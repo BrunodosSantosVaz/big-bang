@@ -83,7 +83,7 @@ com ADR; **PODE** é opção. Exceção só com ADR listado em `docs/padroes/exc
 
 ### COD-09 · Limites de tamanho e complexidade
 
-- **Regra:** Por padrão (ajustável no `STACK.md` com ADR): complexidade ciclomática ≤ 10 por função; arquivo ≤ 400
+- **Regra:** O código DEVE respeitar estes limites, ajustáveis no `STACK.md` com ADR: complexidade ciclomática ≤ 10 por função; arquivo ≤ 400
   linhas; função ≤ 40 linhas; até 4 parâmetros.
 - **Por quê:** Limites objetivos impedem funções gigantes que ninguém consegue revisar.
 - **Certo:** função de 25 linhas que delega para três auxiliares nomeadas.
