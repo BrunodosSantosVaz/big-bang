@@ -73,3 +73,10 @@ resultado.
 - Repositório privado no plano gratuito tem limites de rulesets e de aprovação de ambiente; a Fundação explica a
   alternativa no momento, conferindo a documentação vigente.
 - Todas as IAs usam a conta do dono: o GitHub não distingue quem pôs uma label (veja [08-revisao.md](08-revisao.md)).
+
+## O que a automação faz sozinha
+
+Este documento é o catálogo dela: tudo que está nas tabelas acima roda sem ninguém pedir, a partir de eventos do
+GitHub (push, PR, labels, agenda), exceto os **botões**, que o dono ou a IA disparam, sempre com `simular=true`
+primeiro. Publicar em produção, publicar sem release e voltar versão ainda exigem a aprovação do dono no ambiente
+`producao`.
