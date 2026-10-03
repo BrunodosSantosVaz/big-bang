@@ -3,8 +3,8 @@ import argparse
 import sys
 
 from . import config as config_module
-from . import generator
-from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, BbError
+from . import checksums, generator, verify
+from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 from .paths import default_root
 
 
@@ -32,7 +32,35 @@ def build_parser():
                               help="instala a esteira (.github/) pela primeira vez (Fundação F5)")
     gerar_parser.set_defaults(handler=_gerar)
 
+    verificar_parser = commands.add_parser("verificar", help="confere framework, arquivos gerados e workflows")
+    verificar_parser.set_defaults(handler=_verificar)
+
+    checksums_parser = commands.add_parser("checksums", help="confere ou grava .bigbang/CHECKSUMS (manutenção)")
+    checksums_parser.add_argument("--escrever", action="store_true", help="grava o CHECKSUMS com o estado atual")
+    checksums_parser.set_defaults(handler=_checksums)
+
     return parser
+
+
+def _verificar(args):
+    found = verify.run(args.raiz)
+    if found:
+        print(f"bb verificar: {len(found)} problema(s):", file=sys.stderr)
+        for problem in found:
+            print(f"  - {problem}", file=sys.stderr)
+        return EXIT_VERIFICATION_FAILED
+    print("bb verificar: tudo certo.")
+    return EXIT_OK
+
+
+def _checksums(args):
+    if args.escrever:
+        print(f".bigbang/CHECKSUMS gravado ({checksums.write(args.raiz)} arquivos).")
+        return EXIT_OK
+    found = checksums.problems(args.raiz)
+    for problem in found:
+        print(f"  - {problem}", file=sys.stderr)
+    return EXIT_VERIFICATION_FAILED if found else EXIT_OK
 
 
 def _gerar(args):

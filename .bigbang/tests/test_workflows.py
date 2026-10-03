@@ -3,7 +3,10 @@ import os
 import re
 import unittest
 
-from _raiz import caminho
+from _raiz import caminho, importar_bb
+
+importar_bb()
+from bb import workflow_rules  # noqa: E402
 
 WORKFLOWS = caminho(".github", "workflows")
 REPOSITORIO = "BrunodosSantosVaz/big-bang"
@@ -60,6 +63,11 @@ class RegrasDosWorkflows(unittest.TestCase):
             with self.subTest(workflow=nome):
                 self.assertRegex(texto, r"(?m)^permissions:\s*$|^permissions:\s*\{\}\s*$")
                 self.assertNotRegex(texto, r"(?m)^permissions:\s*write-all")
+
+    def test_regras_do_bb_verificar(self):
+        for nome, texto in workflows():
+            with self.subTest(workflow=nome):
+                self.assertEqual(workflow_rules.problems(nome, texto), [])
 
     def test_sem_pull_request_target(self):
         for nome, texto in workflows():
