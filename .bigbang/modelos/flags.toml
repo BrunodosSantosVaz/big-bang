@@ -1,0 +1,18 @@
+# Registro de feature flags do projeto. Uma entrada [[flag]] por flag.
+# Flags existem quando um épico depende de outro ainda não publicado (processo/09-entrega.md).
+# O "Ver painéis" lista flags ligadas em produção há mais que flags.validade_maxima_dias (bigbang.toml),
+# e a IA abre uma tarefa de limpeza. Mudar este arquivo é zona sensível (revisão humana).
+#
+# Exemplo (descomente e ajuste):
+#
+# [[flag]]
+# nome = "novo-checkout"
+# dono = "BrunodosSantosVaz"
+# motivo = "O épico #57 depende do #52, que ainda não foi publicado"
+# epico = "#57"
+# criada_em = 2026-10-10
+# expira_em = 2026-11-09
+#
+# [flag.estado]
+# staging = true
+# producao = false
