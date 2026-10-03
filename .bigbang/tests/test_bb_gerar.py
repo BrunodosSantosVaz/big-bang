@@ -1,5 +1,6 @@
 """`bb gerar`: rendering, layer composition, skills copies, marked blocks and stale files (spec 5.1, 5.5, 5.6)."""
 import os
+import re
 import shutil
 import tempfile
 import unittest
@@ -10,7 +11,7 @@ importar_bb()
 from bb import generator, render  # noqa: E402
 from bb.errors import BbError  # noqa: E402
 
-VERSAO = "0.2.0"
+VERSAO = "0.3.0"
 
 
 def escrever(raiz, caminho, conteudo):
@@ -26,7 +27,7 @@ def ler(raiz, caminho):
 
 
 def config_toml(perfil="deploy", alvo="vps-docker"):
-    texto = exemplo_toml().replace('versao = "0.2.0"', f'versao = "{VERSAO}"')
+    texto = re.sub(r'(?m)^versao = "[^"]*"', f'versao = "{VERSAO}"', exemplo_toml())
     if perfil == "compilado":
         texto = texto.replace('perfil = "deploy"', 'perfil = "compilado"').replace('alvo = "vps-docker"', 'alvo = ""')
     else:
@@ -115,7 +116,7 @@ class FrameworkFalso(unittest.TestCase):
         self.assertTrue(alvo.startswith("#!/usr/bin/env bash\n# Gerado pelo Big Bang"))
         self.assertIn("echo vps", alvo)
         ci = ler(self.raiz, ".github/workflows/bb-ci.yml")
-        self.assertTrue(ci.startswith("# Gerado pelo Big Bang v0.2.0 a partir de "
+        self.assertTrue(ci.startswith(f"# Gerado pelo Big Bang v{VERSAO} a partir de "
                                       ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml.tmpl."))
         self.assertIn("# meu-sistema ${{ github.ref }}", ci)
         self.assertIn('sistemas: ["src/", "migrations/", "Dockerfile", "package.json", "package-lock.json"]', ci)
@@ -240,10 +241,10 @@ class RepositorioDoBigBang(unittest.TestCase):
     """The template itself must be exactly what `bb gerar` produces."""
 
     def test_template_em_dia(self):
-        from _raiz import RAIZ
+        from _raiz import RAIZ, ignorar_para_copia
         with tempfile.TemporaryDirectory() as pasta:
             copia = os.path.join(pasta, "copia")
-            shutil.copytree(RAIZ, copia, ignore=shutil.ignore_patterns(".git", "__pycache__"))
+            shutil.copytree(RAIZ, copia, ignore=ignorar_para_copia())
             if os.path.exists(os.path.join(copia, "bigbang.toml")):
                 self.skipTest("cópia de trabalho com bigbang.toml")
             self.assertEqual(generator.changes(generator.build_plan(copia), copia), [])

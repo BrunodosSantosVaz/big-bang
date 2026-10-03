@@ -6,7 +6,7 @@ import shutil
 import tempfile
 import unittest
 
-from _raiz import RAIZ, exemplo_toml, importar_bb
+from _raiz import RAIZ, exemplo_toml, ignorar_para_copia, importar_bb
 
 importar_bb()
 from bb import checksums, cli, generator, verify, workflow_rules  # noqa: E402
@@ -27,11 +27,7 @@ jobs:
 
 
 def copiar_template(destino):
-    shutil.copytree(RAIZ, destino, ignore=shutil.ignore_patterns(".git", "__pycache__", "big-bang-prompt.md"))
-    for sobra in ("bigbang.toml", "STACK.md"):
-        caminho = os.path.join(destino, sobra)
-        if os.path.exists(caminho):
-            os.remove(caminho)
+    shutil.copytree(RAIZ, destino, ignore=ignorar_para_copia("bigbang.toml", "STACK.md"))
     checksums.write(destino)  # the working copy may have uncommitted framework edits
 
 
