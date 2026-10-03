@@ -1,0 +1,74 @@
+# CI do proprio Big Bang. Roda so no repositorio BrunodosSantosVaz/big-bang: em sistemas criados a partir do
+# template, todos os jobs sao pulados, e a Fundacao (F5) remove este arquivo. Decisoes: .bigbang/docs/decisoes/ADR-0006.
+name: CI do Big Bang
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-framework-ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  testes:
+    name: testes (Python ${{ matrix.python }})
+    if: github.repository == 'BrunodosSantosVaz/big-bang'
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Testes do framework (estrutura, workflows, Markdown e links)
+        run: python -m unittest discover -s .bigbang/tests -v
+
+  shellcheck:
+    name: shellcheck
+    if: github.repository == 'BrunodosSantosVaz/big-bang'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Shellcheck em todos os scripts Bash
+        run: |
+          shellcheck --version
+          mapfile -t scripts < <(git ls-files '*.sh' '.bigbang/bin/bb')
+          if [ "${#scripts[@]}" -eq 0 ]; then
+            echo "Nenhum script Bash ainda."
+            exit 0
+          fi
+          shellcheck --severity=style "${scripts[@]}"
+
+  gitleaks:
+    name: gitleaks
+    if: github.repository == 'BrunodosSantosVaz/big-bang'
+    runs-on: ubuntu-24.04
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Instalar o Gitleaks (versao e hash fixos)
+        run: |
+          arquivo="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/$arquivo" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$arquivo"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/$arquivo" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$arquivo" -C "$RUNNER_TEMP" gitleaks
+      - name: Gitleaks no historico completo
+        run: '"$RUNNER_TEMP/gitleaks" git --redact --verbose --exit-code 1 .'
