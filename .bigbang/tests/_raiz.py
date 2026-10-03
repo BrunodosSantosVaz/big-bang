@@ -21,3 +21,15 @@ def arquivos_markdown():
         for nome in sorted(nomes):
             if nome.endswith(".md"):
                 yield os.path.join(pasta, nome)
+
+
+def importar_bb():
+    """Make the `bb` package (in .bigbang/) importable by the tests."""
+    import sys
+    if BIGBANG not in sys.path:
+        sys.path.insert(0, BIGBANG)
+
+
+def exemplo_toml():
+    with open(os.path.join(BIGBANG, "modelos", "bigbang.toml.exemplo"), encoding="utf-8") as arquivo:
+        return arquivo.read()
