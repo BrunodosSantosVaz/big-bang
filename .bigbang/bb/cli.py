@@ -4,6 +4,7 @@ import sys
 
 from . import config as config_module
 from . import checksums, generator, verify
+from . import init as init_module
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 from .paths import default_root
 
@@ -32,6 +33,17 @@ def build_parser():
                               help="instala a esteira (.github/) pela primeira vez (Fundação F5)")
     gerar_parser.set_defaults(handler=_gerar)
 
+    init_parser = commands.add_parser("init", help="Fundação F0: cria o bigbang.toml e liga o projeto ao GitHub")
+    init_parser.add_argument("--nome", required=True, help="nome do sistema")
+    init_parser.add_argument("--slug", help="identificador em minúsculas com hífen (padrão: a partir do nome)")
+    init_parser.add_argument("--dono", help="login do GitHub do dono (padrão: o do repositório ou do gh)")
+    init_parser.add_argument("--repositorio", help="dono/nome (padrão: o remote origin)")
+    init_parser.add_argument("--visibilidade", choices=("privado", "publico"), default="privado")
+    init_parser.add_argument("--licenca", default="", help="identificador SPDX (obrigatório se público)")
+    init_parser.add_argument("--sem-github", action="store_true", help="não cria label nem issue no GitHub")
+    init_parser.add_argument("--simular", action="store_true", help="só mostra o plano")
+    init_parser.set_defaults(handler=_init)
+
     verificar_parser = commands.add_parser("verificar", help="confere framework, arquivos gerados e workflows")
     verificar_parser.set_defaults(handler=_verificar)
 
@@ -40,6 +52,24 @@ def build_parser():
     checksums_parser.set_defaults(handler=_checksums)
 
     return parser
+
+
+def _init(args):
+    options = init_module.resolve_options(args.raiz, args.nome, args.slug, args.dono, args.repositorio,
+                                          args.visibilidade, args.licenca)
+    steps = init_module.plan_steps(options, with_github=not args.sem_github)
+    if args.simular:
+        print("Simulação do bb init para " + options["repositorio"] + ":")
+        for step in steps:
+            print(f"  - {step}")
+        return EXIT_OK
+    issue = init_module.run(args.raiz, options, with_github=not args.sem_github)
+    for step in steps:
+        print(f"feito: {step}")
+    if issue:
+        print(f"Issue de F0: {issue}")
+    print("Próximo passo: revisar o diff, commitar numa branch fundacao/<n>-f0 e abrir o PR para a develop.")
+    return EXIT_OK
 
 
 def _verificar(args):
