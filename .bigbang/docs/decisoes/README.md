@@ -1,0 +1,13 @@
+# Decisões do framework (ADRs)
+
+Decisões de arquitetura do próprio Big Bang, no formato [MADR](https://adr.github.io/madr/). As decisões de cada
+sistema ficam em `docs/decisoes/` do sistema, não aqui.
+
+| ADR | Decisão | Situação |
+| --- | --- | --- |
+| [0001](ADR-0001-python-biblioteca-padrao.md) | Ferramentas do framework em Python só com a biblioteca padrão | aceita |
+| [0002](ADR-0002-configuracao-em-toml.md) | Configuração do projeto em `bigbang.toml` | aceita |
+| [0003](ADR-0003-branch-de-epico.md) | Branch de épico (`epico/*`) | aceita |
+| [0004](ADR-0004-release-por-epico-a-partir-da-main.md) | Release por épico a partir da `main` | aceita |
+| [0005](ADR-0005-skills-em-agents-e-claude.md) | Skills em `.agents/skills/`, com cópia em `.claude/skills/` | aceita |
+| [0006](ADR-0006-ci-do-framework.md) | CI do próprio Big Bang | aceita |
