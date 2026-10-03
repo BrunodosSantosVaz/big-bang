@@ -90,7 +90,7 @@ SCHEMA = {
     },
     "entrega": {
         "perfil": _string(allowed=("deploy", "compilado")), "alvo": _string(required=False),
-        "caminhos_artefato": _string_list(),
+        "caminhos_artefato": _string_list(), "arquivo_versao": _string(required=False),
     },
     "compilado": {"sistemas": _string_list(allowed=BUILD_SYSTEMS, unique=True)},  # plus build_<system>
     "deploy": {
