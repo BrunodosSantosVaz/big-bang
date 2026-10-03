@@ -30,7 +30,7 @@ Exceção a uma regra só com ADR aprovado pelo dono, listado em `docs/padroes/e
 
 Cada regra → como é verificada → onde a verificação existe. A coluna **Implementada em** traz o arquivo do framework
 que já implementa a verificação ou o épico do [roteiro](../docs/especificacao.md) que vai implementá-la
-(`E3` CLI e verificador; `E4` núcleo da esteira; `E5` perfil compilado; `E6` testes, revisão, documentação e
+(`E4` núcleo da esteira; `E5` perfil compilado; `E6` testes, revisão, documentação e
 segurança; `E8` skills e hooks; `E9` perfil deploy). Quando um épico entrega a verificação, a linha passa a apontar
 para o arquivo. O teste `.bigbang/tests/test_padroes.py` confere que esta tabela bate com as regras.
 
@@ -55,7 +55,7 @@ para o arquivo. O teste `.bigbang/tests/test_padroes.py` confere que esta tabela
 | SEG-IA-03 | [seguranca.md](seguranca.md) | teste com dois usuários por recurso (`TST-06`) e varredura ZAP no staging. | E4, E9 |
 | SEG-IA-04 | [seguranca.md](seguranca.md) | check que varre o pacote do front já construído; Gitleaks no PR e no histórico (job `seguranca`); bloqueio de push do GitHub. | E6 |
 | SEG-IA-05 | [seguranca.md](seguranca.md) | teste que passa do limite e espera 429 (`TST-07`); `bb-revisor-pr`. | E4, E6 |
-| SEG-01 | [seguranca.md](seguranca.md) | validação do esquema do `bigbang.toml` por `bb verificar` e revisão humana (o `bigbang.toml` é zona sensível). | E3, E4 |
+| SEG-01 | [seguranca.md](seguranca.md) | validação do esquema do `bigbang.toml` por `bb verificar` e revisão humana (o `bigbang.toml` é zona sensível). | E4, `.bigbang/bb/config.py` |
 | SEG-02 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e auditoria de segurança. | E6, E8 |
 | SEG-03 | [seguranca.md](seguranca.md) | `bb-revisor-pr`; regras do Opengrep no job `seguranca`. | E6 |
 | SEG-04 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e teste de aceite da regra. | E4, E6 |
@@ -72,7 +72,7 @@ para o arquivo. O teste `.bigbang/tests/test_padroes.py` confere que esta tabela
 | SEG-15 | [seguranca.md](seguranca.md) | Gitleaks no job `seguranca`; `bb checklist producao` (README documenta variáveis sem valores). | E6 |
 | SEG-16 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e auditoria de segurança. | E6, E8 |
 | SEG-17 | [seguranca.md](seguranca.md) | OSV-Scanner no job `seguranca`; Dependabot. | E6 |
-| SEG-18 | [seguranca.md](seguranca.md) | `bb verificar` (regras dos workflows) no job `check`. | E3, E4 |
+| SEG-18 | [seguranca.md](seguranca.md) | `bb verificar` (regras dos workflows) no job `check`. | E4, `.bigbang/bb/workflow_rules.py`, `.bigbang/bb/verify.py` |
 | SEG-19 | [seguranca.md](seguranca.md) | Trivy no workflow da candidata (perfil deploy). | E9 |
 | SEG-20 | [seguranca.md](seguranca.md) | checklist da tarefa de documentação; revisão humana em zona sensível. | E4 |
 | SEG-21 | [seguranca.md](seguranca.md) | revisão humana (zona sensível) e testes de cenário (`TST-08`). | E4 |

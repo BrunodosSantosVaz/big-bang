@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Entry point of the bb CLI for Linux and macOS. On Windows use: python .bigbang/bin/bb.py
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python="${BB_PYTHON:-python3}"
+command -v "$python" >/dev/null 2>&1 || python=python
+exec "$python" "$here/bb.py" "$@"

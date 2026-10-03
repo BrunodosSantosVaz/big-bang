@@ -11,3 +11,4 @@ sistema ficam em `docs/decisoes/` do sistema, não aqui.
 | [0004](ADR-0004-release-por-epico-a-partir-da-main.md) | Release por épico a partir da `main` | aceita |
 | [0005](ADR-0005-skills-em-agents-e-claude.md) | Skills em `.agents/skills/`, com cópia em `.claude/skills/` | aceita |
 | [0006](ADR-0006-ci-do-framework.md) | CI do próprio Big Bang | aceita |
+| [0007](ADR-0007-gerador-e-verificador.md) | Como o gerador e o verificador funcionam | aceita |
