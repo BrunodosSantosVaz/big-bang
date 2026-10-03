@@ -11,6 +11,7 @@ import urllib.parse
 from _raiz import RAIZ, arquivos_markdown
 
 PULAR_LINKS = (os.path.join(RAIZ, ".bigbang", "modelos") + os.sep,)
+SAIDAS_GERADAS = (os.path.join(RAIZ, ".bigbang", "tests", "esperado") + os.sep,)
 # The spec is copied verbatim from the owner (it must not change), so it is only checked for fences.
 ESPECIFICACAO = os.path.join(RAIZ, ".bigbang", "docs", "especificacao.md")
 
@@ -86,15 +87,17 @@ class Markdown(unittest.TestCase):
 
     def test_links_relativos_existem(self):
         for caminho in arquivos_markdown():
-            if caminho.startswith(PULAR_LINKS) or caminho == ESPECIFICACAO:
+            if caminho.startswith(PULAR_LINKS + SAIDAS_GERADAS) or caminho == ESPECIFICACAO:
                 continue
             with self.subTest(arquivo=os.path.relpath(caminho, RAIZ)):
                 self.assertEqual(links_quebrados(caminho), [])
 
     def test_todo_markdown_tem_titulo(self):
         for caminho in arquivos_markdown():
-            if os.path.basename(caminho) in ("CLAUDE.md", "RN.md"):
-                continue  # CLAUDE.md is a single import line; RN.md starts with the key: value header
+            if os.path.basename(caminho) in ("CLAUDE.md", "RN.md", "AGENTS.projeto.md"):
+                continue  # an import line; a key: value header; a fragment appended to AGENTS.md
+            if caminho.startswith(SAIDAS_GERADAS) or f"{os.sep}arquivos{os.sep}" in caminho:
+                continue  # generator templates and expected outputs follow the format of their destination
             with self.subTest(arquivo=os.path.relpath(caminho, RAIZ)):
                 with open(caminho, encoding="utf-8") as arquivo:
                     linhas, _ = sem_codigo(arquivo.read())

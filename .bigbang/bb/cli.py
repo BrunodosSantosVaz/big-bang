@@ -3,6 +3,7 @@ import argparse
 import sys
 
 from . import config as config_module
+from . import generator
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, BbError
 from .paths import default_root
 
@@ -25,7 +26,33 @@ def build_parser():
     get_parser.add_argument("chave")
     get_parser.set_defaults(handler=_config_get)
 
+    gerar_parser = commands.add_parser("gerar", help="gera a camada gerada a partir de .bigbang/ e do bigbang.toml")
+    gerar_parser.add_argument("--simular", action="store_true", help="só mostra o que mudaria (diff), sem gravar")
+    gerar_parser.add_argument("--esteira", action="store_true",
+                              help="instala a esteira (.github/) pela primeira vez (Fundação F5)")
+    gerar_parser.set_defaults(handler=_gerar)
+
     return parser
+
+
+def _gerar(args):
+    plan = generator.build_plan(args.raiz, install_pipeline=args.esteira)
+    pending = generator.changes(plan, args.raiz)
+    if not pending:
+        print("Camada gerada em dia: nada a mudar.")
+        return EXIT_OK
+    if args.simular:
+        for kind, path in pending:
+            print(f"{kind}: {path}")
+        for kind, path in pending:
+            if kind != "remover":
+                print(generator.diff(plan, args.raiz, path), end="")
+        print(f"Simulação: {len(pending)} arquivo(s) mudariam. Nada foi gravado.")
+        return EXIT_OK
+    for kind, path in generator.apply(plan, args.raiz):
+        print(f"{kind}: {path}")
+    print(f"{len(pending)} arquivo(s) atualizados. Rode bb verificar e revise o diff num PR.")
+    return EXIT_OK
 
 
 def _config_get(args):
