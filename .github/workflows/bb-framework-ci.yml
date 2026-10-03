@@ -32,6 +32,8 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Testes do framework (estrutura, workflows, Markdown e links)
         run: python -m unittest discover -s .bigbang/tests -v
+      - name: bb verificar (CHECKSUMS, camada gerada e workflows)
+        run: python .bigbang/bin/bb.py verificar
 
   shellcheck:
     name: shellcheck
