@@ -10,7 +10,7 @@ import tempfile
 import tomllib
 import unittest
 
-from _raiz import RAIZ, importar_bb
+from _raiz import RAIZ, ignorar_para_copia, importar_bb
 
 importar_bb()
 from bb import checksums, cli, init, verify  # noqa: E402
@@ -40,8 +40,7 @@ class Init(unittest.TestCase):
     def setUp(self):
         self.pasta = tempfile.TemporaryDirectory()
         self.raiz = os.path.join(self.pasta.name, "sistema-x")
-        shutil.copytree(RAIZ, self.raiz, ignore=shutil.ignore_patterns(".git", "__pycache__", "big-bang-prompt.md",
-                                                                      "bigbang.toml", "STACK.md"))
+        shutil.copytree(RAIZ, self.raiz, ignore=ignorar_para_copia("bigbang.toml", "STACK.md"))
         checksums.write(self.raiz)
         os.makedirs(os.path.join(self.raiz, ".git"))
         with open(os.path.join(self.raiz, ".git", "config"), "w", encoding="utf-8") as arquivo:

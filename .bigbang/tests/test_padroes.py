@@ -12,6 +12,9 @@ from _raiz import BIGBANG, ler
 PADROES = ["arquitetura", "seguranca", "codigo", "testes", "documentacao", "api", "dados", "frontend",
            "observabilidade"]
 
+# Last finished epic of the roadmap: verifications of finished epics must point to a file, not to an epic.
+ULTIMO_EPICO_CONCLUIDO = 3
+
 # Number of rules per prefix, as listed in the spec (section 8).
 QUANTIDADE = {"ARQ": 14, "SEG-IA": 5, "SEG": 24, "COD": 13, "TST": 12, "DOC": 14, "API": 7, "DAD": 10, "FE": 10,
               "OBS": 6}
@@ -112,7 +115,8 @@ class TabelaDeRastreio(unittest.TestCase):
                     epico, caminho = EPICO.match(item), CAMINHO.match(item)
                     self.assertTrue(epico or caminho, "use E<n> ou um caminho entre crases")
                     if epico:
-                        self.assertTrue(3 <= int(epico.group(1)) <= 12, "épico fora do roteiro")
+                        self.assertTrue(ULTIMO_EPICO_CONCLUIDO < int(epico.group(1)) <= 12,
+                                        "épico já concluído (aponte o arquivo) ou fora do roteiro")
                     if caminho:
                         raiz = os.path.dirname(BIGBANG)
                         self.assertTrue(os.path.exists(os.path.join(raiz, caminho.group(1))), "caminho inexistente")
