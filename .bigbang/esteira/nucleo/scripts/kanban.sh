@@ -104,6 +104,7 @@ evento_push() {
   local tipo n
   read -r tipo n <<<"$(branch_issue "${REF_NAME:?}")"
   [ -n "${n:-}" ] || return 0
+  "${BB_CMD[@]}" esteira registrar-push "$n"
   case "$tipo" in
     teste|feature|docs)
       if [ "${CREATED:-false}" = true ]; then mover "$EXEC" "$n" Feature "A fazer|-"
@@ -124,6 +125,7 @@ evento_pr() {
       mover "$painel" "$n" "CI/PR" "$inicio" ;;
     closed)
       if [ "${MERGED:-false}" = true ]; then
+        "${BB_CMD[@]}" esteira liberar-posse "$n"
         if [[ "${BASE_REF:-}" == epico/* ]]; then mover "$EXEC" "$n" Pronto "A fazer|Feature|Code|CI/PR|Validar PR|-"; fi
       else
         mover "$painel" "$n" "$voltar" "CI/PR|Validar PR"

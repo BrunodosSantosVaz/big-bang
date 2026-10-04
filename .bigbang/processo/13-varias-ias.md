@@ -43,6 +43,22 @@ comentário e sua label, preservando a label de outra sessão com o mesmo nome.
 - Posse sem push há mais de `ias.trava_expira_horas` ganha a label `parada` e aparece no *Ver painéis*. Outra IA só a
   toma com `bb assumir --forcar`, por ordem do dono, registrada em comentário.
 
+## Recuperação, inatividade e status
+
+Para retomar uma posse vencida: `bb assumir <issue> <nome> --forcar --frase "<ordem do dono>"`.
+O comando confere a inatividade e os pré-requisitos antes de liberar o antigo dono; label `parada` isolada não é prova
+de expiração. `--forcar` sem frase, nome inválido, tarefa bloqueada ou posse ainda ativa é recusado.
+
+O Kanban registra cada push na sessão usando o horário do servidor do GitHub (não a data do commit, que pode ser
+antiga). O workflow **Marcar posses paradas** confere a cada hora; no botão, a simulação é o padrão.
+Esses dois workflows precisam do `PROJETO_TOKEN`; sem ele, a IA deve executar os mesmos comandos de registro e
+marcação pelo `bb esteira`, com o `gh` autenticado. Pushes não registrados não renovam a posse.
+
+`bb status` e **Ver painéis** são somente leitura: mostram posses ativas, paradas ou sem comentário, flags vencidas
+e achados de segurança abertos. A criação da tarefa de limpeza da flag cabe à IA, não ao relatório.
+Como `flags.toml` registra criação e expiração, mas não a data de ativação, o alerta de flag antiga em produção usa
+a data de criação e informa isso explicitamente. Dados malformados são erro, não um relatório vazio.
+
 ## Onde o paralelismo cabe
 
 - O teste do épico é feito por **uma IA só**.

@@ -3,7 +3,7 @@ import argparse
 import sys
 
 from . import config as config_module
-from . import acceptance, checklist, checksums, decisions, generator, ownership, verify, workspaces
+from . import acceptance, checklist, checksums, decisions, generator, ownership, status, verify, workspaces
 from . import init as init_module
 from . import pipeline_cli
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
@@ -59,6 +59,9 @@ def build_parser():
     liberar_posse = commands.add_parser("liberar", help="libera a posse da sessão na pasta de trabalho atual")
     liberar_posse.add_argument("issue", type=int)
     liberar_posse.set_defaults(handler=_liberar)
+
+    status_parser = commands.add_parser("status", help="resumo dos painéis, posses, flags e segurança (somente leitura)")
+    status_parser.set_defaults(handler=_status)
 
     aceite_parser = commands.add_parser("aceite", help="testes de aceite do épico")
     aceite_commands = aceite_parser.add_subparsers(dest="aceite_command", metavar="<subcomando>", parser_class=_Parser)
@@ -145,6 +148,21 @@ def _liberar(args):
     ownership.release(config_module.load(args.raiz), args.issue, acquired["name"], acquired["session"])
     print(f"#{args.issue}: posse liberada. A pasta de trabalho foi preservada.")
     return EXIT_OK
+
+
+def _status(args):
+    import os
+    import subprocess
+    config = config_module.load(args.raiz)
+    script = os.path.join(args.raiz, ".bigbang", "esteira", "nucleo", "scripts", "ver-paineis.sh")
+    env = {**os.environ, "GITHUB_REPOSITORY": config["projeto"]["repositorio"],
+           "PROJETO_OWNER": config["paineis"]["owner"], "PYTHON": sys.executable,
+           "BB_ENTRY": os.path.join(args.raiz, ".bigbang", "bin", "bb.py"), "BB_ROOT": args.raiz}
+    env.pop("BB", None)
+    for key in ("planejamento", "execucao", "bugs"):
+        env["PROJETO_" + key.upper()] = str(config["paineis"][key]) if config["paineis"][key] else ""
+    result = subprocess.run(["bash", script], env=env, cwd=args.raiz, check=False)
+    return EXIT_OK if result.returncode == 0 else EXIT_UNEXPECTED
 
 
 def _decisao(args):

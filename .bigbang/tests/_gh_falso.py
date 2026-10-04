@@ -220,6 +220,7 @@ def api(state, positional, fields, jq, method):
             state["next_comment"] = ident
             record = {"id": ident, "body": fields["body"], "user": {"login": "dono"},
                       "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")}
+            record["updated_at"] = record["created_at"]
             records.append(record)
             save(state)
             return emit(record, jq)
@@ -235,6 +236,7 @@ def api(state, positional, fields, jq, method):
                     state["comments"][number].pop(index)
                 elif method == "PATCH":
                     record["body"] = fields["body"]
+                    record["updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
                     state["comments"][number][index] = fields["body"]
                 save(state)
                 return emit(record, jq)

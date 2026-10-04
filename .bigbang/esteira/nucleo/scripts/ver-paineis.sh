@@ -12,6 +12,13 @@ shopt -s inherit_errexit
 
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 projeto() { bash "$AQUI/projeto.sh" "$@"; }
+if [ -n "${BB:-}" ]; then
+  read -r -a BB_CMD <<<"$BB"
+else
+  BB_CMD=("${PYTHON:-python3}" "${BB_ENTRY:-$AQUI/../../../bin/bb.py}")
+  [ -z "${BB_ROOT:-}" ] || BB_CMD+=(--raiz "$BB_ROOT")
+fi
+bb() { "${BB_CMD[@]}" esteira resumo-posses; }
 
 painel() { # <nome> <numero>
   local nome="$1" numero="$2" colunas quadro coluna linhas
@@ -44,6 +51,7 @@ saida=$(
   [ -z "${PROJETO_PLANEJAMENTO:-}" ] || painel "Planejamento" "$PROJETO_PLANEJAMENTO"
   [ -z "${PROJETO_EXECUCAO:-}" ] || painel "Execução" "$PROJETO_EXECUCAO"
   [ -z "${PROJETO_BUGS:-}" ] || painel "Bugs" "$PROJETO_BUGS"
+  bb
 )
 printf '%s\n' "$saida"
 [ -z "${GITHUB_STEP_SUMMARY:-}" ] || printf '%s\n' "$saida" >> "$GITHUB_STEP_SUMMARY"

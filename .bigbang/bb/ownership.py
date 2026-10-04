@@ -10,6 +10,7 @@ from . import github
 from .errors import EXIT_INVALID_STATE, EXIT_USAGE, BbError
 
 CLAIM = re.compile(r"^<!-- bb:assumida nome=([a-z0-9]+(?:-[a-z0-9]+)*) sessao=([a-zA-Z0-9-]+) -->", re.M)
+PUSH = re.compile(r"^<!-- bb:push instante=[a-zA-Z0-9-]+ -->$", re.M)
 UTC = datetime.timezone.utc
 
 
@@ -166,14 +167,20 @@ def timestamp(value):
 
 
 def last_activity(config, number, claims):
-    repo = config["projeto"]["repositorio"]
+    """GitHub server timestamps of acquisition and push heartbeats, never user-controlled commit dates."""
     dates = [timestamp(c["created_at"]) for c in claims]
-    for kind in ("feature", "teste", "docs", "bugfix", "hotfix"):
-        refs = listing(f"repos/{repo}/git/matching-refs/heads/{kind}/{number}-")
-        for ref in refs:
-            commit = api(f"repos/{repo}/commits/{ref['object']['sha']}")
-            dates.append(timestamp(commit["commit"]["committer"]["date"]))
+    dates.extend(timestamp(c["updated_at"]) for c in claims if PUSH.search(c["body"]))
     return max(dates) if dates else None
+
+
+def touch(config, number):
+    repo, owner = config["projeto"]["repositorio"], config["projeto"]["dono"]
+    for current in active_claims(repo, number, owner):
+        # A new nonce changes the body even for repeated pushes, so GitHub advances updated_at.
+        body = PUSH.sub("", current["body"]).rstrip() + f"\n<!-- bb:push instante={uuid.uuid4()} -->"
+        api(f"repos/{repo}/issues/comments/{current['id']}", "PATCH", body=body)
+    if "parada" in labels(issue_data(repo, number)):
+        _remove_label(repo, number, "parada")
 
 
 def stale(config, number, claims, now=None):
