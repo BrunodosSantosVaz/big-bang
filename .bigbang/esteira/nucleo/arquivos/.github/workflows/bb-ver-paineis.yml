@@ -1,0 +1,29 @@
+# Botão "Ver painéis" (spec 14.2): somente leitura. Em repositório público, o resumo também é público.
+name: Ver painéis
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-ver-paineis
+  cancel-in-progress: false
+
+jobs:
+  ver:
+    if: ${{ vars.PROJETO_OWNER != '' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Ver painéis
+        run: bash .bigbang/esteira/nucleo/scripts/ver-paineis.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
+          PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
+          PROJETO_EXECUCAO: ${{ vars.PROJETO_EXECUCAO }}
+          PROJETO_BUGS: ${{ vars.PROJETO_BUGS }}

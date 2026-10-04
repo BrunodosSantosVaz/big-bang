@@ -1,0 +1,30 @@
+# Gerado pelo Big Bang v0.4.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-tarefa.yml. Não edite: personalize em bigbang.toml.
+name: Tarefa
+description: Tarefa de um épico. Normalmente criada pelo botão Iniciar sprint.
+labels: ["task"]
+body:
+  - type: input
+    attributes:
+      label: Épico
+      description: "#n"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: O que fazer
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Critérios cobertos
+      description: CA-n do épico.
+  - type: textarea
+    attributes:
+      label: Regras de negócio
+  - type: textarea
+    attributes:
+      label: Arquivos prováveis
+  - type: textarea
+    attributes:
+      label: Depende de
+      description: Tarefas do mesmo épico (#n).

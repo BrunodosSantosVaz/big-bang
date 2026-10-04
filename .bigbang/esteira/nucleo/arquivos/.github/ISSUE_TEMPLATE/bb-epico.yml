@@ -1,0 +1,74 @@
+name: Épico
+description: Uma mudança com valor para quem usa. A IA refina com você até a Definition of Ready.
+title: "[Épico] "
+labels: ["epic"]
+body:
+  - type: textarea
+    attributes:
+      label: Problema ou oportunidade
+      description: Em 1 a 3 frases, em linguagem de negócio.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Objetivo e resultado esperado
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Muda o artefato?
+      description: O que quem usa recebe (binário ou sistema implantado) muda?
+      options:
+        - "Sim"
+        - "Não: documentação, testes, esteira"
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Precisa de protótipo?
+      options:
+        - "Sim"
+        - "Não"
+      default: 0
+  - type: dropdown
+    attributes:
+      label: Quem revisa os testes de aceite?
+      options:
+        - "IA"
+        - "Eu"
+      default: 0
+  - type: dropdown
+    attributes:
+      label: Quem revisa os PRs?
+      description: A IA troca para você quando o trabalho é crítico; se você voltar para IA, vale a sua escolha.
+      options:
+        - "IA"
+        - "Eu"
+      default: 0
+  - type: input
+    attributes:
+      label: Depende de outro épico ainda não publicado?
+      description: "Números dos épicos (#n). Vazio se não depende."
+  - type: textarea
+    attributes:
+      label: Escopo
+      description: O que está dentro e o que está fora.
+  - type: textarea
+    attributes:
+      label: Regras de negócio envolvidas
+      description: RN existentes (RN-NNNN) e novas.
+  - type: textarea
+    attributes:
+      label: Critérios de aceite
+      description: "Um por linha, com ID: - CA-1: Dado …, quando …, então …"
+  - type: textarea
+    attributes:
+      label: Análise de ameaças (STRIDE)
+      description: Obrigatória se o épico tocar zona sensível (autenticação, pagamentos, dados pessoais, migrações).
+  - type: textarea
+    attributes:
+      label: Riscos
+  - type: textarea
+    attributes:
+      label: Tarefas previstas
+      description: "Uma por linha, cada uma cabendo num PR pequeno: - [ ] Título (depende de: 1)"

@@ -1,0 +1,24 @@
+# Gerado pelo Big Bang v0.4.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-documentacao.yml. Não edite: personalize em bigbang.toml.
+name: Documentação do épico
+description: A última issue de um épico. Normalmente criada pelo Iniciar sprint.
+labels: ["documentacao"]
+body:
+  - type: input
+    attributes:
+      label: Épico
+      description: "#n"
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Checklist
+      options:
+        - label: Regras de negócio novas ou alteradas em docs/negocio/regras/
+        - label: Glossário com os termos novos
+        - label: Diagramas C4 e arc42, se a arquitetura mudou
+        - label: Contrato da API, se mudou
+        - label: Inventário LGPD, se há dado pessoal novo
+        - label: Runbook, se a operação mudou
+        - label: Guia de quem usa, se a tela ou o fluxo mudou
+        - label: ADR de cada decisão tomada no épico
+        - label: Rascunho da entrada do CHANGELOG.md (a versão é preenchida na integração)

@@ -1,0 +1,20 @@
+name: Testes de aceite
+description: Os testes de aceite de um épico, escritos antes das tarefas. Normalmente criada pelo Iniciar sprint.
+labels: ["teste-aceite"]
+body:
+  - type: input
+    attributes:
+      label: Épico
+      description: "#n"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Critérios cobertos
+      description: CA-n do épico.
+  - type: textarea
+    attributes:
+      label: Regras de negócio
+  - type: textarea
+    attributes:
+      label: Tarefas que vão implementar cada critério

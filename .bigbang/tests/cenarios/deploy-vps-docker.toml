@@ -3,7 +3,7 @@
 # O gerador valida o esquema e recusa chaves desconhecidas. Depois de mudar, rode `bb gerar`.
 
 [bigbang]
-versao = "0.3.0"                       # versão do framework instalada (igual a .bigbang/VERSION)
+versao = "0.4.0"                       # versão do framework instalada (igual a .bigbang/VERSION)
 origem = "BrunodosSantosVaz/big-bang"  # de onde vêm as atualizações
 
 [projeto]
@@ -18,6 +18,8 @@ licenca = ""                           # obrigatório se publico (identificador 
 perfil = "deploy"                      # deploy | compilado
 alvo = "vps-docker"                    # deploy: vps-docker | aws | paas ; compilado: ""
 caminhos_artefato = ["src/", "migrations/", "Dockerfile", "package.json", "package-lock.json"]
+arquivo_versao = "package.json"          # único arquivo com a versão do artefato (definido em F2)
+ecossistemas = ["npm", "docker"]           # pacotes da stack para o Dependabot (definido em F2)
 
 [compilado]                            # só no perfil compilado
 sistemas = ["windows-x64", "linux-x64"]

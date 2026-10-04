@@ -1,0 +1,48 @@
+# Gerado pelo Big Bang v0.4.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-encerrar.yml. Não edite: personalize em bigbang.toml.
+# Botão "Encerrar" (spec 14.2): completa a limpeza depois de uma publicação e/ou encerra a sprint.
+name: Encerrar
+
+on:
+  workflow_dispatch:
+    inputs:
+      versao:
+        description: 'Versão publicada (x.y.z) para limpar; vazio = nenhuma'
+        required: false
+        type: string
+      sprint:
+        description: 'Encerrar a sprint atual (registra a data de fim)'
+        required: false
+        type: boolean
+        default: false
+      simular:
+        description: 'Só mostrar o plano'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-encerrar
+  cancel-in-progress: false
+
+jobs:
+  encerrar:
+    if: ${{ vars.PROJETO_OWNER != '' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Encerrar
+        run: bash .bigbang/esteira/nucleo/scripts/encerrar.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          VERSAO: ${{ inputs.versao }}
+          SPRINT: ${{ inputs.sprint }}
+          SIMULAR: ${{ inputs.simular }}
+          PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
+          PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
+          PROJETO_EXECUCAO: ${{ vars.PROJETO_EXECUCAO }}
+          PROJETO_BUGS: ${{ vars.PROJETO_BUGS }}

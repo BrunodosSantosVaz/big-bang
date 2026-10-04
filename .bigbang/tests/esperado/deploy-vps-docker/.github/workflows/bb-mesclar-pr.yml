@@ -1,0 +1,52 @@
+# Gerado pelo Big Bang v0.4.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-mesclar-pr.yml. Não edite: personalize em bigbang.toml.
+# Mescla no epico/* (e na develop, só fundacao/*, framework/* e actions) o PR aprovado e verde; nunca na main.
+# Mescla com o PROJETO_TOKEN para os eventos do merge dispararem os próximos workflows.
+name: Mesclar PR
+
+on:
+  pull_request:
+    types: [labeled]
+  workflow_run:
+    workflows: [CI, Regras do PR]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'Número do PR'
+        required: true
+        type: string
+      simular:
+        description: 'Só explicar o que faria'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-mesclar-${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number || inputs.pr }}
+  cancel-in-progress: false
+
+jobs:
+  mesclar:
+    if: >-
+      ${{ vars.PROJETO_OWNER != '' && (github.event_name != 'pull_request' ||
+      contains(fromJSON('["pr-aprovado","testes-aprovados"]'), github.event.label.name)) &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Mesclar se aprovado e verde
+        if: ${{ (github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number || inputs.pr) != '' }}
+        run: bash .bigbang/esteira/nucleo/scripts/mesclar-pr.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number || inputs.pr }}
+          SIMULAR: ${{ inputs.simular || 'false' }}
