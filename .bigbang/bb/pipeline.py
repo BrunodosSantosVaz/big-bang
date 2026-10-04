@@ -77,6 +77,15 @@ def form_label_changes(body, previous_body=None):
     return add, remove - add
 
 
+SEVERITIES = {"crítica": "severidade:critica", "alta": "severidade:alta", "média": "severidade:media",
+              "baixa": "severidade:baixa"}
+
+
+def severity_label(body):
+    """Label of the "Severidade" answer of the bug form, or None."""
+    return SEVERITIES.get(sections(body).get("Severidade", "").strip().lower())
+
+
 def dependencies(body):
     return [int(n) for n in ISSUE_REF.findall(sections(body).get(FIELD_DEPENDS, ""))]
 

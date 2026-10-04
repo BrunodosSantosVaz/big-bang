@@ -267,6 +267,34 @@ def main():
                     issue["labels"].remove(item)
         save(state)
         return None
+    if argv[:2] == ["pr", "view"]:
+        pr = state["prs"][positional[2]]
+        return emit({"number": int(positional[2]), "state": pr.get("state", "OPEN"), "isDraft": pr.get("draft", False),
+                     "baseRefName": pr["base"], "headRefName": pr["head"], "headRefOid": pr.get("sha", "sha0"),
+                     "labels": [{"name": label} for label in pr.get("labels", [])],
+                     "title": pr.get("title", ""), "body": pr.get("body", "")}, jq)
+    if argv[:2] == ["pr", "merge"]:
+        pr = state["prs"][positional[2]]
+        expected = (flags.get("--match-head-commit") or [None])[0]
+        if expected and expected != pr.get("sha", "sha0"):
+            sys.stderr.write("head commit mudou\n")
+            sys.exit(1)
+        pr["state"] = "MERGED"
+        save(state)
+        return None
+    if argv[:2] == ["pr", "list"]:
+        wanted_state = (flags.get("--state") or ["open"])[0].upper()
+        base = (flags.get("--base") or [None])[0]
+        head = (flags.get("--head") or [None])[0]
+        result = [{"number": int(n), "headRefName": pr["head"], "baseRefName": pr["base"], "title": pr.get("title", ""),
+                   "body": pr.get("body", ""), "state": pr.get("state", "OPEN"),
+                   "labels": [{"name": label} for label in pr.get("labels", [])]}
+                  for n, pr in state.get("prs", {}).items()
+                  if "head" in pr and (wanted_state == "ALL" or pr.get("state", "OPEN") == wanted_state)
+                  and (base is None or pr["base"] == base) and (head is None or pr["head"] == head)]
+        return emit(result, jq)
+    if argv[:2] == ["workflow", "run"]:
+        return None
     if argv[:2] == ["pr", "edit"]:
         pr = state.setdefault("prs", {}).setdefault(positional[2], {"labels": []})
         for label in flags.get("--add-label", []):

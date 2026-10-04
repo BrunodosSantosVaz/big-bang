@@ -24,6 +24,8 @@ def register(commands, parser_class):
     p.add_argument("--labels", default="", help="labels do épico, separadas por vírgula")
     p.set_defaults(handler=_ready)
 
+    sub.add_parser("severidade", help="label de severidade do formulário de bug (corpo na entrada padrão)").set_defaults(
+        handler=_severity)
     sub.add_parser("tarefas", help="tarefas previstas: <índice>\\t<título>\\t<dependências>").set_defaults(
         handler=_tasks)
     sub.add_parser("dependencias", help="épicos dos quais este depende (um número por linha)").set_defaults(
@@ -93,6 +95,13 @@ def _ready(args):
     for problem in problems:
         print(problem)
     return EXIT_VERIFICATION_FAILED if problems else EXIT_OK
+
+
+def _severity(args):
+    label = pipeline.severity_label(_stdin())
+    if label:
+        print(label)
+    return EXIT_OK
 
 
 def _tasks(args):

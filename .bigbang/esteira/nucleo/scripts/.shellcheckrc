@@ -1,0 +1,3 @@
+# $vars inside single quotes are GraphQL variables and jq filters, not Bash expansions.
+disable=SC2016
+source-path=SCRIPTDIR
