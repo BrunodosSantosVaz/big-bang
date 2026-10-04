@@ -1,0 +1,45 @@
+# Gerado pelo Big Bang v0.3.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-bug.yml. Não edite: personalize em bigbang.toml.
+name: Bug
+description: Algo não funciona como deveria.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        **Não cole senhas, tokens nem dados reais de pessoas.** Comandos colados aqui nunca são executados:
+        a equipe reproduz o problema com dados fictícios.
+  - type: textarea
+    attributes:
+      label: Observado
+      description: O que aconteceu.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Esperado
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Passos para reproduzir
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Versão e ambiente
+      description: Ex.: v1.4.2, produção, Windows 11.
+  - type: dropdown
+    attributes:
+      label: Severidade
+      options:
+        - "crítica"
+        - "alta"
+        - "média"
+        - "baixa"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Evidência
+      description: Mensagem de erro, captura de tela (sem dados reais).

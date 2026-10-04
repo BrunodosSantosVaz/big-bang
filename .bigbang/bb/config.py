@@ -17,6 +17,8 @@ SPDX = re.compile(r"^[A-Za-z0-9.+-]+$")
 URL = re.compile(r"^https://\S+$")
 
 DEPLOY_TARGETS = ("vps-docker", "aws", "paas")
+DEPENDABOT_ECOSYSTEMS = ("npm", "pip", "uv", "gomod", "cargo", "maven", "gradle", "composer", "nuget", "bundler",
+                        "docker", "pub", "mix", "swift", "terraform")
 BUILD_SYSTEMS = ("windows-x64", "windows-arm64", "linux-x64", "linux-arm64", "macos-x64", "macos-arm64")
 COMMAND_KEYS = ("instalar", "lint", "tipos", "testes", "testes_aceite", "arquitetura", "cobertura", "build")
 
@@ -91,6 +93,7 @@ SCHEMA = {
     "entrega": {
         "perfil": _string(allowed=("deploy", "compilado")), "alvo": _string(required=False),
         "caminhos_artefato": _string_list(), "arquivo_versao": _string(required=False),
+        "ecossistemas": _string_list(allowed=DEPENDABOT_ECOSYSTEMS, non_empty=False, unique=True),
     },
     "compilado": {"sistemas": _string_list(allowed=BUILD_SYSTEMS, unique=True)},  # plus build_<system>
     "deploy": {

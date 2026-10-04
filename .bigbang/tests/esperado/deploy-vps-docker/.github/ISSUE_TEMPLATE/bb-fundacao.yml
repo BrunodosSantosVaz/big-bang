@@ -1,0 +1,18 @@
+# Gerado pelo Big Bang v0.3.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-fundacao.yml. Não edite: personalize em bigbang.toml.
+name: Fundação
+description: Uma etapa da Fundação (F0 a F5). Normalmente aberta pela IA.
+title: "F"
+labels: ["fundacao"]
+body:
+  - type: dropdown
+    attributes:
+      label: Etapa
+      options: ["F0", "F1", "F2", "F3", "F4", "F5"]
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Decisão registrada
+  - type: input
+    attributes:
+      label: Link do PR

@@ -60,12 +60,36 @@ def initial_context(root):
     return {"bigbang": {"versao": framework_version(root), "origem": origin}}
 
 
+def dependabot_entries(ecosystems):
+    """YAML entries of the stack ecosystems: grouped, monthly, into main (they ship in a maintenance release)."""
+    entries = []
+    for ecosystem in ecosystems:
+        entries.append(f"""  - package-ecosystem: "{ecosystem}"
+    directory: "/"
+    target-branch: "main"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    labels: ["dependencies"]
+    groups:
+      {ecosystem}:
+        patterns: ["*"]""")
+    return "\n".join(entries)
+
+
+def with_computed(config):
+    """Config plus `gerado.*`: values computed in code, so templates stay free of conditional logic."""
+    context = dict(config)
+    context["gerado"] = {"dependabot": dependabot_entries(config["entrega"].get("ecossistemas", []))}
+    return context
+
+
 def build_plan(root, install_pipeline=False):
     config = config_module.load(root, required=False)
     if install_pipeline and config is None:
         raise BbError("a esteira só pode ser gerada depois do bb init (falta o bigbang.toml)", EXIT_INVALID_STATE)
     installed = config is not None and (install_pipeline or pipeline_installed(root))
-    context = config if config is not None else initial_context(root)
+    context = with_computed(config) if config is not None else initial_context(root)
     version = framework_version(root)
     plan = Plan(installed)
 
