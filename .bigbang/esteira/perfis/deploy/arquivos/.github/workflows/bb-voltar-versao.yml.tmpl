@@ -1,0 +1,65 @@
+# Botão "Voltar versão" (spec 14.4): reimplanta em produção a imagem registrada na Release da versão escolhida (o
+# digest de imagem.txt). Nunca desfaz migração (por isso expandir-e-contrair, DAD-02). Só com simular=false e a
+# aprovação do dono no ambiente "producao".
+name: Voltar versão
+
+on:
+  workflow_dispatch:
+    inputs:
+      versao:
+        description: 'Versão para a qual voltar (vX.Y.Z, já publicada)'
+        required: true
+        type: string
+      simular:
+        description: 'Só mostrar a imagem que voltaria'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-publicar
+  cancel-in-progress: false
+
+jobs:
+  conferir:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Imagem registrada na Release
+        run: |
+          imagem=$(gh release download "$VERSAO" --repo "$GITHUB_REPOSITORY" --pattern imagem.txt --output - | tr -d '[:space:]')
+          [[ "$imagem" =~ @sha256:[0-9a-f]{64}$ ]] || { echo "::error::$VERSAO não registra um digest"; exit 1; }
+          echo "Voltaria produção para $VERSAO: $imagem (migrações não são desfeitas)."
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ inputs.versao }}
+
+  voltar:
+    needs: conferir
+    if: ${{ !inputs.simular }}
+    runs-on: ubuntu-24.04
+    environment: producao
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Voltar produção pelo alvo {{entrega.alvo}}
+        run: |
+          bash .bigbang/esteira/perfis/deploy/alvos/{{entrega.alvo}}/scripts/alvo.sh voltar producao "$VERSAO"
+          bash .bigbang/esteira/perfis/deploy/alvos/{{entrega.alvo}}/scripts/alvo.sh saude producao
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ inputs.versao }}
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_PORTA: ${{ vars.VPS_PORTA }}
+          VPS_USUARIO: ${{ vars.VPS_USUARIO }}
+          VPS_PASTA: ${{ vars.VPS_PASTA }}
+          VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
+          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
+          REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}

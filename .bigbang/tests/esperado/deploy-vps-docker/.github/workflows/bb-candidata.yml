@@ -1,7 +1,7 @@
-# Gerado pelo Big Bang v0.8.0 a partir de .bigbang/esteira/perfis/compilado/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
-# Candidata do perfil compilado (spec 14.3): a cada push em release/**, testes, build de cada sistema (matriz) e,
-# só se TODOS compilarem, a pre-release vX.Y.Z-rc.N com binários, SHA256SUMS, SBOM e atestado de procedência.
-# Depois: épico ou bug em Homologação e PR release -> main. Nada é commitado aqui (o Git guarda só código).
+# Gerado pelo Big Bang v0.8.0 a partir de .bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Candidata do perfil deploy (spec 14.4): a cada push em release/**, testes, imagem construída UMA vez e publicada
+# por digest, Trivy, staging (migração, publicação, saúde, smoke e ZAP), pre-release vX.Y.Z-rc.N com o digest
+# (imagem.txt), SBOM e atestado, e então épico ou bug em Homologação com o PR release -> main.
 name: Candidata
 
 on:
@@ -20,8 +20,6 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       pular: ${{ steps.v.outputs.pular }}
-      versao: ${{ steps.v.outputs.versao }}
-      rc: ${{ steps.v.outputs.rc }}
       tag: ${{ steps.v.outputs.tag }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -35,10 +33,15 @@ jobs:
         id: v
         run: bash .bigbang/esteira/nucleo/scripts/candidata-preparar.sh
 
-  testes:
+  imagem:
     needs: preparar
     if: ${{ needs.preparar.outputs.pular != 'true' }}
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      imagem: ${{ steps.i.outputs.imagem }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -49,15 +52,20 @@ jobs:
       - run: bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
       - run: bash .bigbang/esteira/nucleo/scripts/comando.sh testes
       - run: bash .bigbang/esteira/nucleo/scripts/comando.sh testes_aceite
+      - name: Entrar no GHCR
+        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Imagem (uma vez, por digest) e Trivy
+        id: i
+        run: bash .bigbang/esteira/perfis/deploy/scripts/candidata-imagem.sh
+        env:
+          TAG: ${{ needs.preparar.outputs.tag }}
 
-  build:
-    needs: [preparar, testes]
-    strategy:
-      fail-fast: false
-      matrix:
-        include: [{"sistema": "windows-x64", "runner": "windows-2025"}, {"sistema": "linux-x64", "runner": "ubuntu-24.04"}]
-    runs-on: ${{ matrix.runner }}
-    name: build (${{ matrix.sistema }})
+  staging:
+    needs: [preparar, imagem]
+    runs-on: ubuntu-24.04
+    environment: staging
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -65,30 +73,25 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
-      - name: Instalar
-        shell: bash
-        run: bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
+      - name: Staging pelo alvo vps-docker (migração, publicação, saúde, smoke, ZAP)
+        run: bash .bigbang/esteira/perfis/deploy/scripts/staging.sh
         env:
-          BB: python .bigbang/bin/bb.py
-      - name: Compilar
-        shell: bash
-        run: bash .bigbang/esteira/perfis/compilado/scripts/candidata-build.sh
-        env:
-          BB: python .bigbang/bin/bb.py
-          BB_SISTEMA: ${{ matrix.sistema }}
-          BB_VERSAO: ${{ needs.preparar.outputs.versao }}
-          BB_RC: ${{ needs.preparar.outputs.rc }}
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: candidata-${{ matrix.sistema }}
-          path: candidata/
-          retention-days: 7
+          IMAGEM: ${{ needs.imagem.outputs.imagem }}
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_PORTA: ${{ vars.VPS_PORTA }}
+          VPS_USUARIO: ${{ vars.VPS_USUARIO }}
+          VPS_PASTA: ${{ vars.VPS_PASTA }}
+          VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
+          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
+          REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
 
   publicar:
-    needs: [preparar, build]
+    needs: [preparar, imagem, staging]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+      packages: write
       id-token: write
       attestations: write
     steps:
@@ -98,30 +101,36 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          path: candidata
-          pattern: candidata-*
-          merge-multiple: true
-      - name: SBOM (CycloneDX)
+      - name: Registro da imagem
+        run: mkdir -p candidata && printf '%s\n' "$IMAGEM" > candidata/imagem.txt
+        env:
+          IMAGEM: ${{ needs.imagem.outputs.imagem }}
+      - name: SBOM (CycloneDX) da imagem
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
-          path: .
+          image: ${{ needs.imagem.outputs.imagem }}
           format: cyclonedx-json
           output-file: candidata/sbom-cyclonedx.json
           upload-artifact: false
           upload-release-assets: false
+      - name: Entrar no GHCR
+        if: ${{ github.event.repository.visibility == 'public' }}
+        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+        env:
+          GH_TOKEN: ${{ github.token }}
       # Atestados de procedência: grátis em repositório público; em privado exigem GitHub Enterprise Cloud.
-      - name: Atestado de procedência
+      - name: Atestado de procedência da imagem
         if: ${{ github.event.repository.visibility == 'public' }}
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-path: 'candidata/*'
-      - name: Pre-release
-        run: bash .bigbang/esteira/perfis/compilado/scripts/candidata-publicar.sh
+          subject-name: ${{ needs.imagem.outputs.imagem }}
+          push-to-registry: true
+      - name: Pre-release com o digest
+        run: bash .bigbang/esteira/perfis/deploy/scripts/candidata-publicar.sh
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.preparar.outputs.tag }}
+          IMAGEM: ${{ needs.imagem.outputs.imagem }}
 
   homologar:
     needs: [preparar, publicar]
