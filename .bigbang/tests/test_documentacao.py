@@ -12,7 +12,9 @@ from _raiz import RAIZ, arquivos_markdown, importar_bb
 importar_bb()
 
 PULAR_LINKS = (os.path.join(RAIZ, ".bigbang", "modelos") + os.sep,)
-SAIDAS_GERADAS = (os.path.join(RAIZ, ".bigbang", "tests", "esperado") + os.sep,)
+SAIDAS_GERADAS = (os.path.join(RAIZ, ".bigbang", "tests", "esperado") + os.sep,
+                  # subagents and skills follow the tool's format (a YAML header), not the docs format
+                  os.path.join(RAIZ, ".claude") + os.sep, os.path.join(RAIZ, ".agents") + os.sep)
 # The spec is copied verbatim from the owner (it must not change), so it is only checked for fences.
 ESPECIFICACAO = os.path.join(RAIZ, ".bigbang", "docs", "especificacao.md")
 

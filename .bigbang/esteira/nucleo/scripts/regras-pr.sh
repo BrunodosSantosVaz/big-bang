@@ -65,6 +65,48 @@ if [ -n "$sensiveis" ]; then
   fi
 fi
 
+# ---- lock on tests/aceite/ (spec 11.7): the owner's teste-alterado-aprovado is the only way around it
+if grep -q '^tests/aceite/' <<<"$arquivos"; then
+  if [ -z "${diff_texto:-}" ]; then
+    if [ -n "${DIFF_TEXTO:-}" ]; then diff_texto="$DIFF_TEXTO"; else diff_texto=$(gh pr diff "$pr" --repo "$R"); fi
+  fi
+  aprovado=(); if tem_label teste-alterado-aprovado; then aprovado=(--aprovado); fi
+  if ! msg=$(printf '%s\n' "$diff_texto" | "${BB_CMD[@]}" esteira trava-aceite "${tipo:-outro}" ${issue:+"$issue"} "${aprovado[@]}"); then
+    while IFS= read -r linha; do erro "$linha"; done <<<"$msg"
+  fi
+fi
+
+# ---- content of the PR head (read as data by the target branch's bb): pending marks
+dados="${DADOS_PR:-}"
+if [ -z "$dados" ] && [ -n "${PR_HEAD_SHA:-}" ]; then
+  git fetch -q origin "+refs/pull/$pr/head:refs/remotes/origin/pr-$pr" 2>/dev/null || true
+  if git cat-file -e "${PR_HEAD_SHA}^{commit}" 2>/dev/null; then
+    dados=$(mktemp -d); git worktree add -q --detach "$dados" "$PR_HEAD_SHA"
+  fi
+fi
+if [ -n "$dados" ]; then
+  pendentes=$("${BB_CMD[@]}" esteira pendentes --dados "$dados")
+  if [ -n "$pendentes" ]; then
+    mesclados=$(gh api "repos/$R/pulls?state=closed&per_page=100" \
+      --jq '.[] | select(.merged_at != null) | .head.ref')
+    while IFS=$'\t' read -r n onde; do
+      if grep -qE "^(feature|docs)/$n-" <<<"$mesclados" \
+         || [ "$(gh api "repos/$R/issues/$n" --jq .state 2>/dev/null || echo open)" = closed ]; then
+        erro "$onde: teste ainda marcado como pendente da #$n, que já foi mesclada ou fechada"
+      fi
+    done <<<"$pendentes"
+  fi
+  mudados=$(mktemp); printf '%s\n' "$arquivos" > "$mudados"
+  if ! msg=$("${BB_CMD[@]}" esteira rastreabilidade --dados "$dados" --mudados "$mudados"); then
+    while IFS= read -r linha; do erro "rastreabilidade: $linha"; done <<<"$msg"
+  fi
+  if ! msg=$("${BB_CMD[@]}" esteira guarda-stack --dados "$dados"); then
+    while IFS= read -r linha; do erro "guarda da stack: $linha"; done <<<"$msg"
+  fi
+else
+  echo "::notice::conteúdo do PR indisponível: pendentes, rastreabilidade e guarda da stack não conferidos"
+fi
+
 # ---- artifact paths: sem-release in sync, epic declared sem-release, invariant of develop
 artefato=$(printf '%s\n' "$arquivos" | "${BB_CMD[@]}" esteira artefato)
 if [ -n "$artefato" ]; then

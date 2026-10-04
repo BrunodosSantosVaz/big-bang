@@ -7,7 +7,7 @@ import os
 import sys
 
 from . import config as config_module
-from . import docs_check, pipeline
+from . import acceptance, docs_check, pipeline, stack_guard, traceability
 from .errors import EXIT_OK, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 from .paths import read_text, write_text
 
@@ -78,6 +78,32 @@ def register(commands, parser_class):
     p = sub.add_parser("nome-producao", help="nome do binário em produção (tira o -rc.N)")
     p.add_argument("arquivo")
     p.set_defaults(handler=lambda args: print(pipeline.promoted_name(args.arquivo)) or EXIT_OK)
+
+    p = sub.add_parser("trava-aceite", help="trava de tests/aceite/ (diff na entrada padrão)")
+    p.add_argument("tipo", help="tipo da branch: teste, feature, docs, bugfix, hotfix…")
+    p.add_argument("issue", nargs="?", type=int)
+    p.add_argument("--aprovado", action="store_true", help="o PR tem teste-alterado-aprovado")
+    p.set_defaults(handler=_lock)
+
+    p = sub.add_parser("pendentes", help="marcas de pendente em tests/aceite/: <issue>\t<arquivo:linha>")
+    p.add_argument("--dados", help="pasta com o conteúdo a examinar (padrão: a raiz)")
+    p.set_defaults(handler=_pending)
+
+    p = sub.add_parser("rastreabilidade", help="RN vigente sem teste, teste sem RN, RN apagada")
+    p.add_argument("--dados", help="pasta com o conteúdo a examinar (padrão: a raiz)")
+    p.add_argument("--mudados", default="", help="arquivo com os caminhos mudados no PR (um por linha)")
+    p.set_defaults(handler=_traceability)
+
+    p = sub.add_parser("guarda-stack", help="dependências diretas de execução fora do STACK.md")
+    p.add_argument("--dados", help="pasta com o conteúdo a examinar (padrão: a raiz)")
+    p.set_defaults(handler=_stack_guard)
+
+    sub.add_parser("osv-avaliar", help="relatório JSON do OSV-Scanner (entrada padrão): reprova alta e crítica"
+                   ).set_defaults(handler=_osv)
+
+    p = sub.add_parser("rls", help="tabelas sem RLS nas migrações (quando banco_no_navegador = true)")
+    p.add_argument("--pasta", default="migrations")
+    p.set_defaults(handler=_rls)
 
     p = sub.add_parser("gravar-versao", help="grava a versão no arquivo de versão da stack (entrega.arquivo_versao)")
     p.add_argument("versao")
@@ -194,6 +220,61 @@ def _candidate_name(args):
     slug = config_module.load(args.raiz)["projeto"]["slug"]
     print(pipeline.candidate_asset_name(slug, args.versao, args.rc, args.sistema, args.arquivo))
     return EXIT_OK
+
+
+def _lock(args):
+    marker = config_module.load(args.raiz)["testes"]["marca_pendente"]
+    problems = acceptance.lock_problems(_stdin(), args.tipo, args.issue, marker, args.aprovado)
+    for problem in problems:
+        print(problem)
+    return EXIT_VERIFICATION_FAILED if problems else EXIT_OK
+
+
+def _pending(args):
+    marker = config_module.load(args.raiz)["testes"]["marca_pendente"]
+    for issue, where in acceptance.pending_marks(args.dados or args.raiz, marker):
+        print(f"{issue}\t{where}")
+    return EXIT_OK
+
+
+def _report(problems, ok_message):
+    for problem in problems:
+        print(problem)
+    if not problems:
+        print(ok_message)
+    return EXIT_VERIFICATION_FAILED if problems else EXIT_OK
+
+
+def _traceability(args):
+    pattern = config_module.load(args.raiz)["testes"]["padrao_teste"]
+    changed = read_text(args.mudados).split() if args.mudados else []
+    return _report(traceability.problems(args.dados or args.raiz, pattern, changed),
+                   "Rastreabilidade: toda RN vigente tem teste e todo teste cita uma RN.")
+
+
+def _stack_guard(args):
+    return _report(stack_guard.problems(args.dados or args.raiz),
+                   "Guarda da stack: todas as dependências de execução estão aprovadas no STACK.md.")
+
+
+def _osv(args):
+    import json
+    text = _stdin().strip()
+    findings = pipeline.osv_high_findings(json.loads(text) if text else {})
+    return _report(findings, "OSV-Scanner: nenhuma vulnerabilidade alta ou crítica.")
+
+
+def _rls(args):
+    if not config_module.load(args.raiz)["seguranca"]["banco_no_navegador"]:
+        print("banco_no_navegador = false: o navegador não acessa o banco (SEG-IA-01); nada a conferir.")
+        return EXIT_OK
+    folder = os.path.join(args.raiz, args.pasta)
+    texts = []
+    for current, _, names in os.walk(folder):
+        texts += [read_text(os.path.join(current, n)) for n in sorted(names) if n.endswith(".sql")]
+    missing = pipeline.tables_without_rls(texts)
+    return _report([f"tabela {t} sem ROW LEVEL SECURITY (SEG-IA-01)" for t in missing],
+                   "Todas as tabelas das migrações têm RLS ligada.")
 
 
 def _docs(args):

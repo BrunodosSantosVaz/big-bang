@@ -20,6 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -42,5 +43,11 @@ jobs:
         run: bash .bigbang/esteira/nucleo/scripts/comando.sh cobertura
       - name: Build
         run: bash .bigbang/esteira/nucleo/scripts/comando.sh build
+      - name: Ordem da regressão (PR de bug)
+        if: ${{ startsWith(github.head_ref, 'bugfix/') || startsWith(github.head_ref, 'hotfix/') }}
+        run: bash .bigbang/esteira/nucleo/scripts/regressao.sh
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       - name: Documentação (Markdown e links)
         run: python .bigbang/bin/bb.py esteira documentacao

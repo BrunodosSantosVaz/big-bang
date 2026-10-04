@@ -3,7 +3,7 @@ import argparse
 import sys
 
 from . import config as config_module
-from . import checksums, generator, verify
+from . import acceptance, checklist, checksums, decisions, generator, verify
 from . import init as init_module
 from . import pipeline_cli
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
@@ -48,6 +48,36 @@ def build_parser():
     verificar_parser = commands.add_parser("verificar", help="confere framework, arquivos gerados e workflows")
     verificar_parser.set_defaults(handler=_verificar)
 
+    aceite_parser = commands.add_parser("aceite", help="testes de aceite do épico")
+    aceite_commands = aceite_parser.add_subparsers(dest="aceite_command", metavar="<subcomando>", parser_class=_Parser)
+    liberar_parser = aceite_commands.add_parser("liberar", help="retira as marcas de pendente da sua tarefa")
+    liberar_parser.add_argument("tarefa", type=int)
+    liberar_parser.set_defaults(handler=_aceite_liberar)
+
+    decisao_parser = commands.add_parser("decisao", help="registra uma decisão do dono (frase + label)")
+    decisao_parser.add_argument("label", choices=decisions.DECISIONS)
+    decisao_parser.add_argument("numero", type=int, help="issue ou PR")
+    decisao_parser.add_argument("--frase", required=True, help="as palavras do dono, como ele disse")
+    decisao_parser.add_argument("--ia", default=None, help="nome da IA (padrão: BB_IA ou 'ia')")
+    decisao_parser.set_defaults(handler=_decisao)
+
+    revisao_parser = commands.add_parser("revisao", help="revisão de PR")
+    revisao_commands = revisao_parser.add_subparsers(dest="revisao_command", metavar="<subcomando>",
+                                                     parser_class=_Parser)
+    aprovar_parser = revisao_commands.add_parser("aprovar", help="põe pr-aprovado depois do bb-revisor-pr")
+    aprovar_parser.add_argument("pr", type=int)
+    aprovar_parser.add_argument("--ia", default=None)
+    aprovar_parser.add_argument("--relatorio", default=None, help="arquivo com o relatório do revisor")
+    aprovar_parser.set_defaults(handler=_revisao_aprovar)
+
+    checklist_parser = commands.add_parser("checklist", help="validação final")
+    checklist_commands = checklist_parser.add_subparsers(dest="checklist_command", metavar="<subcomando>",
+                                                         parser_class=_Parser)
+    producao_parser = checklist_commands.add_parser("producao", help="checklist de produção (seção 8.2)")
+    producao_parser.add_argument("--dados", help="pasta com o conteúdo a conferir (padrão: a raiz)")
+    producao_parser.add_argument("--sem-github", action="store_true", help="não confere os achados de segurança")
+    producao_parser.set_defaults(handler=_checklist_producao)
+
     pipeline_cli.register(commands, _Parser)
 
     checksums_parser = commands.add_parser("checksums", help="confere ou grava .bigbang/CHECKSUMS (manutenção)")
@@ -72,6 +102,57 @@ def _init(args):
     if issue:
         print(f"Issue de F0: {issue}")
     print("Próximo passo: revisar o diff, commitar numa branch fundacao/<n>-f0 e abrir o PR para a develop.")
+    return EXIT_OK
+
+
+def _ia(args):
+    import os
+    return args.ia or os.environ.get("BB_IA") or "ia"
+
+
+def _decisao(args):
+    repository = config_module.load(args.raiz)["projeto"]["repositorio"]
+    decisions.record_decision(repository, args.label, args.numero, args.frase, _ia(args))
+    print(f"Decisão registrada em #{args.numero}: {args.label}.")
+    return EXIT_OK
+
+
+def _revisao_aprovar(args):
+    config = config_module.load(args.raiz)
+    report = ""
+    if args.relatorio:
+        from .paths import read_text
+        report = read_text(args.relatorio)
+    decisions.approve_review(config["projeto"]["repositorio"], args.pr, _ia(args),
+                             config["seguranca"]["zonas_sensiveis"], config["testes"]["marca_pendente"], report)
+    print(f"PR #{args.pr}: pr-aprovado (revisão da IA).")
+    return EXIT_OK
+
+
+def _checklist_producao(args):
+    import os
+    repository = os.environ.get("GITHUB_REPOSITORY") or config_module.load(args.raiz)["projeto"]["repositorio"]
+    results, problems = checklist.run(args.dados or args.raiz, repository, with_github=not args.sem_github)
+    for item, status, detail in results:
+        print(f"[{status}] {item}" + (f" ({detail})" if detail else ""))
+    for problem in problems:
+        print(f"  - {problem}", file=sys.stderr)
+    if problems:
+        print(f"Checklist de produção REPROVADO: {len(problems)} problema(s).", file=sys.stderr)
+        return EXIT_VERIFICATION_FAILED
+    print("Checklist de produção aprovado.")
+    return EXIT_OK
+
+
+def _aceite_liberar(args):
+    marker = config_module.load(args.raiz)["testes"]["marca_pendente"]
+    changed = acceptance.release_marks(args.raiz, args.tarefa, marker)
+    if not changed:
+        print(f"Nenhuma marca de pendente da #{args.tarefa} em tests/aceite/.")
+        return EXIT_OK
+    for path, line in changed:
+        print(f"liberado: {path}:{line}")
+    print(f"{len(changed)} teste(s) da #{args.tarefa} liberados. Rode os testes de aceite: agora eles precisam passar.")
     return EXIT_OK
 
 

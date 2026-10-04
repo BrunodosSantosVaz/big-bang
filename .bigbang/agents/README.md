@@ -1,5 +1,8 @@
 # Procedimentos dos subagentes
 
-`revisor-pr.md` e `pesquisador.md`, legíveis por qualquer IA (seção 15.3).
+Legíveis por qualquer IA. No Claude Code, o `bb gerar` cria os subagentes correspondentes em `.claude/agents/`.
 
-Esta pasta é preenchida no **E6** (seção 17 da [especificação](../docs/especificacao.md)).
+| Procedimento | Subagente do Claude Code | Uso |
+| --- | --- | --- |
+| [revisor-pr.md](revisor-pr.md) | `bb-revisor-pr` | revisão hostil de PR, com contexto limpo e só leitura |
+| [pesquisador.md](pesquisador.md) | `bb-pesquisador` | pesquisa para a Fundação F2 e para tecnologia nova |

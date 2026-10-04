@@ -203,6 +203,25 @@ def api(state, positional, fields, jq, method):
     match = re.match(rf"^repos/{re.escape(REPO)}/issues/(\d+)$", path)
     if match:
         return emit(issue_json(state, match.group(1)), jq)
+    match = re.match(rf"^repos/{re.escape(REPO)}/issues/(\d+)/comments$", path)
+    if match and method == "POST":
+        state.setdefault("comments", {}).setdefault(match.group(1), []).append(fields["body"])
+        save(state)
+        return emit({}, jq)
+    match = re.match(rf"^repos/{re.escape(REPO)}/issues/(\d+)/labels(?:/(.+))?$", path)
+    if match and method in ("POST", "DELETE"):
+        number = match.group(1)
+        target = state.get("prs", {}).get(number) or state["issues"][number]
+        target.setdefault("labels", [])
+        if method == "POST" and fields["labels[]"] not in target["labels"]:
+            target["labels"].append(fields["labels[]"])
+        if method == "DELETE":
+            if match.group(2) not in target["labels"]:
+                sys.stderr.write("HTTP 404: Label does not exist\n")
+                sys.exit(1)
+            target["labels"].remove(match.group(2))
+        save(state)
+        return emit({}, jq)
     match = re.match(rf"^repos/{re.escape(REPO)}/issues/(\d+)/dependencies/blocked_by$", path)
     if match:
         issue = state["issues"][match.group(1)]

@@ -257,3 +257,20 @@ class PerfilCompilado(unittest.TestCase):
         lin = p.candidate_asset_name("meu-sistema", "1.2.0", 12, "linux-x64", "meu-sistema")
         self.assertEqual(p.promoted_name(lin), "meu-sistema-v1.2.0-linux-x64")
         self.assertEqual(p.promoted_name("SHA256SUMS-linux-x64.txt"), "SHA256SUMS-linux-x64.txt")
+
+
+class Seguranca(unittest.TestCase):
+    def test_osv_so_alta_e_critica(self):
+        relatorio = {"results": [{"packages": [
+            {"package": {"name": "lodash", "version": "4.17.20"}, "groups": [{"ids": ["GHSA-1"], "max_severity": "9.8"}]},
+            {"package": {"name": "minimist", "version": "1.2.0"}, "groups": [{"ids": ["GHSA-2"], "max_severity": "5.3"}]},
+            {"package": {"name": "x", "version": "1"}, "groups": [{"ids": ["GHSA-3"], "max_severity": ""}]}]}]}
+        self.assertEqual(p.osv_high_findings(relatorio), ["lodash 4.17.20: GHSA-1 (CVSS 9.8)"])
+        self.assertEqual(p.osv_high_findings({}), [])
+
+    def test_tabelas_sem_rls(self):
+        sql = ["create table public.pedidos (id uuid);\nCREATE TABLE IF NOT EXISTS \"clientes\" (id uuid);",
+               "alter table pedidos enable row level security;"]
+        self.assertEqual(p.tables_without_rls(sql), ["clientes"])
+        self.assertEqual(p.tables_without_rls(sql + ["ALTER TABLE ONLY public.clientes ENABLE ROW LEVEL SECURITY;"]),
+                         [])

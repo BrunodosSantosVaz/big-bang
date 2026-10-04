@@ -447,3 +447,40 @@ def candidate_asset_name(slug, version, rc, system, filename):
 def promoted_name(candidate_name):
     """Production name of a candidate asset: the same name without `-rc.N`."""
     return re.sub(r"-rc\.\d+(?=-|\.|$)", "", candidate_name, count=1)
+
+
+# --- security gates (SEG-17, SEG-IA-01) -----------------------------------------------------------------------------
+
+HIGH_SEVERITY = 7.0  # CVSS: 7.0-8.9 high, 9.0+ critical
+
+
+def osv_high_findings(report):
+    """['package version: ids (CVSS n)'] of the OSV-Scanner JSON report entries rated high or critical."""
+    findings = []
+    for result in (report or {}).get("results", []):
+        for package in result.get("packages", []):
+            info = package.get("package", {})
+            for group in package.get("groups", []):
+                try:
+                    score = float(group.get("max_severity") or 0)
+                except ValueError:
+                    score = 0.0
+                if score >= HIGH_SEVERITY:
+                    ids = ", ".join(group.get("ids", []))
+                    findings.append(f"{info.get('name')} {info.get('version')}: {ids} (CVSS {score})")
+    return findings
+
+
+CREATE_TABLE = re.compile(r"create\s+table\s+(?:if\s+not\s+exists\s+)?([\w.\"]+)", re.I)
+ENABLE_RLS = re.compile(r"alter\s+table\s+(?:only\s+)?([\w.\"]+)\s+enable\s+row\s+level\s+security", re.I)
+
+
+def tables_without_rls(sql_texts):
+    """Tables created in the migrations that never get ROW LEVEL SECURITY enabled (SEG-IA-01)."""
+    def name(raw):
+        return raw.replace('"', "").split(".")[-1].lower()
+    created, protected = [], set()
+    for text in sql_texts:
+        created += [name(m) for m in CREATE_TABLE.findall(text)]
+        protected |= {name(m) for m in ENABLE_RLS.findall(text)}
+    return sorted(set(created) - protected)
