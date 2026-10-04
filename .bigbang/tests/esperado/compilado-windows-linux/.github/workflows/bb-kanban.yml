@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v0.3.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-kanban.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v0.4.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-kanban.yml. Não edite: personalize em bigbang.toml.
 # Move os cartões dos painéis e converte o formulário do épico em labels (spec 11.1). Precisa do segredo
 # PROJETO_TOKEN e das variáveis PROJETO_*. Em eventos de PR, os scripts vêm do SHA da branch de destino.
 name: Kanban
