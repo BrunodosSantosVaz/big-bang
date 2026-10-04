@@ -52,7 +52,7 @@ if [ -n "${EPICO:-}" ]; then
     [ -n "$n" ] || continue
     tem "$rotulos" teste-aceite || tem "$rotulos" task || tem "$rotulos" documentacao || continue
     issues+=("$n")
-    cut -f2 <<<"$mesclados" | grep -qE "^(teste|feature|docs)/$n-" || faltam+=("#$n")
+    cut -f2 <<<"$mesclados" | grep -E "^(teste|feature|docs)/$n-" >/dev/null || faltam+=("#$n")
   done < <(gh api graphql -H "GraphQL-Features: sub_issues" -f o="$OWNER" -f r="$REPO" -F n="$epico" -f query='
     query($o:String!,$r:String!,$n:Int!){ repository(owner:$o,name:$r){ issue(number:$n){
       subIssues(first:100){ nodes{ number labels(first:20){ nodes{ name } } } } } } }' \

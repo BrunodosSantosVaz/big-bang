@@ -90,7 +90,7 @@ mover() {
   pid=$(projeto_id "$painel")
   item=$(item_de "$pid" "$issue")
   atual=$(valor_atual "$item" Status)
-  if [ -n "$de" ] && ! printf '%s' "|$de|" | grep -qF "|$atual|"; then
+  if [ -n "$de" ] && ! printf '%s' "|$de|" | grep -F "|$atual|" >/dev/null; then
     echo "#$issue no painel $painel: '$atual' fora de [$de]; mantido."; return 0
   fi
   if [ "$atual" = "$destino" ]; then echo "#$issue no painel $painel: já está em '$destino'."; return 0; fi
@@ -156,7 +156,7 @@ sprints() { opcoes "$1" Sprint | cut -f3; }
 # sent back with their ids and keep the values already set on the cards (a new id would wipe them).
 sprint_criar() {
   local painel="$1" titulo="$2" campo lista="" oid nome
-  if sprints "$painel" | grep -qxF -- "$titulo"; then echo "Sprint '$titulo' já existe no painel $painel."; return 0; fi
+  if sprints "$painel" | grep -xF -- "$titulo" >/dev/null; then echo "Sprint '$titulo' já existe no painel $painel."; return 0; fi
   if [ "${DRY_RUN:-}" = 1 ]; then echo "[simulado] painel $painel: criar a opção de Sprint '$titulo'"; return 0; fi
   campo=$(campo_id "$painel" Sprint)
   [ -n "$campo" ] || { echo "Campo 'Sprint' não existe no painel $painel (rode criar-paineis.sh)." >&2; return 1; }
