@@ -2,7 +2,7 @@
 name: bb-entregar-epico
 description: Use para vamos homologar ou vamos publicar um épico ou bug. Mostra candidata e critérios, registra a decisão do dono e confere checklist e portão sem aprovar o ambiente de produção.
 ---
-<!-- Gerado pelo Big Bang v0.11.6 a partir de .bigbang/skills/bb-entregar-epico/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v0.11.7 a partir de .bigbang/skills/bb-entregar-epico/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Entregar épico ou bug
 

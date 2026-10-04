@@ -2,7 +2,7 @@
 name: bb-atualizar
 description: Use para atualizar o Big Bang. Confere versão e migração, preserva a camada do projeto e prepara PR framework/vX.Y.Z para revisão humana; não atualiza dependências do sistema.
 ---
-<!-- Gerado pelo Big Bang v0.11.6 a partir de .bigbang/skills/bb-atualizar/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v0.11.7 a partir de .bigbang/skills/bb-atualizar/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Atualizar Big Bang
 

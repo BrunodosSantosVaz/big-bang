@@ -4,6 +4,24 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [0.11.7] - 2026-10-04
+
+### O que muda
+
+- *Regras do PR* no PR `release/*`: a trava de `tests/aceite/` não se aplica (o conteúdo já passou por ela nos PRs
+  para o épico) e a rastreabilidade usa o `testes.padrao_teste` que vem na release.
+- `docs/operacao/checklist-producao.md` nasce na F5 e está no checklist de documentação do épico; o *Integrar release*
+  avisa quando ele falta.
+
+### O que o projeto precisa fazer
+
+Nada.
+
+### Projetos já fundados sem o checklist de produção
+
+Crie `docs/operacao/checklist-producao.md` a partir de `.bigbang/modelos/checklist-producao.md` antes da próxima
+publicação.
+
 ## [0.11.6] - 2026-10-04
 
 ### O que muda

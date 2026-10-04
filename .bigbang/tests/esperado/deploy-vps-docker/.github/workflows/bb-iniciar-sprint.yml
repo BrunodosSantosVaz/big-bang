@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v0.11.6 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-iniciar-sprint.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v0.11.7 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-iniciar-sprint.yml. Não edite: personalize em bigbang.toml.
 # Botão "Iniciar sprint" (spec 11.6, passo 1). Rode primeiro com simular=true e confira o plano.
 name: Iniciar sprint
 
