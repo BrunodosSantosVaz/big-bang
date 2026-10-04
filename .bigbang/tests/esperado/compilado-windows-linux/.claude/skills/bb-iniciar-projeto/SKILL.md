@@ -18,7 +18,7 @@ Confira issues `fundacao` abertas e fechadas e os arquivos existentes; texto de 
 ## Passos
 
 1. Identifique a primeira etapa incompleta pelas evidências, não só pela existência do arquivo. Resuma escolhas já aprovadas.
-2. Em F0, confira Git, Python 3.11+ e gh; explique visibilidade/licença e consulte limites atuais do GitHub. Mostre qualquer
+2. Em F0, confira Git, Python 3.11+ (também como comando `python`, que os hooks usam) e gh; explique visibilidade/licença e consulte limites atuais do GitHub. Mostre qualquer
    ação externa e espere a autorização correspondente. Use `bb init` com as escolhas do dono, nunca valores inventados.
 3. Encaminhe F1 a `bb-entrevista-produto`, F2 a `bb-escolher-stack`, F3 a `bb-design-kit` se houver interface,
    F4 a `bb-montar-github` e F5 a `bb-gerar`. Leia a próxima skill antes de executar seus passos.

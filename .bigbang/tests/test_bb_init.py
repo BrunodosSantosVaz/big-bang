@@ -156,3 +156,34 @@ class Auxiliares(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PythonDosHooks(unittest.TestCase):
+    """The hooks run `python`; bb init warns when it is missing or older than 3.11."""
+
+    def com_path(self, conteudo_python=None):
+        pasta = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, pasta)
+        if conteudo_python is not None:
+            caminho = os.path.join(pasta, "python")
+            with open(caminho, "w", encoding="utf-8") as arquivo:
+                arquivo.write(conteudo_python)
+            os.chmod(caminho, 0o755)
+        antigo = os.environ["PATH"]
+        os.environ["PATH"] = pasta
+        self.addCleanup(os.environ.__setitem__, "PATH", antigo)
+
+    @unittest.skipIf(os.name == "nt", "PATH com scripts de shell")
+    def test_sem_python(self):
+        self.com_path()
+        self.assertIn("python-is-python3", init.hook_python_problem())
+
+    @unittest.skipIf(os.name == "nt", "PATH com scripts de shell")
+    def test_python_antigo(self):
+        self.com_path("#!/bin/sh\necho 3 10\n")
+        self.assertIn("3.10", init.hook_python_problem())
+
+    @unittest.skipIf(os.name == "nt", "PATH com scripts de shell")
+    def test_python_certo(self):
+        self.com_path("#!/bin/sh\necho 3 12\n")
+        self.assertIsNone(init.hook_python_problem())

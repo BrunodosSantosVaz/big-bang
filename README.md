@@ -25,7 +25,7 @@ ferramenta (CI, testes travados, portões), não por promessa.
 
 - [Git](https://git-scm.com/)
 - [GitHub CLI](https://cli.github.com/) (`gh`) autenticado (`gh auth login`)
-- Python 3.11 ou superior
+- Python 3.11 ou superior, disponível também como comando `python` (no Ubuntu/Debian: `sudo apt install python-is-python3`)
 - Uma IA para código, como Claude Code, Codex ou Cursor
 - Uma conta no GitHub
 

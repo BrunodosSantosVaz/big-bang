@@ -30,7 +30,8 @@ que depende da stack fecha depois de F2); F4 e F5 por último.
 
 ### F0 · Ligar ao GitHub e escolher a visibilidade
 
-1. Conferir `git`, Python 3.11+ e `gh auth status` com os escopos `repo`, `project` e `workflow`. Para o que faltar,
+1. Conferir `git`, Python 3.11+ (também como comando `python`, usado pelos hooks do Claude Code; no Ubuntu/Debian,
+   `python-is-python3`) e `gh auth status` com os escopos `repo`, `project` e `workflow`. Para o que faltar,
    a IA mostra o comando exato (por exemplo `gh auth refresh -s project,workflow`) e espera o dono rodar. A IA nunca
    pede nem guarda token na conversa.
 2. Conferir que o repositório existe e tem `main`; criar `develop` a partir da `main`.
@@ -84,8 +85,10 @@ Um item por vez, conferido pela IA com `gh` antes do próximo:
 7. Variáveis do repositório (`PROJETO_OWNER`, números dos painéis) e opções de merge (permitir *merge commit*;
    "apagar branch após merge" desligado, porque quem apaga é a esteira).
 
-Depois, a IA cria os três painéis com colunas, campos e visões, as labels completas e acrescenta as issues da
-Fundação já concluídas.
+Os itens 3, 4, 5 e 7 são aplicados por `.bigbang/scripts/configurar-repositorio.sh <dono/repo>` (rode antes com
+`--simular`); os itens 2 e 6 são segredos e só o dono os cria. Depois, a IA cria os três painéis com colunas, campos
+e visões (`criar-paineis.sh`), as labels completas (`criar-labels.sh`) e acrescenta as issues da Fundação já
+concluídas.
 
 ### F5 · Esteira e esqueleto andante
 
