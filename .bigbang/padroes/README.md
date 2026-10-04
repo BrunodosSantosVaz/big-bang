@@ -42,7 +42,7 @@ para o arquivo. O teste `.bigbang/tests/test_padroes.py` confere que esta tabela
 | ARQ-04 | [arquitetura.md](arquitetura.md) | teste de arquitetura da stack e item do `bb-revisor-pr`. | E6 |
 | ARQ-05 | [arquitetura.md](arquitetura.md) | item do `bb-revisor-pr`. | E6 |
 | ARQ-06 | [arquitetura.md](arquitetura.md) | item do `bb-revisor-pr` e varredura de segredo no pacote do front (job `seguranca`). | E6 |
-| ARQ-07 | [arquitetura.md](arquitetura.md) | a esteira (candidata e publicação usam o mesmo artefato) e item do `bb-revisor-pr`. | E5, E6, E9 |
+| ARQ-07 | [arquitetura.md](arquitetura.md) | a esteira (candidata e publicação usam o mesmo artefato) e item do `bb-revisor-pr`. | E6, E9, `.bigbang/esteira/perfis/compilado/scripts/promover.sh` |
 | ARQ-08 | [arquitetura.md](arquitetura.md) | item do `bb-revisor-pr`. | E6 |
 | ARQ-09 | [arquitetura.md](arquitetura.md) | item do `bb-revisor-pr`. | E6 |
 | ARQ-10 | [arquitetura.md](arquitetura.md) | revisão humana (mudança de arquitetura exige ADR aprovado pelo dono). | `.bigbang/esteira/nucleo/scripts/regras-pr.sh` |
@@ -111,7 +111,7 @@ para o arquivo. O teste `.bigbang/tests/test_padroes.py` confere que esta tabela
 | DOC-05 | [documentacao.md](documentacao.md) | checklist da tarefa de documentação. | `.bigbang/esteira/nucleo/scripts/iniciar-sprint.sh` |
 | DOC-06 | [documentacao.md](documentacao.md) | teste de contrato no job `check` e item do `bb-revisor-pr`. | E6, `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml` |
 | DOC-07 | [documentacao.md](documentacao.md) | item do `bb-revisor-pr`. | E6 |
-| DOC-08 | [documentacao.md](documentacao.md) | portão do *Publicar em produção* (changelog com a seção da versão). | E5 |
+| DOC-08 | [documentacao.md](documentacao.md) | portão do *Publicar em produção* (changelog com a seção da versão). | `.bigbang/esteira/nucleo/scripts/publicar-producao.sh` |
 | DOC-09 | [documentacao.md](documentacao.md) | checklist da tarefa de documentação. | `.bigbang/esteira/nucleo/scripts/iniciar-sprint.sh` |
 | DOC-10 | [documentacao.md](documentacao.md) | checklist da tarefa de documentação. | `.bigbang/esteira/nucleo/scripts/iniciar-sprint.sh` |
 | DOC-11 | [documentacao.md](documentacao.md) | checklist da tarefa de documentação. | `.bigbang/esteira/nucleo/scripts/iniciar-sprint.sh` |
