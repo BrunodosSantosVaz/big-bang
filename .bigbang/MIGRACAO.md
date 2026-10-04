@@ -4,6 +4,23 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [0.10.2] - 2026-10-04
+
+### O que muda
+
+- O job `regras` lê os arquivos do PR pela API paginada: o `gh pr diff` recusa PR com mais de 300 arquivos, como o
+  de uma atualização do framework. Arquivo de `tests/aceite/` sem trecho de diff (grande demais) reprova a trava.
+
+### O que o projeto precisa fazer
+
+Nada.
+
+### Vindo de uma versão anterior à 0.10.2
+
+O job `regras` roda com os scripts da `develop`, ainda antigos, e pode reprovar o PR da atualização com
+"diff exceeded the maximum number of files (300)". Revise o PR e mescle com o bypass de administrador; os PRs
+seguintes já usam o script novo.
+
 ## [0.10.1] - 2026-10-04
 
 ### O que muda
