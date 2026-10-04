@@ -5,7 +5,7 @@
 # Environment: GITHUB_REF_NAME (release/x.y.z), GITHUB_OUTPUT, BB.
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
-read -r -a BB <<<"${BB:-python3 .bigbang/bin/bb.py}"
+read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 saida() { if [ -n "${GITHUB_OUTPUT:-}" ]; then echo "$1" >> "$GITHUB_OUTPUT"; fi; echo "$1"; }
 
 [[ "${GITHUB_REF_NAME:?}" =~ ^release/([0-9]+\.[0-9]+\.[0-9]+)$ ]] || { echo "::error::branch $GITHUB_REF_NAME não é release/x.y.z"; exit 1; }
@@ -14,7 +14,7 @@ git fetch -q --tags origin
 if git rev-parse -q --verify "refs/tags/v$v" >/dev/null; then
   echo "::error::v$v já foi publicada: uma correção precisa de uma versão nova (Integrar release)."; exit 1
 fi
-arquivo=$("${BB[@]}" config get entrega.arquivo_versao)
+arquivo=$("${BB_CMD[@]}" config get entrega.arquivo_versao)
 if [ -n "$arquivo" ] && ! grep -qF "$v" "$arquivo"; then
   echo "::warning::$arquivo ainda não está na versão $v: candidata pulada."; saida "pular=true"; exit 0
 fi

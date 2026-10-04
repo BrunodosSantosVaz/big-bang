@@ -5,11 +5,11 @@
 # Environment: TAG (vX.Y.Z-rc.N), GITHUB_SHA, GITHUB_REF_NAME, GITHUB_REPOSITORY, GH_TOKEN, BB. Files in candidata/.
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
-read -r -a BB <<<"${BB:-python3 .bigbang/bin/bb.py}"
+read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 tag="${TAG:?}"; R="${GITHUB_REPOSITORY:?}"
 if gh release view "$tag" --repo "$R" >/dev/null 2>&1; then echo "Pre-release $tag já existe."; exit 0; fi
 (cd candidata && for soma in SHA256SUMS-*.txt; do sha256sum -c "$soma"; done)
-nome=$("${BB[@]}" config get projeto.nome)
+nome=$("${BB_CMD[@]}" config get projeto.nome)
 {
   echo "## Candidata para homologação"
   echo
