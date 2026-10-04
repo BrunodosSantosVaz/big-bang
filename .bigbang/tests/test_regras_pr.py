@@ -23,9 +23,10 @@ class _Base(CasoDeScript):
         self.issue(12, "Tarefa", labels=["task"])
 
     def regras(self, head="feature/12-tarefa", base="epico/7-estoque", titulo="feat(pedidos): bloqueia pedido",
-               corpo=CORPO, arquivos="src/pedidos.py\n", labels="", sha="", diff_texto=""):
+               corpo=CORPO, arquivos="src/pedidos.py\n", labels="", sha="", diff_texto="", dados=""):
         env = {"HEAD_REF": head, "BASE_REF": base, "PR_TITLE": titulo, "PR_BODY": corpo, "PR_NUMBER": "30",
                "PR_LABELS": labels, "DIFF_ARQUIVOS": arquivos, "PR_HEAD_SHA": sha, "DIFF_TEXTO": diff_texto,
+               "DADOS_PR": dados,
                "BB": f"{sys.executable} {BB} --raiz {self.projeto}"}
         return self.rodar("regras-pr.sh", env=env, cwd=self.projeto)
 
@@ -98,6 +99,37 @@ class RegrasPr(_Base):
         r = self.regras(arquivos="src/a.py\n")
         self.assertEqual(r.returncode, 1)
         self.assertIn("sem-release", r.stdout)
+
+
+class TravaEPendentes(_Base):
+    ENFRAQUECE = ("diff --git a/tests/aceite/7-e/test_a.py b/tests/aceite/7-e/test_a.py\n--- a/x\n+++ b/x\n@@ -1 +1 @@\n"
+                  "-        self.assertEqual(total, 100)\n+        self.assertTrue(total)\n")
+
+    def test_trava_reprova_e_teste_alterado_aprovado_libera(self):
+        r = self.regras(arquivos="tests/aceite/7-e/test_a.py\n", diff_texto=self.ENFRAQUECE)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("teste-alterado-aprovado", r.stdout)
+        r = self.regras(arquivos="tests/aceite/7-e/test_a.py\n", diff_texto=self.ENFRAQUECE,
+                        labels="teste-alterado-aprovado")
+        self.assertEqual(r.returncode, 0, r.stdout)
+
+    def test_pendente_de_tarefa_ja_mesclada_reprova(self):
+        dados = os.path.join(self.pasta, "head")
+        os.makedirs(os.path.join(dados, "tests", "aceite", "7-e"))
+        with open(os.path.join(dados, "tests", "aceite", "7-e", "a.test.js"), "w", encoding="utf-8") as arquivo:
+            arquivo.write('test.failing("RN-0042 x", () => {  // pendente da tarefa #15\n')
+        self.issue(15, "Outra tarefa", labels=["task"])
+        self.assertEqual(self.regras(dados=dados).returncode, 0)  # #15 still open and not merged
+        self.estado["pulls"] = [{"head": {"ref": "feature/15-outra-tarefa"}, "merged_at": "2026-10-04T00:00:00Z"}]
+        self.gravar_estado()
+        self.assertEqual(self.regras(dados=dados).returncode, 1)  # merged into the epic, issue still open
+        self.estado["pulls"] = []
+        self.gravar_estado()
+        self.estado["api"] = {}
+        self.issue(15, "Outra tarefa", labels=["task"], state="closed")
+        r = self.regras(dados=dados)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("tests/aceite/7-e/a.test.js:1: teste ainda marcado como pendente da #15", r.stdout)
 
 
 class InvarianteDaDevelop(_Base):
