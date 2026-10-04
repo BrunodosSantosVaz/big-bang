@@ -5,6 +5,7 @@ import io
 import os
 import shutil
 import sys
+from unittest.mock import patch
 
 from _raiz import BIGBANG
 from test_posse import ComPosse
@@ -44,9 +45,24 @@ class Inatividade(ComPosse):
         ownership.touch(self.config, 12)
         self.assertFalse(status.possessions(self.config)[0]["stale"])
         self.assertNotIn("parada", self.ler_estado()["issues"]["12"]["labels"])
-        first = self.estado["comments"]["12"][0]
+        first = len(self.estado["comments"]["12"])
         ownership.touch(self.config, 12)
-        self.assertNotEqual(first, self.ler_estado()["comments"]["12"][0])
+        self.assertEqual(first + 1, len(self.ler_estado()["comments"]["12"]))
+
+    def test_push_concorrente_com_liberacao_nao_reabre_sessao(self):
+        acquired = self.assumir()
+        original = ownership.api
+        triggered = False
+        def release_before_heartbeat(path, method="GET", **fields):
+            nonlocal triggered
+            if method == "POST" and "bb:push" in fields.get("body", "") and not triggered:
+                triggered = True
+                ownership.release(self.config, 12, acquired["name"], acquired["session"])
+            return original(path, method, **fields)
+        with patch.object(ownership, "api", side_effect=release_before_heartbeat):
+            ownership.touch(self.config, 12)
+        self.assertEqual(ownership.active_claims("dono/repo", 12, "dono"), [])
+        self.assertNotIn("ia:claude-1", self.ler_estado()["issues"]["12"]["labels"])
 
     def test_forcar_exige_ordem_e_posse_vencida(self):
         self.assumir()
