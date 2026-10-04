@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v0.6.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-teste-aceite.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v0.7.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-teste-aceite.yml. Não edite: personalize em bigbang.toml.
 name: Testes de aceite
 description: Os testes de aceite de um épico, escritos antes das tarefas. Normalmente criada pelo Iniciar sprint.
 labels: ["teste-aceite"]

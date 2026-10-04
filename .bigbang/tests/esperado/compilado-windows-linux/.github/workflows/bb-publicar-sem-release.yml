@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v0.6.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-sem-release.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v0.7.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-sem-release.yml. Não edite: personalize em bigbang.toml.
 # Botão "Publicar sem release" (spec 14.2): avança a main até a develop quando o artefato não mudou.
 # "conferir" roda sempre (portão e plano); "publicar" só com simular=false e a aprovação do dono em "producao".
 name: Publicar sem release

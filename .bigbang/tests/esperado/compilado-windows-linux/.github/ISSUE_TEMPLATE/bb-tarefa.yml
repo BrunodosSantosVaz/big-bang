@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v0.6.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-tarefa.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v0.7.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-tarefa.yml. Não edite: personalize em bigbang.toml.
 name: Tarefa
 description: Tarefa de um épico. Normalmente criada pelo botão Iniciar sprint.
 labels: ["task"]
