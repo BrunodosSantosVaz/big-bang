@@ -5,11 +5,12 @@ These are building blocks for the generated workflows, not commands the owner ty
 import datetime
 import os
 import sys
+import tomllib
 
 from . import config as config_module
 from . import acceptance, docs_check, ownership, pipeline, stack_guard, status, traceability
 from .errors import EXIT_OK, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
-from .paths import read_text, write_text
+from .paths import CONFIG_FILE, read_text, write_text
 
 
 def register(commands, parser_class):
@@ -92,6 +93,8 @@ def register(commands, parser_class):
     p = sub.add_parser("rastreabilidade", help="RN vigente sem teste, teste sem RN, RN apagada")
     p.add_argument("--dados", help="pasta com o conteúdo a examinar (padrão: a raiz)")
     p.add_argument("--mudados", default="", help="arquivo com os caminhos mudados no PR (um por linha)")
+    p.add_argument("--padrao-dos-dados", action="store_true",
+                   help="usa testes.padrao_teste do bigbang.toml de --dados (PR release/*: conteúdo já revisado)")
     p.set_defaults(handler=_traceability)
 
     p = sub.add_parser("guarda-stack", help="dependências diretas de execução fora do STACK.md")
@@ -263,6 +266,9 @@ def _report(problems, ok_message):
 
 def _traceability(args):
     pattern = config_module.load(args.raiz)["testes"]["padrao_teste"]
+    if args.padrao_dos_dados and args.dados and os.path.exists(os.path.join(args.dados, CONFIG_FILE)):
+        with open(os.path.join(args.dados, CONFIG_FILE), "rb") as handle:  # only this key; scripts stay the target's
+            pattern = tomllib.load(handle).get("testes", {}).get("padrao_teste", pattern)
     changed = read_text(args.mudados).split() if args.mudados else []
     return _report(traceability.problems(args.dados or args.raiz, pattern, changed),
                    "Rastreabilidade: toda RN vigente tem teste e todo teste cita uma RN.")

@@ -2,7 +2,7 @@
 name: bb-prototipar
 description: Use para vamos montar o protótipo de um épico com-prototipo cujo refinamento já foi aprovado. Itera um protótipo navegável até aprovação do dono.
 ---
-<!-- Gerado pelo Big Bang v0.11.6 a partir de .bigbang/skills/bb-prototipar/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v0.11.7 a partir de .bigbang/skills/bb-prototipar/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Prototipar épico
 

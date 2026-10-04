@@ -2,7 +2,7 @@
 name: bb-corrigir-bug
 description: Use para Bug, corrigir uma issue, hotfix ou atualizar dependências. Reproduz antes de corrigir e mantém teste que falha no primeiro commit, correção mínima no segundo.
 ---
-<!-- Gerado pelo Big Bang v0.11.6 a partir de .bigbang/skills/bb-corrigir-bug/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v0.11.7 a partir de .bigbang/skills/bb-corrigir-bug/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Corrigir bug ou dependências
 
