@@ -50,6 +50,15 @@ class ConfigurarRepositorio(CasoDeScript):
         self.assertIn("Pendente do dono (segredos): PROJETO_TOKEN", r.stdout)
         self.assertIn("staging", r.stdout)  # deploy profile
 
+    def test_checks_so_depois_da_esteira(self):
+        r = self.configurar()
+        self.assertIn("ainda não os checks", r.stdout)
+        corpo = [c for c in self.chamadas() if c[:4] == ["api", "-X", "POST", "repos/dono/repo/rulesets"]]
+        self.assertTrue(corpo)
+        os.makedirs(os.path.join(self.pasta, ".github", "workflows"))
+        open(os.path.join(self.pasta, ".github", "workflows", "bb-ci.yml"), "w").close()
+        self.assertNotIn("ainda não os checks", self.configurar().stdout)
+
     def test_avisa_quando_o_plano_nao_aplica_a_aprovacao(self):
         self.estado["api"]["repos/dono/repo/environments/producao"] = {"protection_rules": []}
         self.gravar_estado()

@@ -16,3 +16,4 @@ sistema ficam em `docs/decisoes/` do sistema, não aqui.
 | [0009](ADR-0009-perfil-compilado.md) | Perfil compilado: candidata, promoção e correção | aceita |
 | [0010](ADR-0010-portoes-de-teste-revisao-e-seguranca.md) | Portões de testes, revisão e segurança | aceita |
 | [0011](ADR-0011-posses-e-concorrencia.md) | Posse de tarefas, isolamento e inatividade das IAs | aceita |
+| [0012](ADR-0012-skills-hooks-e-fundacao.md) | Skills, hooks e a montagem do GitHub na Fundação | aceita |

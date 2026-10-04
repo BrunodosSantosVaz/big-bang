@@ -8,7 +8,8 @@
 #      (merge commit allowed, automatic branch deletion off: the pipeline deletes branches, with locks).
 # Item 2 (PROJETO_TOKEN) and item 6 (deploy credentials) are secrets: only the owner creates them.
 # A protection the plan does not offer (e.g. on a private repository of the free plan) is reported, never faked.
-# Usage: .bigbang/scripts/configurar-repositorio.sh OWNER/REPO [--simular]
+# The required checks are added only once the pipeline is installed (F5); run the script again after F5.
+# Usage (from the project root): .bigbang/scripts/configurar-repositorio.sh OWNER/REPO [--simular]
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
@@ -60,6 +61,14 @@ fi
 [ "$perfil" != deploy ] || ambiente staging false
 
 echo "5. Rulesets"
+# The required checks only exist once the pipeline is installed (F5): before that, requiring them would block every
+# Foundation PR. Run this script again after `bb gerar --esteira`.
+checks='{"type": "required_status_checks", "parameters": {"strict_required_status_checks_policy": false,
+         "required_status_checks": [{"context": "check"}, {"context": "regras"}, {"context": "seguranca"}]}}'
+if [ ! -f .github/workflows/bb-ci.yml ]; then
+  checks='{"type": "non_fast_forward"}'
+  aviso "a esteira ainda não está instalada: os rulesets exigem PR, mas ainda não os checks; rode este script de novo depois da F5"
+fi
 ruleset() { # <nome> <padrão do ref>
   local id corpo
   corpo=$(json <<EOF
@@ -70,8 +79,7 @@ ruleset() { # <nome> <padrão do ref>
            {"type": "pull_request", "parameters": {"required_approving_review_count": 0,
              "dismiss_stale_reviews_on_push": false, "require_code_owner_review": false,
              "require_last_push_approval": false, "required_review_thread_resolution": false}},
-           {"type": "required_status_checks", "parameters": {"strict_required_status_checks_policy": false,
-             "required_status_checks": [{"context": "check"}, {"context": "regras"}, {"context": "seguranca"}]}}]}
+           $checks]}
 EOF
 )
   id=""

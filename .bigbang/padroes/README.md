@@ -56,28 +56,28 @@ para o arquivo. O teste `.bigbang/tests/test_padroes.py` confere que esta tabela
 | SEG-IA-04 | [seguranca.md](seguranca.md) | check que varre o pacote do front já construído; Gitleaks no PR e no histórico (job `seguranca`); bloqueio de push do GitHub. | `.bigbang/esteira/nucleo/scripts/seguranca.sh` |
 | SEG-IA-05 | [seguranca.md](seguranca.md) | teste que passa do limite e espera 429 (`TST-07`); `bb-revisor-pr`. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml`, `.bigbang/agents/revisor-pr.md` |
 | SEG-01 | [seguranca.md](seguranca.md) | validação do esquema do `bigbang.toml` por `bb verificar` e revisão humana (o `bigbang.toml` é zona sensível). | `.bigbang/bb/config.py`, `.bigbang/esteira/nucleo/scripts/regras-pr.sh` |
-| SEG-02 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e auditoria de segurança. | E8, `.bigbang/agents/revisor-pr.md` |
+| SEG-02 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e auditoria de segurança. | `.bigbang/agents/revisor-pr.md`, `.bigbang/skills/bb-auditar-seguranca/SKILL.md` |
 | SEG-03 | [seguranca.md](seguranca.md) | `bb-revisor-pr`; regras do Opengrep no job `seguranca`. | `.bigbang/agents/revisor-pr.md`, `.bigbang/esteira/nucleo/scripts/seguranca.sh` |
 | SEG-04 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e teste de aceite da regra. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml`, `.bigbang/agents/revisor-pr.md` |
-| SEG-05 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e auditoria de segurança. | E8, `.bigbang/agents/revisor-pr.md` |
+| SEG-05 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e auditoria de segurança. | `.bigbang/agents/revisor-pr.md`, `.bigbang/skills/bb-auditar-seguranca/SKILL.md` |
 | SEG-06 | [seguranca.md](seguranca.md) | `bb-revisor-pr`; teste de API das rotas protegidas (`SEG-IA-02`). | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml`, `.bigbang/agents/revisor-pr.md` |
 | SEG-07 | [seguranca.md](seguranca.md) | `bb-revisor-pr`; regras do Opengrep no job `seguranca`. | `.bigbang/agents/revisor-pr.md`, `.bigbang/esteira/nucleo/scripts/seguranca.sh` |
 | SEG-08 | [seguranca.md](seguranca.md) | Opengrep, Bandit (Python) e CodeQL no job `seguranca`. | `.bigbang/esteira/nucleo/scripts/seguranca.sh` |
 | SEG-09 | [seguranca.md](seguranca.md) | Opengrep e CodeQL no job `seguranca`; `bb-revisor-pr`. | `.bigbang/agents/revisor-pr.md`, `.bigbang/esteira/nucleo/scripts/seguranca.sh` |
 | SEG-10 | [seguranca.md](seguranca.md) | varredura ZAP no staging e `bb-revisor-pr`. | E9, `.bigbang/agents/revisor-pr.md` |
 | SEG-11 | [seguranca.md](seguranca.md) | `bb checklist producao` e `bb-revisor-pr`. | `.bigbang/agents/revisor-pr.md`, `.bigbang/bb/checklist.py` |
-| SEG-12 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e auditoria de segurança. | E8, `.bigbang/agents/revisor-pr.md` |
+| SEG-12 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e auditoria de segurança. | `.bigbang/agents/revisor-pr.md`, `.bigbang/skills/bb-auditar-seguranca/SKILL.md` |
 | SEG-13 | [seguranca.md](seguranca.md) | varredura ZAP no staging e `bb-revisor-pr`. | E9, `.bigbang/agents/revisor-pr.md` |
 | SEG-14 | [seguranca.md](seguranca.md) | `bb-revisor-pr`; regras do Opengrep no job `seguranca`. | `.bigbang/agents/revisor-pr.md`, `.bigbang/esteira/nucleo/scripts/seguranca.sh` |
 | SEG-15 | [seguranca.md](seguranca.md) | Gitleaks no job `seguranca`; `bb checklist producao` (README documenta variáveis sem valores). | `.bigbang/esteira/nucleo/scripts/seguranca.sh`, `.bigbang/bb/checklist.py` |
-| SEG-16 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e auditoria de segurança. | E8, `.bigbang/agents/revisor-pr.md` |
+| SEG-16 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e auditoria de segurança. | `.bigbang/agents/revisor-pr.md`, `.bigbang/skills/bb-auditar-seguranca/SKILL.md` |
 | SEG-17 | [seguranca.md](seguranca.md) | OSV-Scanner no job `seguranca`; Dependabot. | `.bigbang/esteira/nucleo/scripts/seguranca.sh` |
 | SEG-18 | [seguranca.md](seguranca.md) | `bb verificar` (regras dos workflows) no job `check`. | `.bigbang/bb/workflow_rules.py`, `.bigbang/bb/verify.py`, `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml` |
 | SEG-19 | [seguranca.md](seguranca.md) | Trivy no workflow da candidata (perfil deploy). | E9 |
 | SEG-20 | [seguranca.md](seguranca.md) | checklist da tarefa de documentação; revisão humana em zona sensível. | `.bigbang/esteira/nucleo/scripts/regras-pr.sh`, `.bigbang/esteira/nucleo/scripts/iniciar-sprint.sh` |
 | SEG-21 | [seguranca.md](seguranca.md) | revisão humana (zona sensível) e testes de cenário (`TST-08`). | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml`, `.bigbang/esteira/nucleo/scripts/regras-pr.sh` |
-| SEG-22 | [seguranca.md](seguranca.md) | regra no `AGENTS.md`; `bb-triar-issue`; `bb-revisor-pr` (texto do PR que tenta mudar a revisão é achado). | E8, `.bigbang/AGENTS.base.md`, `.bigbang/agents/revisor-pr.md` |
-| SEG-23 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e auditoria de segurança. | E8, `.bigbang/agents/revisor-pr.md` |
+| SEG-22 | [seguranca.md](seguranca.md) | regra no `AGENTS.md`; `bb-triar-issue`; `bb-revisor-pr` (texto do PR que tenta mudar a revisão é achado). | `.bigbang/AGENTS.base.md`, `.bigbang/agents/revisor-pr.md`, `.bigbang/skills/bb-triar-issue/SKILL.md` |
+| SEG-23 | [seguranca.md](seguranca.md) | `bb-revisor-pr` e auditoria de segurança. | `.bigbang/agents/revisor-pr.md`, `.bigbang/skills/bb-auditar-seguranca/SKILL.md` |
 | SEG-24 | [seguranca.md](seguranca.md) | portão do *Iniciar sprint* (Definition of Ready) e revisão humana do refinamento. | `.bigbang/esteira/nucleo/scripts/regras-pr.sh`, `.bigbang/esteira/nucleo/scripts/iniciar-sprint.sh` |
 | COD-01 | [codigo.md](codigo.md) | item do `bb-revisor-pr`. | `.bigbang/agents/revisor-pr.md` |
 | COD-02 | [codigo.md](codigo.md) | item do `bb-revisor-pr` e lint. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml`, `.bigbang/agents/revisor-pr.md` |
@@ -97,7 +97,7 @@ para o arquivo. O teste `.bigbang/tests/test_padroes.py` confere que esta tabela
 | TST-03 | [testes.md](testes.md) | fluxo do épico (as tarefas esperam o teste) e check `regras` (regressão). | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml`, `.bigbang/esteira/nucleo/scripts/regras-pr.sh`, `.bigbang/esteira/nucleo/scripts/iniciar-sprint.sh`, `.bigbang/esteira/nucleo/scripts/regressao.sh` |
 | TST-04 | [testes.md](testes.md) | item do `bb-revisor-pr`. | `.bigbang/agents/revisor-pr.md` |
 | TST-05 | [testes.md](testes.md) | comando `cobertura` no job `check`. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml` |
-| TST-06 | [testes.md](testes.md) | item do `bb-revisor-pr` e auditoria de segurança. | E8, `.bigbang/agents/revisor-pr.md` |
+| TST-06 | [testes.md](testes.md) | item do `bb-revisor-pr` e auditoria de segurança. | `.bigbang/agents/revisor-pr.md`, `.bigbang/skills/bb-auditar-seguranca/SKILL.md` |
 | TST-07 | [testes.md](testes.md) | item do `bb-revisor-pr` e `bb checklist producao`. | `.bigbang/agents/revisor-pr.md`, `.bigbang/bb/checklist.py` |
 | TST-08 | [testes.md](testes.md) | revisão humana (zona sensível) e item do `bb-revisor-pr`. | `.bigbang/esteira/nucleo/scripts/regras-pr.sh`, `.bigbang/agents/revisor-pr.md` |
 | TST-09 | [testes.md](testes.md) | comando `arquitetura` no job `check`. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml` |
@@ -115,7 +115,7 @@ para o arquivo. O teste `.bigbang/tests/test_padroes.py` confere que esta tabela
 | DOC-09 | [documentacao.md](documentacao.md) | checklist da tarefa de documentação. | `.bigbang/esteira/nucleo/scripts/iniciar-sprint.sh` |
 | DOC-10 | [documentacao.md](documentacao.md) | checklist da tarefa de documentação. | `.bigbang/esteira/nucleo/scripts/iniciar-sprint.sh` |
 | DOC-11 | [documentacao.md](documentacao.md) | checklist da tarefa de documentação. | `.bigbang/esteira/nucleo/scripts/iniciar-sprint.sh` |
-| DOC-12 | [documentacao.md](documentacao.md) | item do `bb-revisor-pr` e `bb-retrospectiva`. | E8, `.bigbang/agents/revisor-pr.md` |
+| DOC-12 | [documentacao.md](documentacao.md) | item do `bb-revisor-pr` e `bb-retrospectiva`. | `.bigbang/agents/revisor-pr.md`, `.bigbang/skills/bb-retrospectiva/SKILL.md` |
 | DOC-13 | [documentacao.md](documentacao.md) | *Iniciar sprint* cria a issue; *Integrar release* exige a tarefa concluída. | `.bigbang/esteira/nucleo/scripts/iniciar-sprint.sh`, `.bigbang/esteira/nucleo/scripts/integrar-release.sh` |
 | DOC-14 | [documentacao.md](documentacao.md) | checagem de Markdown e links no job `check` da CI. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml` |
 | API-01 | [api.md](api.md) | item do `bb-revisor-pr` e teste de contrato. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml`, `.bigbang/agents/revisor-pr.md` |
@@ -139,7 +139,7 @@ para o arquivo. O teste `.bigbang/tests/test_padroes.py` confere que esta tabela
 | FE-02 | [frontend.md](frontend.md) | lint da stack (`no-alert` ou equivalente) no job `check`. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml` |
 | FE-03 | [frontend.md](frontend.md) | teste ponta a ponta em 360 px nos fluxos principais e item do `bb-revisor-pr`. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml`, `.bigbang/agents/revisor-pr.md` |
 | FE-04 | [frontend.md](frontend.md) | verificador automático (por exemplo axe) no job `check`. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml` |
-| FE-05 | [frontend.md](frontend.md) | item do `bb-revisor-pr` e protótipo aprovado. | E8, `.bigbang/agents/revisor-pr.md` |
+| FE-05 | [frontend.md](frontend.md) | item do `bb-revisor-pr` e protótipo aprovado. | `.bigbang/agents/revisor-pr.md`, `.bigbang/skills/bb-prototipar/SKILL.md` |
 | FE-06 | [frontend.md](frontend.md) | item do `bb-revisor-pr`. | `.bigbang/agents/revisor-pr.md` |
 | FE-07 | [frontend.md](frontend.md) | varredura de segredo no pacote do front (job `seguranca`). | `.bigbang/esteira/nucleo/scripts/seguranca.sh` |
 | FE-08 | [frontend.md](frontend.md) | item do `bb-revisor-pr` e `bb checklist producao`. | `.bigbang/agents/revisor-pr.md`, `.bigbang/bb/checklist.py` |
@@ -150,4 +150,4 @@ para o arquivo. O teste `.bigbang/tests/test_padroes.py` confere que esta tabela
 | OBS-03 | [observabilidade.md](observabilidade.md) | item do `bb-revisor-pr` e revisão do runbook de operação. | E9, `.bigbang/agents/revisor-pr.md` |
 | OBS-04 | [observabilidade.md](observabilidade.md) | operação `saude` do alvo, chamada pela publicação em produção e pela candidata. | E9 |
 | OBS-05 | [observabilidade.md](observabilidade.md) | item do `bb-revisor-pr`. | `.bigbang/agents/revisor-pr.md` |
-| OBS-06 | [observabilidade.md](observabilidade.md) | item do `bb-revisor-pr` e auditoria de segurança. | E8, `.bigbang/agents/revisor-pr.md` |
+| OBS-06 | [observabilidade.md](observabilidade.md) | item do `bb-revisor-pr` e auditoria de segurança. | `.bigbang/agents/revisor-pr.md`, `.bigbang/skills/bb-auditar-seguranca/SKILL.md` |

@@ -2,7 +2,7 @@
 name: bb-gerar
 description: Use em F5 ou quando bigbang.toml mudar ou o framework for atualizado, para simular, gerar e verificar a camada gerada e abrir PR com revisão humana.
 ---
-<!-- Gerado pelo Big Bang v0.7.0 a partir de .bigbang/skills/bb-gerar/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v0.8.0 a partir de .bigbang/skills/bb-gerar/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Gerar a camada do Big Bang
 
@@ -21,6 +21,7 @@ Confira branch e alterações existentes; preserve arquivos e alterações do pr
    Sem configuração fundada, não instale esteira. Mostre inclusões, alterações e remoções previstas.
 2. Resolva configuração inválida pela decisão do dono, nunca alterando framework/arquivo gerado para esconder o erro.
 3. Rode `bb gerar --esteira` só na primeira instalação de F5; depois, `bb gerar`. Rode `bb verificar` e comandos da stack.
+   Depois do merge da F5, rode de novo `.bigbang/scripts/configurar-repositorio.sh` para os rulesets exigirem os checks.
 4. Revise que só a camada gerada mudou e que skills sem prefixo bb-, documentos e código do projeto foram preservados.
 5. Abra PR para develop com `revisao-humana`, diff e evidências; peça revisão. Em F5, continue Esqueleto andante pela
    `bb-rodar-sprint`; gerar arquivos não encerra a Fundação.
