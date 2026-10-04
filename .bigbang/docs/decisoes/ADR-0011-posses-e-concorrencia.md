@@ -24,8 +24,9 @@ Labels e comentários precisam coordenar a disputa, a liberação e a retomada d
 - O Kanban acrescenta um comentário de atividade por push, com UUID da sessão e horário do servidor do GitHub.
   A telemetria é somente acrescentada: um push concorrente com a liberação não reabre o comentário de posse.
   A data do commit não indica quando ele foi enviado.
-- O cron marca `parada` depois do prazo configurado, conferindo a sessão novamente antes da alteração. A label é
-  informativa; `--forcar` recalcula a inatividade e exige a frase do dono antes de registrar a retomada.
+- O cron marca `parada` depois do prazo configurado, conferindo a sessão antes e depois da alteração; também
+  retira uma marca antiga se a sessão já recebeu push. A label é informativa; `--forcar` exige a frase do dono e
+  recalcula a inatividade após registrar a ordem, recusando a retomada se a sessão mudou ou recebeu push.
 - `bb status` e Ver painéis só leem. Alertam sobre posses, flags e segurança; a criação da tarefa de limpeza da flag
   continua sendo responsabilidade da IA. Datas/estados inválidos em `flags.toml` reprovam a leitura.
 - O registro de flags tem criação e expiração, sem data de ativação. O alerta de flag antiga em produção usa a criação

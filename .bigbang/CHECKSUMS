@@ -41,7 +41,7 @@ d50dce8f60cfc0752162842dc6e6397274d33e0a044098194e2e33621002f36a  docs/decisoes/
 c64e39dd9bd308712532987e23774e1035de317e95b91d7f834e46eebce355d4  docs/decisoes/ADR-0008-esteira-bash-e-bb.md
 4380b8108d25a2e288895603e37948a664db76ce9761d42fe8b32d4b138e9784  docs/decisoes/ADR-0009-perfil-compilado.md
 13256aca25888f153dcc263cc85c4b4a1ae974b4ab8aa0f0da984f5fc450bc88  docs/decisoes/ADR-0010-portoes-de-teste-revisao-e-seguranca.md
-e0bd18c3ccd386004e78e9e8ddd91b82b6b8f81cde0086d0f4df6add073e913d  docs/decisoes/ADR-0011-posses-e-concorrencia.md
+fc2970063baf3aec81997328ada8c045da382bb44cc4df82ada509e9f0c76466  docs/decisoes/ADR-0011-posses-e-concorrencia.md
 ea59f0fd56b4464db02f984bdb9fdad9eb67484953c678b3630dfe9ee9310802  docs/decisoes/README.md
 e94e70cfeb753b14dc45887b590fc0b7136583d4d3d73e42b1f7dfd94c721dce  esteira/nucleo/README.md
 34ab41c900e502b5e964c35d01fb97ca64f29b11c4c3c29e2bff3a6d718f2470  esteira/nucleo/arquivos/.github/dependabot.yml.tmpl
