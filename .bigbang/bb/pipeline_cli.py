@@ -98,6 +98,13 @@ def register(commands, parser_class):
     p.add_argument("--dados", help="pasta com o conteúdo a examinar (padrão: a raiz)")
     p.set_defaults(handler=_stack_guard)
 
+    sub.add_parser("osv-avaliar", help="relatório JSON do OSV-Scanner (entrada padrão): reprova alta e crítica"
+                   ).set_defaults(handler=_osv)
+
+    p = sub.add_parser("rls", help="tabelas sem RLS nas migrações (quando banco_no_navegador = true)")
+    p.add_argument("--pasta", default="migrations")
+    p.set_defaults(handler=_rls)
+
     p = sub.add_parser("gravar-versao", help="grava a versão no arquivo de versão da stack (entrega.arquivo_versao)")
     p.add_argument("versao")
     p.set_defaults(handler=_write_version)
@@ -248,6 +255,26 @@ def _traceability(args):
 def _stack_guard(args):
     return _report(stack_guard.problems(args.dados or args.raiz),
                    "Guarda da stack: todas as dependências de execução estão aprovadas no STACK.md.")
+
+
+def _osv(args):
+    import json
+    text = _stdin().strip()
+    findings = pipeline.osv_high_findings(json.loads(text) if text else {})
+    return _report(findings, "OSV-Scanner: nenhuma vulnerabilidade alta ou crítica.")
+
+
+def _rls(args):
+    if not config_module.load(args.raiz)["seguranca"]["banco_no_navegador"]:
+        print("banco_no_navegador = false: o navegador não acessa o banco (SEG-IA-01); nada a conferir.")
+        return EXIT_OK
+    folder = os.path.join(args.raiz, args.pasta)
+    texts = []
+    for current, _, names in os.walk(folder):
+        texts += [read_text(os.path.join(current, n)) for n in sorted(names) if n.endswith(".sql")]
+    missing = pipeline.tables_without_rls(texts)
+    return _report([f"tabela {t} sem ROW LEVEL SECURITY (SEG-IA-01)" for t in missing],
+                   "Todas as tabelas das migrações têm RLS ligada.")
 
 
 def _docs(args):

@@ -20,7 +20,7 @@ fi
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 R="${GITHUB_REPOSITORY:?}"; SIMULAR="${SIMULAR:-false}"
 read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
-read -r -a CHECKS <<<"${CHECKS_OBRIGATORIOS:-check regras}"
+read -r -a CHECKS <<<"${CHECKS_OBRIGATORIOS:-check regras seguranca}"
 v="${VERSAO:?informe a versão (x.y.z)}"; v="${v#v}"; tag="v$v"; branch="release/$v"
 [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::versão '$v' inválida"; exit 2; }
 perfil=$("${BB_CMD[@]}" config get entrega.perfil)

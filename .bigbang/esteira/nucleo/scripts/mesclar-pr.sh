@@ -19,7 +19,7 @@ fi
 
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 R="${GITHUB_REPOSITORY:?}"; PR="${PR_NUMBER:?}"; SIMULAR="${SIMULAR:-false}"
-read -r -a CHECKS <<<"${CHECKS_OBRIGATORIOS:-check regras}"
+read -r -a CHECKS <<<"${CHECKS_OBRIGATORIOS:-check regras seguranca}"
 tem() { [[ ",$1," == *",$2,"* ]]; }
 espera() { echo "PR #$PR não será mesclado agora: $1"; exit 0; }
 

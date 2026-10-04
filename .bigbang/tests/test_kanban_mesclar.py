@@ -107,7 +107,8 @@ class Kanban(ComBb):
 
 class Mesclar(ComBb):
     VERDE = [{"name": "check", "status": "completed", "conclusion": "success"},
-             {"name": "regras", "status": "completed", "conclusion": "success"}]
+             {"name": "regras", "status": "completed", "conclusion": "success"},
+             {"name": "seguranca", "status": "completed", "conclusion": "success"}]
 
     def pr(self, numero=30, head="feature/12-tarefa", base="epico/7-estoque", labels=("pr-aprovado",),
            checks=None, sha="abc"):
