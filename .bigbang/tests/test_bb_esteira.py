@@ -61,6 +61,13 @@ class Formulario(unittest.TestCase):
         self.assertEqual(p.dependencies(epico(**{p.FIELD_DEPENDS: "#12 e #15"})), [12, 15])
 
 
+class Bug(unittest.TestCase):
+    def test_severidade(self):
+        self.assertEqual(p.severity_label("### Severidade\n\ncrítica"), "severidade:critica")
+        self.assertEqual(p.severity_label("### Severidade\n\nMédia"), "severidade:media")
+        self.assertIsNone(p.severity_label("### Observado\n\nx"))
+
+
 class DefinitionOfReady(unittest.TestCase):
     def test_epico_pronto(self):
         self.assertEqual(p.readiness_problems(epico(), PRONTO), [])
