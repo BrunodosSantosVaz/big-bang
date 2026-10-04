@@ -34,7 +34,7 @@ for extra in "$baixado"/*; do
 done
 (cd "$pub" && for soma in SHA256SUMS-*.txt; do sha256sum -c "$soma" >/dev/null; done)
 
-git show "$alvo:CHANGELOG.md" 2>/dev/null | awk -v v="$v" '
+{ git show "$alvo:CHANGELOG.md" 2>/dev/null || true; } | awk -v v="$v" '
   index($0, "## [" v "]") == 1 { dentro = 1; next }
   dentro && /^## \[/ { exit }
   dentro { print }' > "$tmp/notas.md"

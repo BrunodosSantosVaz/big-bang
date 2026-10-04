@@ -1,0 +1,153 @@
+# Candidata do perfil deploy (spec 14.4): a cada push em release/**, testes, imagem construída UMA vez e publicada
+# por digest, Trivy, staging (migração, publicação, saúde, smoke e ZAP), pre-release vX.Y.Z-rc.N com o digest
+# (imagem.txt), SBOM e atestado, e então épico ou bug em Homologação com o PR release -> main.
+name: Candidata
+
+on:
+  push:
+    branches: ['release/**']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-candidata-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  preparar:
+    runs-on: ubuntu-24.04
+    outputs:
+      pular: ${{ steps.v.outputs.pular }}
+      tag: ${{ steps.v.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Versão e número da candidata
+        id: v
+        run: bash .bigbang/esteira/nucleo/scripts/candidata-preparar.sh
+
+  imagem:
+    needs: preparar
+    if: ${{ needs.preparar.outputs.pular != 'true' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      imagem: ${{ steps.i.outputs.imagem }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - run: bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
+      - run: bash .bigbang/esteira/nucleo/scripts/comando.sh testes
+      - run: bash .bigbang/esteira/nucleo/scripts/comando.sh testes_aceite
+      - name: Entrar no GHCR
+        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Imagem (uma vez, por digest) e Trivy
+        id: i
+        run: bash .bigbang/esteira/perfis/deploy/scripts/candidata-imagem.sh
+        env:
+          TAG: ${{ needs.preparar.outputs.tag }}
+
+  staging:
+    needs: [preparar, imagem]
+    runs-on: ubuntu-24.04
+    environment: staging
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Staging pelo alvo {{entrega.alvo}} (migração, publicação, saúde, smoke, ZAP)
+        run: bash .bigbang/esteira/perfis/deploy/scripts/staging.sh
+        env:
+          IMAGEM: ${{ needs.imagem.outputs.imagem }}
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_PORTA: ${{ vars.VPS_PORTA }}
+          VPS_USUARIO: ${{ vars.VPS_USUARIO }}
+          VPS_PASTA: ${{ vars.VPS_PASTA }}
+          VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
+          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
+          REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+
+  publicar:
+    needs: [preparar, imagem, staging]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Registro da imagem
+        run: mkdir -p candidata && printf '%s\n' "$IMAGEM" > candidata/imagem.txt
+        env:
+          IMAGEM: ${{ needs.imagem.outputs.imagem }}
+      - name: SBOM (CycloneDX) da imagem
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          image: ${{ needs.imagem.outputs.imagem }}
+          format: cyclonedx-json
+          output-file: candidata/sbom-cyclonedx.json
+          upload-artifact: false
+          upload-release-assets: false
+      - name: Entrar no GHCR
+        if: ${{ github.event.repository.visibility == 'public' }}
+        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+        env:
+          GH_TOKEN: ${{ github.token }}
+      # Atestados de procedência: grátis em repositório público; em privado exigem GitHub Enterprise Cloud.
+      - name: Atestado de procedência da imagem
+        if: ${{ github.event.repository.visibility == 'public' }}
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ needs.imagem.outputs.imagem }}
+          push-to-registry: true
+      - name: Pre-release com o digest
+        run: bash .bigbang/esteira/perfis/deploy/scripts/candidata-publicar.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.preparar.outputs.tag }}
+          IMAGEM: ${{ needs.imagem.outputs.imagem }}
+
+  homologar:
+    needs: [preparar, publicar]
+    if: ${{ vars.PROJETO_OWNER != '' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Épico em Homologação e PR da release
+        run: bash .bigbang/esteira/nucleo/scripts/homologar.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+          RC_TAG: ${{ needs.preparar.outputs.tag }}
+          PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
+          PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
+          PROJETO_BUGS: ${{ vars.PROJETO_BUGS }}

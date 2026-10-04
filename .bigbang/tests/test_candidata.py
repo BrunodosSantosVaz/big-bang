@@ -5,7 +5,7 @@ import sys
 import unittest
 
 from _raiz import BIGBANG
-from _scripts import CasoDeScript
+from _scripts import SCRIPTS, CasoDeScript
 from test_integrar_publicar import ComGit
 
 BB = os.path.join(BIGBANG, "bin", "bb.py")
@@ -28,7 +28,8 @@ class BaseCompilado(ComGit):
         self.git("push", "-q", "origin", "main:develop")
 
     def compilado(self, script, **env):
-        return self.rodar(script, env={"BB": self.bb, **{k: str(v) for k, v in env.items()}}, pasta=COMPILADO,
+        pasta = SCRIPTS if script == "candidata-preparar.sh" else COMPILADO
+        return self.rodar(script, env={"BB": self.bb, **{k: str(v) for k, v in env.items()}}, pasta=pasta,
                           cwd=self.trabalho)
 
     def release(self, versao="0.2.0", changelog=True):

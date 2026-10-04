@@ -1,0 +1,17 @@
+# deploy/compose.yaml do projeto (perfil deploy, alvo vps-docker). Mantido pelo projeto; o alvo copia este arquivo
+# para o servidor a cada publicação. Nunca ponha segredo aqui: eles ficam no servidor (app.env), descritos no runbook.
+services:
+  app:
+    image: ${BB_IMAGEM}          # sempre um digest (imagem@sha256:…), escrito pelo alvo
+    restart: unless-stopped
+    env_file: [app.env]
+    ports: ["127.0.0.1:8080:8080"]   # atrás do proxy reverso com TLS
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/health"]
+      interval: 30s
+      retries: 3
+  migrar:
+    image: ${BB_IMAGEM}
+    env_file: [app.env]
+    command: ["<comando de migração da stack>"]
+    profiles: ["migrar"]          # só roda com `alvo.sh migrar`, antes da troca de versão
