@@ -73,6 +73,13 @@ resultado.
 - Repositório privado no plano gratuito tem limites de rulesets e de aprovação de ambiente; a Fundação explica a
   alternativa no momento, conferindo a documentação vigente.
 - Todas as IAs usam a conta do dono: o GitHub não distingue quem pôs uma label (veja [08-revisao.md](08-revisao.md)).
+- **Limites de requisições:** a API GraphQL (que os Projects usam) dá 5.000 pontos por hora por conta, divididos entre
+  todos os workflows que usam o `PROJETO_TOKEN` e a IA; os scripts guardam os ids dos painéis durante cada execução
+  para economizar. Há também um **limite secundário** para criar conteúdo em sequência (issues, PRs, comentários):
+  um *Iniciar sprint* com muitos épicos pode esbarrar nele. Os botões são idempotentes, então a solução é esperar
+  alguns minutos e rodar de novo.
+- O workflow embutido *Auto-add sub-issues to project* vem ligado em painel novo e puxaria as tarefas para o
+  Planejamento; a API não o desliga, só o apaga, e o `criar-paineis` apaga no Planejamento e em Bugs.
 
 ## O que a automação faz sozinha
 
