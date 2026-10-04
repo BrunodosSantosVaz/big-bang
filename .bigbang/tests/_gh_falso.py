@@ -303,6 +303,22 @@ def main():
             issue["milestone"] = flags["--milestone"][0]
         save(state)
         return None
+    if argv[:2] == ["release", "create"]:
+        tag = positional[2]
+        state.setdefault("releases", []).append(tag)
+        state.setdefault("release_assets", {})[tag] = [os.path.basename(f) for f in positional[3:]]
+        state.setdefault("release_info", {})[tag] = {"prerelease": "--prerelease" in argv,
+                                                     "latest": "--latest" in argv,
+                                                     "target": (flags.get("--target") or [""])[0]}
+        save(state)
+        return None
+    if argv[:2] == ["pr", "create"]:
+        number = str(max([int(n) for n in state.get("prs", {})] + [400]) + 1)
+        state.setdefault("prs", {})[number] = {"head": flags["--head"][0], "base": flags["--base"][0],
+                                               "title": flags["--title"][0], "state": "OPEN", "labels": []}
+        save(state)
+        print(f"https://github.com/{REPO}/pull/{number}")
+        return None
     if argv[:2] == ["release", "view"]:
         if positional[2] not in state.get("releases", []):
             sys.stderr.write("release not found\n")

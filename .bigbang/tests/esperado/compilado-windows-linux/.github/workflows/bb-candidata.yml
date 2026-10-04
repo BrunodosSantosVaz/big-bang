@@ -1,0 +1,145 @@
+# Gerado pelo Big Bang v0.4.0 a partir de .bigbang/esteira/perfis/compilado/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Candidata do perfil compilado (spec 14.3): a cada push em release/**, testes, build de cada sistema (matriz) e,
+# só se TODOS compilarem, a pre-release vX.Y.Z-rc.N com binários, SHA256SUMS, SBOM e atestado de procedência.
+# Depois: épico ou bug em Homologação e PR release -> main. Nada é commitado aqui (o Git guarda só código).
+name: Candidata
+
+on:
+  push:
+    branches: ['release/**']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-candidata-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  preparar:
+    runs-on: ubuntu-24.04
+    outputs:
+      pular: ${{ steps.v.outputs.pular }}
+      versao: ${{ steps.v.outputs.versao }}
+      rc: ${{ steps.v.outputs.rc }}
+      tag: ${{ steps.v.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Versão e número da candidata
+        id: v
+        run: bash .bigbang/esteira/perfis/compilado/scripts/candidata-preparar.sh
+
+  testes:
+    needs: preparar
+    if: ${{ needs.preparar.outputs.pular != 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - run: bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
+      - run: bash .bigbang/esteira/nucleo/scripts/comando.sh testes
+      - run: bash .bigbang/esteira/nucleo/scripts/comando.sh testes_aceite
+
+  build:
+    needs: [preparar, testes]
+    strategy:
+      fail-fast: false
+      matrix:
+        include: [{"sistema": "windows-x64", "runner": "windows-2025"}, {"sistema": "linux-x64", "runner": "ubuntu-24.04"}]
+    runs-on: ${{ matrix.runner }}
+    name: build (${{ matrix.sistema }})
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Instalar
+        shell: bash
+        run: bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
+        env:
+          BB: python .bigbang/bin/bb.py
+      - name: Compilar
+        shell: bash
+        run: bash .bigbang/esteira/perfis/compilado/scripts/candidata-build.sh
+        env:
+          BB: python .bigbang/bin/bb.py
+          BB_SISTEMA: ${{ matrix.sistema }}
+          BB_VERSAO: ${{ needs.preparar.outputs.versao }}
+          BB_RC: ${{ needs.preparar.outputs.rc }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: candidata-${{ matrix.sistema }}
+          path: candidata/
+          retention-days: 7
+
+  publicar:
+    needs: [preparar, build]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: candidata
+          pattern: candidata-*
+          merge-multiple: true
+      - name: SBOM (CycloneDX)
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: candidata/sbom-cyclonedx.json
+          upload-artifact: false
+          upload-release-assets: false
+      # Atestados de procedência: grátis em repositório público; em privado exigem GitHub Enterprise Cloud.
+      - name: Atestado de procedência
+        if: ${{ github.event.repository.visibility == 'public' }}
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: 'candidata/*'
+      - name: Pre-release
+        run: bash .bigbang/esteira/perfis/compilado/scripts/candidata-publicar.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.preparar.outputs.tag }}
+
+  homologar:
+    needs: [preparar, publicar]
+    if: ${{ vars.PROJETO_OWNER != '' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Épico em Homologação e PR da release
+        run: bash .bigbang/esteira/nucleo/scripts/homologar.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+          RC_TAG: ${{ needs.preparar.outputs.tag }}
+          PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
+          PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
+          PROJETO_BUGS: ${{ vars.PROJETO_BUGS }}

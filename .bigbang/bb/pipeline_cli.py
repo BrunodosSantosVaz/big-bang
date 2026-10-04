@@ -70,6 +70,15 @@ def register(commands, parser_class):
     p.add_argument("issue", type=int)
     p.set_defaults(handler=_only_release)
 
+    p = sub.add_parser("nome-candidata", help="nome do binário na candidata (slug, versão, rc, sistema, arquivo)")
+    for nome in ("versao", "rc", "sistema", "arquivo"):
+        p.add_argument(nome)
+    p.set_defaults(handler=_candidate_name)
+
+    p = sub.add_parser("nome-producao", help="nome do binário em produção (tira o -rc.N)")
+    p.add_argument("arquivo")
+    p.set_defaults(handler=lambda args: print(pipeline.promoted_name(args.arquivo)) or EXIT_OK)
+
     p = sub.add_parser("gravar-versao", help="grava a versão no arquivo de versão da stack (entrega.arquivo_versao)")
     p.add_argument("versao")
     p.set_defaults(handler=_write_version)
@@ -179,6 +188,12 @@ def _sensitive(args):
 def _only_release(args):
     marker = config_module.load(args.raiz)["testes"]["marca_pendente"]
     return EXIT_OK if pipeline.only_own_marks_released(_stdin(), args.issue, marker) else EXIT_VERIFICATION_FAILED
+
+
+def _candidate_name(args):
+    slug = config_module.load(args.raiz)["projeto"]["slug"]
+    print(pipeline.candidate_asset_name(slug, args.versao, args.rc, args.sistema, args.arquivo))
+    return EXIT_OK
 
 
 def _docs(args):

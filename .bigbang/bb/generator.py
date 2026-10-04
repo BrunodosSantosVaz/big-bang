@@ -14,6 +14,7 @@ import re
 import tomllib
 
 from . import config as config_module
+from . import pipeline
 from .errors import EXIT_INVALID_STATE, BbError
 from .paths import framework_dir, framework_version, read_text, to_posix, write_text
 from .render import TEMPLATE_SUFFIX, add_notice, has_notice, notice_text, substitute
@@ -80,7 +81,9 @@ def dependabot_entries(ecosystems):
 def with_computed(config):
     """Config plus `gerado.*`: values computed in code, so templates stay free of conditional logic."""
     context = dict(config)
-    context["gerado"] = {"dependabot": dependabot_entries(config["entrega"].get("ecossistemas", []))}
+    systems = config.get("compilado", {}).get("sistemas", []) if config["entrega"]["perfil"] == "compilado" else []
+    context["gerado"] = {"dependabot": dependabot_entries(config["entrega"].get("ecossistemas", [])),
+                         "matriz_compilado": pipeline.build_matrix(systems)}
     return context
 
 
