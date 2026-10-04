@@ -4,6 +4,18 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [0.11.3] - 2026-10-04
+
+### O que muda
+
+- `comando.sh` (CI): enquanto nenhum caminho de `entrega.caminhos_artefato` existe no repositório, os comandos da
+  stack são pulados com aviso. O PR da F5 instala a esteira sem código do artefato, que chega pelo épico Esqueleto
+  andante (invariante 11.5).
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [0.11.2] - 2026-10-04
 
 ### O que muda

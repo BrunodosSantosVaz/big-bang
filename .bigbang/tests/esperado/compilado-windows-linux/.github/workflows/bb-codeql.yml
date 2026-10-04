@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v0.11.2 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-codeql.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v0.11.3 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-codeql.yml. Não edite: personalize em bigbang.toml.
 # CodeQL (spec 14.2): análise estática do GitHub, com as linguagens detectadas no repositório. Grátis em repositório
 # público; em privado exige GitHub Advanced Security (o job é pulado e a Fundação explica a alternativa).
 name: CodeQL
