@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v0.9.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v0.10.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl. Não edite: personalize em bigbang.toml.
 # Botão "Publicar em produção" (spec 11.6, passo 10). "conferir" roda sempre (portão e plano, nada muda);
 # "publicar" só com simular=false e depois que o dono aprova o ambiente "producao" — o único "ok" que ele não delega.
 name: Publicar em produção

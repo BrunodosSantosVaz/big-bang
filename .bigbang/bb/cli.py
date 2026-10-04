@@ -3,7 +3,7 @@ import argparse
 import sys
 
 from . import config as config_module
-from . import acceptance, checklist, checksums, decisions, generator, ownership, status, verify, workspaces
+from . import acceptance, checklist, checksums, decisions, generator, ownership, package, status, update, verify, workspaces
 from . import init as init_module
 from . import pipeline_cli
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
@@ -94,6 +94,20 @@ def build_parser():
     producao_parser.set_defaults(handler=_checklist_producao)
 
     pipeline_cli.register(commands, _Parser)
+
+    atualizar_parser = commands.add_parser("atualizar", help="atualiza o framework numa branch framework/vX.Y.Z (PR)")
+    atualizar_parser.add_argument("versao", nargs="?", help="versão alvo X.Y.Z (padrão: a última da origem)")
+    atualizar_parser.add_argument("--simular", action="store_true", help="baixa, confere e mostra a migração; não grava")
+    atualizar_parser.add_argument("--confirmo-migracao", action="store_true",
+                                  help="o dono confirmou os passos manuais do MIGRACAO.md")
+    atualizar_parser.add_argument("--sem-atestacao", action="store_true",
+                                  help="só para origem sem atestação (fork privado); confere apenas o SHA-256")
+    atualizar_parser.set_defaults(handler=_atualizar)
+
+    pacote_parser = commands.add_parser("pacote", help="empacota .bigbang/ para a release do framework (manutenção)")
+    pacote_parser.add_argument("--saida", default="dist")
+    pacote_parser.add_argument("--notas", default=None, help="grava as notas da versão (MIGRACAO.md) neste arquivo")
+    pacote_parser.set_defaults(handler=_pacote)
 
     checksums_parser = commands.add_parser("checksums", help="confere ou grava .bigbang/CHECKSUMS (manutenção)")
     checksums_parser.add_argument("--escrever", action="store_true", help="grava o CHECKSUMS com o estado atual")
@@ -222,6 +236,24 @@ def _verificar(args):
             print(f"  - {problem}", file=sys.stderr)
         return EXIT_VERIFICATION_FAILED
     print("bb verificar: tudo certo.")
+    return EXIT_OK
+
+
+def _atualizar(args):
+    update.check_args(args.versao)
+    update.update(args.raiz, args.versao, simulate=args.simular, confirmed=args.confirmo_migracao,
+                  attestation=not args.sem_atestacao)
+    return EXIT_OK
+
+
+def _pacote(args):
+    import os
+    from .paths import framework_version, write_text
+    target, digest = package.build(args.raiz, os.path.join(args.raiz, args.saida) if not os.path.isabs(args.saida)
+                                   else args.saida)
+    if args.notas:
+        write_text(args.notas, package.release_notes(args.raiz, framework_version(args.raiz)) + "\n")
+    print(f"{target}\n{digest}")
     return EXIT_OK
 
 
