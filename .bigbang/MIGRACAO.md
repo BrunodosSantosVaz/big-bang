@@ -4,6 +4,17 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [0.10.1] - 2026-10-04
+
+### O que muda
+
+- O passo de quem vem de uma versão anterior à 0.10.0 saiu de "O que o projeto precisa fazer": o `bb atualizar`
+  o lia como passo manual e parava pedindo confirmação.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [0.10.0] - 2026-10-04
 
 ### O que muda
@@ -13,8 +24,12 @@ Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando 
 
 ### O que o projeto precisa fazer
 
-Nada. Vindo de uma versão anterior à 0.10.0 (que ainda não tem `bb atualizar`), rode uma vez o `bb` do pacote novo,
-na raiz do sistema, com a árvore limpa:
+Nada.
+
+### Vindo de uma versão anterior à 0.10.0
+
+Essas versões ainda não têm `bb atualizar`. Rode uma vez o `bb` do pacote novo, na raiz do sistema, com a árvore
+limpa (troque `0.10.0` pela versão desejada; daí em diante, use só `bb atualizar`):
 
 ```bash
 gh release download v0.10.0 --repo BrunodosSantosVaz/big-bang --pattern 'bigbang-v0.10.0.tar.gz*' --dir /tmp/bb
