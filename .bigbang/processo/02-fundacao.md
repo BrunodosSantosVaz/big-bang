@@ -95,7 +95,9 @@ concluídas.
 ### F5 · Esteira e esqueleto andante
 
 `bb gerar` monta `.github/`, `.agents/skills/`, `.claude/` e os blocos marcados a partir do framework e do
-`bigbang.toml` (removendo os workflows `bb-framework-*`). Todos os botões rodam primeiro com `simular=true`. Em
+`bigbang.toml` (removendo os workflows `bb-framework-*`). O PR da F5 instala só a esteira e documentos: nenhum código do
+artefato entra na `develop` por ele (invariante da seção 11.5). Enquanto nenhum caminho do artefato existe, a CI pula
+os comandos da stack com aviso. Todos os botões rodam primeiro com `simular=true`. Em
 seguida, um épico de verdade, "Esqueleto andante", segue o fluxo normal: estrutura de camadas da stack, health check,
 teste de arquitetura, a primeira regra de negócio com seu teste de aceite, e publicação em produção — incluindo um
 *Voltar versão* de teste no perfil deploy. **A Fundação só termina quando esse ciclo fecha.**

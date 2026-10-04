@@ -221,6 +221,11 @@ class ComandoSh(CasoDeScript):
         with open(os.path.join(projeto, "bigbang.toml"), "w", encoding="utf-8") as arquivo:
             arquivo.write(toml)
         env = {"BB": f"{sys.executable} {BB} --raiz {projeto}"}
+        # no artifact path yet (Foundation F5, before the walking skeleton): every command is skipped
+        sem_artefato = self.rodar("comando.sh", "build", env=env)
+        self.assertEqual(sem_artefato.returncode, 0, sem_artefato.stdout + sem_artefato.stderr)
+        self.assertIn("nenhum caminho do artefato", sem_artefato.stdout)
+        os.makedirs(os.path.join(self.pasta, "src"))  # first artifact path: the commands run from now on
         r = self.rodar("comando.sh", "lint", env=env)
         self.assertIn("lint-ok", r.stdout)
         self.assertIn("etapa pulada", self.rodar("comando.sh", "tipos", env=env).stdout)
