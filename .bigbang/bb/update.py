@@ -146,6 +146,7 @@ def update(root, target=None, simulate=False, confirmed=False, attestation=True)
         sections, manual = migration(new_framework, current, target)
         for section in sections:
             print("\n" + section)
+        sys.stdout.flush()  # the sections above come before the error, also when piped
         if manual and not confirmed:
             raise BbError("a migração tem passos manuais (acima). Mostre-os ao dono e, com a confirmação dele, rode "
                           "de novo com --confirmo-migracao", EXIT_INVALID_STATE)
