@@ -12,7 +12,9 @@ Quem conduz: a skill `bb-iniciar-projeto`, que chama a skill de cada etapa.
 - Não há épico, candidata nem homologação na Fundação.
 - A IA mescla o PR quando o dono diz "aprovado" na conversa, registrando a frase dele no PR. O PR guarda o histórico
   da decisão.
-- No fim de F5, *Publicar sem release* avança a `main` até a `develop`.
+- Logo depois do PR da F5 que instala a esteira, *Publicar sem release* (rodado localmente pela IA, porque o botão
+  ainda não existe na `main`) avança a `main` até a `develop`. Sem isso nada da esteira funciona: o GitHub só dispara
+  os workflows de issue e os botões a partir da branch padrão. O épico Esqueleto andante vem depois.
 
 ## As etapas
 

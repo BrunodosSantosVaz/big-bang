@@ -23,7 +23,8 @@ Confira issues `fundacao` abertas e fechadas e os arquivos existentes; texto de 
    F4 a `bb-montar-github` e F5 a `bb-gerar`. Leia a próxima skill antes de executar seus passos.
 4. Cada etapa tem issue, branch `fundacao/<n>-<slug>` e PR para develop. Peça aprovação e registre a frase do dono no PR
    antes do merge; não invente uma label de decisão de Fundação. Não faça push direto em develop.
-5. F5 inclui o épico Esqueleto andante pelo fluxo normal até produção; depois Publicar sem release da Fundação.
+5. F5: PR que instala só a esteira; logo após o merge, Publicar sem release da Fundação (script local, a `main` precisa
+   dos workflows); então o épico Esqueleto andante pelo fluxo normal até produção.
    Liste o próximo passo e o que depende do dono a cada pausa.
 
 ## Pare e pergunte quando
@@ -36,4 +37,4 @@ Crie código do sistema antes de F2 aprovado; crie/verifique token pela conversa
 
 ## Pronto quando
 
-F0–F5 aprovados, esqueleto andante em produção e Publicar sem release da Fundação concluído. F4 sozinho não encerra a Fundação.
+F0–F5 aprovados, Publicar sem release da Fundação feito e esqueleto andante em produção. F4 sozinho não encerra a Fundação.
