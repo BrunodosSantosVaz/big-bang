@@ -37,7 +37,7 @@ criar_painel() {
 
 campo() { # <numero> <nome> <tipo> [opcoes]
   local numero="$1" nome="$2" tipo="$3" opcoes="${4:-}"
-  if gh project field-list "$numero" --owner "$OWNER" --format json --jq '.fields[].name' | grep -qxF "$nome"; then
+  if gh project field-list "$numero" --owner "$OWNER" --format json --jq '.fields[].name' | grep -xF "$nome" >/dev/null; then
     return 0
   fi
   if [ -n "$opcoes" ]; then

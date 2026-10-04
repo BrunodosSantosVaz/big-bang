@@ -50,7 +50,7 @@ if [ -z "$m" ]; then falha "milestone $tag não encontrado (o Integrar release o
       [[ ",$labels," == *",reprovado,"* ]] && falha "#$n está reprovado: a correção precisa de uma candidata nova"
       [[ ",$labels," == *",homologado,"* ]] || falha "#$n não foi homologado (label homologado, decisão do dono)"
     fi
-    if [[ ",$labels," == *",documentacao,"* ]] && ! git log --format=%s "origin/$branch" | grep -qE "/docs/$n-"; then
+    if [[ ",$labels," == *",documentacao,"* ]] && ! git log --format=%s "origin/$branch" | grep -E "/docs/$n-" >/dev/null; then
       falha "a documentação #$n não foi mesclada na release"
     fi
   done < <(gh api "repos/$R/issues?milestone=$m&state=all&per_page=100" \
@@ -60,7 +60,7 @@ fi
 bloqueios=$(gh api "repos/$R/issues?labels=bloqueia-producao&state=open&per_page=100" \
   --jq '[.[] | select(has("pull_request") | not) | "#\(.number)"] | join(" ")')
 [ -z "$bloqueios" ] || falha "issues que bloqueiam produção abertas: $bloqueios"
-if "${BB_CMD[@]}" --help 2>/dev/null | grep -q checklist; then
+if "${BB_CMD[@]}" --help 2>/dev/null | grep checklist >/dev/null; then
   "${BB_CMD[@]}" checklist producao || falha "bb checklist producao reprovado"
 else
   echo "::notice::bb checklist producao ainda não existe nesta versão do framework (chega no E6)."
@@ -84,7 +84,7 @@ if [ -z "$rc" ]; then falha "não há candidata $tag-rc.N"
 elif [ "$(git rev-parse "$rc^{commit}")" != "$(git rev-parse "origin/$branch")" ]; then
   falha "a $branch mudou depois da candidata $rc: gere uma candidata nova antes de publicar"
 fi
-git show "origin/$branch:CHANGELOG.md" 2>/dev/null | grep -qF "## [$v]" || falha "CHANGELOG.md da $branch sem a seção [$v]"
+git show "origin/$branch:CHANGELOG.md" 2>/dev/null | grep -F "## [$v]" >/dev/null || falha "CHANGELOG.md da $branch sem a seção [$v]"
 
 if [ "$falhas" -gt 0 ]; then echo "Publicação RECUSADA ($falhas problema(s)). Nada foi alterado."; exit 1; fi
 echo "Portão aprovado: $tag a partir de $rc (PR #$pr, ${head_sha:0:7})."

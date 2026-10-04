@@ -202,6 +202,20 @@ class DevolverMain(ComGit):
         self.assertNotIn("conflito", self.estado["issues"]["7"]["labels"])
 
 
+class DevolverDepoisDaLimpeza(ComGit):
+    def test_branch_apagada_depois_do_ultimo_fetch_e_ignorada(self):
+        self.git("fetch", "-q", "origin")
+        self.branch("epico/7-estoque", "develop", "docs/a.md", "# A\n")
+        self.git("fetch", "-q", "origin")  # the local clone still knows epico/7-estoque…
+        subprocess.run(["git", "--git-dir", self.origin, "branch", "-D", "epico/7-estoque"], check=True,
+                       capture_output=True)  # …that the cleanup deleted on origin
+        self.escrever("src/app.js", "publicado\n")
+        self.commit("feat: release")
+        self.git("push", "-q", "origin", "main")
+        r = self.rodar("devolver-main.sh", env={"BB": self.bb}, cwd=self.trabalho)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+
 class PublicarSemRelease(ComGit):
     def preparar(self):
         self.git("fetch", "-q", "origin")
