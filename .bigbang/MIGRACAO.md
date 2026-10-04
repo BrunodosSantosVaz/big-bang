@@ -13,7 +13,16 @@ Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando 
 
 ### O que o projeto precisa fazer
 
-Nada.
+Nada. Vindo de uma versão anterior à 0.10.0 (que ainda não tem `bb atualizar`), rode uma vez o `bb` do pacote novo,
+na raiz do sistema, com a árvore limpa:
+
+```bash
+gh release download v0.10.0 --repo BrunodosSantosVaz/big-bang --pattern 'bigbang-v0.10.0.tar.gz*' --dir /tmp/bb
+cd /tmp/bb && sha256sum -c bigbang-v0.10.0.tar.gz.sha256 && cd -
+gh attestation verify /tmp/bb/bigbang-v0.10.0.tar.gz --repo BrunodosSantosVaz/big-bang
+tar -xzf /tmp/bb/bigbang-v0.10.0.tar.gz -C /tmp/bb
+python3 /tmp/bb/.bigbang/bin/bb.py --raiz . atualizar 0.10.0
+```
 
 ## [0.9.0] - 2026-10-04
 
