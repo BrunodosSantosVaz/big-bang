@@ -26,7 +26,7 @@ fi
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 PLAN="${PROJETO_PLANEJAMENTO:?}"; EXEC="${PROJETO_EXECUCAO:?}"; BUGS="${PROJETO_BUGS:?}"
 R="${GITHUB_REPOSITORY:?}"
-read -r -a BB <<<"${BB:-python3 .bigbang/bin/bb.py}"
+read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 mover() { bash "$AQUI/projeto.sh" mover "$@"; }
 labels_de() { gh api "repos/$R/issues/$1" --jq '[.labels[].name] | join(",")'; }
 tem() { [[ ",$1," == *",$2,"* ]]; }
@@ -42,7 +42,7 @@ formulario_do_epico() {
   if [ "${ACTION:-}" = edited ]; then
     antes=$(mktemp); printf '%s' "${BODY_FROM:-}" >"$antes"; args=(--antes "$antes")
   fi
-  mudancas=$(printf '%s' "$corpo" | "${BB[@]}" esteira formulario "${args[@]}")
+  mudancas=$(printf '%s' "$corpo" | "${BB_CMD[@]}" esteira formulario "${args[@]}")
   [ -z "$antes" ] || rm -f "$antes"
   local add=() remove=() linha
   while IFS= read -r linha; do
@@ -59,7 +59,7 @@ formulario_do_epico() {
 
 severidade_do_bug() {
   local label
-  label=$(gh api "repos/$R/issues/$ISSUE" --jq '.body // ""' | "${BB[@]}" esteira severidade)
+  label=$(gh api "repos/$R/issues/$ISSUE" --jq '.body // ""' | "${BB_CMD[@]}" esteira severidade)
   [ -z "$label" ] || gh issue edit "$ISSUE" --repo "$R" --add-label "$label" >/dev/null
 }
 

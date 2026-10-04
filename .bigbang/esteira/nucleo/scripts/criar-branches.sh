@@ -17,7 +17,7 @@ fi
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 PLAN="${PROJETO_PLANEJAMENTO:?}"; EXEC="${PROJETO_EXECUCAO:?}"
 R="${GITHUB_REPOSITORY:?}"; OWNER="${R%%/*}"; REPO="${R##*/}"; SIMULAR="${SIMULAR:-false}"
-read -r -a BB <<<"${BB:-python3 .bigbang/bin/bb.py}"
+read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 [ "$SIMULAR" = true ] && export DRY_RUN=1
 projeto() { bash "$AQUI/projeto.sh" "$@"; }
 tem() { [[ ",$1," == *",$2,"* ]]; }
@@ -27,7 +27,7 @@ if [ -n "${EPICO:-}" ]; then epicos=("$EPICO"); else mapfile -t epicos < <(proje
 
 criar() { # <issue> <tipo> <titulo> <branch do épico>
   local branch sha
-  branch=$("${BB[@]}" esteira branch "$2" "$1" "$3")
+  branch=$("${BB_CMD[@]}" esteira branch "$2" "$1" "$3")
   if gh api "repos/$R/git/ref/heads/$branch" >/dev/null 2>&1; then return 0; fi
   if [ "$SIMULAR" = true ]; then echo "  [simulado] criar $branch a partir de $4"; return 0; fi
   sha=$(gh api "repos/$R/git/ref/heads/$4" --jq '.object.sha')

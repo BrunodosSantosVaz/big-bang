@@ -12,7 +12,7 @@ BB = os.path.join(BIGBANG, "bin", "bb.py")
 COMPILADO = os.path.join(BIGBANG, "esteira", "perfis", "compilado", "scripts")
 
 
-class ProjetoCompilado(ComGit):
+class BaseCompilado(ComGit):
     def setUp(self):
         super().setUp()
         toml = os.path.join(self.trabalho, "bigbang.toml")
@@ -23,6 +23,9 @@ class ProjetoCompilado(ComGit):
                           'build_linux-x64 = "printf binario-$BB_VERSAO-rc$BB_RC > $BB_SAIDA/app"'))
         with open(toml, "w", encoding="utf-8") as arquivo:
             arquivo.write(texto)
+        self.commit("chore: compiled profile")
+        self.git("push", "-q", "origin", "main")
+        self.git("push", "-q", "origin", "main:develop")
 
     def compilado(self, script, **env):
         return self.rodar(script, env={"BB": self.bb, **{k: str(v) for k, v in env.items()}}, pasta=COMPILADO,
@@ -36,6 +39,9 @@ class ProjetoCompilado(ComGit):
         self.commit("chore(release): v" + versao)
         self.git("push", "-q", "origin", f"release/{versao}")
 
+
+
+class ProjetoCompilado(BaseCompilado):
     def test_preparar_numera_as_candidatas(self):
         self.release()
         r = self.compilado("candidata-preparar.sh", GITHUB_REF_NAME="release/0.2.0")
