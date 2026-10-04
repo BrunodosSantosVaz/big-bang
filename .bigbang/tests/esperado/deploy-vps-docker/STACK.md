@@ -24,7 +24,7 @@ Decisão registrada em [ADR-0001](docs/decisoes/ADR-0001-stack.md).
 
 ## Tipo de entrega e alvo
 
-<!-- Perfil (deploy | compilado) e alvo (vps-docker | aws | paas) ou sistemas (windows-x64, linux-x64…). -->
+<!-- Perfil (deploy | compilado) e alvo (vps-docker | aws | paas) ou sistemas (windows-x64, linux-x64, android…). -->
 
 ## Arquitetura
 
