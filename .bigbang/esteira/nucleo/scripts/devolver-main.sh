@@ -9,7 +9,7 @@ trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2'
 
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 R="${GITHUB_REPOSITORY:?}"; SIMULAR="${SIMULAR:-false}"
-git fetch -q origin "+refs/heads/*:refs/remotes/origin/*"
+git fetch -q --prune origin "+refs/heads/*:refs/remotes/origin/*"  # --prune: branches deleted by the cleanup
 falhou=0
 
 devolver() { # <branch>

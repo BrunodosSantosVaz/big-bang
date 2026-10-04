@@ -38,7 +38,7 @@ if [ -n "${VERSAO:-}" ]; then
   gh release view "$tag" --repo "$R" >/dev/null 2>&1 || { echo "::error::a Release $tag não existe"; exit 1; }
   m=$(gh api "repos/$R/milestones?state=all&per_page=100" --jq ".[] | select(.title == \"$tag\") | .number" | head -n 1)
   [ -n "$m" ] || { echo "::error::milestone $tag não encontrado"; exit 1; }
-  echo "Encerrando $tag${SIMULAR/true/ [SIMULAÇÃO]}"
+  echo "Encerrando $tag$([ "$SIMULAR" = true ] && echo " [SIMULAÇÃO]")"
   while IFS=$'\t' read -r n estado labels; do
     [ -n "$n" ] || continue
     [ "$estado" = closed ] || run gh issue close "$n" --repo "$R" --reason completed --comment "Publicado em produção na versão $tag."

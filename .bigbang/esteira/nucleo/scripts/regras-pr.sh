@@ -15,15 +15,15 @@ trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2'
 
 R="${GITHUB_REPOSITORY:?}"
 head="${HEAD_REF:?}"; base="${BASE_REF:?}"; pr="${PR_NUMBER:?}"
-read -r -a BB <<<"${BB:-python3 .bigbang/bin/bb.py}"
+read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 erros=0
 erro() { echo "::error::$*"; erros=$((erros + 1)); }
 tem_label() { [[ ",${PR_LABELS:-}," == *",$1,"* ]]; }
 editar() { gh "$@" >/dev/null 2>&1 || echo "::warning::sem permissão para mudar labels (PR de fork?): gh $*"; }
 
 # ---- names
-if msg=$("${BB[@]}" esteira regra-branch "$head" "$base"); then :; else erro "$msg"; fi
-if msg=$("${BB[@]}" esteira titulo "${PR_TITLE:-}"); then :; else erro "$msg"; fi
+if msg=$("${BB_CMD[@]}" esteira regra-branch "$head" "$base"); then :; else erro "$msg"; fi
+if msg=$("${BB_CMD[@]}" esteira titulo "${PR_TITLE:-}"); then :; else erro "$msg"; fi
 
 issue=""
 if [[ "$head" =~ ^(feature|teste|docs|bugfix|hotfix|fundacao)/([0-9]+)- ]]; then
@@ -48,11 +48,11 @@ opcao_teste=(); [ "${tipo:-}" != teste ] || opcao_teste=(--pr-de-teste)
 # a task that only releases the pending marks of its own tests (spec 11.7) is not a sensitive change
 if [ -z "${opcao_teste[*]}" ] && [ -n "$issue" ] && grep -q '^tests/aceite/' <<<"$arquivos"; then
   if [ -n "${DIFF_TEXTO:-}" ]; then diff_texto="$DIFF_TEXTO"; else diff_texto=$(gh pr diff "$pr" --repo "$R"); fi
-  if printf '%s\n' "$diff_texto" | "${BB[@]}" esteira so-liberacao "$issue"; then
+  if printf '%s\n' "$diff_texto" | "${BB_CMD[@]}" esteira so-liberacao "$issue"; then
     opcao_teste=(--pr-de-teste); echo "tests/aceite/: só a retirada das marcas de pendente da #$issue."
   fi
 fi
-sensiveis=$(printf '%s\n' "$arquivos" | "${BB[@]}" esteira sensivel "${opcao_teste[@]}")
+sensiveis=$(printf '%s\n' "$arquivos" | "${BB_CMD[@]}" esteira sensivel "${opcao_teste[@]}")
 labels_issue=""
 [ -z "$issue" ] || labels_issue=$(gh api "repos/$R/issues/$issue" --jq '[.labels[].name] | join(",")' 2>/dev/null || true)
 if [ -n "$sensiveis" ]; then
@@ -66,7 +66,7 @@ if [ -n "$sensiveis" ]; then
 fi
 
 # ---- artifact paths: sem-release in sync, epic declared sem-release, invariant of develop
-artefato=$(printf '%s\n' "$arquivos" | "${BB[@]}" esteira artefato)
+artefato=$(printf '%s\n' "$arquivos" | "${BB_CMD[@]}" esteira artefato)
 if [ -n "$artefato" ]; then
   if [[ ",$labels_issue," == *",sem-release,"* ]] && [[ "${tipo:-}" =~ ^(feature|teste|docs)$ ]]; then
     erro "o épico desta tarefa é sem-release, mas o PR muda o artefato ($(head -n 3 <<<"$artefato" | tr '\n' ' ')). Tire sem-release do épico com o dono e refaça o planejamento da release"
@@ -80,7 +80,7 @@ else
 fi
 
 if [ "$base" = develop ] && [ -n "${PR_HEAD_SHA:-}" ]; then
-  mapfile -t caminhos < <("${BB[@]}" config get entrega.caminhos_artefato)
+  mapfile -t caminhos < <("${BB_CMD[@]}" config get entrega.caminhos_artefato)
   git fetch -q origin "+refs/heads/main:refs/remotes/origin/main"
   git fetch -q origin "+refs/pull/$pr/head:refs/remotes/origin/pr-$pr" 2>/dev/null || true  # forks: PR head
   fora=$(git diff --name-only origin/main "$PR_HEAD_SHA" -- "${caminhos[@]}" 2>/dev/null || echo "?")

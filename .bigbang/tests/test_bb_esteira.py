@@ -240,3 +240,20 @@ class LiberacaoDasMarcas(unittest.TestCase):
             with self.subTest(diff=d):
                 self.assertFalse(p.only_own_marks_released(d, 11, "expectedFailure"))
         self.assertFalse(p.only_own_marks_released("", 11, "expectedFailure"))
+
+
+class PerfilCompilado(unittest.TestCase):
+    def test_matriz_com_runner_fixo(self):
+        self.assertEqual(p.build_matrix(["windows-x64", "linux-x64"]),
+                         [{"sistema": "windows-x64", "runner": "windows-2025"},
+                          {"sistema": "linux-x64", "runner": "ubuntu-24.04"}])
+        for runner in p.RUNNERS.values():
+            self.assertNotIn("latest", runner)
+
+    def test_nomes_da_candidata_e_de_producao(self):
+        exe = p.candidate_asset_name("meu-sistema", "1.2.0", 2, "windows-x64", "dist/MeuSistema.exe")
+        self.assertEqual(exe, "meu-sistema-v1.2.0-rc.2-windows-x64.exe")
+        self.assertEqual(p.promoted_name(exe), "meu-sistema-v1.2.0-windows-x64.exe")
+        lin = p.candidate_asset_name("meu-sistema", "1.2.0", 12, "linux-x64", "meu-sistema")
+        self.assertEqual(p.promoted_name(lin), "meu-sistema-v1.2.0-linux-x64")
+        self.assertEqual(p.promoted_name("SHA256SUMS-linux-x64.txt"), "SHA256SUMS-linux-x64.txt")

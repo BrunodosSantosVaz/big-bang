@@ -22,7 +22,7 @@ AQUI="$(cd "$(dirname "$0")" && pwd)"
 PLAN="${PROJETO_PLANEJAMENTO:?}"; EXEC="${PROJETO_EXECUCAO:?}"
 R="${GITHUB_REPOSITORY:?}"; OWNER="${R%%/*}"; REPO="${R##*/}"
 DEVELOP="${BRANCH_DEVELOP:-develop}"; SIMULAR="${SIMULAR:-false}"; DATA="${DATA:-$(date -u +%F)}"
-read -r -a BB <<<"${BB:-python3 .bigbang/bin/bb.py}"
+read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 [ "$SIMULAR" = true ] && export DRY_RUN=1
 projeto() { bash "$AQUI/projeto.sh" "$@"; }
 gql() { gh api graphql -H "GraphQL-Features: sub_issues" "$@"; }
@@ -54,7 +54,7 @@ fi
 prontos=()
 for n in "${candidatos[@]}"; do
   labels=$(gh api "repos/$R/issues/$n" --jq '[.labels[].name] | join(",")')
-  if problemas=$(gh api "repos/$R/issues/$n" --jq '.body // ""' | "${BB[@]}" esteira pronto --labels "$labels"); then
+  if problemas=$(gh api "repos/$R/issues/$n" --jq '.body // ""' | "${BB_CMD[@]}" esteira pronto --labels "$labels"); then
     prontos+=("$n")
   else
     echo "::warning::Épico #$n recusado (Definition of Ready): $(tr '\n' ';' <<<"$problemas")"
@@ -105,12 +105,12 @@ for n in "${prontos[@]}"; do
     query($o:String!,$r:String!,$n:Int!){ repository(owner:$o,name:$r){ issue(number:$n){
       subIssues(first:100){ nodes{ number title } } } } }' --jq '.data.repository.issue.subIssues.nodes[] | "\(.number)\t\(.title)"')
 
-  base_epico=$("${BB[@]}" esteira branch epico "$n" "$titulo")
+  base_epico=$("${BB_CMD[@]}" esteira branch epico "$n" "$titulo")
   criar_branch "$base_epico" "$DEVELOP"
 
   criterios=$(printf '%s' "$corpo" | awk '/^### /{d=($0 ~ /^### Critérios de aceite/); next} d')
   regras=$(printf '%s' "$corpo" | awk '/^### /{d=($0 ~ /^### Regras de negócio envolvidas/); next} d')
-  mapfile -t tarefas < <(printf '%s' "$corpo" | "${BB[@]}" esteira tarefas)
+  mapfile -t tarefas < <(printf '%s' "$corpo" | "${BB_CMD[@]}" esteira tarefas)
   lista_tarefas=$(for t in "${tarefas[@]}"; do printf -- '- %s\n' "$(cut -f2 <<<"$t")"; done)
 
   teste=$(nova_issue "Testes de aceite · $titulo" "### Épico
@@ -177,7 +177,7 @@ ${deps:-nenhuma}" task "${herdadas[@]}")
   done
   unset numero_da_tarefa
 
-  if [ "$teste" != "?" ]; then criar_branch "$("${BB[@]}" esteira branch teste "$teste" "Testes de aceite · $titulo")" "$base_epico"; fi
+  if [ "$teste" != "?" ]; then criar_branch "$("${BB_CMD[@]}" esteira branch teste "$teste" "Testes de aceite · $titulo")" "$base_epico"; fi
   projeto sprint "$PLAN" "$n" "$sprint" >/dev/null || true
   projeto mover "$PLAN" "$n" "Em desenvolvimento" "Próxima sprint"
 done

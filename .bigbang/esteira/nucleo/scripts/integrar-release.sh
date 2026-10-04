@@ -22,7 +22,7 @@ fi
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 R="${GITHUB_REPOSITORY:?}"; OWNER="${R%%/*}"; REPO="${R##*/}"
 SIMULAR="${SIMULAR:-false}"
-read -r -a BB <<<"${BB:-python3 .bigbang/bin/bb.py}"
+read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 [ "$SIMULAR" = true ] && export DRY_RUN=1
 projeto() { bash "$AQUI/projeto.sh" "$@"; }
 tem() { [[ ",$1," == *",$2,"* ]]; }
@@ -40,7 +40,7 @@ if [ -n "${EPICO:-}" ]; then
   [ -n "$base" ] || erro "épico #$epico sem branch epico/$epico-* (rode Iniciar sprint)"
   labels=$(gh api "repos/$R/issues/$epico" --jq '[.labels[].name] | join(",")')
   # dependency between epics: the epic it depends on must already be in production
-  for dep in $(gh api "repos/$R/issues/$epico" --jq '.body // ""' | "${BB[@]}" esteira dependencias); do
+  for dep in $(gh api "repos/$R/issues/$epico" --jq '.body // ""' | "${BB_CMD[@]}" esteira dependencias); do
     [ "$(gh api "repos/$R/issues/$dep" --jq .state)" = closed ] \
       || erro "o épico #$epico depende do #$dep, que ainda não está em produção (use feature flag ou espere o #$dep)"
   done
@@ -52,7 +52,7 @@ if [ -n "${EPICO:-}" ]; then
     [ -n "$n" ] || continue
     tem "$rotulos" teste-aceite || tem "$rotulos" task || tem "$rotulos" documentacao || continue
     issues+=("$n")
-    cut -f2 <<<"$mesclados" | grep -qE "^(teste|feature|docs)/$n-" || faltam+=("#$n")
+    cut -f2 <<<"$mesclados" | grep -E "^(teste|feature|docs)/$n-" >/dev/null || faltam+=("#$n")
   done < <(gh api graphql -H "GraphQL-Features: sub_issues" -f o="$OWNER" -f r="$REPO" -F n="$epico" -f query='
     query($o:String!,$r:String!,$n:Int!){ repository(owner:$o,name:$r){ issue(number:$n){
       subIssues(first:100){ nodes{ number labels(first:20){ nodes{ name } } } } } } }' \
@@ -65,7 +65,7 @@ if [ -n "${EPICO:-}" ]; then
   issues+=("$epico")
 
   if tem "$labels" sem-release; then
-    caminhos=(); mapfile -t caminhos < <("${BB[@]}" config get entrega.caminhos_artefato)
+    caminhos=(); mapfile -t caminhos < <("${BB_CMD[@]}" config get entrega.caminhos_artefato)
     mudou=$(git diff --name-only origin/main "origin/$base" -- "${caminhos[@]}")
     [ -z "$mudou" ] || erro "o épico #$epico é sem-release, mas muda o artefato: $(tr '\n' ' ' <<<"$mudou")"
     if [ "$SIMULAR" = true ]; then echo "[simulado] mesclar $base na develop (épico sem-release)"; exit 0; fi
@@ -101,7 +101,7 @@ else
 fi
 
 # ---- version: from the PR titles; a different VERSAO needs confirmation
-calculada=$(printf '%s\n' "$titulos" | "${BB[@]}" esteira versao --atual "$atual")
+calculada=$(printf '%s\n' "$titulos" | "${BB_CMD[@]}" esteira versao --atual "$atual")
 if [ "${BUG:-}" != "" ] || [ "${DEPENDENCIAS:-false}" = true ]; then
   IFS=. read -r ma mi pa <<<"$atual"; calculada="$ma.$mi.$((pa + 1))"  # bug and maintenance: last number
 fi
@@ -127,8 +127,8 @@ if [ "$rc" -eq 3 ]; then
 fi
 [ "$rc" -eq 0 ] || exit "$rc"
 
-if [ -n "$("${BB[@]}" config get entrega.arquivo_versao)" ]; then "${BB[@]}" esteira gravar-versao "$v"; fi
-printf '%s\n' "$itens" | "${BB[@]}" esteira changelog --versao "$v" --data "$(date -u +%F)"
+if [ -n "$("${BB_CMD[@]}" config get entrega.arquivo_versao)" ]; then "${BB_CMD[@]}" esteira gravar-versao "$v"; fi
+printf '%s\n' "$itens" | "${BB_CMD[@]}" esteira changelog --versao "$v" --data "$(date -u +%F)"
 git add -A
 git diff --cached --quiet || git commit -q -m "chore(release): v$v"
 git push -q origin "$branch"

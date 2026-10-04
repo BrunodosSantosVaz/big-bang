@@ -1,0 +1,70 @@
+# Gerado pelo Big Bang v0.5.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Botão "Publicar em produção" (spec 11.6, passo 10). "conferir" roda sempre (portão e plano, nada muda);
+# "publicar" só com simular=false e depois que o dono aprova o ambiente "producao" — o único "ok" que ele não delega.
+name: Publicar em produção
+
+on:
+  workflow_dispatch:
+    inputs:
+      versao:
+        description: 'Versão homologada (x.y.z)'
+        required: true
+        type: string
+      simular:
+        description: 'Só conferir o portão e mostrar o plano'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-publicar
+  cancel-in-progress: false
+
+env:
+  VERSAO: ${{ inputs.versao }}
+  PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
+  PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
+  PROJETO_EXECUCAO: ${{ vars.PROJETO_EXECUCAO }}
+  PROJETO_BUGS: ${{ vars.PROJETO_BUGS }}
+
+jobs:
+  conferir:
+    if: ${{ vars.PROJETO_OWNER != '' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Portão e plano (não altera nada)
+        run: bash .bigbang/esteira/nucleo/scripts/publicar-producao.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          SIMULAR: 'true'
+
+  publicar:
+    needs: conferir
+    if: ${{ !inputs.simular }}
+    runs-on: ubuntu-24.04
+    environment: producao
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.PROJETO_TOKEN }}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Publicar (compilado)
+        run: bash .bigbang/esteira/nucleo/scripts/publicar-producao.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          SIMULAR: 'false'

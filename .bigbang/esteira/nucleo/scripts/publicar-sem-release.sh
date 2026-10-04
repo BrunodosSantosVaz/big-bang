@@ -19,13 +19,13 @@ fi
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 PLAN="${PROJETO_PLANEJAMENTO:?}"; EXEC="${PROJETO_EXECUCAO:?}"
 R="${GITHUB_REPOSITORY:?}"; OWNER="${R%%/*}"; REPO="${R##*/}"; SIMULAR="${SIMULAR:-false}"
-read -r -a BB <<<"${BB:-python3 .bigbang/bin/bb.py}"
+read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 projeto() { bash "$AQUI/projeto.sh" "$@"; }
 falhas=0
 falha() { echo "::error::$*"; falhas=$((falhas + 1)); }
 
 git fetch -q origin "+refs/heads/*:refs/remotes/origin/*"
-mapfile -t caminhos < <("${BB[@]}" config get entrega.caminhos_artefato)
+mapfile -t caminhos < <("${BB_CMD[@]}" config get entrega.caminhos_artefato)
 mudou=$(git diff --name-only origin/main origin/develop -- "${caminhos[@]}")
 [ -z "$mudou" ] || falha "a develop tem mudança no artefato que não está na main ($(tr '\n' ' ' <<<"$mudou")): isso exige release"
 git merge-base --is-ancestor origin/main origin/develop || falha "a main tem commits que a develop não tem: devolva a main para a develop antes"

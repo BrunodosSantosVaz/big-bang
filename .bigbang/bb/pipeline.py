@@ -421,3 +421,29 @@ def only_own_marks_released(diff, issue, marker):
             if line not in expected:
                 return False
     return True
+
+
+# --- compiled profile: build matrix and asset names (spec 14.3) ------------------------------------------------------
+
+RUNNERS = {"windows-x64": "windows-2025", "windows-arm64": "windows-11-arm", "linux-x64": "ubuntu-24.04",
+           "linux-arm64": "ubuntu-24.04-arm", "macos-x64": "macos-15-intel", "macos-arm64": "macos-15"}
+
+
+def build_matrix(systems):
+    """GitHub Actions matrix include list: one fixed-version runner per system."""
+    return [{"sistema": system, "runner": RUNNERS[system]} for system in systems]
+
+
+def candidate_asset_name(slug, version, rc, system, filename):
+    """`<slug>-vX.Y.Z-rc.N-<sistema><ext>`: the promotion only drops `-rc.N`, so the bytes and the hash stay."""
+    ext = ""
+    for known in (".tar.gz", ".exe", ".msi", ".zip", ".dmg", ".pkg", ".AppImage", ".deb", ".rpm", ".tgz"):
+        if filename.endswith(known):
+            ext = known
+            break
+    return f"{slug}-v{version}-rc.{rc}-{system}{ext}"
+
+
+def promoted_name(candidate_name):
+    """Production name of a candidate asset: the same name without `-rc.N`."""
+    return re.sub(r"-rc\.\d+(?=-|\.|$)", "", candidate_name, count=1)

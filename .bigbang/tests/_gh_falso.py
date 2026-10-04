@@ -268,7 +268,12 @@ def api(state, positional, fields, jq, method):
             return emit(state["milestones"][-1], jq)
         return emit(state.get("milestones", []), jq)
     if path.startswith(f"repos/{REPO}/issues?") or path == f"repos/{REPO}/issues":
-        return emit([issue_json(state, n) for n in state["issues"]], jq)
+        from urllib.parse import parse_qs, urlsplit
+        query = parse_qs(urlsplit(path).query)
+        wanted = set(query.get("labels", [""])[0].split(",")) - {""}
+        status = query.get("state", ["open"])[0]
+        return emit([issue_json(state, n) for n, i in state["issues"].items()
+                     if wanted <= set(i.get("labels", [])) and status in ("all", i.get("state", "open"))], jq)
     return emit(state.get("api", {}).get(path, {}), jq)
 
 
@@ -303,6 +308,35 @@ def main():
             issue["milestone"] = flags["--milestone"][0]
         save(state)
         return None
+    if argv[:2] == ["release", "create"]:
+        tag = positional[2]
+        state.setdefault("releases", []).append(tag)
+        state.setdefault("refs", {})[f"tags/{tag}"] = (flags.get("--target") or ["sha"])[0]
+        state.setdefault("release_assets", {})[tag] = [os.path.basename(f) for f in positional[3:]]
+        import shutil
+        import tempfile
+        folder = tempfile.mkdtemp(prefix="release-", dir=os.path.dirname(os.environ["FAKE_GH_STATE"]))
+        for f in positional[3:]:
+            shutil.copy(f, folder)
+        state.setdefault("release_dirs", {})[tag] = folder
+        state.setdefault("release_info", {})[tag] = {"prerelease": "--prerelease" in argv,
+                                                     "latest": "--latest" in argv,
+                                                     "target": (flags.get("--target") or [""])[0]}
+        save(state)
+        return None
+    if argv[:2] == ["pr", "create"]:
+        number = str(max([int(n) for n in state.get("prs", {})] + [400]) + 1)
+        state.setdefault("prs", {})[number] = {"head": flags["--head"][0], "base": flags["--base"][0],
+                                               "title": flags["--title"][0], "state": "OPEN", "labels": []}
+        save(state)
+        print(f"https://github.com/{REPO}/pull/{number}")
+        return None
+    if argv[:2] == ["release", "download"]:
+        import shutil
+        source = state["release_dirs"][positional[2]]
+        for name in os.listdir(source):
+            shutil.copy(os.path.join(source, name), os.path.join(flags["--dir"][0], name))
+        return None
     if argv[:2] == ["release", "view"]:
         if positional[2] not in state.get("releases", []):
             sys.stderr.write("release not found\n")
@@ -325,12 +359,16 @@ def main():
             sys.exit(1)
         pr["state"] = "MERGED"
         save(state)
+        hook = state.get("hooks", {}).get("pr_merge")
+        if hook:  # tests: perform the real git merge the PR would do
+            subprocess.run(hook, shell=True, check=True, capture_output=True)
         return None
     if argv[:2] == ["pr", "list"]:
         wanted_state = (flags.get("--state") or ["open"])[0].upper()
         base = (flags.get("--base") or [None])[0]
         head = (flags.get("--head") or [None])[0]
         result = [{"number": int(n), "headRefName": pr["head"], "baseRefName": pr["base"], "title": pr.get("title", ""),
+                   "mergeable": pr.get("mergeable", "MERGEABLE"), "headRefOid": pr.get("sha", "sha0"),
                    "body": pr.get("body", ""), "state": pr.get("state", "OPEN"),
                    "labels": [{"name": label} for label in pr.get("labels", [])]}
                   for n, pr in state.get("prs", {}).items()

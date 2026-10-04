@@ -30,6 +30,7 @@ Todos os workflows gerados pelo Big Bang, os botões, os segredos e as variávei
 | Publicar sem release | `bb-publicar-sem-release.yml` | botão + ambiente `producao` | avança a `main` até a `develop` |
 | Encerrar | `bb-encerrar.yml` | botão | completa a limpeza pós-produção; encerra a sprint |
 | Ver painéis | `bb-ver-paineis.yml` | botão | somente leitura: colunas, posses paradas, flags vencidas, pendências do dono |
+| Tarefa de correção | `bb-tarefa-de-correcao.yml` | botão (`epico`, `motivo`) | tarefa nova no épico reprovado na homologação (decisão 16) |
 | Dependabot | `.github/dependabot.yml` | mensal | actions → `develop` (`sem-release`); pacotes da stack → `main`, via release de manutenção |
 
 ### Perfil `compilado`
@@ -37,6 +38,10 @@ Todos os workflows gerados pelo Big Bang, os botões, os segredos e as variávei
 | Arquivo | Disparo | O que faz |
 | --- | --- | --- |
 | `bb-candidata.yml` | push em `release/**` | testes; build por sistema; pre-release `vX.Y.Z-rc.N` com binários, `SHA256SUMS-<sistema>.txt`, atestado e SBOM; abre o PR da release |
+
+Contrato de build (ADR-0009): `compilado.build_<sistema>` deixa **exatamente um arquivo** em `$BB_SAIDA`
+(`dist/<sistema>`) e pode ler `BB_VERSAO`, `BB_RC` e `BB_SISTEMA`. O atestado de procedência só é gerado em
+repositório público (em privado exige GitHub Enterprise Cloud).
 
 ### Perfil `deploy`
 

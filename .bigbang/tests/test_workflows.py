@@ -111,3 +111,16 @@ class AutoTesteDasRegras(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PipelinesSeguros(unittest.TestCase):
+    """`cmd | grep -q` under pipefail fails when grep exits early and cmd gets SIGPIPE (found in the sandbox)."""
+
+    def test_nenhum_grep_q_no_fim_de_pipeline(self):
+        import glob
+        from _raiz import BIGBANG
+        for caminho in glob.glob(os.path.join(BIGBANG, "**", "*.sh"), recursive=True):
+            with open(caminho, encoding="utf-8") as arquivo:
+                for numero, linha in enumerate(arquivo, start=1):
+                    with self.subTest(arquivo=os.path.relpath(caminho, BIGBANG), linha=numero):
+                        self.assertNotRegex(linha, r"\|\s*grep\s+-[a-zA-Z]*q")
