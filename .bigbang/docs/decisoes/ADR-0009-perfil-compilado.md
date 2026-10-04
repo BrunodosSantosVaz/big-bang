@@ -56,3 +56,16 @@ Escolhida: **opção 2**.
 
 - Especificação, seções 11.6, 14.3 e 18. CNABLens: `build-release.yml`, `promover-release.sh`, `publicar-producao.sh`.
 - Artifact attestations: https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations
+
+## Validação no sandbox (2026-10-04)
+
+No `big-bang-sandbox` no perfil compilado (Linux e Windows, build fictício): a candidata `v0.1.0-rc.1` rodou nas
+Actions (testes, build nos dois sistemas, SBOM, atestado verificado com `gh attestation verify`, pre-release); o
+épico foi reprovado e a tarefa de correção, mesclada, gerou a `v0.1.0-rc.2`; depois de homologado, o *Publicar em
+produção* mesclou o PR da release e publicou a `v0.1.0` com **o mesmo SHA-256** da `rc.2` nos dois sistemas,
+fechando issues, milestone, cartões e branches, e devolvendo a `main` à `develop`. A retomada é idempotente.
+
+Os passos que dependem do `PROJETO_TOKEN` (homologar, tarefa de correção, integrar, publicar) rodaram com a conta do
+dono fora das Actions; a aprovação real do ambiente `producao` será conferida quando o sandbox tiver o token. O
+sandbox revelou e corrigiu: `grep -q` no fim de pipeline com `pipefail` (o portão não via a documentação mesclada) e a
+devolução da `main` tentando branches já apagadas (faltava `--prune`).
