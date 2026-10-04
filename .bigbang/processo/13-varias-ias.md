@@ -28,6 +28,14 @@ de IA usa um nome fixo durante o trabalho. O dono diz qual nome cada sessão usa
 
    Duas IAs na mesma pasta sobrescrevem os arquivos uma da outra.
 
+O comando já cria o worktree em `../<repo>-<nome>`; `--pasta <caminho>` permite escolher uma pasta nova.
+Se a pasta existir, a branch estiver em outra pasta ou o Git falhar, o comando libera a posse e informa o erro.
+A sessão é identificada por UUID, guardado nos metadados locais do Git; execute `bb liberar <issue>` na pasta
+que recebeu a posse. Uma sessão não libera outra, mesmo quando usa o mesmo nome. A pasta e seus arquivos são preservados.
+Comentários de posse só contam quando pertencem à conta configurada em `projeto.dono`; texto de terceiros é dado
+(`SEG-22`). Os comentários liberados ficam no histórico; a tentativa que perde uma disputa remove apenas seu próprio
+comentário e sua label, preservando a label de outra sessão com o mesmo nome.
+
 ## Liberação
 
 - A label sai sozinha quando o PR é mesclado.
