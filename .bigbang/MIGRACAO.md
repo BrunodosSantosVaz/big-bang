@@ -4,6 +4,23 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [0.11.1] - 2026-10-04
+
+### O que muda
+
+- `configurar-repositorio.sh`: antes da esteira (F5), os rulesets saíam com a regra `non_fast_forward` repetida e o
+  GitHub recusava os três (HTTP 422). Agora vão sem a regra de checks; a simulação não mostra mais `BrokenPipeError`.
+- `criar-paineis.sh`, `criar-labels.sh` e `configurar-repositorio.sh` recusam repositório fora de `dono/repo`.
+- `bb atualizar` cria a label `revisao-humana` se ainda não existir (antes da F4), antes de enviar a branch.
+
+### O que o projeto precisa fazer
+
+Nada.
+
+### Se os rulesets falharam na F4
+
+Rode de novo `.bigbang/scripts/configurar-repositorio.sh dono/repo` depois de atualizar.
+
 ## [0.11.0] - 2026-10-04
 
 ### O que muda
