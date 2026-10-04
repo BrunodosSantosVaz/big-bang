@@ -96,8 +96,15 @@ if [ -n "$dados" ]; then
       fi
     done <<<"$pendentes"
   fi
+  mudados=$(mktemp); printf '%s\n' "$arquivos" > "$mudados"
+  if ! msg=$("${BB_CMD[@]}" esteira rastreabilidade --dados "$dados" --mudados "$mudados"); then
+    while IFS= read -r linha; do erro "rastreabilidade: $linha"; done <<<"$msg"
+  fi
+  if ! msg=$("${BB_CMD[@]}" esteira guarda-stack --dados "$dados"); then
+    while IFS= read -r linha; do erro "guarda da stack: $linha"; done <<<"$msg"
+  fi
 else
-  echo "::notice::conteúdo do PR indisponível: pendentes não conferidos"
+  echo "::notice::conteúdo do PR indisponível: pendentes, rastreabilidade e guarda da stack não conferidos"
 fi
 
 # ---- artifact paths: sem-release in sync, epic declared sem-release, invariant of develop
