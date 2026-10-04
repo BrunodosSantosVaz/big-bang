@@ -258,6 +258,12 @@ class PerfilCompilado(unittest.TestCase):
         self.assertEqual(p.promoted_name(lin), "meu-sistema-v1.2.0-linux-x64")
         self.assertEqual(p.promoted_name("SHA256SUMS-linux-x64.txt"), "SHA256SUMS-linux-x64.txt")
 
+    def test_android(self):  # ScreenFakeCam pilot: the APK keeps its extension and builds on Linux
+        apk = p.candidate_asset_name("screenfakecam", "0.1.0", 1, "android", "app/build/app-release.apk")
+        self.assertEqual(apk, "screenfakecam-v0.1.0-rc.1-android.apk")
+        self.assertEqual(p.promoted_name(apk), "screenfakecam-v0.1.0-android.apk")
+        self.assertEqual(p.build_matrix(["android"]), [{"sistema": "android", "runner": "ubuntu-24.04"}])
+
 
 class Seguranca(unittest.TestCase):
     def test_osv_so_alta_e_critica(self):

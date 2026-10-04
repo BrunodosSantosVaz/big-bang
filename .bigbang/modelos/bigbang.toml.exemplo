@@ -3,7 +3,7 @@
 # O gerador valida o esquema e recusa chaves desconhecidas. Depois de mudar, rode `bb gerar`.
 
 [bigbang]
-versao = "0.10.2"                       # versão do framework instalada (igual a .bigbang/VERSION)
+versao = "0.11.0"                       # versão do framework instalada (igual a .bigbang/VERSION)
 origem = "BrunodosSantosVaz/big-bang"  # de onde vêm as atualizações
 
 [projeto]
@@ -23,6 +23,7 @@ ecossistemas = ["npm", "docker"]           # pacotes da stack para o Dependabot 
 
 [compilado]                            # só no perfil compilado
 # Cada build_<sistema> deixa exatamente um arquivo em $BB_SAIDA (lê BB_VERSAO, BB_RC, BB_SISTEMA). ADR-0009.
+# Sistemas: windows-x64, windows-arm64, linux-x64, linux-arm64, macos-x64, macos-arm64, android (APK/AAB).
 sistemas = ["windows-x64", "linux-x64"]
 build_windows-x64 = "python packaging/windows/build.py"
 build_linux-x64 = "bash packaging/linux/build.sh"
