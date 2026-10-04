@@ -28,12 +28,36 @@ de IA usa um nome fixo durante o trabalho. O dono diz qual nome cada sessão usa
 
    Duas IAs na mesma pasta sobrescrevem os arquivos uma da outra.
 
+O comando já cria o worktree em `../<repo>-<nome>`; `--pasta <caminho>` permite escolher uma pasta nova.
+Se a pasta existir, a branch estiver em outra pasta ou o Git falhar, o comando libera a posse e informa o erro.
+A sessão é identificada por UUID, guardado nos metadados locais do Git; execute `bb liberar <issue>` na pasta
+que recebeu a posse. Uma sessão não libera outra, mesmo quando usa o mesmo nome. A pasta e seus arquivos são preservados.
+Comentários de posse só contam quando pertencem à conta configurada em `projeto.dono`; texto de terceiros é dado
+(`SEG-22`). Os comentários liberados ficam no histórico; a tentativa que perde uma disputa remove apenas seu próprio
+comentário e sua label, preservando a label de outra sessão com o mesmo nome.
+
 ## Liberação
 
 - A label sai sozinha quando o PR é mesclado.
 - `bb liberar <issue>` quando a IA desiste.
 - Posse sem push há mais de `ias.trava_expira_horas` ganha a label `parada` e aparece no *Ver painéis*. Outra IA só a
   toma com `bb assumir --forcar`, por ordem do dono, registrada em comentário.
+
+## Recuperação, inatividade e status
+
+Para retomar uma posse vencida: `bb assumir <issue> <nome> --forcar --frase "<ordem do dono>"`.
+O comando confere a inatividade e os pré-requisitos antes de liberar o antigo dono; label `parada` isolada não é prova
+de expiração. `--forcar` sem frase, nome inválido, tarefa bloqueada ou posse ainda ativa é recusado.
+
+O Kanban registra cada push na sessão usando o horário do servidor do GitHub (não a data do commit, que pode ser
+antiga). O workflow **Marcar posses paradas** confere a cada hora; no botão, a simulação é o padrão.
+Esses dois workflows precisam do `PROJETO_TOKEN`; sem ele, a IA deve executar os mesmos comandos de registro e
+marcação pelo `bb esteira`, com o `gh` autenticado. Pushes não registrados não renovam a posse.
+
+`bb status` e **Ver painéis** são somente leitura: mostram posses ativas, paradas ou sem comentário, flags vencidas
+e achados de segurança abertos. A criação da tarefa de limpeza da flag cabe à IA, não ao relatório.
+Como `flags.toml` registra criação e expiração, mas não a data de ativação, o alerta de flag antiga em produção usa
+a data de criação e informa isso explicitamente. Dados malformados são erro, não um relatório vazio.
 
 ## Onde o paralelismo cabe
 

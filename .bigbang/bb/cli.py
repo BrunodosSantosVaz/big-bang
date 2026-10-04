@@ -3,7 +3,7 @@ import argparse
 import sys
 
 from . import config as config_module
-from . import acceptance, checklist, checksums, decisions, generator, verify
+from . import acceptance, checklist, checksums, decisions, generator, ownership, status, verify, workspaces
 from . import init as init_module
 from . import pipeline_cli
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
@@ -47,6 +47,21 @@ def build_parser():
 
     verificar_parser = commands.add_parser("verificar", help="confere framework, arquivos gerados e workflows")
     verificar_parser.set_defaults(handler=_verificar)
+
+    assumir_parser = commands.add_parser("assumir", help="confirma a posse e abre uma pasta de trabalho própria")
+    assumir_parser.add_argument("issue", type=int)
+    assumir_parser.add_argument("nome")
+    assumir_parser.add_argument("--forcar", action="store_true", help="retoma uma posse parada por ordem do dono")
+    assumir_parser.add_argument("--frase", help="ordem do dono (obrigatória com --forcar)")
+    assumir_parser.add_argument("--pasta", help="pasta própria do worktree (padrão: ../repo-nome)")
+    assumir_parser.set_defaults(handler=_assumir)
+
+    liberar_posse = commands.add_parser("liberar", help="libera a posse da sessão na pasta de trabalho atual")
+    liberar_posse.add_argument("issue", type=int)
+    liberar_posse.set_defaults(handler=_liberar)
+
+    status_parser = commands.add_parser("status", help="resumo dos painéis, posses, flags e segurança (somente leitura)")
+    status_parser.set_defaults(handler=_status)
 
     aceite_parser = commands.add_parser("aceite", help="testes de aceite do épico")
     aceite_commands = aceite_parser.add_subparsers(dest="aceite_command", metavar="<subcomando>", parser_class=_Parser)
@@ -108,6 +123,46 @@ def _init(args):
 def _ia(args):
     import os
     return args.ia or os.environ.get("BB_IA") or "ia"
+
+
+def _assumir(args):
+    config = config_module.load(args.raiz)
+    if args.forcar:
+        acquired = ownership.recover(config, args.issue, args.nome, args.frase)
+    else:
+        acquired = ownership.claim(config, args.issue, args.nome)
+    try:
+        folder = workspaces.isolate(args.raiz, config, acquired, args.pasta)
+    except BaseException:
+        ownership.release(config, args.issue, acquired["name"], acquired["session"])
+        raise
+    print(f"#{args.issue}: posse confirmada de {args.nome} (sessão {acquired['session']}).")
+    print(f"Pasta própria: {folder}")
+    return EXIT_OK
+
+
+def _liberar(args):
+    acquired = workspaces.receipt(args.raiz)
+    if acquired.get("issue") != args.issue:
+        raise BbError("execute bb liberar na pasta da sessão dona da issue", EXIT_USAGE)
+    ownership.release(config_module.load(args.raiz), args.issue, acquired["name"], acquired["session"])
+    print(f"#{args.issue}: posse liberada. A pasta de trabalho foi preservada.")
+    return EXIT_OK
+
+
+def _status(args):
+    import os
+    import subprocess
+    config = config_module.load(args.raiz)
+    script = os.path.join(args.raiz, ".bigbang", "esteira", "nucleo", "scripts", "ver-paineis.sh")
+    env = {**os.environ, "GITHUB_REPOSITORY": config["projeto"]["repositorio"],
+           "PROJETO_OWNER": config["paineis"]["owner"], "PYTHON": sys.executable,
+           "BB_ENTRY": os.path.join(args.raiz, ".bigbang", "bin", "bb.py"), "BB_ROOT": args.raiz}
+    env.pop("BB", None)
+    for key in ("planejamento", "execucao", "bugs"):
+        env["PROJETO_" + key.upper()] = str(config["paineis"][key]) if config["paineis"][key] else ""
+    result = subprocess.run(["bash", script], env=env, cwd=args.raiz, check=False)
+    return EXIT_OK if result.returncode == 0 else EXIT_UNEXPECTED
 
 
 def _decisao(args):

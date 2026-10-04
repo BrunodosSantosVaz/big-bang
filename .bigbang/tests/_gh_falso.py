@@ -9,6 +9,7 @@ State shape:
   refs: {"heads/develop": "sha"}, pulls: [...], checks: {"sha": [{"name", "status", "conclusion"}]}
 """
 import json
+import datetime
 import os
 import re
 import subprocess
@@ -57,6 +58,8 @@ def options(argv):
 
 
 def emit(data, jq):
+    if "--slurp" in sys.argv and jq is None:
+        data = [data]
     text = json.dumps(data, ensure_ascii=False)
     if jq is None:
         print(text)
@@ -186,6 +189,7 @@ def issue_json(state, number):
     return {"number": int(number), "node_id": f"N{number}", "id": 1000 + int(number), "title": issue.get("title", ""),
             "body": issue.get("body", ""), "state": issue.get("state", "open"),
             "labels": [{"name": label} for label in issue.get("labels", [])],
+            "comments": len(state.get("comment_records", {}).get(str(number), [])),
             "milestone": {"title": issue["milestone"]} if issue.get("milestone") else None}
 
 
@@ -199,15 +203,45 @@ def new_issue(state, title, body, labels, milestone=None):
 
 
 def api(state, positional, fields, jq, method):
-    path = positional[0]
+    from urllib.parse import unquote
+    path = unquote(positional[0])
+    if "per_page=100" in path and "/issues?" not in path:
+        path = path.split("?", 1)[0]
     match = re.match(rf"^repos/{re.escape(REPO)}/issues/(\d+)$", path)
     if match:
         return emit(issue_json(state, match.group(1)), jq)
     match = re.match(rf"^repos/{re.escape(REPO)}/issues/(\d+)/comments$", path)
-    if match and method == "POST":
-        state.setdefault("comments", {}).setdefault(match.group(1), []).append(fields["body"])
-        save(state)
-        return emit({}, jq)
+    if match:
+        number = match.group(1)
+        records = state.setdefault("comment_records", {}).setdefault(number, [])
+        if method == "POST":
+            state.setdefault("comments", {}).setdefault(number, []).append(fields["body"])
+            ident = state.get("next_comment", 0) + 1
+            state["next_comment"] = ident
+            record = {"id": ident, "body": fields["body"], "user": {"login": "dono"},
+                      "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")}
+            record["updated_at"] = record["created_at"]
+            records.append(record)
+            save(state)
+            return emit(record, jq)
+        return emit(records, jq)
+    match = re.match(rf"^repos/{re.escape(REPO)}/issues/comments/(\d+)$", path)
+    if match:
+        for number, records in state.get("comment_records", {}).items():
+            for index, record in enumerate(records):
+                if record["id"] != int(match.group(1)):
+                    continue
+                if method == "DELETE":
+                    records.pop(index)
+                    state["comments"][number].pop(index)
+                elif method == "PATCH":
+                    record["body"] = fields["body"]
+                    record["updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+                    state["comments"][number][index] = fields["body"]
+                save(state)
+                return emit(record, jq)
+        sys.stderr.write("HTTP 404: comment not found\n")
+        sys.exit(1)
     match = re.match(rf"^repos/{re.escape(REPO)}/issues/(\d+)/labels(?:/(.+))?$", path)
     if match and method in ("POST", "DELETE"):
         number = match.group(1)
@@ -232,6 +266,13 @@ def api(state, positional, fields, jq, method):
             save(state)
             return emit({}, jq)
         return emit([issue_json(state, n) for n in issue.get("blocked_by", [])], jq)
+    match = re.match(rf"^repos/{re.escape(REPO)}/issues/(\d+)/parent$", path)
+    if match:
+        parent = state["issues"][match.group(1)].get("parent")
+        if not parent:
+            sys.stderr.write("HTTP 404: parent not found\n")
+            sys.exit(1)
+        return emit(issue_json(state, parent), jq)
     match = re.match(rf"^repos/{re.escape(REPO)}/git/ref/tags/(.+)$", path)
     if match:
         if f"tags/{match.group(1)}" not in state.get("refs", {}):
@@ -260,7 +301,7 @@ def api(state, positional, fields, jq, method):
         return emit([issue_json(state, n) for n, i in state["issues"].items() if i.get("milestone") == title], jq)
     match = re.match(rf"^repos/{re.escape(REPO)}/git/matching-refs/heads/(.*)$", path)
     if match:
-        refs = [{"ref": f"refs/{name}"} for name in sorted(state.get("refs", {}))
+        refs = [{"ref": f"refs/{name}", "object": {"sha": state["refs"][name]}} for name in sorted(state.get("refs", {}))
                 if name.startswith(f"heads/{match.group(1)}")]
         return emit(refs, jq)
     match = re.match(rf"^repos/{re.escape(REPO)}/git/refs?/heads/(.+)$", path)
@@ -421,4 +462,27 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if os.name == "nt":
+        main()
+    else:
+        # Serialize fake API transactions, not clients: concurrent tests must not lose JSON writes.
+        import contextlib
+        import fcntl
+        import io
+        import time
+        output = io.StringIO()
+        with open(os.environ["FAKE_GH_STATE"] + ".lock", "w", encoding="utf-8") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            with contextlib.redirect_stdout(output):
+                main()
+        result = output.getvalue()
+        gate = os.environ.get("FAKE_GH_INITIAL_GATE")
+        if gate and "/comments?" in " ".join(sys.argv) and "-X" not in sys.argv and result.strip() == "[[]]":
+            from pathlib import Path
+            Path(gate, os.environ["FAKE_GH_ACTOR"]).touch()
+            deadline = time.monotonic() + 10
+            while len(list(Path(gate).iterdir())) < 2:
+                if time.monotonic() > deadline:
+                    raise RuntimeError("concurrent clients did not reach the initial barrier")
+                time.sleep(0.01)
+        sys.stdout.write(result)

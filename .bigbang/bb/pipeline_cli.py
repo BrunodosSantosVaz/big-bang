@@ -7,7 +7,7 @@ import os
 import sys
 
 from . import config as config_module
-from . import acceptance, docs_check, pipeline, stack_guard, traceability
+from . import acceptance, docs_check, ownership, pipeline, stack_guard, status, traceability
 from .errors import EXIT_OK, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 from .paths import read_text, write_text
 
@@ -108,6 +108,22 @@ def register(commands, parser_class):
     p = sub.add_parser("gravar-versao", help="grava a versão no arquivo de versão da stack (entrega.arquivo_versao)")
     p.add_argument("versao")
     p.set_defaults(handler=_write_version)
+
+    sub.add_parser("resumo-posses", help="possessões, flags e segurança (somente leitura)").set_defaults(
+        handler=lambda args: status.report(args.raiz, config_module.load(args.raiz)) or EXIT_OK)
+
+    p = sub.add_parser("marcar-paradas", help="marca posses sem push há mais que ias.trava_expira_horas")
+    p.add_argument("--aplicar", action="store_true", help="grava a label parada; padrão: simulação")
+    p.set_defaults(handler=lambda args: status.mark_stale(config_module.load(args.raiz), not args.aplicar) or EXIT_OK)
+
+    p = sub.add_parser("liberar-posse", help="liberação automática depois do merge (uso interno da esteira)")
+    p.add_argument("issue", type=int)
+    p.set_defaults(handler=lambda args: ownership.release(config_module.load(args.raiz), args.issue,
+                                                          automated=True) or EXIT_OK)
+
+    p = sub.add_parser("registrar-push", help="registra push na posse pelo horário do GitHub (uso interno)")
+    p.add_argument("issue", type=int)
+    p.set_defaults(handler=lambda args: ownership.touch(config_module.load(args.raiz), args.issue) or EXIT_OK)
 
 
 def _stdin():

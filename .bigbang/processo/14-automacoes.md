@@ -1,5 +1,12 @@
 # 14 · Automações
 
+## Coordenação de IAs
+
+**Marcar posses paradas** (`bb-posses.yml`) roda a cada hora e marca `parada` quando não houve push registrado por
+mais que `ias.trava_expira_horas`. O botão começa em simulação. **Kanban** registra pushes na sessão e libera a posse
+no merge do PR. **Ver painéis** e `bb status` exibem posses, flags vencidas e achados de segurança sem alterar estado.
+Essas automações usam o `PROJETO_TOKEN` do projeto; detalhes em [13-varias-ias.md](13-varias-ias.md).
+
 Todos os workflows gerados pelo Big Bang, os botões, os segredos e as variáveis, e os limites conhecidos do GitHub.
 
 ## Regras de todos os workflows gerados
