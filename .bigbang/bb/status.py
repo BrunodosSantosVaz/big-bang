@@ -24,14 +24,18 @@ def possessions(config, now=None):
 def mark_stale(config, simulate=True):
     repo = config["projeto"]["repositorio"]
     for entry in possessions(config):
-        if not entry["stale"]:
-            continue
-        print(f"#{entry['issue']}: posse parada" + (" (simulação)" if simulate else ""))
+        if entry["stale"]:
+            print(f"#{entry['issue']}: posse parada" + (" (simulação)" if simulate else ""))
         if not simulate:
             # Re-read: a push or release may have arrived while collecting the report.
             claims = ownership.active_claims(repo, entry["issue"], config["projeto"]["dono"])
             if ownership.stale(config, entry["issue"], claims):
                 ownership._add_label(repo, entry["issue"], "parada")
+            # Reconcile after the write: a concurrent push may have renewed or released the session.
+            current = ownership.active_claims(repo, entry["issue"], config["projeto"]["dono"])
+            if not ownership.stale(config, entry["issue"], current):
+                if "parada" in ownership.labels(ownership.issue_data(repo, entry["issue"])):
+                    ownership._remove_label(repo, entry["issue"], "parada")
 
 
 def _date(value, field, name):
