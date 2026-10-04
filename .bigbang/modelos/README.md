@@ -16,3 +16,5 @@ de cada arquivo no projeto, não a esta pasta.
 | [c4-conteineres.md](c4-conteineres.md) | `docs/arquitetura/conteineres.md` | F2 |
 | [bigbang.toml.exemplo](bigbang.toml.exemplo) | `bigbang.toml` | F0 (`bb init`), completado em F1, F2 e F4 |
 | [flags.toml](flags.toml) | `flags.toml` | F5 (vazio) |
+| [checklist-producao.md](checklist-producao.md) | `docs/operacao/checklist-producao.md` | F2/F5 (cada item com sua verificação) |
+| [compose.yaml](compose.yaml) | `deploy/compose.yaml` | F2, perfil deploy com alvo vps-docker |
