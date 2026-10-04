@@ -160,6 +160,21 @@ class Mesclar(ComBb):
                 self.assertIn("não será mesclado", r.stdout)
                 self.assertFalse(self.mesclado())
 
+    def test_so_a_execucao_mais_recente_do_check_conta(self):  # pilot PR #25: regras failed, then passed
+        self.epico()
+        antiga = dict(self.VERDE[1], id=1, conclusion="failure")
+        cancelada = dict(self.VERDE[1], id=2, conclusion="cancelled")
+        self.pr(checks=[dict(self.VERDE[0], id=3), antiga, cancelada, dict(self.VERDE[1], id=4),
+                        dict(self.VERDE[2], id=8)])
+        r = self.mesclar()
+        self.assertTrue(self.mesclado(), r.stdout + r.stderr)
+        self.epico()
+        self.pr(numero=31, sha="def", checks=[dict(self.VERDE[0], id=5), dict(self.VERDE[1], id=6),
+                                              dict(self.VERDE[1], id=7, conclusion="failure"),
+                                              dict(self.VERDE[2], id=9)])
+        r = self.mesclar(numero=31)
+        self.assertIn("o check regras falhou", r.stdout)  # the newest run failed: still waits
+
     def test_nunca_na_main(self):
         self.pr(head="release/1.0.0", base="main")
         self.assertIn("só recebe releases", self.mesclar().stdout)

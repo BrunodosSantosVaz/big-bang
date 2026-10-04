@@ -4,6 +4,17 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [0.11.6] - 2026-10-04
+
+### O que muda
+
+- *Mesclar PR* considera só a execução mais recente de cada check obrigatório: um `regras` que rodou de novo depois
+  da label de decisão (ou foi cancelado pela concorrência) não segura mais o merge.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [0.11.5] - 2026-10-04
 
 ### O que muda
