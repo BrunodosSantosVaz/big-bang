@@ -118,5 +118,70 @@ class GuardaDaStack(Projeto):
         self.assertEqual(stack_guard.problems(self.raiz), [])
 
 
+GRADLE_STACK = STACK.replace("<!-- bb:dependencias:fim -->", """| androidx.core:core-ktx | maven | 1 | base | ADR-0001 |
+| androidx.compose:compose-bom | maven | 2026 | UI | ADR-0001 |
+| androidx.compose.ui:ui | maven | BOM | UI | ADR-0001 |
+| androidx.compose.material3:material3 | maven | BOM | UI | ADR-0001 |
+| com.google.zxing:core | maven | 3 | QR | ADR-0001 |
+<!-- bb:dependencias:fim -->""")
+CATALOGO = """[versions]
+core = "1.17.0"
+
+[libraries]
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2026.09.00" }
+androidx_compose_ui = { module = "androidx.compose.ui:ui" }
+compose-material3 = "androidx.compose.material3:material3:1.5.0"
+junit = "junit:junit:4.13.2"
+
+[bundles]
+compose = ["androidx_compose_ui", "compose-material3"]
+"""
+
+
+class GuardaGradle(Projeto):
+    """Android/Gradle projects (found by the ScreenFakeCam pilot): version catalog, bundles and platform() BOMs."""
+
+    def setUp(self):
+        super().setUp()
+        self.escrever("STACK.md", GRADLE_STACK)
+        self.escrever("gradle/libs.versions.toml", CATALOGO)
+
+    def gradle(self, corpo):
+        self.escrever("app/build.gradle.kts", "dependencies {\n" + corpo + "}\n")
+        return stack_guard.problems(self.raiz)
+
+    def test_catalogo_bundle_e_bom_aprovados(self):
+        self.assertEqual(self.gradle(
+            "    implementation(libs.androidx.core.ktx)\n"
+            "    implementation(platform(libs.androidx.compose.bom))\n"
+            "    implementation(libs.bundles.compose)\n"
+            "    implementation(\"com.google.zxing:core:3.5.4\")\n"
+            "    implementation(project(\":core\"))\n"
+            "    testImplementation(libs.junit)\n"
+            "    debugImplementation(\"androidx.compose.ui:ui-tooling\")\n"), [])
+
+    def test_dependencia_do_catalogo_fora_da_tabela(self):
+        problemas = self.gradle("    implementation(libs.junit)\n")
+        self.assertEqual(len(problemas), 1)
+        self.assertIn("junit:junit (maven)", problemas[0])
+
+    def test_linha_que_a_guarda_nao_entende_falha_explicitamente(self):
+        for linha in ("    implementation(libs.nao.existe)\n", "    api(minhaVariavel)\n",
+                      "    implementation group: 'g', name: 'a'\n"):
+            with self.subTest(linha=linha.strip()):
+                problemas = self.gradle(linha)
+                self.assertTrue(any("não consegue ler" in p for p in problemas), problemas)
+
+    def test_catalogo_sem_arquivo_falha_explicitamente(self):
+        os.remove(os.path.join(self.raiz, "gradle", "libs.versions.toml"))
+        problemas = self.gradle("    implementation(libs.androidx.core.ktx)\n")
+        self.assertTrue(any("sem gradle/libs.versions.toml" in p for p in problemas), problemas)
+
+    def test_groovy_com_aspas_simples(self):
+        self.escrever("app/build.gradle", "dependencies {\n    implementation 'com.google.zxing:core:3.5.4'\n}\n")
+        self.assertEqual(stack_guard.problems(self.raiz), [])
+
+
 if __name__ == "__main__":
     unittest.main()

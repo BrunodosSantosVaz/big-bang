@@ -118,13 +118,70 @@ def _pom(text):
     return deps
 
 
-def _gradle(text):
-    pattern = re.compile(r"^\s*(?:implementation|api|runtimeOnly|compileOnly)\s*\(?\s*[\"']([^:\"']+):([^:\"']+)")
-    return [("maven", f"{m.group(1)}:{m.group(2)}") for m in map(pattern.match, text.splitlines()) if m]
+GRADLE_RUNTIME = re.compile(r"^\s*(implementation|api|runtimeOnly|compileOnly)\b\s*(.*)$")
+GRADLE_COORDINATE = re.compile(r"^\(?\s*(?:platform|enforcedPlatform)?\s*\(?\s*[\"']([^:\"'\s]+):([^:\"'\s]+)")
+GRADLE_CATALOG = re.compile(r"^\(?\s*(?:platform|enforcedPlatform)?\s*\(?\s*libs\.([A-Za-z0-9_.]+)")
+GRADLE_LOCAL = re.compile(r"^\(?\s*(project|files|fileTree)\s*\(")
+
+
+def _alias(name):
+    return re.sub(r"[-_.]+", ".", name.lower())
+
+
+def gradle_catalog(text):
+    """{accessor: [group:artifact]} of a gradle/libs.versions.toml (libraries and bundles)."""
+    data = tomllib.loads(text)
+    libraries = {}
+    for name, value in data.get("libraries", {}).items():
+        if isinstance(value, str):
+            module = ":".join(value.split(":")[:2])
+        elif "module" in value:
+            module = value["module"]
+        else:
+            module = f"{value.get('group', '')}:{value.get('name', '')}"
+        libraries[_alias(name)] = [module]
+    for name, members in data.get("bundles", {}).items():
+        libraries["bundles." + _alias(name)] = [m for member in members for m in libraries.get(_alias(member), [])]
+    return libraries
+
+
+def _gradle(text, catalog=None):
+    """Runtime dependencies of build.gradle(.kts): coordinates, platform() BOMs and version-catalog accessors.
+    A runtime line the guard cannot read is a problem, never skipped (local projects and files are not packages)."""
+    deps, problems = [], []
+    for number, line in enumerate(text.splitlines(), start=1):
+        match = GRADLE_RUNTIME.match(line)
+        if not match or not match.group(2) or match.group(2).startswith(("{", ".", "=")):
+            continue  # not a dependency declaration (configurations { implementation { … } }, accessors)
+        rest = match.group(2)
+        coordinate, accessor = GRADLE_COORDINATE.match(rest), GRADLE_CATALOG.match(rest)
+        if coordinate:
+            deps.append(("maven", f"{coordinate.group(1)}:{coordinate.group(2)}"))
+        elif accessor and catalog is not None and _alias(accessor.group(1)) in catalog:
+            deps += [("maven", module) for module in catalog[_alias(accessor.group(1))]]
+        elif GRADLE_LOCAL.match(rest):
+            continue
+        else:
+            where = "sem gradle/libs.versions.toml" if accessor and catalog is None else "formato não reconhecido"
+            problems.append(f"linha {number}: dependência de execução que a guarda não consegue ler ({where}): "
+                            f"{line.strip()}")
+    return deps, problems
+
+
+def _find_catalog(path, root):
+    folder = os.path.dirname(path)
+    while True:
+        candidate = os.path.join(folder, "gradle", "libs.versions.toml")
+        if os.path.exists(candidate):
+            return candidate
+        if os.path.abspath(folder) == os.path.abspath(root) or os.path.dirname(folder) == folder:
+            return None
+        folder = os.path.dirname(folder)
 
 
 PARSERS = {"package.json": _package_json, "pyproject.toml": _pyproject, "go.mod": _go_mod, "Cargo.toml": _cargo,
-           "composer.json": _composer, "pom.xml": _pom, "build.gradle": _gradle, "build.gradle.kts": _gradle}
+           "composer.json": _composer, "pom.xml": _pom}
+GRADLE_FILES = ("build.gradle", "build.gradle.kts")
 
 
 def dependency_files(root):
@@ -147,6 +204,17 @@ def direct_runtime_dependencies(root):
         if name in UNSUPPORTED or name.endswith(".gemspec"):
             problems.append(f"{relative}: ecossistema {UNSUPPORTED.get(name, 'rubygems')} não suportado pela guarda "
                             "da stack; peça o suporte numa issue do Big Bang")
+            continue
+        if name in GRADLE_FILES:
+            try:
+                catalog_path = _find_catalog(path, root)
+                catalog = gradle_catalog(read_text(catalog_path)) if catalog_path else None
+                found, unreadable = _gradle(read_text(path), catalog)
+            except (ValueError, tomllib.TOMLDecodeError) as exc:
+                problems.append(f"{relative}: não consegui ler o catálogo de versões do Gradle ({exc})")
+                continue
+            deps += [(ecosystem, dep, relative) for ecosystem, dep in found]
+            problems += [f"{relative}: {problem}" for problem in unreadable]
             continue
         if parser is None:
             continue
