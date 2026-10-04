@@ -22,6 +22,7 @@ from .init import set_value
 from .paths import FRAMEWORK_DIR, config_path, framework_dir, read_text, write_text
 
 PR_LABEL = "revisao-humana"
+PR_LABEL_COLOR, PR_LABEL_DESCRIPTION = "FBCA04", "PRs revisados pelo dono"  # as in .bigbang/scripts/criar-labels.sh
 
 
 def _git(root, *args, check=True):
@@ -108,6 +109,15 @@ def swap(root, new_framework):
                 handle.write(data)
 
 
+def ensure_label():
+    """The PR needs revisao-humana, which only exists after Foundation F4: create it when missing, before any push."""
+    try:
+        github.run("label", "create", PR_LABEL, "--color", PR_LABEL_COLOR, "--description", PR_LABEL_DESCRIPTION)
+    except BbError as exc:
+        if "already exists" not in exc.message:
+            raise
+
+
 def _pr_body(current, target, sections, manual, generated):
     lines = ["## O que muda", "", f"Atualiza o Big Bang de v{current} para v{target} (`bb atualizar`).",
              "Só a camada do framework (`.bigbang/`) e a camada gerada mudam; a camada do projeto não é tocada.", "",
@@ -168,6 +178,7 @@ def update(root, target=None, simulate=False, confirmed=False, attestation=True)
         raise BbError(f"bb verificar falhou na branch local {branch} (nada foi enviado; revise e corrija, ou volte "
                       f"com git switch develop e apague a branch):\n{verified}",
                       EXIT_VERIFICATION_FAILED)
+    ensure_label()
     _git(root, "add", "-A")  # the tree was clean: everything here came from the swap, bigbang.versao and bb gerar
     _git(root, "commit", "-q", "-m", f"chore(framework): update Big Bang to v{target}\n\n"
          f"bb atualizar: .bigbang/ replaced by the verified v{target} package, bigbang.versao updated and the "

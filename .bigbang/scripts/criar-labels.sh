@@ -5,6 +5,8 @@
 set -euo pipefail
 
 REPO="${1:?Uso: $0 OWNER/REPO [--simular]}"
+[[ "$REPO" =~ ^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+$ ]] \
+  || { echo "::error::informe o repositório como dono/repo (recebi '$REPO')" >&2; exit 2; }
 SIMULAR="${2:-}"
 
 # name|color|description

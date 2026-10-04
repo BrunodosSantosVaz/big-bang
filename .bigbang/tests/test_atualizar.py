@@ -131,6 +131,10 @@ class Atualizar(CasoDeScript):
         pr = next(iter(self.estado["prs"].values()))
         self.assertEqual((pr["base"], pr["head"]), ("develop", branch))
         self.assertIn("revisao-humana", pr["labels"])
+        criar = [c for c in self.chamadas() if c[:3] == ["label", "create", "revisao-humana"]]
+        self.assertTrue(criar)  # before F4 the label does not exist yet (found by the pilot)
+        self.assertLess(self.chamadas().index(criar[0]),
+                        next(i for i, c in enumerate(self.chamadas()) if c[:2] == ["pr", "create"]))
         self.assertIn(f"## [{NOVA}]", pr["body"])
         self.assertEqual(self.bb("verificar").returncode, 0)
 
