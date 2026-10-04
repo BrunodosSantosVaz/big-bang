@@ -51,7 +51,7 @@ formulario_do_epico() {
   local editar=(gh issue edit "$ISSUE" --repo "$R")
   [ "${#add[@]}" -eq 0 ] || editar+=(--add-label "$(IFS=,; echo "${add[*]}")")
   [ "${#remove[@]}" -eq 0 ] || editar+=(--remove-label "$(IFS=,; echo "${remove[*]}")")
-  if [ "${#editar[@]}" -gt 4 ]; then
+  if [ "${#add[@]}" -gt 0 ] || [ "${#remove[@]}" -gt 0 ]; then  # gh issue edit refuses a call without a field
     "${editar[@]}" >/dev/null
     echo "Épico #$ISSUE: labels do formulário: +${add[*]:-} -${remove[*]:-}"
   fi

@@ -4,6 +4,18 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [0.11.5] - 2026-10-04
+
+### O que muda
+
+- `kanban.sh`: editar um épico sem mudar as respostas do formulário não falha mais.
+- Fundação: o *Publicar sem release* vem logo depois do PR que instala a esteira (F5), antes do épico Esqueleto
+  andante; sem a esteira na `main`, os workflows de issue e os botões não rodam.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [0.11.4] - 2026-10-04
 
 ### O que muda
