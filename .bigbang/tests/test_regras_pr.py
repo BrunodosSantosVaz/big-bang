@@ -132,6 +132,25 @@ class TravaEPendentes(_Base):
         self.assertIn("tests/aceite/7-e/a.test.js:1: teste ainda marcado como pendente da #15", r.stdout)
 
 
+class RastreioEGuardaNoPr(_Base):
+    def test_dependencia_nova_sem_stack_reprova_e_com_a_linha_passa(self):
+        dados = os.path.join(self.pasta, "head")
+        os.makedirs(dados)
+        with open(os.path.join(dados, "package.json"), "w", encoding="utf-8") as arquivo:
+            arquivo.write('{"dependencies": {"left-pad": "1"}}')
+        stack = ("# Stack\n<!-- bb:dependencias:inicio -->\n| Pacote | Ecossistema | Faixa de versão | Para quê | ADR |\n"
+                 "| --- | --- | --- | --- | --- |\n<!-- bb:dependencias:fim -->\n")
+        with open(os.path.join(dados, "STACK.md"), "w", encoding="utf-8") as arquivo:
+            arquivo.write(stack)
+        r = self.regras(dados=dados)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("guarda da stack: package.json: left-pad (npm)", r.stdout)
+        with open(os.path.join(dados, "STACK.md"), "w", encoding="utf-8") as arquivo:
+            arquivo.write(stack.replace("<!-- bb:dependencias:fim -->", "| left-pad | npm | 1 | x | ADR-0002 |\n"
+                                                                          "<!-- bb:dependencias:fim -->"))
+        self.assertEqual(self.regras(dados=dados).returncode, 0)
+
+
 class InvarianteDaDevelop(_Base):
     """A PR into develop may not leave artifact code there that main (production) does not have."""
 

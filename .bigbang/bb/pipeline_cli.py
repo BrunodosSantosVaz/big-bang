@@ -7,7 +7,7 @@ import os
 import sys
 
 from . import config as config_module
-from . import acceptance, docs_check, pipeline
+from . import acceptance, docs_check, pipeline, stack_guard, traceability
 from .errors import EXIT_OK, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 from .paths import read_text, write_text
 
@@ -88,6 +88,15 @@ def register(commands, parser_class):
     p = sub.add_parser("pendentes", help="marcas de pendente em tests/aceite/: <issue>\t<arquivo:linha>")
     p.add_argument("--dados", help="pasta com o conteúdo a examinar (padrão: a raiz)")
     p.set_defaults(handler=_pending)
+
+    p = sub.add_parser("rastreabilidade", help="RN vigente sem teste, teste sem RN, RN apagada")
+    p.add_argument("--dados", help="pasta com o conteúdo a examinar (padrão: a raiz)")
+    p.add_argument("--mudados", default="", help="arquivo com os caminhos mudados no PR (um por linha)")
+    p.set_defaults(handler=_traceability)
+
+    p = sub.add_parser("guarda-stack", help="dependências diretas de execução fora do STACK.md")
+    p.add_argument("--dados", help="pasta com o conteúdo a examinar (padrão: a raiz)")
+    p.set_defaults(handler=_stack_guard)
 
     p = sub.add_parser("gravar-versao", help="grava a versão no arquivo de versão da stack (entrega.arquivo_versao)")
     p.add_argument("versao")
@@ -219,6 +228,26 @@ def _pending(args):
     for issue, where in acceptance.pending_marks(args.dados or args.raiz, marker):
         print(f"{issue}\t{where}")
     return EXIT_OK
+
+
+def _report(problems, ok_message):
+    for problem in problems:
+        print(problem)
+    if not problems:
+        print(ok_message)
+    return EXIT_VERIFICATION_FAILED if problems else EXIT_OK
+
+
+def _traceability(args):
+    pattern = config_module.load(args.raiz)["testes"]["padrao_teste"]
+    changed = read_text(args.mudados).split() if args.mudados else []
+    return _report(traceability.problems(args.dados or args.raiz, pattern, changed),
+                   "Rastreabilidade: toda RN vigente tem teste e todo teste cita uma RN.")
+
+
+def _stack_guard(args):
+    return _report(stack_guard.problems(args.dados or args.raiz),
+                   "Guarda da stack: todas as dependências de execução estão aprovadas no STACK.md.")
 
 
 def _docs(args):
