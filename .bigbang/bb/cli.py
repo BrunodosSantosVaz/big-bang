@@ -3,7 +3,7 @@ import argparse
 import sys
 
 from . import config as config_module
-from . import acceptance, checksums, generator, verify
+from . import acceptance, checksums, decisions, generator, verify
 from . import init as init_module
 from . import pipeline_cli
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
@@ -54,6 +54,22 @@ def build_parser():
     liberar_parser.add_argument("tarefa", type=int)
     liberar_parser.set_defaults(handler=_aceite_liberar)
 
+    decisao_parser = commands.add_parser("decisao", help="registra uma decisão do dono (frase + label)")
+    decisao_parser.add_argument("label", choices=decisions.DECISIONS)
+    decisao_parser.add_argument("numero", type=int, help="issue ou PR")
+    decisao_parser.add_argument("--frase", required=True, help="as palavras do dono, como ele disse")
+    decisao_parser.add_argument("--ia", default=None, help="nome da IA (padrão: BB_IA ou 'ia')")
+    decisao_parser.set_defaults(handler=_decisao)
+
+    revisao_parser = commands.add_parser("revisao", help="revisão de PR")
+    revisao_commands = revisao_parser.add_subparsers(dest="revisao_command", metavar="<subcomando>",
+                                                     parser_class=_Parser)
+    aprovar_parser = revisao_commands.add_parser("aprovar", help="põe pr-aprovado depois do bb-revisor-pr")
+    aprovar_parser.add_argument("pr", type=int)
+    aprovar_parser.add_argument("--ia", default=None)
+    aprovar_parser.add_argument("--relatorio", default=None, help="arquivo com o relatório do revisor")
+    aprovar_parser.set_defaults(handler=_revisao_aprovar)
+
     pipeline_cli.register(commands, _Parser)
 
     checksums_parser = commands.add_parser("checksums", help="confere ou grava .bigbang/CHECKSUMS (manutenção)")
@@ -78,6 +94,30 @@ def _init(args):
     if issue:
         print(f"Issue de F0: {issue}")
     print("Próximo passo: revisar o diff, commitar numa branch fundacao/<n>-f0 e abrir o PR para a develop.")
+    return EXIT_OK
+
+
+def _ia(args):
+    import os
+    return args.ia or os.environ.get("BB_IA") or "ia"
+
+
+def _decisao(args):
+    repository = config_module.load(args.raiz)["projeto"]["repositorio"]
+    decisions.record_decision(repository, args.label, args.numero, args.frase, _ia(args))
+    print(f"Decisão registrada em #{args.numero}: {args.label}.")
+    return EXIT_OK
+
+
+def _revisao_aprovar(args):
+    config = config_module.load(args.raiz)
+    report = ""
+    if args.relatorio:
+        from .paths import read_text
+        report = read_text(args.relatorio)
+    decisions.approve_review(config["projeto"]["repositorio"], args.pr, _ia(args),
+                             config["seguranca"]["zonas_sensiveis"], config["testes"]["marca_pendente"], report)
+    print(f"PR #{args.pr}: pr-aprovado (revisão da IA).")
     return EXIT_OK
 
 
