@@ -22,6 +22,7 @@ arquivo_versao = "package.json"          # único arquivo com a versão do artef
 ecossistemas = ["npm", "docker"]           # pacotes da stack para o Dependabot (definido em F2)
 
 [compilado]                            # só no perfil compilado
+# Cada build_<sistema> deixa exatamente um arquivo em $BB_SAIDA (lê BB_VERSAO, BB_RC, BB_SISTEMA). ADR-0009.
 sistemas = ["windows-x64", "linux-x64"]
 build_windows-x64 = "python packaging/windows/build.py"
 build_linux-x64 = "bash packaging/linux/build.sh"

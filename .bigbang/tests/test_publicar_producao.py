@@ -5,6 +5,7 @@ import os
 import subprocess
 
 from test_candidata import BaseCompilado
+from test_kanban_mesclar import ComBb
 
 VERDE = [{"name": "check", "status": "completed", "conclusion": "success"},
          {"name": "regras", "status": "completed", "conclusion": "success"}]
@@ -113,3 +114,30 @@ class PublicarEmProducao(BaseCompilado):
         self.assertIn("retomada", r.stdout)
         self.assertEqual(self.estado["releases"].count("v0.2.0"), 1)
 
+
+
+class TarefaDeCorrecao(ComBb):
+    def test_cria_a_tarefa_no_epico_reprovado(self):
+        self.estado["refs"] = {"heads/epico/7-saudacao": "ep1"}
+        self.gravar_estado()
+        self.issue(7, "[Épico] Saudação", labels=["epic", "reprovado", "revisao-humana"], milestone="v0.2.0", sub=[11])
+        self.issue(11, "Testes", labels=["teste-aceite"], parent=7)
+        self.cartao(1, 7, "Em desenvolvimento", Sprint="Sem sprint")
+        r = self.rodar("tarefa-de-correcao.sh", env={"BB": self.bb, "EPICO": "7",
+                                                      "MOTIVO": "A vírgula sai antes do nome.\nVer captura."})
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        nova = max(int(n) for n in self.estado["issues"])
+        issue = self.estado["issues"][str(nova)]
+        self.assertEqual(issue["title"], "Correção: A vírgula sai antes do nome.")
+        self.assertEqual(set(issue["labels"]), {"task", "revisao-humana"})
+        self.assertEqual(issue["milestone"], "v0.2.0")
+        self.assertEqual(issue["parent"], 7)
+        self.assertIn("A vírgula sai antes do nome.", issue["body"])
+        self.assertEqual(self.status(2, nova), "Feature")
+        self.assertIn(f"heads/feature/{nova}-correcao-a-virgula-sai-antes-do-nome", self.estado["refs"])
+
+    def test_recusa_epico_nao_reprovado(self):
+        self.issue(7, "Saudação", labels=["epic"])
+        r = self.rodar("tarefa-de-correcao.sh", env={"BB": self.bb, "EPICO": "7", "MOTIVO": "x"})
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("não está reprovado", r.stdout)
