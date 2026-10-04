@@ -2,7 +2,7 @@
 name: bb-gerar
 description: Use em F5 ou quando bigbang.toml mudar ou o framework for atualizado, para simular, gerar e verificar a camada gerada e abrir PR com revisão humana.
 ---
-<!-- Gerado pelo Big Bang v0.11.0 a partir de .bigbang/skills/bb-gerar/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v0.11.1 a partir de .bigbang/skills/bb-gerar/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Gerar a camada do Big Bang
 

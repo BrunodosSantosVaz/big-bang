@@ -346,6 +346,10 @@ def main():
         log.write(json.dumps(argv, ensure_ascii=False) + "\n")
     state = load()
     fields, jq, method, positional, flags = options(argv)
+    if argv[0] == "api" and flags.get("--input"):  # the request body (e.g. a ruleset), kept for the assertions
+        with open(flags["--input"][0], encoding="utf-8") as body:
+            state.setdefault("corpos", []).append({"rota": positional[1], "corpo": json.loads(body.read())})
+        save(state)
     if argv[:2] == ["api", "graphql"]:
         return graphql(state, fields, jq)
     if argv[0] == "api":

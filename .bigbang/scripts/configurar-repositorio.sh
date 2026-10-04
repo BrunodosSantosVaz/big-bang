@@ -14,6 +14,8 @@ set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
 REPO="${1:?Uso: $0 OWNER/REPO [--simular]}"
+[[ "$REPO" =~ ^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+$ ]] \
+  || { echo "::error::informe o repositório como dono/repo (recebi '$REPO')" >&2; exit 2; }
 SIMULAR="${2:-}"
 read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 config() { "${BB_CMD[@]}" config get "$1"; }
@@ -45,8 +47,9 @@ ambiente() { # <nome> <exigir aprovação: true|false>
   else
     corpo='{"deployment_branch_policy":null}'
   fi
+  corpo=$(json <<<"$corpo")  # before the call: in a simulation nobody reads the <(…) and python would hit SIGPIPE
   fazer "ambiente $1$([ "$2" = true ] && echo " com aprovação do dono")" \
-    gh api -X PUT "repos/$REPO/environments/$1" --input <(json <<<"$corpo")
+    gh api -X PUT "repos/$REPO/environments/$1" --input <(printf '%s' "$corpo")
 }
 ambiente producao true
 if [ "$SIMULAR" != --simular ]; then
@@ -63,10 +66,12 @@ fi
 echo "5. Rulesets"
 # The required checks only exist once the pipeline is installed (F5): before that, requiring them would block every
 # Foundation PR. Run this script again after `bb gerar --esteira`.
-checks='{"type": "required_status_checks", "parameters": {"strict_required_status_checks_policy": false,
+# Each rule type may appear only once in a ruleset (GitHub answers 422 otherwise), so before F5 the checks rule is
+# simply left out.
+checks=', {"type": "required_status_checks", "parameters": {"strict_required_status_checks_policy": false,
          "required_status_checks": [{"context": "check"}, {"context": "regras"}, {"context": "seguranca"}]}}'
 if [ ! -f .github/workflows/bb-ci.yml ]; then
-  checks='{"type": "non_fast_forward"}'
+  checks=""
   aviso "a esteira ainda não está instalada: os rulesets exigem PR, mas ainda não os checks; rode este script de novo depois da F5"
 fi
 ruleset() { # <nome> <padrão do ref>
@@ -78,8 +83,7 @@ ruleset() { # <nome> <padrão do ref>
  "rules": [{"type": "deletion"}, {"type": "non_fast_forward"},
            {"type": "pull_request", "parameters": {"required_approving_review_count": 0,
              "dismiss_stale_reviews_on_push": false, "require_code_owner_review": false,
-             "require_last_push_approval": false, "required_review_thread_resolution": false}},
-           $checks]}
+             "require_last_push_approval": false, "required_review_thread_resolution": false}}$checks]}
 EOF
 )
   id=""
