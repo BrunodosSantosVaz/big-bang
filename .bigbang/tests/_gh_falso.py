@@ -387,9 +387,15 @@ def main():
     if argv[:2] == ["pr", "create"]:
         number = str(max([int(n) for n in state.get("prs", {})] + [400]) + 1)
         state.setdefault("prs", {})[number] = {"head": flags["--head"][0], "base": flags["--base"][0],
-                                               "title": flags["--title"][0], "state": "OPEN", "labels": []}
+                                               "title": flags["--title"][0], "state": "OPEN",
+                                               "labels": flags.get("--label", []), "body": (flags.get("--body") or [""])[0]}
         save(state)
         print(f"https://github.com/{REPO}/pull/{number}")
+        return None
+    if argv[:2] == ["attestation", "verify"]:
+        if state.get("atestacao_falha"):
+            sys.stderr.write("verification failed\n")
+            sys.exit(1)
         return None
     if argv[:2] == ["release", "download"]:
         import shutil
@@ -398,6 +404,8 @@ def main():
             shutil.copy(os.path.join(source, name), os.path.join(flags["--dir"][0], name))
         return None
     if argv[:2] == ["release", "view"]:
+        if len(positional) < 3:  # no tag: the latest release
+            return emit({"tagName": state["releases"][-1]}, jq)
         if positional[2] not in state.get("releases", []):
             sys.stderr.write("release not found\n")
             sys.exit(1)
