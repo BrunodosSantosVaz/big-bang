@@ -1,0 +1,60 @@
+# Release do proprio Big Bang (ADR-0014). Roda so no repositorio BrunodosSantosVaz/big-bang, quando a tag vX.Y.Z
+# chega na main: confere CHECKSUMS e VERSION, empacota .bigbang/ de forma reprodutivel e cria a Release com
+# bigbang-vX.Y.Z.tar.gz, o .sha256, a atestacao de origem e as notas da secao da versao no MIGRACAO.md.
+# E o pacote que `bb atualizar` baixa nos sistemas. A Fundacao (F5) remove este arquivo nos sistemas.
+name: Release do Big Bang
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-framework-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: pacote e release
+    if: github.repository == 'BrunodosSantosVaz/big-bang'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: A tag esta na main e bate com .bigbang/VERSION
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          git fetch -q origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main || { echo "::error::$TAG nao esta na main"; exit 1; }
+          versao=$(tr -d '[:space:]' < .bigbang/VERSION)
+          [ "v$versao" = "$TAG" ] || { echo "::error::$TAG nao bate com .bigbang/VERSION ($versao)"; exit 1; }
+      - name: bb verificar e pacote reprodutivel
+        run: |
+          python .bigbang/bin/bb.py verificar
+          python .bigbang/bin/bb.py pacote --saida dist --notas "$RUNNER_TEMP/notas.md"
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/bigbang-v*.tar.gz
+      - name: Criar a Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --verify-tag \
+              --title "Big Bang $TAG" --notes-file "$RUNNER_TEMP/notas.md"
+          fi

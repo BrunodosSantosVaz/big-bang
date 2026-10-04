@@ -3,7 +3,7 @@ import argparse
 import sys
 
 from . import config as config_module
-from . import acceptance, checklist, checksums, decisions, generator, ownership, status, verify, workspaces
+from . import acceptance, checklist, checksums, decisions, generator, ownership, package, status, verify, workspaces
 from . import init as init_module
 from . import pipeline_cli
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
@@ -94,6 +94,11 @@ def build_parser():
     producao_parser.set_defaults(handler=_checklist_producao)
 
     pipeline_cli.register(commands, _Parser)
+
+    pacote_parser = commands.add_parser("pacote", help="empacota .bigbang/ para a release do framework (manutenção)")
+    pacote_parser.add_argument("--saida", default="dist")
+    pacote_parser.add_argument("--notas", default=None, help="grava as notas da versão (MIGRACAO.md) neste arquivo")
+    pacote_parser.set_defaults(handler=_pacote)
 
     checksums_parser = commands.add_parser("checksums", help="confere ou grava .bigbang/CHECKSUMS (manutenção)")
     checksums_parser.add_argument("--escrever", action="store_true", help="grava o CHECKSUMS com o estado atual")
@@ -222,6 +227,17 @@ def _verificar(args):
             print(f"  - {problem}", file=sys.stderr)
         return EXIT_VERIFICATION_FAILED
     print("bb verificar: tudo certo.")
+    return EXIT_OK
+
+
+def _pacote(args):
+    import os
+    from .paths import framework_version, write_text
+    target, digest = package.build(args.raiz, os.path.join(args.raiz, args.saida) if not os.path.isabs(args.saida)
+                                   else args.saida)
+    if args.notas:
+        write_text(args.notas, package.release_notes(args.raiz, framework_version(args.raiz)) + "\n")
+    print(f"{target}\n{digest}")
     return EXIT_OK
 
 
