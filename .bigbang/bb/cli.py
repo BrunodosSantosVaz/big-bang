@@ -5,6 +5,7 @@ import sys
 from . import config as config_module
 from . import checksums, generator, verify
 from . import init as init_module
+from . import pipeline_cli
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 from .paths import default_root
 
@@ -46,6 +47,8 @@ def build_parser():
 
     verificar_parser = commands.add_parser("verificar", help="confere framework, arquivos gerados e workflows")
     verificar_parser.set_defaults(handler=_verificar)
+
+    pipeline_cli.register(commands, _Parser)
 
     checksums_parser = commands.add_parser("checksums", help="confere ou grava .bigbang/CHECKSUMS (manutenção)")
     checksums_parser.add_argument("--escrever", action="store_true", help="grava o CHECKSUMS com o estado atual")

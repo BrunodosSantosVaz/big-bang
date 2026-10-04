@@ -18,6 +18,7 @@ licenca = ""                           # obrigatório se publico (identificador 
 perfil = "compilado"                      # deploy | compilado
 alvo = ""                    # deploy: vps-docker | aws | paas ; compilado: ""
 caminhos_artefato = ["src/", "packaging/", "pyproject.toml"]
+arquivo_versao = "src/version.py"        # único arquivo com a versão do artefato (definido em F2)
 
 [compilado]                            # só no perfil compilado
 sistemas = ["windows-x64", "linux-x64"]
