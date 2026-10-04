@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v0.6.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ver-paineis.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v0.7.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ver-paineis.yml. Não edite: personalize em bigbang.toml.
 # Botão "Ver painéis" (spec 14.2): somente leitura. Em repositório público, o resumo também é público.
 name: Ver painéis
 

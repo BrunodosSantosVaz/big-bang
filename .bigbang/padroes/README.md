@@ -30,7 +30,7 @@ Exceção a uma regra só com ADR aprovado pelo dono, listado em `docs/padroes/e
 
 Cada regra → como é verificada → onde a verificação existe. A coluna **Implementada em** traz o arquivo do framework
 que já implementa a verificação ou o épico do [roteiro](../docs/especificacao.md) que vai implementá-la
-(`E7` várias IAs; `E8` skills e hooks;
+(`E8` skills e hooks;
 `E9` perfil deploy). Quando um épico entrega a verificação, a linha passa a apontar
 para o arquivo. O teste `.bigbang/tests/test_padroes.py` confere que esta tabela bate com as regras.
 
