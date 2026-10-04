@@ -61,25 +61,25 @@ def inspect(event):
         target = Path(event["cwd"]) / target
     lexical = Path(os.path.abspath(target))
     resolved = target.resolve()
-    relative = None
+    relatives = []
     for candidate in (lexical, resolved):
         try:
             current = candidate.relative_to(root)
         except ValueError:
             continue
-        relative = current
+        relatives.append(current)
         reason = guarded_path(current)
         if reason:
             return "deny", reason
-    if relative is None:
+    if not relatives:
         return "ask", "Arquivo fora da raiz Big Bang; confirme o escopo com o dono."
     text = resolved.read_text(encoding="utf-8") if resolved.is_file() else ""
-    pattern = BLOCKS.get(relative.as_posix())
-    if pattern and changed_block(event, text, pattern):
+    patterns = [BLOCKS[p.as_posix()] for p in relatives if p.as_posix() in BLOCKS]
+    if any(changed_block(event, text, pattern) for pattern in patterns):
         return "deny", "Bloco gerado protegido; altere a configuração e rode bb gerar."
-    if not pattern and "Gerado pelo Big Bang v" in "\n".join(text.splitlines()[:8]):
+    if not patterns and "Gerado pelo Big Bang v" in "\n".join(text.splitlines()[:8]):
         return "deny", "Arquivo gerado protegido; use bb gerar."
-    if relative.as_posix() in SENSITIVE:
+    if any(p.as_posix() in SENSITIVE for p in relatives):
         return "ask", "Documento de decisão do dono; confirme a mudança antes de editar."
     return None
 

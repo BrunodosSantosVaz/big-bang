@@ -86,6 +86,17 @@ def git_check(args, cwd):
 
 
 def gh_check(args):
+    # gh accepts persistent flags before its subcommand as well as local flags after it.
+    while args and args[0].startswith("-"):
+        option = args.pop(0)
+        if option in ("-R", "--repo", "-H", "--hostname") and args:
+            args.pop(0)
+        elif option.startswith(("--repo=", "--hostname=", "-R", "-H")):
+            continue
+        elif option in ("--help", "--version"):
+            return None
+        else:
+            return "ask", "Opção global do gh não reconhecida; confira com o dono."
     text = " ".join(args)
     if args[:2] == ["release", "delete"] and "--cleanup-tag" in args:
         return "deny", "Apagar tag junto com a release é proibido."
@@ -129,7 +140,7 @@ def inspect(event):
         return "ask", "Comando não pôde ser analisado; confira com o dono."
     segments, segment = [], []
     for token in tokens:
-        if token in CONTROL or token in ("(", ")"):
+        if token in CONTROL or (token and all(c in ";&|()" for c in token)):
             if segment:
                 segments.append(segment)
                 segment = []

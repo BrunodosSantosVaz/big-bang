@@ -97,6 +97,17 @@ class Arquivos(ComHook):
         self.assertEqual(self.call("STACK.md", "Edit", old_string="Python.", new_string="Outra."), "ask")
         self.assertEqual(self.call("STACK.md", "Edit", old_string="Gerado.", new_string="Livre."), "deny")
 
+    def test_alias_de_documento_preserva_classificacao_lexical(self):
+        text = "# Stack\nPython.\n" + "\n" * 9 + "<!-- bb:config:inicio -->\nGerado.\n<!-- bb:config:fim -->\n"
+        target = self.write("docs/stack-real.md", text)
+        try:
+            (self.root / "STACK.md").symlink_to(target)
+        except OSError:
+            self.skipTest("symlink indisponivel nesta plataforma")
+        self.assertEqual(self.call("STACK.md", "Edit", old_string="Python.", new_string="Outra."), "ask")
+        self.assertEqual(self.call("STACK.md", "Edit", old_string="Gerado.", new_string="Livre."), "deny")
+        self.assertEqual(self.call("STACK.md", content="# Apagado\n"), "deny")
+
     def test_falha_de_entrada_bloqueia_sem_vazar_evento(self):
         for data in ("{", "[]", '{"tool_input": "segredo-nao-expor"}'):
             result = self.raw("proteger_arquivos.py", data)
@@ -152,6 +163,22 @@ class Comandos(ComHook):
                         "gh api graphql -f query='mutation { addLabelsToLabelable(input:{}) { clientMutationId } }'"):
             with self.subTest(command=command):
                 self.assertEqual(self.call(command), "ask")
+
+    def test_opcoes_globais_do_gh_nao_isentam_decisoes(self):
+        for command in ("gh -R dono/repo issue edit 1 --add-label homologado",
+                        "gh --repo=dono/repo pr edit 2 --add-label pr-aprovado",
+                        "gh -Rdono/repo issue edit 1 --add-label testes-aprovados",
+                        "gh --hostname github.com api -XDELETE repos/dono/repo/git/refs/tags/v1"):
+            with self.subTest(command=command):
+                self.assertEqual(self.call(command), "deny")
+        self.assertEqual(self.call("gh --opcao-desconhecida issue edit 1 --add-label homologado"), "ask")
+        self.assertIsNone(self.call("gh -R dono/repo pr view 1"))
+
+    def test_pontuacao_agrupada_nao_esconde_comando_seguinte(self):
+        for command in ("(git status); git push origin main", "(git status); git tag -d v1.0.0",
+                        "(git status)&&git reset --hard", "(bb verificar)||git push origin develop"):
+            with self.subTest(command=command):
+                self.assertEqual(self.call(command), "deny")
 
     def test_powershell_tambem_aciona_os_bloqueios(self):
         self.assertEqual(self.call("git.exe push origin main", "PowerShell"), "deny")
