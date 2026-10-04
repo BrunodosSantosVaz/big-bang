@@ -1,0 +1,36 @@
+# Job obrigatório `seguranca` (spec 14.2 e 15.5): Gitleaks, Opengrep (OWASP), Bandit, OSV-Scanner, segredo no pacote
+# do front e RLS. Em PR olha o diff; no push e toda segunda-feira, o histórico completo.
+name: Segurança
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop, 'epico/**', 'release/**']
+  schedule:
+    - cron: '17 6 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-seguranca-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  seguranca:
+    name: seguranca
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Varreduras de segurança
+        run: bash .bigbang/esteira/nucleo/scripts/seguranca.sh
+        env:
+          EVENTO: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}

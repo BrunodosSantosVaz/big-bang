@@ -15,7 +15,8 @@ from bb.checklist import ITEMS  # noqa: E402
 
 CHECKLIST_OK = "\n".join(f"- [x] {item} — verificação: `nao-se-aplica: projeto fictício`" for item in ITEMS) + "\n"
 VERDE = [{"name": "check", "status": "completed", "conclusion": "success"},
-         {"name": "regras", "status": "completed", "conclusion": "success"}]
+         {"name": "regras", "status": "completed", "conclusion": "success"},
+             {"name": "seguranca", "status": "completed", "conclusion": "success"}]
 
 
 class PublicarEmProducao(BaseCompilado):
