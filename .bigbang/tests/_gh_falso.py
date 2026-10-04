@@ -210,6 +210,11 @@ def api(state, positional, fields, jq, method):
             save(state)
             return emit({}, jq)
         return emit([issue_json(state, n) for n in issue.get("blocked_by", [])], jq)
+    match = re.match(rf"^repos/{re.escape(REPO)}/git/matching-refs/heads/(.+)$", path)
+    if match:
+        refs = [{"ref": f"refs/{name}"} for name in sorted(state.get("refs", {}))
+                if name.startswith(f"heads/{match.group(1)}")]
+        return emit(refs, jq)
     match = re.match(rf"^repos/{re.escape(REPO)}/git/refs?/heads/(.+)$", path)
     if match and method == "GET":
         sha = state.get("refs", {}).get(f"heads/{match.group(1)}")
