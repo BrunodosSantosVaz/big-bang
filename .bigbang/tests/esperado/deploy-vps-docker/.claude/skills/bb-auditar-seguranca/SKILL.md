@@ -2,7 +2,7 @@
 name: bb-auditar-seguranca
 description: Use para audita a segurança, antes da primeira produção e ao fim de épico em zona sensível. Reporta só achados verificados no código e abre issues com evidências; não corrige na mesma sessão sem issue.
 ---
-<!-- Gerado pelo Big Bang v0.11.1 a partir de .bigbang/skills/bb-auditar-seguranca/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v0.11.2 a partir de .bigbang/skills/bb-auditar-seguranca/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Auditar segurança
 

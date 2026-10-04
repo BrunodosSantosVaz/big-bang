@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v0.11.1 a partir de .bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v0.11.2 a partir de .bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
 # Candidata do perfil deploy (spec 14.4): a cada push em release/**, testes, imagem construída UMA vez e publicada
 # por digest, Trivy, staging (migração, publicação, saúde, smoke e ZAP), pre-release vX.Y.Z-rc.N com o digest
 # (imagem.txt), SBOM e atestado, e então épico ou bug em Homologação com o PR release -> main.

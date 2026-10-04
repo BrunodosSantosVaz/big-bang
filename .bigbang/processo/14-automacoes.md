@@ -47,7 +47,10 @@ Todos os workflows gerados pelo Big Bang, os botões, os segredos e as variávei
 | `bb-candidata.yml` | push em `release/**` | testes; build por sistema; pre-release `vX.Y.Z-rc.N` com binários, `SHA256SUMS-<sistema>.txt`, atestado e SBOM; abre o PR da release |
 
 Contrato de build (ADR-0009): `compilado.build_<sistema>` deixa **exatamente um arquivo** em `$BB_SAIDA`
-(`dist/<sistema>`) e pode ler `BB_VERSAO`, `BB_RC` e `BB_SISTEMA`. O atestado de procedência só é gerado em
+(`dist/<sistema>`) e pode ler `BB_VERSAO`, `BB_RC` e `BB_SISTEMA`. Para assinar o binário (APK, executável), o build
+recebe os segredos opcionais `BB_ASSINATURA_ARQUIVO` (keystore ou certificado em base64), `BB_ASSINATURA_SENHA`,
+`BB_ASSINATURA_ALIAS` e `BB_ASSINATURA_SENHA_CHAVE`, só nesse passo; o script do projeto grava o arquivo num temporário
+e nunca o imprime. O atestado de procedência só é gerado em
 repositório público (em privado exige GitHub Enterprise Cloud).
 
 ### Perfil `deploy`

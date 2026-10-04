@@ -81,7 +81,9 @@ Um item por vez, conferido pela IA com `gh` antes do próximo:
 4. Ambiente `producao` com aprovação obrigatória do dono, aceitando só a `main`; no perfil deploy, também `staging`.
 5. Rulesets em `main`, `develop` e `epico/*`: exigem PR e os checks `check`, `regras` e `seguranca`; bloqueiam force
    push e exclusão.
-6. No perfil deploy: credenciais do alvo, preferindo federação OIDC (nada de chave fixa).
+6. No perfil deploy: credenciais do alvo, preferindo federação OIDC (nada de chave fixa). No perfil compilado:
+   os segredos de assinatura `BB_ASSINATURA_ARQUIVO` (keystore ou certificado em base64), `BB_ASSINATURA_SENHA`,
+   `BB_ASSINATURA_ALIAS` e, se diferente, `BB_ASSINATURA_SENHA_CHAVE`, gerados e guardados pelo dono.
 7. Variáveis do repositório (`PROJETO_OWNER`, números dos painéis) e opções de merge (permitir *merge commit*;
    "apagar branch após merge" desligado, porque quem apaga é a esteira).
 
