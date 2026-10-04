@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v0.11.1 a partir de .bigbang/esteira/perfis/compilado/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v0.11.2 a partir de .bigbang/esteira/perfis/compilado/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
 # Candidata do perfil compilado (spec 14.3): a cada push em release/**, testes, build de cada sistema (matriz) e,
 # só se TODOS compilarem, a pre-release vX.Y.Z-rc.N com binários, SHA256SUMS, SBOM e atestado de procedência.
 # Depois: épico ou bug em Homologação e PR release -> main. Nada é commitado aqui (o Git guarda só código).
@@ -78,6 +78,12 @@ jobs:
           BB_SISTEMA: ${{ matrix.sistema }}
           BB_VERSAO: ${{ needs.preparar.outputs.versao }}
           BB_RC: ${{ needs.preparar.outputs.rc }}
+          # Code signing (optional, only in this step): keystore/certificate in base64, passwords and alias.
+          # The build command of the project decides how to use them (ADR-0009).
+          BB_ASSINATURA_ARQUIVO: ${{ secrets.BB_ASSINATURA_ARQUIVO }}
+          BB_ASSINATURA_SENHA: ${{ secrets.BB_ASSINATURA_SENHA }}
+          BB_ASSINATURA_ALIAS: ${{ secrets.BB_ASSINATURA_ALIAS }}
+          BB_ASSINATURA_SENHA_CHAVE: ${{ secrets.BB_ASSINATURA_SENHA_CHAVE }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: candidata-${{ matrix.sistema }}

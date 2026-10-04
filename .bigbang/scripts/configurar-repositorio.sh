@@ -108,5 +108,15 @@ done
 fazer "merge commit permitido; apagar branch no merge desligado" gh repo edit "$REPO" --enable-merge-commit \
   --delete-branch-on-merge=false
 
-echo "Pendente do dono (segredos): PROJETO_TOKEN (gh secret set PROJETO_TOKEN --repo $REPO)$([ "$perfil" = deploy ] && echo "; credenciais do alvo de deploy")."
+# Secrets only the owner creates: report the missing ones by NAME (gh secret list never shows values).
+existentes=" $(gh secret list --repo "$REPO" --json name --jq '[.[].name] | join(" ")' 2>/dev/null || true) "
+esperados=(PROJETO_TOKEN)
+[ "$perfil" != compilado ] || esperados+=(BB_ASSINATURA_ARQUIVO BB_ASSINATURA_SENHA BB_ASSINATURA_ALIAS)
+faltando=()
+for segredo in "${esperados[@]}"; do [[ "$existentes" == *" $segredo "* ]] || faltando+=("$segredo"); done
+if [ "${#faltando[@]}" -gt 0 ]; then
+  echo "Pendente do dono (segredos): ${faltando[*]} (Settings > Secrets and variables > Actions, ou gh secret set <nome> --repo $REPO)$([ "$perfil" = deploy ] && echo "; credenciais do alvo de deploy")."
+else
+  echo "Segredos do dono: todos criados (${esperados[*]})$([ "$perfil" = deploy ] && echo "; confira as credenciais do alvo de deploy")."
+fi
 [ "$avisos" -eq 0 ] || echo "$avisos aviso(s): mostre cada um ao dono antes de seguir."

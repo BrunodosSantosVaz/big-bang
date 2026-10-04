@@ -4,6 +4,23 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [0.11.2] - 2026-10-04
+
+### O que muda
+
+- Perfil compilado: o passo de build da candidata recebe os segredos de assinatura `BB_ASSINATURA_ARQUIVO`,
+  `BB_ASSINATURA_SENHA`, `BB_ASSINATURA_ALIAS` e `BB_ASSINATURA_SENHA_CHAVE` (opcionais).
+- `configurar-repositorio.sh` lista só os segredos do dono que ainda faltam (pelo nome), incluindo os de assinatura no
+  perfil compilado.
+
+### O que o projeto precisa fazer
+
+Nada.
+
+### Para assinar no perfil compilado
+
+Crie os segredos `BB_ASSINATURA_*` e use-os no comando `compilado.build_<sistema>` (processo 14).
+
 ## [0.11.1] - 2026-10-04
 
 ### O que muda
