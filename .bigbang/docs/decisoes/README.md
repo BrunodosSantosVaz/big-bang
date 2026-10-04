@@ -18,3 +18,4 @@ sistema ficam em `docs/decisoes/` do sistema, não aqui.
 | [0011](ADR-0011-posses-e-concorrencia.md) | Posse de tarefas, isolamento e inatividade das IAs | aceita |
 | [0012](ADR-0012-skills-hooks-e-fundacao.md) | Skills, hooks e a montagem do GitHub na Fundação | aceita |
 | [0013](ADR-0013-perfil-deploy.md) | Perfil deploy e alvo vps-docker | aceita |
+| [0014](ADR-0014-pacote-e-atualizacao.md) | Pacote do framework e `bb atualizar` | aceita |
