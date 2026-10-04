@@ -3,7 +3,7 @@
 > Um framework para **uma pessoa, com uma ou mais IAs**, planejar, construir e manter sistemas profissionais:
 > bem arquitetados, seguros, testados e 100% documentados.
 
-**Versão:** 0.8.0 (em construção; a 1.0.0 sai depois do piloto) · **Licença do framework:** MIT
+**Versão:** 0.9.0 (em construção; a 1.0.0 sai depois do piloto) · **Licença do framework:** MIT
 
 ## O que é o Big Bang
 
