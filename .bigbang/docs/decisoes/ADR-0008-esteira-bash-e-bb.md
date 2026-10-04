@@ -71,3 +71,18 @@ Decisões que acompanham:
 
 - Especificação, seções 11, 14.1, 14.2 e 14.5.
 - GitHub: *Issue dependencies* (REST) e *Projects* (GraphQL), consultados em 2026-10-03.
+
+## Validação no sandbox (2026-10-04)
+
+No repositório `BrunodosSantosVaz/big-bang-sandbox`, criado a partir do template: `bb init`, labels, painéis e
+`bb gerar --esteira`; um épico `sem-release` do refinamento ao *Publicar sem release* (`main` = `develop`, issues e
+cartões concluídos, branches apagadas); um épico com release até a `release/0.1.0` (versão no arquivo da stack,
+changelog, milestone, `develop` intocada); a CI (`check`) e as Regras do PR (`regras`) rodando nas Actions, incluindo a
+reprovação de um PR que levaria artefato não publicado à `develop`.
+
+Os scripts que dependem do `PROJETO_TOKEN` (Kanban, Mesclar PR, Iniciar sprint, Criar branches, Integrar release,
+Publicar sem release) rodaram com a conta do dono fora das Actions; o disparo automático deles pelas Actions será
+conferido quando o sandbox tiver o `PROJETO_TOKEN`. O sandbox revelou e corrigiu: o prefixo do formulário nos nomes
+de branch; o workflow embutido *Auto-add sub-issues* puxando tarefas para o Planejamento; o consumo de GraphQL (cache
+por execução); a primeira release sem nenhuma tag; e a retirada das marcas de pendente levando toda tarefa à revisão
+humana.

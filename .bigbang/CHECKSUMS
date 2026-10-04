@@ -28,7 +28,7 @@ d50dce8f60cfc0752162842dc6e6397274d33e0a044098194e2e33621002f36a  docs/decisoes/
 14bc864eb1a9a479ff67bf87ccd3a640d1ab861271c7fad34a31ee9ce8743e36  docs/decisoes/ADR-0005-skills-em-agents-e-claude.md
 0fb395e8bc93280d9272bfe481ceb2be3eb9896b9c4e928028f633510a7ed5d3  docs/decisoes/ADR-0006-ci-do-framework.md
 12a8d28ce86392ae9a99adfe9a700cce08f229140a4e981d66fac501323bf034  docs/decisoes/ADR-0007-gerador-e-verificador.md
-a48927f70cb951f4e2b73d9ea55b652d0edd29bfa1bd6602fff9ac621559d809  docs/decisoes/ADR-0008-esteira-bash-e-bb.md
+c64e39dd9bd308712532987e23774e1035de317e95b91d7f834e46eebce355d4  docs/decisoes/ADR-0008-esteira-bash-e-bb.md
 5faf36d1f0dec933db792f47a1a36c8d796032ad6003663426bed0230c97ed78  docs/decisoes/README.md
 e94e70cfeb753b14dc45887b590fc0b7136583d4d3d73e42b1f7dfd94c721dce  esteira/nucleo/README.md
 34ab41c900e502b5e964c35d01fb97ca64f29b11c4c3c29e2bff3a6d718f2470  esteira/nucleo/arquivos/.github/dependabot.yml.tmpl
