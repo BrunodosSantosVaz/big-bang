@@ -18,3 +18,5 @@ de cada arquivo no projeto, não a esta pasta.
 | [flags.toml](flags.toml) | `flags.toml` | F5 (vazio) |
 | [checklist-producao.md](checklist-producao.md) | `docs/operacao/checklist-producao.md` | F2/F5 (cada item com sua verificação) |
 | [compose.yaml](compose.yaml) | `deploy/compose.yaml` | F2, perfil deploy com alvo vps-docker |
+| [runbook-deploy.md](runbook-deploy.md) | `docs/operacao/deploy.md` | F5, perfil deploy |
+| [runbook-voltar-versao.md](runbook-voltar-versao.md) | `docs/operacao/voltar-versao.md` | F5 |
