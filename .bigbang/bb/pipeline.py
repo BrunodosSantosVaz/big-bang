@@ -426,7 +426,8 @@ def only_own_marks_released(diff, issue, marker):
 # --- compiled profile: build matrix and asset names (spec 14.3) ------------------------------------------------------
 
 RUNNERS = {"windows-x64": "windows-2025", "windows-arm64": "windows-11-arm", "linux-x64": "ubuntu-24.04",
-           "linux-arm64": "ubuntu-24.04-arm", "macos-x64": "macos-15-intel", "macos-arm64": "macos-15"}
+           "linux-arm64": "ubuntu-24.04-arm", "macos-x64": "macos-15-intel", "macos-arm64": "macos-15",
+           "android": "ubuntu-24.04"}  # android: APK/AAB built on Linux (the runner has the Android SDK and a JDK)
 
 
 def build_matrix(systems):
@@ -437,7 +438,8 @@ def build_matrix(systems):
 def candidate_asset_name(slug, version, rc, system, filename):
     """`<slug>-vX.Y.Z-rc.N-<sistema><ext>`: the promotion only drops `-rc.N`, so the bytes and the hash stay."""
     ext = ""
-    for known in (".tar.gz", ".exe", ".msi", ".zip", ".dmg", ".pkg", ".AppImage", ".deb", ".rpm", ".tgz"):
+    for known in (".tar.gz", ".exe", ".msi", ".zip", ".dmg", ".pkg", ".AppImage", ".deb", ".rpm", ".tgz",
+                  ".apk", ".aab"):
         if filename.endswith(known):
             ext = known
             break
