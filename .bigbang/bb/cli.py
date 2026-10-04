@@ -3,7 +3,7 @@ import argparse
 import sys
 
 from . import config as config_module
-from . import checksums, generator, verify
+from . import acceptance, checksums, generator, verify
 from . import init as init_module
 from . import pipeline_cli
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
@@ -48,6 +48,12 @@ def build_parser():
     verificar_parser = commands.add_parser("verificar", help="confere framework, arquivos gerados e workflows")
     verificar_parser.set_defaults(handler=_verificar)
 
+    aceite_parser = commands.add_parser("aceite", help="testes de aceite do épico")
+    aceite_commands = aceite_parser.add_subparsers(dest="aceite_command", metavar="<subcomando>", parser_class=_Parser)
+    liberar_parser = aceite_commands.add_parser("liberar", help="retira as marcas de pendente da sua tarefa")
+    liberar_parser.add_argument("tarefa", type=int)
+    liberar_parser.set_defaults(handler=_aceite_liberar)
+
     pipeline_cli.register(commands, _Parser)
 
     checksums_parser = commands.add_parser("checksums", help="confere ou grava .bigbang/CHECKSUMS (manutenção)")
@@ -72,6 +78,18 @@ def _init(args):
     if issue:
         print(f"Issue de F0: {issue}")
     print("Próximo passo: revisar o diff, commitar numa branch fundacao/<n>-f0 e abrir o PR para a develop.")
+    return EXIT_OK
+
+
+def _aceite_liberar(args):
+    marker = config_module.load(args.raiz)["testes"]["marca_pendente"]
+    changed = acceptance.release_marks(args.raiz, args.tarefa, marker)
+    if not changed:
+        print(f"Nenhuma marca de pendente da #{args.tarefa} em tests/aceite/.")
+        return EXIT_OK
+    for path, line in changed:
+        print(f"liberado: {path}:{line}")
+    print(f"{len(changed)} teste(s) da #{args.tarefa} liberados. Rode os testes de aceite: agora eles precisam passar.")
     return EXIT_OK
 
 

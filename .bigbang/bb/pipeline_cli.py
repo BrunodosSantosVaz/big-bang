@@ -7,7 +7,7 @@ import os
 import sys
 
 from . import config as config_module
-from . import docs_check, pipeline
+from . import acceptance, docs_check, pipeline
 from .errors import EXIT_OK, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 from .paths import read_text, write_text
 
@@ -78,6 +78,16 @@ def register(commands, parser_class):
     p = sub.add_parser("nome-producao", help="nome do binário em produção (tira o -rc.N)")
     p.add_argument("arquivo")
     p.set_defaults(handler=lambda args: print(pipeline.promoted_name(args.arquivo)) or EXIT_OK)
+
+    p = sub.add_parser("trava-aceite", help="trava de tests/aceite/ (diff na entrada padrão)")
+    p.add_argument("tipo", help="tipo da branch: teste, feature, docs, bugfix, hotfix…")
+    p.add_argument("issue", nargs="?", type=int)
+    p.add_argument("--aprovado", action="store_true", help="o PR tem teste-alterado-aprovado")
+    p.set_defaults(handler=_lock)
+
+    p = sub.add_parser("pendentes", help="marcas de pendente em tests/aceite/: <issue>\t<arquivo:linha>")
+    p.add_argument("--dados", help="pasta com o conteúdo a examinar (padrão: a raiz)")
+    p.set_defaults(handler=_pending)
 
     p = sub.add_parser("gravar-versao", help="grava a versão no arquivo de versão da stack (entrega.arquivo_versao)")
     p.add_argument("versao")
@@ -193,6 +203,21 @@ def _only_release(args):
 def _candidate_name(args):
     slug = config_module.load(args.raiz)["projeto"]["slug"]
     print(pipeline.candidate_asset_name(slug, args.versao, args.rc, args.sistema, args.arquivo))
+    return EXIT_OK
+
+
+def _lock(args):
+    marker = config_module.load(args.raiz)["testes"]["marca_pendente"]
+    problems = acceptance.lock_problems(_stdin(), args.tipo, args.issue, marker, args.aprovado)
+    for problem in problems:
+        print(problem)
+    return EXIT_VERIFICATION_FAILED if problems else EXIT_OK
+
+
+def _pending(args):
+    marker = config_module.load(args.raiz)["testes"]["marca_pendente"]
+    for issue, where in acceptance.pending_marks(args.dados or args.raiz, marker):
+        print(f"{issue}\t{where}")
     return EXIT_OK
 
 
