@@ -82,6 +82,25 @@ class ConfigurarRepositorio(CasoDeScript):
                 self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
                 self.assertIn("dono/repo", r.stderr)
 
+    def test_lista_so_os_segredos_que_faltam(self):  # found by the pilot: the token was created and still "pending"
+        self.estado["segredos"] = ["PROJETO_TOKEN"]
+        self.gravar_estado()
+        r = self.configurar("--simular")
+        self.assertNotIn("Pendente do dono (segredos)", r.stdout)
+        self.assertIn("Segredos do dono: todos criados (PROJETO_TOKEN)", r.stdout)
+
+    def test_compilado_pede_os_segredos_de_assinatura(self):
+        toml = os.path.join(self.pasta, "projeto", "bigbang.toml")
+        with open(toml, encoding="utf-8") as arquivo:
+            texto = arquivo.read()
+        texto = texto.replace('perfil = "deploy"', 'perfil = "compilado"').replace('alvo = "vps-docker"', 'alvo = ""')
+        with open(toml, "w", encoding="utf-8") as arquivo:
+            arquivo.write(texto)
+        self.estado["segredos"] = ["PROJETO_TOKEN", "BB_ASSINATURA_ALIAS"]
+        self.gravar_estado()
+        r = self.configurar("--simular")
+        self.assertIn("Pendente do dono (segredos): BB_ASSINATURA_ARQUIVO BB_ASSINATURA_SENHA (", r.stdout)
+
     def test_avisa_quando_o_plano_nao_aplica_a_aprovacao(self):
         self.estado["api"]["repos/dono/repo/environments/producao"] = {"protection_rules": []}
         self.gravar_estado()

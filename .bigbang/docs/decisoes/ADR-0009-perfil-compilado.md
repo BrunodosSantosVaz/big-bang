@@ -22,7 +22,9 @@ da seção 11.5).
 Escolhida: **opção 2**.
 
 - **Contrato de build:** `compilado.build_<sistema>` deixa **exatamente um arquivo** em `$BB_SAIDA` (`dist/<sistema>`)
-  e pode ler `BB_VERSAO`, `BB_RC` e `BB_SISTEMA`. Mais de um arquivo (ou nenhum) reprova a candidata.
+  e pode ler `BB_VERSAO`, `BB_RC` e `BB_SISTEMA`. Mais de um arquivo (ou nenhum) reprova a candidata. Assinatura:
+  os segredos `BB_ASSINATURA_*` (arquivo em base64, senha, alias, senha da chave) chegam só ao passo de build
+  (acrescentado em 0.11.2, achado do piloto Android).
 - **Nomes:** `<slug>-vX.Y.Z-rc.N-<sistema><ext>`; na produção o nome só perde o `-rc.N`. O SHA-256 é o mesmo, e o
   `SHA256SUMS-<sistema>.txt` é reescrito com o nome novo e conferido antes de publicar.
 - **Matriz:** um runner de versão fixa por sistema (`windows-2025`, `ubuntu-24.04`, `macos-15`…), calculada pelo

@@ -468,6 +468,8 @@ def main():
         return None
     if argv[:2] in (["issue", "comment"], ["pr", "comment"], ["label", "create"]):
         return None
+    if argv[:2] == ["secret", "list"]:  # names only, as the real gh
+        return emit([{"name": name} for name in state.get("segredos", [])], jq)
     canned = state.get("comandos", {}).get(" ".join(argv[:2]))
     if canned is not None:
         sys.stdout.write(canned)
