@@ -139,3 +139,6 @@ milestone=$(gh api "repos/$R/milestones?state=all&per_page=100" --jq ".[] | sele
 for n in "${issues[@]}"; do gh issue edit "$n" --repo "$R" --milestone "$tag" >/dev/null; done
 [ -z "$epico" ] || projeto texto "${PROJETO_PLANEJAMENTO:?}" "$epico" "Versão" "$tag" >/dev/null || true
 echo "Enviada: $branch ($tag). A candidata é gerada a partir dela."
+if [ ! -f docs/operacao/checklist-producao.md ]; then  # required by "Publicar em produção": warn before homologation
+  echo "::warning::docs/operacao/checklist-producao.md não existe: o Publicar em produção vai recusar; crie-o pela documentação do épico (modelo em .bigbang/modelos/checklist-producao.md)"
+fi

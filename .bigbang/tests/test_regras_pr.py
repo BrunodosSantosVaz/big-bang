@@ -155,6 +155,38 @@ class TravaEPendentes(_Base):
         self.assertIn("tests/aceite/7-e/a.test.js:1: teste ainda marcado como pendente da #15", r.stdout)
 
 
+class PrDaRelease(_Base):
+    """release/* -> main only carries epics already judged PR by PR (pilot ScreenFakeCam v0.1.0, PR #30)."""
+
+    def dados_kotlin(self):
+        dados = os.path.join(self.pasta, "release")
+        os.makedirs(os.path.join(dados, "tests", "aceite", "1-e"))
+        os.makedirs(os.path.join(dados, "docs", "negocio", "regras"))
+        with open(os.path.join(dados, "tests", "aceite", "1-e", "ATest.kt"), "w", encoding="utf-8") as arquivo:
+            arquivo.write("    @Test\n    fun `RN-0001 CA-1 faz algo`() {\n")
+        with open(os.path.join(dados, "docs", "negocio", "regras", "RN-0001-x.md"), "w", encoding="utf-8") as arquivo:
+            arquivo.write("id: RN-0001\ntitulo: x\nsituacao: vigente\n")
+        with open(os.path.join(dados, "bigbang.toml"), "w", encoding="utf-8") as arquivo:
+            arquivo.write('[testes]\npadrao_teste = "fun `"\n')
+        return dados
+
+    def release(self, **extra):
+        return self.regras(head="release/0.1.0", base="main", titulo="chore(release): v0.1.0", corpo="Release",
+                           **extra)
+
+    def test_trava_de_aceite_nao_se_aplica(self):
+        r = self.release(arquivos="tests/aceite/7-e/test_a.py\n", diff_texto=TravaEPendentes.ENFRAQUECE)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+    def test_rastreabilidade_com_o_padrao_que_vem_na_release(self):
+        dados = self.dados_kotlin()
+        r = self.release(arquivos="tests/aceite/1-e/ATest.kt\nbigbang.toml\n", dados=dados)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        # the same content in a task PR is judged by the target's pattern
+        r = self.regras(arquivos="tests/aceite/1-e/ATest.kt\n", dados=dados)
+        self.assertIn("rastreabilidade", r.stdout)
+
+
 class RastreioEGuardaNoPr(_Base):
     def test_dependencia_nova_sem_stack_reprova_e_com_a_linha_passa(self):
         dados = os.path.join(self.pasta, "head")

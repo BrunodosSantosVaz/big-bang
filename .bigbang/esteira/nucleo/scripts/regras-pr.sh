@@ -25,6 +25,11 @@ editar() { gh "$@" >/dev/null 2>&1 || echo "::warning::sem permissão para mudar
 if msg=$("${BB_CMD[@]}" esteira regra-branch "$head" "$base"); then :; else erro "$msg"; fi
 if msg=$("${BB_CMD[@]}" esteira titulo "${PR_TITLE:-}"); then :; else erro "$msg"; fi
 
+# A release/* PR only carries epics into main through "Integrar release": every change in it already passed these
+# rules in its own PR into the epic, so the acceptance lock is not re-applied, and the test pattern of traceability
+# comes with the release's bigbang.toml (an epic may have changed it). The scripts still come from the target.
+release_pr=false; [[ "$head" =~ ^release/ ]] && release_pr=true
+
 issue=""
 if [[ "$head" =~ ^(feature|teste|docs|bugfix|hotfix|fundacao)/([0-9]+)- ]]; then
   tipo="${BASH_REMATCH[1]}"; issue="${BASH_REMATCH[2]}"
@@ -74,7 +79,7 @@ if [ -n "$sensiveis" ]; then
 fi
 
 # ---- lock on tests/aceite/ (spec 11.7): the owner's teste-alterado-aprovado is the only way around it
-if grep -q '^tests/aceite/' <<<"$arquivos"; then
+if [ "$release_pr" = false ] && grep -q '^tests/aceite/' <<<"$arquivos"; then
   [ -n "${diff_texto:-}" ] || diff_texto=$(diff_aceite)
   if grep -q '^BB-SEM-PATCH ' <<<"$diff_texto"; then
     erro "tests/aceite/ com diff grande demais para conferir a trava; divida o PR"
@@ -106,7 +111,8 @@ if [ -n "$dados" ]; then
     done <<<"$pendentes"
   fi
   mudados=$(mktemp); printf '%s\n' "$arquivos" > "$mudados"
-  if ! msg=$("${BB_CMD[@]}" esteira rastreabilidade --dados "$dados" --mudados "$mudados"); then
+  padrao_release=(); [ "$release_pr" = false ] || padrao_release=(--padrao-dos-dados)
+  if ! msg=$("${BB_CMD[@]}" esteira rastreabilidade --dados "$dados" --mudados "$mudados" "${padrao_release[@]}"); then
     while IFS= read -r linha; do erro "rastreabilidade: $linha"; done <<<"$msg"
   fi
   if ! msg=$("${BB_CMD[@]}" esteira guarda-stack --dados "$dados"); then

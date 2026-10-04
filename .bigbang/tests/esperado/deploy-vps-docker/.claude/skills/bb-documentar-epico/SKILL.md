@@ -2,7 +2,7 @@
 name: bb-documentar-epico
 description: Use para a issue documentacao de um épico. Confere checklist documental e rastreabilidade, atualiza os documentos necessários e prepara o rascunho do changelog.
 ---
-<!-- Gerado pelo Big Bang v0.11.6 a partir de .bigbang/skills/bb-documentar-epico/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v0.11.7 a partir de .bigbang/skills/bb-documentar-epico/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Documentar épico
 

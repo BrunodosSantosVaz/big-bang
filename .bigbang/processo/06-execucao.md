@@ -44,6 +44,8 @@ estão em *Pronto*. Checklist:
 - [ ] Guia de quem usa, se a tela ou o fluxo mudou
 - [ ] ADR de cada decisão tomada no épico
 - [ ] Rascunho da entrada do `CHANGELOG.md` (a versão é preenchida na integração)
+- [ ] `docs/operacao/checklist-producao.md` com a verificação de cada item, se o épico mudou algum deles (o
+  *Publicar em produção* recusa sem ele; app sem servidor marca os itens de backend como `nao-se-aplica`)
 
 Ela não muda o artefato, mas **o épico só é integrado com ela concluída**.
 
