@@ -10,6 +10,7 @@ from . import github
 from .errors import EXIT_INVALID_STATE, EXIT_USAGE, BbError
 
 CLAIM = re.compile(r"^<!-- bb:assumida nome=([a-z0-9]+(?:-[a-z0-9]+)*) sessao=([a-zA-Z0-9-]+) -->", re.M)
+PUSH = re.compile(r"^<!-- bb:push sessao=([a-zA-Z0-9-]+) -->$", re.M)
 UTC = datetime.timezone.utc
 
 
@@ -32,10 +33,18 @@ def labels(issue):
 
 def active_claims(repository, number, owner):
     result = []
-    for comment in listing(f"repos/{repository}/issues/{number}/comments"):
+    comments = [c for c in listing(f"repos/{repository}/issues/{number}/comments") if
+                c.get("user", {}).get("login", "").casefold() == owner.casefold()]
+    pushes = {}
+    for comment in comments:
+        match = PUSH.search(comment.get("body") or "")
+        if match:
+            pushes[match[1]] = max(pushes.get(match[1], ""), comment["created_at"])
+    for comment in comments:
         match = CLAIM.search(comment.get("body") or "")
-        if match and comment.get("user", {}).get("login", "").casefold() == owner.casefold():
-            result.append({**comment, "name": match[1], "session": match[2]})
+        if match:
+            result.append({**comment, "name": match[1], "session": match[2],
+                           "last_push": pushes.get(match[2])})
     return sorted(result, key=lambda c: (c["created_at"], c["name"], c["id"]))
 
 
@@ -166,14 +175,21 @@ def timestamp(value):
 
 
 def last_activity(config, number, claims):
-    repo = config["projeto"]["repositorio"]
+    """GitHub server timestamps of acquisition and push heartbeats, never user-controlled commit dates."""
     dates = [timestamp(c["created_at"]) for c in claims]
-    for kind in ("feature", "teste", "docs", "bugfix", "hotfix"):
-        refs = listing(f"repos/{repo}/git/matching-refs/heads/{kind}/{number}-")
-        for ref in refs:
-            commit = api(f"repos/{repo}/commits/{ref['object']['sha']}")
-            dates.append(timestamp(commit["commit"]["committer"]["date"]))
+    dates.extend(timestamp(c["last_push"]) for c in claims if c.get("last_push"))
     return max(dates) if dates else None
+
+
+def touch(config, number):
+    repo, owner = config["projeto"]["repositorio"], config["projeto"]["dono"]
+    for current in active_claims(repo, number, owner):
+        # Append-only telemetry cannot resurrect a session released while the push event was being processed.
+        api(f"repos/{repo}/issues/{number}/comments", "POST",
+            body=f"<!-- bb:push sessao={current['session']} -->\nPush registrado para `{current['name']}`.")
+    claims = active_claims(repo, number, owner)
+    if claims and not stale(config, number, claims) and "parada" in labels(issue_data(repo, number)):
+        _remove_label(repo, number, "parada")
 
 
 def stale(config, number, claims, now=None):
@@ -191,9 +207,15 @@ def recover(config, number, name, phrase):
         raise BbError(f"#{number}: posse ainda ativa; --forcar recusado", EXIT_INVALID_STATE)
     api(f"repos/{repo}/issues/{number}/comments", "POST",
         body=f"**Ordem do dono para retomar a posse** (`{name}`):\n\n" + "\n".join("> " + line for line in phrase.splitlines()))
+    refreshed = active_claims(repo, number, owner)
+    if {c["session"] for c in refreshed} != {c["session"] for c in claims} or not stale(config, number, refreshed):
+        raise BbError(f"#{number}: posse mudou ou recebeu push durante a retomada; --forcar recusado",
+                      EXIT_INVALID_STATE)
+    claims = refreshed
     for current in claims:
         _close_claim(repo, current, "Posse retomada por ordem do dono; histórico preservado.")
+    live_names = {c["name"] for c in active_claims(repo, number, owner)}
     for label in labels(issue_data(repo, number)):
-        if label.startswith("ia:") or label == "parada":
+        if (label.startswith("ia:") and label[3:] not in live_names) or (label == "parada" and not live_names):
             _remove_label(repo, number, label)
     return claim(config, number, name)

@@ -1,0 +1,42 @@
+# Gerado pelo Big Bang v0.6.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-posses.yml. Não edite: personalize em bigbang.toml.
+# Posses sem push há mais que ias.trava_expira_horas; o status é somente leitura.
+name: Marcar posses paradas
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+    inputs:
+      simular:
+        description: Só mostrar posses paradas, sem gravar labels
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-posses
+  cancel-in-progress: false
+
+jobs:
+  posses:
+    if: ${{ vars.PROJETO_OWNER != '' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Conferir posses e marcar paradas
+        shell: bash
+        run: |
+          args=()
+          if [ "$EVENTO" = schedule ] || [ "$SIMULAR" = false ]; then args+=(--aplicar); fi
+          python .bigbang/bin/bb.py esteira marcar-paradas "${args[@]}"
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          EVENTO: ${{ github.event_name }}
+          SIMULAR: ${{ inputs.simular }}

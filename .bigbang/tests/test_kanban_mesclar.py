@@ -23,7 +23,8 @@ class ComBb(CasoDeScript):
         os.makedirs(os.path.join(projeto, ".bigbang"))
         shutil.copy(os.path.join(BIGBANG, "VERSION"), os.path.join(projeto, ".bigbang", "VERSION"))
         with open(os.path.join(projeto, "bigbang.toml"), "w", encoding="utf-8") as arquivo:
-            arquivo.write(exemplo_toml())
+            arquivo.write(exemplo_toml().replace("BrunodosSantosVaz/meu-sistema", "dono/repo").replace(
+                'dono = "BrunodosSantosVaz"', 'dono = "dono"'))
         self.bb = f"{sys.executable} {BB} --raiz {projeto}"
 
     def kanban(self, **env):
