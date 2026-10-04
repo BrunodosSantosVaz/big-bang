@@ -82,18 +82,16 @@ if ! msg=$("${BB_CMD[@]}" esteira osv-avaliar <"$relatorio"); then
 fi
 
 echo "== Segredo no pacote do front (SEG-IA-04)"
-build=$("${BB_CMD[@]}" config get comandos.build)
-if [ -n "$build" ]; then
-  bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
-  bash -c "$build"
-  for saida in dist build out .next public/build; do
-    if [ -d "$saida" ]; then
-      "$ferramentas/gitleaks" dir --redact --no-banner --exit-code 1 "$saida" || falha "segredo no pacote construído ($saida)"
-    fi
-  done
-else
-  echo "comandos.build vazio: sem pacote para conferir."
-fi
+# comando.sh skips an empty build command and every command while no artifact path exists (same rules as the CI).
+bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
+bash .bigbang/esteira/nucleo/scripts/comando.sh build
+shopt -s nullglob
+for saida in dist build out .next public/build */build/outputs; do  # */build/outputs: Gradle modules (APK)
+  if [ -d "$saida" ]; then
+    "$ferramentas/gitleaks" dir --redact --no-banner --exit-code 1 "$saida" || falha "segredo no pacote construído ($saida)"
+  fi
+done
+shopt -u nullglob
 
 echo "== RLS (SEG-IA-01)"
 "${BB_CMD[@]}" esteira rls || falha "tabela sem RLS com banco_no_navegador = true"

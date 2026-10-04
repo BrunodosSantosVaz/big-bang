@@ -2,7 +2,7 @@
 name: bb-iniciar-projeto
 description: Use quando o dono disser iniciar projeto ou pedir trabalho num repositório ainda não fundado. Descobre a etapa F0–F5 e conduz a Fundação, preservando as escolhas do dono.
 ---
-<!-- Gerado pelo Big Bang v0.11.3 a partir de .bigbang/skills/bb-iniciar-projeto/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v0.11.4 a partir de .bigbang/skills/bb-iniciar-projeto/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Iniciar projeto
 
