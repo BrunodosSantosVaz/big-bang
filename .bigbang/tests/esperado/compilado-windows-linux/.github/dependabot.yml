@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v0.11.4 a partir de .bigbang/esteira/nucleo/arquivos/.github/dependabot.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v0.11.5 a partir de .bigbang/esteira/nucleo/arquivos/.github/dependabot.yml.tmpl. Não edite: personalize em bigbang.toml.
 # Atualizações agrupadas e mensais (spec 14.2 e 11.12): actions do GitHub vão para a develop (sem-release);
 # pacotes da stack vão para a main e entram juntos numa release de manutenção ("atualizar dependências").
 version: 2

@@ -48,6 +48,13 @@ class Kanban(ComBb):
         self.assertIn("com-prototipo", labels)
         self.assertIn("revisao-humana", labels)  # the AI's switch to human review survives the edit
 
+    def test_edicao_sem_mudanca_no_formulario_nao_falha(self):  # pilot: "field to edit flag required"
+        self.issue(7, "Estoque", labels=["epic", "sem-prototipo", "testes-revisao-ia", "revisao-ia"],
+                   corpo=corpo_epico())
+        r = self.kanban(EVENT="issues", ACTION="edited", ISSUE=7, BODY_FROM=corpo_epico())
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse([c for c in self.chamadas() if c[:2] == ["issue", "edit"]])
+
     def test_decisoes_do_dono_movem_o_epico(self):
         self.issue(7, "Estoque", labels=["epic", "com-prototipo"])
         self.cartao(1, 7, "Backlog Refinement")
