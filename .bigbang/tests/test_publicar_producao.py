@@ -4,9 +4,16 @@ import hashlib
 import os
 import subprocess
 
+from _raiz import importar_bb
+
+importar_bb()
+
 from test_candidata import BaseCompilado
 from test_kanban_mesclar import ComBb
 
+from bb.checklist import ITEMS  # noqa: E402
+
+CHECKLIST_OK = "\n".join(f"- [x] {item} — verificação: `nao-se-aplica: projeto fictício`" for item in ITEMS) + "\n"
 VERDE = [{"name": "check", "status": "completed", "conclusion": "success"},
          {"name": "regras", "status": "completed", "conclusion": "success"}]
 
@@ -18,6 +25,7 @@ class PublicarEmProducao(BaseCompilado):
         self.escrever("src/app.js", "v2\n")
         self.escrever("CHANGELOG.md", "# Changelog\n\n## [Não publicado]\n\n## [0.2.0] - 2026-10-04\n\n### Adicionado\n\n"
                                       "- Saudação formal (#14)\n\n## [0.1.0] - 2026-09-01\n\n- início\n")
+        self.escrever("docs/operacao/checklist-producao.md", CHECKLIST_OK)
         self.commit("chore(release): v0.2.0")
         self.git("commit", "-q", "--allow-empty", "-m", "Merge pull request #21 from dono/docs/13-documentacao")
         self.git("tag", "v0.2.0-rc.1")
@@ -87,6 +95,8 @@ class PublicarEmProducao(BaseCompilado):
                 {self.estado["prs"]["30"]["sha"]: [VERDE[0], {**VERDE[1], "conclusion": "failure"}]}),
             "conflito": lambda: self.estado["prs"]["30"].update(mergeable="CONFLICTING"),
             "sem PR": lambda: self.estado["prs"]["30"].update(state="CLOSED"),
+            "achado de segurança alto": lambda: self.issue(41, "[Segurança] x",
+                                                         labels=["bug", "seguranca", "severidade:alta"]),
         }
         for nome, estragar in casos.items():
             with self.subTest(caso=nome):

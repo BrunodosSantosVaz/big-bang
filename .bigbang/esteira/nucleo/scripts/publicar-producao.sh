@@ -3,7 +3,7 @@
 #   - the release unit (epics and bugs of milestone vX.Y.Z) is not `homologado` (or is `reprovado`);
 #   - an epic's documentation issue was not merged into the release;
 #   - an issue `bloqueia-producao` is open;
-#   - `bb checklist producao` fails (from E6 on);
+#   - `bb checklist producao` fails on the release branch;
 #   - the PR release/x.y.z -> main is missing, conflicting, or not green on its exact head commit;
 #   - there is no candidate vX.Y.Z-rc.N, or the release branch changed after it;
 #   - CHANGELOG.md has no section for the version.
@@ -60,10 +60,10 @@ fi
 bloqueios=$(gh api "repos/$R/issues?labels=bloqueia-producao&state=open&per_page=100" \
   --jq '[.[] | select(has("pull_request") | not) | "#\(.number)"] | join(" ")')
 [ -z "$bloqueios" ] || falha "issues que bloqueiam produção abertas: $bloqueios"
-if "${BB_CMD[@]}" --help 2>/dev/null | grep checklist >/dev/null; then
-  "${BB_CMD[@]}" checklist producao || falha "bb checklist producao reprovado"
-else
-  echo "::notice::bb checklist producao ainda não existe nesta versão do framework (chega no E6)."
+if git rev-parse -q --verify "origin/$branch" >/dev/null; then
+  release_dir=$(mktemp -d); git worktree add -q --detach "$release_dir" "origin/$branch"
+  "${BB_CMD[@]}" checklist producao --dados "$release_dir" || falha "bb checklist producao reprovado (na $branch)"
+  git worktree remove --force "$release_dir" >/dev/null 2>&1 || true
 fi
 
 # ---- the release PR, its checks and the candidate
