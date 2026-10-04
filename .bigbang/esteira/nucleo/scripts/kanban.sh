@@ -18,6 +18,10 @@
 # PROJETO_PLANEJAMENTO/EXECUCAO/BUGS, GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN). BB as in regras-pr.sh.
 set -euo pipefail
 
+if [ -z "${BB_CACHE_DIR:-}" ]; then  # board ids and options fetched once per run (projeto.sh)
+  BB_CACHE_DIR=$(mktemp -d); export BB_CACHE_DIR; trap 'rm -rf "$BB_CACHE_DIR"' EXIT
+fi
+
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 PLAN="${PROJETO_PLANEJAMENTO:?}"; EXEC="${PROJETO_EXECUCAO:?}"; BUGS="${PROJETO_BUGS:?}"
 R="${GITHUB_REPOSITORY:?}"

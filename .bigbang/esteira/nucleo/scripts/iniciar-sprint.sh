@@ -13,6 +13,10 @@
 # GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN), BB, BRANCH_DEVELOP (develop).
 set -euo pipefail
 
+if [ -z "${BB_CACHE_DIR:-}" ]; then  # board ids and options fetched once per run (projeto.sh)
+  BB_CACHE_DIR=$(mktemp -d); export BB_CACHE_DIR; trap 'rm -rf "$BB_CACHE_DIR"' EXIT
+fi
+
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 PLAN="${PROJETO_PLANEJAMENTO:?}"; EXEC="${PROJETO_EXECUCAO:?}"
 R="${GITHUB_REPOSITORY:?}"; OWNER="${R%%/*}"; REPO="${R##*/}"
@@ -91,6 +95,7 @@ cartao() { # <issue> : A fazer, Sprint and Épico on the Execução board
 for n in "${prontos[@]}"; do
   IFS=$'\t' read -r titulo epico_node labels <<<"$(gh api "repos/$R/issues/$n" \
     --jq '[.title, .node_id, ([.labels[].name] | join(","))] | @tsv')"
+  titulo="${titulo#\[Épico\] }"  # the form's title prefix stays out of branch names and sub-issue titles
   corpo=$(gh api "repos/$R/issues/$n" --jq '.body // ""')
   echo "== Épico #$n: $titulo"
   herdadas=()

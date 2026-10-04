@@ -12,6 +12,10 @@
 # GH_TOKEN (PROJETO_TOKEN: its merge events trigger the next workflows).
 set -euo pipefail
 
+if [ -z "${BB_CACHE_DIR:-}" ]; then  # board ids and options fetched once per run (projeto.sh)
+  BB_CACHE_DIR=$(mktemp -d); export BB_CACHE_DIR; trap 'rm -rf "$BB_CACHE_DIR"' EXIT
+fi
+
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 R="${GITHUB_REPOSITORY:?}"; PR="${PR_NUMBER:?}"; SIMULAR="${SIMULAR:-false}"
 read -r -a CHECKS <<<"${CHECKS_OBRIGATORIOS:-check regras}"

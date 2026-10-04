@@ -13,7 +13,7 @@ class IniciarSprint(ComBb):
         super().setUp()
         self.estado["refs"] = {"heads/develop": "dev0", "heads/main": "main0"}
         self.gravar_estado()
-        self.issue(7, "Bloquear pedido sem estoque", labels=PRONTO,
+        self.issue(7, "[Épico] Bloquear pedido sem estoque", labels=PRONTO,
                    corpo=epico(**{"Análise de ameaças (STRIDE)": STRIDE}))
         self.cartao(1, 7, "Próxima sprint")
 

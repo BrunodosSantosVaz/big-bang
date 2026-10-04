@@ -100,3 +100,26 @@ class LabelsEColunas(unittest.TestCase):
             bloco = re.search(rf"COLUNAS_{nome}=\((.*?)\)", texto, re.S).group(1)
             with self.subTest(painel=nome):
                 self.assertEqual(re.findall(r'"([^":]+):[A-Z]+"', bloco), esperado)
+
+
+class Cache(CasoDeScript):
+    def test_ids_e_opcoes_buscados_uma_vez_e_sprint_nova_invalida(self):
+        import os
+        cache = os.path.join(self.pasta, "cache")
+        os.makedirs(cache)
+        for n in (5, 6):
+            self.issue(n)
+        env = {"BB_CACHE_DIR": cache}
+
+        def consultas():
+            return sum(1 for c in self.chamadas() if c[:2] == ["api", "graphql"] and
+                       ("ProjectV2SingleSelectField { id options" in " ".join(c) or "{ id } } } }" in " ".join(c)))
+
+        self.rodar("projeto.sh", "mover", "2", "5", "Code", env=env)
+        antes = consultas()
+        self.rodar("projeto.sh", "mover", "2", "6", "Code", env=env)
+        self.assertEqual(consultas(), antes)  # board id and Status options came from the cache
+        self.assertEqual(self.status(2, 6), "Code")
+        self.rodar("projeto.sh", "sprint-criar", "2", "Sprint 1 · 2026-10-05", env=env)
+        r = self.rodar("projeto.sh", "sprint", "2", "5", "Sprint 1 · 2026-10-05", env=env)
+        self.assertEqual(r.returncode, 0, r.stderr)  # the new option is seen: the cache was invalidated

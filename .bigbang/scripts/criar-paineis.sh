@@ -2,7 +2,7 @@
 # Creates the three boards of the process (spec 11.1) for a repository, or completes them (idempotent):
 #   "<Produto> — Planejamento", "<Produto> — Execução", "<Produto> — Bugs"
 # with the Status columns, the fields Sprint (single select), Épico (text), Prioridade and Versão (text), and the
-# views Quadro, Tabela and Roadmap. Prints the numbers to put in bigbang.toml [paineis] and in the repository
+# views Quadro, Tabela and Roadmap. Planejamento and Bugs lose the built-in "Auto-add sub-issues" workflow. Prints the numbers to put in bigbang.toml [paineis] and in the repository
 # variables PROJETO_PLANEJAMENTO, PROJETO_EXECUCAO and PROJETO_BUGS.
 #
 # Requires gh with the "project" scope (gh auth refresh -s project).
@@ -81,6 +81,20 @@ visoes() { # <numero>: Quadro (board), Tabela and Roadmap
   done
 }
 
+sem_auto_add_de_sub_issues() { # <numero>: Planejamento and Bugs only hold epics and bugs
+  local numero="$1" pid id
+  pid=$(gh project view "$numero" --owner "$OWNER" --format json --jq '.id')
+  # The built-in "Auto-add sub-issues to project" workflow (on by default) would pull every task into this board.
+  # The API cannot switch it off, only delete it.
+  id=$(gh api graphql -f id="$pid" -f query='query($id:ID!){ node(id:$id){ ... on ProjectV2 {
+    workflows(first:20){ nodes{ id name enabled } } } } }' \
+    --jq '.data.node.workflows.nodes[] | select(.enabled and .name == "Auto-add sub-issues to project") | .id')
+  [ -n "$id" ] || return 0
+  gh api graphql -f id="$id" -f query='mutation($id:ID!){ deleteProjectV2Workflow(input:{workflowId:$id}){
+    deletedWorkflowId } }' >/dev/null
+  echo "  workflow 'Auto-add sub-issues to project' removido do painel $numero" >&2
+}
+
 montar() { # <titulo> <array de colunas> -> numero
   local titulo="$1"; shift
   local numero
@@ -96,10 +110,12 @@ montar() { # <titulo> <array de colunas> -> numero
 
 echo "== Planejamento ==" >&2
 P=$(montar "$PRODUTO — Planejamento" "${COLUNAS_PLANEJAMENTO[@]}")
+sem_auto_add_de_sub_issues "$P"
 echo "== Execução ==" >&2
 E=$(montar "$PRODUTO — Execução" "${COLUNAS_EXECUCAO[@]}")
 echo "== Bugs ==" >&2
 B=$(montar "$PRODUTO — Bugs" "${COLUNAS_BUGS[@]}")
+sem_auto_add_de_sub_issues "$B"
 
 cat <<FIM
 
