@@ -207,6 +207,11 @@ def recover(config, number, name, phrase):
         raise BbError(f"#{number}: posse ainda ativa; --forcar recusado", EXIT_INVALID_STATE)
     api(f"repos/{repo}/issues/{number}/comments", "POST",
         body=f"**Ordem do dono para retomar a posse** (`{name}`):\n\n" + "\n".join("> " + line for line in phrase.splitlines()))
+    refreshed = active_claims(repo, number, owner)
+    if {c["session"] for c in refreshed} != {c["session"] for c in claims} or not stale(config, number, refreshed):
+        raise BbError(f"#{number}: posse mudou ou recebeu push durante a retomada; --forcar recusado",
+                      EXIT_INVALID_STATE)
+    claims = refreshed
     for current in claims:
         _close_claim(repo, current, "Posse retomada por ordem do dono; histórico preservado.")
     live_names = {c["name"] for c in active_claims(repo, number, owner)}

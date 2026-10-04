@@ -64,6 +64,38 @@ class Inatividade(ComPosse):
         self.assertEqual(ownership.active_claims("dono/repo", 12, "dono"), [])
         self.assertNotIn("ia:claude-1", self.ler_estado()["issues"]["12"]["labels"])
 
+    def test_push_entre_conferencia_e_marcacao_nao_deixa_label_parada(self):
+        self.antiga()
+        original = ownership._add_label
+        def push_before_label(repo, number, label):
+            ownership.touch(self.config, number)
+            original(repo, number, label)
+        with patch.object(ownership, "_add_label", side_effect=push_before_label), \
+                contextlib.redirect_stdout(io.StringIO()):
+            status.mark_stale(self.config, simulate=False)
+        self.assertFalse(status.possessions(self.config)[0]["stale"])
+        self.assertNotIn("parada", self.ler_estado()["issues"]["12"]["labels"])
+        # Repair a leftover label from a previous interrupted run as well.
+        self.estado["issues"]["12"]["labels"].append("parada")
+        self.gravar_estado()
+        status.mark_stale(self.config, simulate=False)
+        self.assertNotIn("parada", self.ler_estado()["issues"]["12"]["labels"])
+
+    def test_push_durante_retomada_preserva_a_sessao_renovada(self):
+        self.antiga()
+        original = ownership.api
+        def push_after_order(path, method="GET", **fields):
+            result = original(path, method, **fields)
+            if method == "POST" and "Ordem do dono" in fields.get("body", ""):
+                ownership.touch(self.config, 12)
+            return result
+        with patch.object(ownership, "api", side_effect=push_after_order):
+            with self.assertRaisesRegex(BbError, "recebeu push"):
+                ownership.recover(self.config, 12, "codex-1", "Retome se continuar parada.")
+        live = ownership.active_claims("dono/repo", 12, "dono")
+        self.assertEqual(len(live), 1)
+        self.assertEqual(live[0]["name"], "claude-1")
+
     def test_forcar_exige_ordem_e_posse_vencida(self):
         self.assumir()
         with self.assertRaisesRegex(BbError, "--frase"):
