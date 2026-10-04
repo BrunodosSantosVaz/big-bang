@@ -14,3 +14,4 @@ sistema ficam em `docs/decisoes/` do sistema, não aqui.
 | [0007](ADR-0007-gerador-e-verificador.md) | Como o gerador e o verificador funcionam | aceita |
 | [0008](ADR-0008-esteira-bash-e-bb.md) | Esteira: Bash orquestra, o `bb` decide | aceita |
 | [0009](ADR-0009-perfil-compilado.md) | Perfil compilado: candidata, promoção e correção | aceita |
+| [0010](ADR-0010-portoes-de-teste-revisao-e-seguranca.md) | Portões de testes, revisão e segurança | aceita |
