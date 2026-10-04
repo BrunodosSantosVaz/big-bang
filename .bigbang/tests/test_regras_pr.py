@@ -232,5 +232,20 @@ class ComandoSh(CasoDeScript):
         self.assertEqual(self.rodar("comando.sh", "build", env=env).returncode, 3)
 
 
+    def test_comandos_da_stack_so_pelo_comando_sh(self):
+        # seguranca.sh ran the build directly and failed before the artifact existed (pilot F5): every script runs
+        # the stack commands through comando.sh, which skips them while no artifact path exists. regressao.sh only
+        # runs on bug PRs (the artifact exists) and reads the test commands to run them on chosen commits.
+        permitidos = {"comando.sh", "regressao.sh"}
+        for pasta, _, nomes in os.walk(os.path.join(BIGBANG, "esteira")):
+            for nome in nomes:
+                if not nome.endswith(".sh") or nome in permitidos:
+                    continue
+                with open(os.path.join(pasta, nome), encoding="utf-8") as arquivo:
+                    texto = arquivo.read()
+                with self.subTest(script=nome):
+                    self.assertNotRegex(texto, r"config get \"?comandos\.")
+
+
 if __name__ == "__main__":
     unittest.main()
