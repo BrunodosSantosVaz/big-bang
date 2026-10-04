@@ -32,7 +32,7 @@ jobs:
           python-version: '3.12'
       - name: Versão e número da candidata
         id: v
-        run: bash .bigbang/esteira/perfis/compilado/scripts/candidata-preparar.sh
+        run: bash .bigbang/esteira/nucleo/scripts/candidata-preparar.sh
 
   testes:
     needs: preparar

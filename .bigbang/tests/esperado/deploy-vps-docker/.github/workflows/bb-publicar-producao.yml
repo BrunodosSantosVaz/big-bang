@@ -68,3 +68,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
           SIMULAR: 'false'
+          # perfil deploy: o servidor de produção (variáveis e segredos do ambiente producao)
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_PORTA: ${{ vars.VPS_PORTA }}
+          VPS_USUARIO: ${{ vars.VPS_USUARIO }}
+          VPS_PASTA: ${{ vars.VPS_PASTA }}
+          VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
+          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
+          REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}

@@ -1,0 +1,3 @@
+# GraphQL variables and jq filters are single-quoted on purpose.
+disable=SC2016
+source-path=SCRIPTDIR
