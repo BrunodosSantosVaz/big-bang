@@ -318,6 +318,9 @@ def api(state, positional, fields, jq, method):
     match = re.match(rf"^repos/{re.escape(REPO)}/commits/([^/]+)/check-runs", path)
     if match:
         return emit({"check_runs": state.get("checks", {}).get(match.group(1), [])}, jq)
+    match = re.match(rf"^repos/{re.escape(REPO)}/pulls/(\d+)/files", path)
+    if match:
+        return emit(state.get("pr_files", {}).get(match.group(1), []), jq)
     if path.startswith(f"repos/{REPO}/pulls"):
         return emit(state.get("pulls", []), jq)
     if path.startswith(f"repos/{REPO}/milestones"):

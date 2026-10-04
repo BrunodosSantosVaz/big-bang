@@ -36,18 +36,26 @@ if [[ "$head" =~ ^(feature|teste|docs|bugfix|hotfix|fundacao)/([0-9]+)- ]]; then
   fi
 fi
 
-# ---- changed files
+# ---- changed files: the paginated files API (gh pr diff refuses PRs with more than 300 files, like a framework update)
 if [ -n "${DIFF_ARQUIVOS:-}" ]; then
   arquivos="$DIFF_ARQUIVOS"
 else
-  arquivos=$(gh pr diff "$pr" --repo "$R" --name-only)
+  arquivos=$(gh api --paginate "repos/$R/pulls/$pr/files" \
+    --jq '.[] | .filename, (.previous_filename // empty)' | sort -u)
 fi
+# unified diff of tests/aceite/ only (the one part read line by line); a file without patch fails closed
+diff_aceite() {
+  if [ -n "${DIFF_TEXTO:-}" ]; then printf '%s\n' "$DIFF_TEXTO"; return; fi
+  gh api --paginate "repos/$R/pulls/$pr/files" --jq '.[]
+    | select((.filename | startswith("tests/aceite/")) or ((.previous_filename // "") | startswith("tests/aceite/")))
+    | "diff --git a/\(.previous_filename // .filename) b/\(.filename)\n--- a/\(.previous_filename // .filename)\n+++ b/\(.filename)\n\(.patch // "BB-SEM-PATCH \(.filename)")"'
+}
 
 # ---- sensitive zone -> human review (the owner's dono:revisao-ia has the last word)
 opcao_teste=(); [ "${tipo:-}" != teste ] || opcao_teste=(--pr-de-teste)
 # a task that only releases the pending marks of its own tests (spec 11.7) is not a sensitive change
 if [ -z "${opcao_teste[*]}" ] && [ -n "$issue" ] && grep -q '^tests/aceite/' <<<"$arquivos"; then
-  if [ -n "${DIFF_TEXTO:-}" ]; then diff_texto="$DIFF_TEXTO"; else diff_texto=$(gh pr diff "$pr" --repo "$R"); fi
+  diff_texto=$(diff_aceite)
   if printf '%s\n' "$diff_texto" | "${BB_CMD[@]}" esteira so-liberacao "$issue"; then
     opcao_teste=(--pr-de-teste); echo "tests/aceite/: só a retirada das marcas de pendente da #$issue."
   fi
@@ -67,8 +75,9 @@ fi
 
 # ---- lock on tests/aceite/ (spec 11.7): the owner's teste-alterado-aprovado is the only way around it
 if grep -q '^tests/aceite/' <<<"$arquivos"; then
-  if [ -z "${diff_texto:-}" ]; then
-    if [ -n "${DIFF_TEXTO:-}" ]; then diff_texto="$DIFF_TEXTO"; else diff_texto=$(gh pr diff "$pr" --repo "$R"); fi
+  [ -n "${diff_texto:-}" ] || diff_texto=$(diff_aceite)
+  if grep -q '^BB-SEM-PATCH ' <<<"$diff_texto"; then
+    erro "tests/aceite/ com diff grande demais para conferir a trava; divida o PR"
   fi
   aprovado=(); if tem_label teste-alterado-aprovado; then aprovado=(--aprovado); fi
   if ! msg=$(printf '%s\n' "$diff_texto" | "${BB_CMD[@]}" esteira trava-aceite "${tipo:-outro}" ${issue:+"$issue"} "${aprovado[@]}"); then

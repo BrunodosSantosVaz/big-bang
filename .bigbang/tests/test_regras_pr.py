@@ -35,6 +35,29 @@ class _Base(CasoDeScript):
 
 
 class RegrasPr(_Base):
+    def test_pr_com_mais_de_300_arquivos_pela_api(self):
+        # gh pr diff refuses PRs over 300 files (a framework update has more): the files API is paginated
+        self.estado["pr_files"] = {"30": [{"filename": f".bigbang/arquivo-{n}.md", "patch": "+x"} for n in range(330)]}
+        self.gravar_estado()
+        r = self.regras(head="framework/v0.10.1", base="develop", titulo="chore(framework): atualizar o Big Bang",
+                        corpo="## O que muda\nx\n", arquivos="", labels="revisao-humana")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+    def test_aceite_sem_patch_falha_fechado(self):
+        self.estado["pr_files"] = {"30": [{"filename": "tests/aceite/test_rn.py", "status": "modified"}]}
+        self.gravar_estado()
+        r = self.regras(arquivos="", diff_texto="")
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+        self.assertIn("grande demais", r.stdout + r.stderr)
+
+    def test_aceite_pela_api_aplica_a_trava(self):
+        patch = "@@ -1,2 +1,2 @@\n-def test_a():\n+def test_b():"
+        self.estado["pr_files"] = {"30": [{"filename": "tests/aceite/test_rn.py", "patch": patch}]}
+        self.gravar_estado()
+        r = self.regras(arquivos="", diff_texto="")
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+        self.assertIn("tests/aceite/test_rn.py", r.stdout + r.stderr)
+
     def test_pr_certo(self):
         r = self.regras()
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
