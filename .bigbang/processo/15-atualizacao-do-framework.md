@@ -33,11 +33,18 @@ bata com `.bigbang/CHECKSUMS`.
 Skill `bb-atualizar` (o dono diz "atualizar o Big Bang"):
 
 1. Lê a versão atual e a origem em `bigbang.toml` (`bigbang.versao`, `bigbang.origem`).
-2. Baixa `bigbang-vX.Y.Z.tar.gz` e o `.sha256` da Release pública da origem; confere o hash; recusa se não bater.
-3. Mostra o `MIGRACAO.md` entre as duas versões; se houver passo manual, pergunta ao dono.
+2. Baixa `bigbang-vX.Y.Z.tar.gz` e o `.sha256` da Release pública da origem; confere o hash e a atestação de origem
+   (`gh attestation verify`); recusa se não bater.
+3. Mostra o `MIGRACAO.md` entre as duas versões; se houver passo manual, pergunta ao dono e só segue com
+   `--confirmo-migracao`.
 4. Cria a branch `framework/vX.Y.Z` a partir da `develop`, troca `.bigbang/` inteira, atualiza `bigbang.versao`, roda
    `bb gerar` e `bb verificar`.
 5. Abre o PR `framework/vX.Y.Z` → `develop` com `revisao-humana` (toca `.github/`), listando o diff da camada gerada.
+
+Opções: `--simular` (baixa, confere e mostra a migração, sem gravar nada), `--confirmo-migracao` (o dono confirmou
+os passos manuais) e `--sem-atestacao` (só para origem sem atestação, como um fork privado; confere apenas o SHA-256).
+Sem versão, usa a última Release da origem. O pacote também é recusado se não bater com o próprio `CHECKSUMS` ou se
+tiver entradas fora de `.bigbang/`.
 
 ## Versões do Big Bang
 
