@@ -57,7 +57,8 @@ O subagente `bb-pesquisador` levanta as opções atuais e grava em `docs/pesquis
 opções completas, cada uma com linguagem, framework, banco, alvo (AWS, Docker em VPS, PaaS) ou empacotamento,
 ferramentas de teste/lint/tipos/arquitetura, custo mensal estimado, curva de aprendizado para o dono e riscos, e
 recomenda uma. O dono escolhe. Saída: `STACK.md` (com a tabela de dependências de execução permitidas),
-`bigbang.toml` completo (perfil, alvo, caminhos do artefato, zonas sensíveis, comandos), `ADR-0001-stack.md` com as
+`bigbang.toml` completo (perfil, alvo, caminhos do artefato, arquivo de versão, ecossistemas do Dependabot, zonas
+sensíveis, comandos), `ADR-0001-stack.md` com as
 alternativas descartadas e `docs/arquitetura/` com os diagramas C4 de contexto e contêineres.
 
 ### F3 · Design kit
