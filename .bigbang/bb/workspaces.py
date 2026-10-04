@@ -14,6 +14,23 @@ def git(root, *args):
     return result.stdout.strip()
 
 
+def _update_local(root, branch):
+    current = git(root, "branch", "--list", branch)
+    if current:
+        checked = git(root, "worktree", "list", "--porcelain")
+        if f"branch refs/heads/{branch}\n" in checked + "\n":
+            raise BbError(f"branch já aberta em outro worktree: {branch}", EXIT_INVALID_STATE)
+        local = git(root, "rev-parse", "refs/heads/" + branch)
+        remote = git(root, "rev-parse", "refs/remotes/origin/" + branch)
+        if local != remote:
+            result = subprocess.run(["git", "-C", root, "merge-base", "--is-ancestor", local, remote],
+                                    capture_output=True, text=True, check=False)
+            if result.returncode != 0:
+                raise BbError(f"branch local diverge do remoto: {branch}; reconcilie os commits antes de assumir",
+                              EXIT_INVALID_STATE)
+            git(root, "update-ref", "refs/heads/" + branch, remote, local)
+
+
 def isolate(root, config, receipt, folder=None):
     repo, number = config["projeto"]["repositorio"], receipt["issue"]
     branches = []
@@ -27,6 +44,7 @@ def isolate(root, config, receipt, folder=None):
     if os.path.exists(folder):
         raise BbError(f"pasta de trabalho já existe: {folder}", EXIT_INVALID_STATE)
     git(root, "fetch", "origin", "--prune")
+    _update_local(root, branches[0])
     git(root, "worktree", "add", folder, branches[0])
     receipt_path = git(folder, "rev-parse", "--git-path", "bb-posse.json")
     with open(receipt_path, "w", encoding="utf-8") as handle:

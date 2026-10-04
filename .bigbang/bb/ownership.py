@@ -63,13 +63,18 @@ def _close_claim(repository, claim, reason):
 def blocked(repository, number):
     """A merged blocker counts as done even while its issue awaits production."""
     for blocker in listing(f"repos/{repository}/issues/{number}/dependencies/blocked_by"):
-        if blocker["state"].lower() == "closed":
+        if blocker["state"].lower() == "closed" and "teste-aceite" not in labels(blocker):
             continue
+        parent = api(f"repos/{repository}/issues/{number}/parent")
+        blocker_parent = api(f"repos/{repository}/issues/{blocker['number']}/parent")
+        if parent["number"] != blocker_parent["number"]:
+            raise BbError(f"#{number}: bloqueador de outro épico", EXIT_INVALID_STATE)
         prs = json.loads(github.run("pr", "list", "--repo", repository, "--state", "merged",
                                    "--search", f"in:body \"Refs #{blocker['number']}\"", "--limit", "100",
-                                   "--json", "body,headRefName"))
+                                   "--json", "body,headRefName,baseRefName"))
         reference = re.compile(rf"\bRefs\s+#{blocker['number']}\b", re.I)
         if not any(reference.search(pr.get("body", "")) and
+                   re.match(rf"^epico/{parent['number']}-", pr["baseRefName"]) and
                    re.match(rf"^(teste|feature|docs)/{blocker['number']}-", pr["headRefName"]) for pr in prs):
             raise BbError(f"#{number} bloqueada pela #{blocker['number']} (PR ainda não mesclado)", EXIT_INVALID_STATE)
 
@@ -87,25 +92,32 @@ def _capacity(config, number, name):
         raise BbError(f"{name} atingiu o limite de tarefas: {owned}", EXIT_INVALID_STATE)
 
 
-def claim(config, number, name):
+def _preflight(config, number, name, allow_occupied=False):
     if number <= 0 or name not in config["ias"]["nomes"] or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name):
         raise BbError("issue inválida ou nome fora de ias.nomes", EXIT_USAGE)
+    if config["ias"]["espera_confirmacao_segundos"] < 1:
+        raise BbError("espera_confirmacao_segundos precisa ser pelo menos 1", EXIT_USAGE)
     repo, owner = config["projeto"]["repositorio"], config["projeto"]["dono"]
     data = issue_data(repo, number)
     if "pull_request" in data or data["state"].lower() != "open":
         raise BbError(f"#{number} não é uma issue aberta", EXIT_INVALID_STATE)
     claims = active_claims(repo, number, owner)
     occupied = [label for label in labels(data) if label.startswith("ia:")]
-    if claims or occupied:
+    if (claims or occupied) and not allow_occupied:
         who = f"{claims[0]['name']} desde {claims[0]['created_at']}" if claims else ", ".join(occupied)
         raise BbError(f"#{number} já está com {who}", EXIT_INVALID_STATE)
     blocked(repo, number)
     _capacity(config, number, name)
+    return claims
+
+
+def claim(config, number, name):
+    _preflight(config, number, name)
+    repo, owner = config["projeto"]["repositorio"], config["projeto"]["dono"]
     github.run("label", "create", f"ia:{name}", "--repo", repo, "--color", "5319E7", "--force",
                "--description", "Posse de tarefa por IA")
     session = str(uuid.uuid4())
     body = f"<!-- bb:assumida nome={name} sessao={session} -->\nPosse solicitada por `{name}`."
-    comment = None
     try:
         _add_label(repo, number, f"ia:{name}")
         comment = api(f"repos/{repo}/issues/{number}/comments", "POST", body=body)
@@ -121,8 +133,10 @@ def claim(config, number, name):
         _capacity(config, number, name)
         _add_label(repo, number, f"ia:{name}")
     except BaseException:
-        if comment:
-            api(f"repos/{repo}/issues/comments/{comment['id']}", "DELETE")
+        # Reconcile by UUID even if GitHub accepted the POST but the response was lost.
+        for pending in active_claims(repo, number, owner):
+            if pending["session"] == session:
+                api(f"repos/{repo}/issues/comments/{pending['id']}", "DELETE")
         remaining = active_claims(repo, number, owner)
         if not any(c["name"] == name for c in remaining):
             _remove_label(repo, number, f"ia:{name}")
@@ -172,7 +186,7 @@ def recover(config, number, name, phrase):
     if not phrase or not phrase.strip():
         raise BbError("--forcar exige --frase com a ordem do dono", EXIT_USAGE)
     repo, owner = config["projeto"]["repositorio"], config["projeto"]["dono"]
-    claims = active_claims(repo, number, owner)
+    claims = _preflight(config, number, name, allow_occupied=True)
     if not claims or not stale(config, number, claims):
         raise BbError(f"#{number}: posse ainda ativa; --forcar recusado", EXIT_INVALID_STATE)
     api(f"repos/{repo}/issues/{number}/comments", "POST",
