@@ -267,6 +267,16 @@ def main():
                     issue["labels"].remove(item)
         save(state)
         return None
+    if argv[:2] == ["pr", "edit"]:
+        pr = state.setdefault("prs", {}).setdefault(positional[2], {"labels": []})
+        for label in flags.get("--add-label", []):
+            if label not in pr["labels"]:
+                pr["labels"].append(label)
+        for label in flags.get("--remove-label", []):
+            if label in pr["labels"]:
+                pr["labels"].remove(label)
+        save(state)
+        return None
     if argv[:2] == ["issue", "close"]:
         state["issues"][positional[2]]["state"] = "closed"
         save(state)

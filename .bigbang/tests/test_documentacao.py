@@ -6,75 +6,20 @@ link checks because their links are relative to the file's destination in a proj
 import os
 import re
 import unittest
-import urllib.parse
 
-from _raiz import RAIZ, arquivos_markdown
+from _raiz import RAIZ, arquivos_markdown, importar_bb
+
+importar_bb()
 
 PULAR_LINKS = (os.path.join(RAIZ, ".bigbang", "modelos") + os.sep,)
 SAIDAS_GERADAS = (os.path.join(RAIZ, ".bigbang", "tests", "esperado") + os.sep,)
 # The spec is copied verbatim from the owner (it must not change), so it is only checked for fences.
 ESPECIFICACAO = os.path.join(RAIZ, ".bigbang", "docs", "especificacao.md")
 
-CERCA = re.compile(r"^\s*(`{3,}|~{3,})")
-LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+from bb.docs_check import LINK, anchor as ancora, broken_links as links_quebrados  # noqa: E402
+from bb.docs_check import outside_code as sem_codigo  # noqa: E402
+
 TITULO = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
-
-
-def sem_codigo(texto):
-    """Return the lines outside fenced code blocks, and whether every fence was closed."""
-    linhas, aberta = [], None
-    for linha in texto.splitlines():
-        cerca = CERCA.match(linha)
-        if cerca:
-            marca = cerca.group(1)
-            if aberta is None:
-                aberta = marca
-                continue
-            if marca[0] == aberta[0] and len(marca) >= len(aberta):
-                aberta = None
-                continue
-        if aberta is None:
-            linhas.append(re.sub(r"`[^`]*`", "", linha))
-    return linhas, aberta is None
-
-
-def ancora(titulo):
-    """GitHub-style heading anchor."""
-    titulo = re.sub(r"`|\*\*|\*|_", "", titulo).strip().lower()
-    titulo = re.sub(r"[^\w\- ]", "", titulo)
-    return titulo.replace(" ", "-")
-
-
-def ancoras(caminho):
-    with open(caminho, encoding="utf-8") as arquivo:
-        linhas, _ = sem_codigo(arquivo.read())
-    vistas, resultado = {}, set()
-    for linha in linhas:
-        titulo = TITULO.match(linha)
-        if titulo:
-            base = ancora(titulo.group(2))
-            n = vistas.get(base, 0)
-            resultado.add(base if n == 0 else f"{base}-{n}")
-            vistas[base] = n + 1
-    return resultado
-
-
-def links_quebrados(caminho):
-    with open(caminho, encoding="utf-8") as arquivo:
-        linhas, _ = sem_codigo(arquivo.read())
-    quebrados = []
-    for linha in linhas:
-        for alvo in LINK.findall(linha):
-            if re.match(r"^[a-z][a-z0-9+.-]*:", alvo, re.I):
-                continue  # external (https:, mailto:)
-            arquivo_alvo, _, fragmento = alvo.partition("#")
-            destino = caminho if not arquivo_alvo else os.path.normpath(
-                os.path.join(os.path.dirname(caminho), urllib.parse.unquote(arquivo_alvo)))
-            if not os.path.exists(destino):
-                quebrados.append(alvo)
-            elif fragmento and destino.endswith(".md") and fragmento not in ancoras(destino):
-                quebrados.append(alvo)
-    return quebrados
 
 
 class Markdown(unittest.TestCase):

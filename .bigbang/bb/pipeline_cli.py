@@ -7,7 +7,7 @@ import os
 import sys
 
 from . import config as config_module
-from . import pipeline
+from . import docs_check, pipeline
 from .errors import EXIT_OK, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 from .paths import read_text, write_text
 
@@ -60,6 +60,9 @@ def register(commands, parser_class):
     p = sub.add_parser("sensivel", help="dos caminhos na entrada padrão, imprime os de zona sensível")
     p.add_argument("--pr-de-teste", action="store_true", help="PR de teste do épico: tests/aceite/ liberado")
     p.set_defaults(handler=_sensitive)
+
+    p = sub.add_parser("documentacao", help="Markdown válido e links relativos do projeto (DOC-14)")
+    p.set_defaults(handler=_docs)
 
     p = sub.add_parser("gravar-versao", help="grava a versão no arquivo de versão da stack (entrega.arquivo_versao)")
     p.add_argument("versao")
@@ -158,6 +161,15 @@ def _sensitive(args):
     for path in pipeline.sensitive_paths(_lines(), zones, acceptance_allowed=args.pr_de_teste):
         print(path)
     return EXIT_OK
+
+
+def _docs(args):
+    problems = docs_check.problems(args.raiz)
+    for problem in problems:
+        print(problem)
+    if not problems:
+        print("Documentação: Markdown e links em ordem.")
+    return EXIT_VERIFICATION_FAILED if problems else EXIT_OK
 
 
 def _write_version(args):
