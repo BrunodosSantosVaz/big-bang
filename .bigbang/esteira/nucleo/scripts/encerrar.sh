@@ -7,6 +7,7 @@
 #   SPRINT=true  : records the end of the current sprint: "Sprint N · <início>" -> "Sprint N · <início> → <hoje>".
 # Idempotent. Environment: VERSAO, SPRINT, SIMULAR, PROJETO_PLANEJAMENTO/EXECUCAO/BUGS, GITHUB_REPOSITORY, GH_TOKEN.
 set -euo pipefail
+trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
 if [ -z "${BB_CACHE_DIR:-}" ]; then  # board ids and options fetched once per run (projeto.sh)
   BB_CACHE_DIR=$(mktemp -d); export BB_CACHE_DIR; trap 'rm -rf "$BB_CACHE_DIR"' EXIT

@@ -11,6 +11,7 @@
 # Environment: HEAD_REF, BASE_REF, PR_TITLE, PR_BODY, PR_NUMBER, PR_HEAD_SHA, PR_LABELS (comma separated),
 # GITHUB_REPOSITORY, GH_TOKEN. BB (default: python3 .bigbang/bin/bb.py). DIFF_ARQUIVOS (tests: changed files).
 set -euo pipefail
+trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
 R="${GITHUB_REPOSITORY:?}"
 head="${HEAD_REF:?}"; base="${BASE_REF:?}"; pr="${PR_NUMBER:?}"

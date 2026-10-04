@@ -20,6 +20,7 @@
 # Environment: GH_TOKEN (scope project), PROJETO_OWNER, GITHUB_REPOSITORY. DRY_RUN=1 only prints the writes.
 # shellcheck disable=SC2016  # $vars inside single quotes are GraphQL variables, not Bash
 set -euo pipefail
+trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
 : "${PROJETO_OWNER:?defina PROJETO_OWNER}"
 : "${GITHUB_REPOSITORY:?defina GITHUB_REPOSITORY}"

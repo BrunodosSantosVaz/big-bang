@@ -13,6 +13,7 @@
 # Environment: EPICO | BUG | DEPENDENCIAS, VERSAO, CONFIRMAR_VERSAO, SIMULAR, PROJETO_PLANEJAMENTO,
 # GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN; the checkout must push with it), BB.
 set -euo pipefail
+trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
 if [ -z "${BB_CACHE_DIR:-}" ]; then  # board ids and options fetched once per run (projeto.sh)
   BB_CACHE_DIR=$(mktemp -d); export BB_CACHE_DIR; trap 'rm -rf "$BB_CACHE_DIR"' EXIT
@@ -28,8 +29,8 @@ tem() { [[ ",$1," == *",$2,"* ]]; }
 erro() { echo "::error::$*"; exit 1; }
 
 git fetch -q origin "+refs/heads/*:refs/remotes/origin/*" --tags
-atual=$(git tag --merged origin/main --list 'v[0-9]*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sed 's/^v//' \
-  | sort -t. -k1,1n -k2,2n -k3,3n | tail -n 1)
+atual=$(git tag --merged origin/main --list 'v[0-9]*' | { grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' || true; } \
+  | sed 's/^v//' | sort -t. -k1,1n -k2,2n -k3,3n | tail -n 1)
 atual="${atual:-0.0.0}"
 
 unidade=""; refs=(); titulos=""; itens=""; issues=(); epico=""

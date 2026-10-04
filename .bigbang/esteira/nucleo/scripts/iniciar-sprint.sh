@@ -12,6 +12,7 @@
 # Environment: SIMULAR (true: only the plan), DATA (AAAA-MM-DD, default today), PROJETO_PLANEJAMENTO/EXECUCAO,
 # GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN), BB, BRANCH_DEVELOP (develop).
 set -euo pipefail
+trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
 if [ -z "${BB_CACHE_DIR:-}" ]; then  # board ids and options fetched once per run (projeto.sh)
   BB_CACHE_DIR=$(mktemp -d); export BB_CACHE_DIR; trap 'rm -rf "$BB_CACHE_DIR"' EXIT

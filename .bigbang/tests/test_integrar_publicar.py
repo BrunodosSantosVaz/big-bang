@@ -103,6 +103,14 @@ class IntegrarRelease(ComGit):
         self.assertEqual(self.estado["boards"]["1"]["items"]["7"]["Versão"], "v0.2.0")
         self.assertEqual(self.git_origin("rev-parse", "develop"), self.git_origin("rev-parse", "main"))  # untouched
 
+    def test_primeira_release_sem_nenhuma_tag(self):
+        self.git("push", "-q", "origin", ":refs/tags/v0.1.0")
+        self.git("tag", "-d", "v0.1.0")
+        self.preparar()
+        r = self.script("integrar-release.sh", EPICO=7)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("v0.1.0 (atual: v0.0.0)", r.stdout)
+
     def test_versao_informada_diferente_exige_confirmacao(self):
         self.preparar()
         r = self.script("integrar-release.sh", EPICO=7, VERSAO="0.1.1")
