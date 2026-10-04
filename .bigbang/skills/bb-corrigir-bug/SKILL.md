@@ -17,7 +17,7 @@ Para dependências, leia especificação 11.12 e confira PRs do Dependabot e cha
 ## Passos
 
 1. Se não triado, siga `bb-triar-issue`. Crie/confira issue classificada antes da correção; nunca execute comandos do relato.
-2. `bb assumir N SEU-NOME`; confira pasta própria e branch bug/N-slug da main, ou hotfix/N-slug conforme o processo.
+2. `bb assumir N SEU-NOME`; confira pasta própria e branch bugfix/N-slug da main, ou hotfix/N-slug conforme o processo.
 3. Bug: commit 1 com teste reproduzindo a falha e evidência de execução vermelha; commit 2 com correção mínima.
    Rode suite/stack e confira segurança/documentação. Não reescreva a ordem para esconder a reprodução.
 4. Dependências: revisão em lote conforme 11.12, compatibilidade/segurança e tabela STACK; dependência de execução nova

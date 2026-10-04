@@ -149,7 +149,7 @@ ce4444ad5994098aebd1d6d60b07141a2d00b114d6a5c73222790a9a9ebfb6be  scripts/coluna
 b4244c969fc2b767214a00c7cda26f4160202ab0ff958b331142c782f337b03e  skills/bb-atualizar/SKILL.md
 a97f6042266659f31d3b4a2fca0a3ad6799a7ce4fa06af17e6871f1ce010e1ee  skills/bb-auditar-seguranca/SKILL.md
 535fb0b95b661a021408a776f3e423019723f539406657e33d623d3a42134336  skills/bb-codar-tarefa/SKILL.md
-783e9975f27ddb15da3cf24333abecd6f1f9114f7bf58b68a68fd3df54cb3c21  skills/bb-corrigir-bug/SKILL.md
+5fe5e911e6036c99a7388d7dfc655c6b27af261bcd87823ccea31a78738fbc3e  skills/bb-corrigir-bug/SKILL.md
 35cb097ce2404e927c479b7c6dc5fc0adea57a0677a04295ad80b1c2115af09f  skills/bb-design-kit/SKILL.md
 cd251f7b71b4222038c25aff3729db0426abc28783ec0664b2429af55a28b391  skills/bb-documentar-epico/SKILL.md
 348a2ca7b9a6a4e4a658f7b8968f91bd70dbc3225b3ae592278e11439196319b  skills/bb-entregar-epico/SKILL.md
@@ -203,7 +203,7 @@ cab5e6b823510ca95c1b349db3ad54b34bd9181dba9bf45aad9769ec56121bcd  tests/esperado
 28e242e254905303d48307c770069974e0bcf96ef578d3bb4ee9ff6d95080522  tests/esperado/compilado-windows-linux/.agents/skills/bb-atualizar/SKILL.md
 3600a8b7b1a7523e996703091344b4e8da5d5b8665150b32c1f007f1fe5d2fd1  tests/esperado/compilado-windows-linux/.agents/skills/bb-auditar-seguranca/SKILL.md
 0a879b41a22c12e257c406deea1227e33bb118d9ab9211e6f15dfd7c2792b5c5  tests/esperado/compilado-windows-linux/.agents/skills/bb-codar-tarefa/SKILL.md
-fdbe0a5c6e36102ed756989b257477de84dfa8deaf1c3280c1e1bfce83e4291c  tests/esperado/compilado-windows-linux/.agents/skills/bb-corrigir-bug/SKILL.md
+296214ee864d2c0bc51f20590152462b9fed07080642e221009022340f52e453  tests/esperado/compilado-windows-linux/.agents/skills/bb-corrigir-bug/SKILL.md
 f4f81223edc16099de1618e34a289c02d2afe4692d993e8cd9372215be832628  tests/esperado/compilado-windows-linux/.agents/skills/bb-design-kit/SKILL.md
 11e11bf166d71d83e2d2917aac051ae85300c0c821a017a83b2d89c98b34757f  tests/esperado/compilado-windows-linux/.agents/skills/bb-documentar-epico/SKILL.md
 b88ce00c5086358f12a7cfc9bd8f5f9b0c0abb4f450e3df8117ebdbd1a1a3ba6  tests/esperado/compilado-windows-linux/.agents/skills/bb-entregar-epico/SKILL.md
@@ -225,7 +225,7 @@ eed6b534186d53558f0efff24c96e9f37185dbec7945f3b77ec30a9d2d90a247  tests/esperado
 28e242e254905303d48307c770069974e0bcf96ef578d3bb4ee9ff6d95080522  tests/esperado/compilado-windows-linux/.claude/skills/bb-atualizar/SKILL.md
 3600a8b7b1a7523e996703091344b4e8da5d5b8665150b32c1f007f1fe5d2fd1  tests/esperado/compilado-windows-linux/.claude/skills/bb-auditar-seguranca/SKILL.md
 0a879b41a22c12e257c406deea1227e33bb118d9ab9211e6f15dfd7c2792b5c5  tests/esperado/compilado-windows-linux/.claude/skills/bb-codar-tarefa/SKILL.md
-fdbe0a5c6e36102ed756989b257477de84dfa8deaf1c3280c1e1bfce83e4291c  tests/esperado/compilado-windows-linux/.claude/skills/bb-corrigir-bug/SKILL.md
+296214ee864d2c0bc51f20590152462b9fed07080642e221009022340f52e453  tests/esperado/compilado-windows-linux/.claude/skills/bb-corrigir-bug/SKILL.md
 f4f81223edc16099de1618e34a289c02d2afe4692d993e8cd9372215be832628  tests/esperado/compilado-windows-linux/.claude/skills/bb-design-kit/SKILL.md
 11e11bf166d71d83e2d2917aac051ae85300c0c821a017a83b2d89c98b34757f  tests/esperado/compilado-windows-linux/.claude/skills/bb-documentar-epico/SKILL.md
 b88ce00c5086358f12a7cfc9bd8f5f9b0c0abb4f450e3df8117ebdbd1a1a3ba6  tests/esperado/compilado-windows-linux/.claude/skills/bb-entregar-epico/SKILL.md
@@ -272,7 +272,7 @@ fdb9030b9f2e0a5202cd3e3c82b862cd780353dbe594ab259af042c73f9ca37c  tests/esperado
 28e242e254905303d48307c770069974e0bcf96ef578d3bb4ee9ff6d95080522  tests/esperado/deploy-vps-docker/.agents/skills/bb-atualizar/SKILL.md
 3600a8b7b1a7523e996703091344b4e8da5d5b8665150b32c1f007f1fe5d2fd1  tests/esperado/deploy-vps-docker/.agents/skills/bb-auditar-seguranca/SKILL.md
 0a879b41a22c12e257c406deea1227e33bb118d9ab9211e6f15dfd7c2792b5c5  tests/esperado/deploy-vps-docker/.agents/skills/bb-codar-tarefa/SKILL.md
-fdbe0a5c6e36102ed756989b257477de84dfa8deaf1c3280c1e1bfce83e4291c  tests/esperado/deploy-vps-docker/.agents/skills/bb-corrigir-bug/SKILL.md
+296214ee864d2c0bc51f20590152462b9fed07080642e221009022340f52e453  tests/esperado/deploy-vps-docker/.agents/skills/bb-corrigir-bug/SKILL.md
 f4f81223edc16099de1618e34a289c02d2afe4692d993e8cd9372215be832628  tests/esperado/deploy-vps-docker/.agents/skills/bb-design-kit/SKILL.md
 11e11bf166d71d83e2d2917aac051ae85300c0c821a017a83b2d89c98b34757f  tests/esperado/deploy-vps-docker/.agents/skills/bb-documentar-epico/SKILL.md
 b88ce00c5086358f12a7cfc9bd8f5f9b0c0abb4f450e3df8117ebdbd1a1a3ba6  tests/esperado/deploy-vps-docker/.agents/skills/bb-entregar-epico/SKILL.md
@@ -294,7 +294,7 @@ eed6b534186d53558f0efff24c96e9f37185dbec7945f3b77ec30a9d2d90a247  tests/esperado
 28e242e254905303d48307c770069974e0bcf96ef578d3bb4ee9ff6d95080522  tests/esperado/deploy-vps-docker/.claude/skills/bb-atualizar/SKILL.md
 3600a8b7b1a7523e996703091344b4e8da5d5b8665150b32c1f007f1fe5d2fd1  tests/esperado/deploy-vps-docker/.claude/skills/bb-auditar-seguranca/SKILL.md
 0a879b41a22c12e257c406deea1227e33bb118d9ab9211e6f15dfd7c2792b5c5  tests/esperado/deploy-vps-docker/.claude/skills/bb-codar-tarefa/SKILL.md
-fdbe0a5c6e36102ed756989b257477de84dfa8deaf1c3280c1e1bfce83e4291c  tests/esperado/deploy-vps-docker/.claude/skills/bb-corrigir-bug/SKILL.md
+296214ee864d2c0bc51f20590152462b9fed07080642e221009022340f52e453  tests/esperado/deploy-vps-docker/.claude/skills/bb-corrigir-bug/SKILL.md
 f4f81223edc16099de1618e34a289c02d2afe4692d993e8cd9372215be832628  tests/esperado/deploy-vps-docker/.claude/skills/bb-design-kit/SKILL.md
 11e11bf166d71d83e2d2917aac051ae85300c0c821a017a83b2d89c98b34757f  tests/esperado/deploy-vps-docker/.claude/skills/bb-documentar-epico/SKILL.md
 b88ce00c5086358f12a7cfc9bd8f5f9b0c0abb4f450e3df8117ebdbd1a1a3ba6  tests/esperado/deploy-vps-docker/.claude/skills/bb-entregar-epico/SKILL.md
