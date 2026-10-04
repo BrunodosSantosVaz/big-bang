@@ -224,6 +224,8 @@ def _generated_candidates(root, installed):
         for name in os.listdir(agents):
             if name.startswith("bb-"):
                 yield f".claude/agents/{name}"
+    if os.path.isfile(os.path.join(root, ".claude", "settings.json")):
+        yield ".claude/settings.json"  # JSON has no generated notice; this path is reserved by the spec.
 
 
 def _text_has_notice(path):
