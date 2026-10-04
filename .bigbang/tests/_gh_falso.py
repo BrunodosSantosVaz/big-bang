@@ -116,11 +116,14 @@ def graphql(state, fields, jq):
                     for match in re.finditer(r'\{\s*(?:id:\s*"([^"]*)",\s*)?name:\s*"((?:[^"\\]|\\.)*)"', query):
                         option_id = match.group(1) or f"{field_id}-{len(new)}-{match.group(2)}"
                         new.append({"id": option_id, "name": match.group(2).replace('\\"', '"')})
-                    kept = {o["id"] for o in new}
+                    kept = {o["id"]: o["name"] for o in new}
                     lost = {o["name"] for o in field["options"] if o["id"] not in kept}
+                    renamed = {o["name"]: kept[o["id"]] for o in field["options"] if o["id"] in kept}
                     for item in b["items"].values():  # GitHub wipes values of options sent without their id
                         if item.get(name) in lost:
                             item.pop(name)
+                        elif item.get(name) in renamed:  # and a kept id carries the new name
+                            item[name] = renamed[item[name]]
                     field["options"] = new
         save(state)
         return emit({"data": {}}, jq)
@@ -210,7 +213,33 @@ def api(state, positional, fields, jq, method):
             save(state)
             return emit({}, jq)
         return emit([issue_json(state, n) for n in issue.get("blocked_by", [])], jq)
-    match = re.match(rf"^repos/{re.escape(REPO)}/git/matching-refs/heads/(.+)$", path)
+    match = re.match(rf"^repos/{re.escape(REPO)}/git/ref/tags/(.+)$", path)
+    if match:
+        if f"tags/{match.group(1)}" not in state.get("refs", {}):
+            sys.stderr.write("HTTP 404: Not Found\n")
+            sys.exit(1)
+        return emit({"object": {"sha": state["refs"][f"tags/{match.group(1)}"]}}, jq)
+    match = re.match(rf"^repos/{re.escape(REPO)}/git/refs/heads/(.+)$", path)
+    if match and method == "DELETE":
+        state.get("refs", {}).pop(f"heads/{match.group(1)}", None)
+        state.setdefault("apagadas", []).append(match.group(1))
+        save(state)
+        return emit({}, jq)
+    match = re.match(rf"^repos/{re.escape(REPO)}/compare/(.+)$", path)
+    if match:
+        return emit({"ahead_by": state.get("compare", {}).get(match.group(1), 0)}, jq)
+    match = re.match(rf"^repos/{re.escape(REPO)}/milestones/(\d+)$", path)
+    if match and method == "PATCH":
+        for milestone in state.get("milestones", []):
+            if milestone["number"] == int(match.group(1)):
+                milestone["state"] = fields.get("state", milestone["state"])
+        save(state)
+        return emit({}, jq)
+    match = re.match(rf"^repos/{re.escape(REPO)}/issues\?milestone=(\d+)", path)
+    if match:
+        title = next(m["title"] for m in state.get("milestones", []) if m["number"] == int(match.group(1)))
+        return emit([issue_json(state, n) for n, i in state["issues"].items() if i.get("milestone") == title], jq)
+    match = re.match(rf"^repos/{re.escape(REPO)}/git/matching-refs/heads/(.*)$", path)
     if match:
         refs = [{"ref": f"refs/{name}"} for name in sorted(state.get("refs", {}))
                 if name.startswith(f"heads/{match.group(1)}")]
@@ -270,7 +299,14 @@ def main():
             for item in label.split(","):
                 if item in issue["labels"]:
                     issue["labels"].remove(item)
+        if flags.get("--milestone"):
+            issue["milestone"] = flags["--milestone"][0]
         save(state)
+        return None
+    if argv[:2] == ["release", "view"]:
+        if positional[2] not in state.get("releases", []):
+            sys.stderr.write("release not found\n")
+            sys.exit(1)
         return None
     if argv[:2] == ["pr", "view"]:
         pr = state["prs"][positional[2]]

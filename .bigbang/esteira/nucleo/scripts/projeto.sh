@@ -13,6 +13,7 @@
 #   projeto.sh texto   <painel> <issue> "<Campo>" "<valor>"   sets a text field (Épico, Versão)
 #   projeto.sh sprints <painel>                 options of the single-select "Sprint" field
 #   projeto.sh sprint-criar <painel> "<Sprint N · AAAA-MM-DD>"  adds the option keeping the existing ones
+#   projeto.sh sprint-renomear <painel> "<de>" "<para>"     keeps the option id (cards keep their Sprint)
 #   projeto.sh sprint  <painel> <issue> "<titulo>"
 #   projeto.sh sprint-de <painel> <issue>       Sprint of the issue (empty if none)
 #
@@ -154,6 +155,21 @@ sprint_criar() {
   echo "Sprint '$titulo' criada no painel $painel."
 }
 
+# Renames a Sprint option keeping every id (the cards keep their Sprint).
+sprint_renomear() {
+  local painel="$1" de="$2" para="$3" campo lista="" oid nome
+  if [ "${DRY_RUN:-}" = 1 ]; then echo "[simulado] painel $painel: Sprint '$de' -> '$para'"; return 0; fi
+  campo=$(campo_id "$painel" Sprint)
+  while IFS=$'\t' read -r _ oid nome; do
+    [ -n "$oid" ] || continue
+    [ "$nome" != "$de" ] || nome="$para"
+    lista+="{id: $(json_texto "$oid"), name: $(json_texto "$nome"), color: GRAY, description: \"\"}, "
+  done < <(opcoes "$painel" Sprint)
+  gh api graphql -f query="mutation { updateProjectV2Field(input: { fieldId: $(json_texto "$campo"),
+    singleSelectOptions: [${lista%, }] }) { projectV2Field { ... on ProjectV2SingleSelectField { id } } } }" >/dev/null
+  echo "Sprint '$de' renomeada para '$para' no painel $painel."
+}
+
 json_texto() { # GraphQL string literal
   local s="${1//\\/\\\\}"; s="${s//\"/\\\"}"; printf '"%s"' "$s"
 }
@@ -185,7 +201,8 @@ case "$cmd" in
   texto) texto "$@" ;;
   sprints) sprints "$@" ;;
   sprint-criar) sprint_criar "$@" ;;
+  sprint-renomear) sprint_renomear "$@" ;;
   sprint) sprint "$@" ;;
   sprint-de) sprint_de "$@" ;;
-  *) sed -n '2,22p' "$0"; exit 2 ;;
+  *) sed -n '2,23p' "$0"; exit 2 ;;
 esac

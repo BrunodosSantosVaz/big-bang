@@ -1,0 +1,66 @@
+# Botão "Integrar release" (spec 11.6, passo 7; 11.12). Também disparado pelo Mesclar PR no último merge do épico.
+name: Integrar release
+
+on:
+  workflow_dispatch:
+    inputs:
+      epico:
+        description: 'Número do épico'
+        required: false
+        type: string
+      bug:
+        description: 'Número do bug (bugfix/hotfix)'
+        required: false
+        type: string
+      dependencias:
+        description: 'Release de manutenção com os PRs do Dependabot'
+        required: false
+        type: boolean
+        default: false
+      versao:
+        description: 'Versão x.y.z (vazio = calculada pelos títulos dos PRs)'
+        required: false
+        type: string
+      confirmar_versao:
+        description: 'Confirmar uma versão diferente da calculada'
+        required: false
+        type: boolean
+        default: false
+      simular:
+        description: 'Só mostrar o plano'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-integrar-release
+  cancel-in-progress: false
+
+jobs:
+  integrar:
+    if: ${{ vars.PROJETO_OWNER != '' }}
+    runs-on: ubuntu-24.04
+    steps:
+      # PROJETO_TOKEN: o push da release/x.y.z precisa disparar a candidata
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PROJETO_TOKEN }}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Integrar
+        run: bash .bigbang/esteira/nucleo/scripts/integrar-release.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          EPICO: ${{ inputs.epico }}
+          BUG: ${{ inputs.bug }}
+          DEPENDENCIAS: ${{ inputs.dependencias }}
+          VERSAO: ${{ inputs.versao }}
+          CONFIRMAR_VERSAO: ${{ inputs.confirmar_versao }}
+          SIMULAR: ${{ inputs.simular }}
+          PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
+          PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
