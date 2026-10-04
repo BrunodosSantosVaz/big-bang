@@ -1,0 +1,43 @@
+# Botão "Iniciar sprint" (spec 11.6, passo 1). Rode primeiro com simular=true e confira o plano.
+name: Iniciar sprint
+
+on:
+  workflow_dispatch:
+    inputs:
+      simular:
+        description: 'Só mostrar o plano (nada é criado)'
+        required: true
+        type: boolean
+        default: true
+      data:
+        description: 'Data da sprint (AAAA-MM-DD); vazio = hoje'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-sprint
+  cancel-in-progress: false
+
+jobs:
+  iniciar:
+    if: ${{ vars.PROJETO_OWNER != '' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Iniciar sprint
+        run: bash .bigbang/esteira/nucleo/scripts/iniciar-sprint.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          SIMULAR: ${{ inputs.simular }}
+          DATA: ${{ inputs.data }}
+          PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
+          PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
+          PROJETO_EXECUCAO: ${{ vars.PROJETO_EXECUCAO }}
