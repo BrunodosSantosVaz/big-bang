@@ -23,9 +23,9 @@ class _Base(CasoDeScript):
         self.issue(12, "Tarefa", labels=["task"])
 
     def regras(self, head="feature/12-tarefa", base="epico/7-estoque", titulo="feat(pedidos): bloqueia pedido",
-               corpo=CORPO, arquivos="src/pedidos.py\n", labels="", sha=""):
+               corpo=CORPO, arquivos="src/pedidos.py\n", labels="", sha="", diff_texto=""):
         env = {"HEAD_REF": head, "BASE_REF": base, "PR_TITLE": titulo, "PR_BODY": corpo, "PR_NUMBER": "30",
-               "PR_LABELS": labels, "DIFF_ARQUIVOS": arquivos, "PR_HEAD_SHA": sha,
+               "PR_LABELS": labels, "DIFF_ARQUIVOS": arquivos, "PR_HEAD_SHA": sha, "DIFF_TEXTO": diff_texto,
                "BB": f"{sys.executable} {BB} --raiz {self.projeto}"}
         return self.rodar("regras-pr.sh", env=env, cwd=self.projeto)
 
@@ -69,6 +69,21 @@ class RegrasPr(_Base):
         self.assertEqual(r.returncode, 0, r.stdout)
         self.assertNotIn("revisao-humana", self.labels_pr())
         self.regras(arquivos="tests/aceite/7-estoque/test_a.py\n")  # a task PR touching it: human review
+        self.assertIn("revisao-humana", self.labels_pr())
+
+    def test_tarefa_que_so_libera_as_proprias_marcas_continua_com_a_ia(self):
+        diff = ("diff --git a/tests/aceite/7-e/test_a.py b/tests/aceite/7-e/test_a.py\n--- a/x\n+++ b/x\n@@ -1 +0,0 @@\n"
+                "-    @unittest.expectedFailure  # pendente da tarefa #12\n")
+        toml = os.path.join(self.projeto, "bigbang.toml")
+        with open(toml, encoding="utf-8") as arquivo:
+            texto = arquivo.read().replace('marca_pendente = "test.failing"', 'marca_pendente = "expectedFailure"')
+        with open(toml, "w", encoding="utf-8") as arquivo:
+            arquivo.write(texto)
+        r = self.regras(arquivos="src/a.py\ntests/aceite/7-e/test_a.py\n", labels="revisao-ia", diff_texto=diff)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertNotIn("revisao-humana", self.labels_pr())
+        r = self.regras(arquivos="src/a.py\ntests/aceite/7-e/test_a.py\n", labels="revisao-ia",
+                        diff_texto=diff.replace("#12", "#99"))
         self.assertIn("revisao-humana", self.labels_pr())
 
     def test_sem_release_sincronizado(self):

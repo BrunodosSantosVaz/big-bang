@@ -314,6 +314,9 @@ def main():
                      "baseRefName": pr["base"], "headRefName": pr["head"], "headRefOid": pr.get("sha", "sha0"),
                      "labels": [{"name": label} for label in pr.get("labels", [])],
                      "title": pr.get("title", ""), "body": pr.get("body", "")}, jq)
+    if argv[:2] == ["pr", "diff"]:
+        sys.stdout.write(state.get("prs", {}).get(positional[2], {}).get("diff", ""))
+        return None
     if argv[:2] == ["pr", "merge"]:
         pr = state["prs"][positional[2]]
         expected = (flags.get("--match-head-commit") or [None])[0]

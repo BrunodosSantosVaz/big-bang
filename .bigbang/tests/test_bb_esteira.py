@@ -215,3 +215,28 @@ class Caminhos(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LiberacaoDasMarcas(unittest.TestCase):
+    def diff(self, removidas, adicionadas=(), arquivo="tests/aceite/9-x/test_a.py"):
+        linhas = [f"diff --git a/{arquivo} b/{arquivo}", f"--- a/{arquivo}", f"+++ b/{arquivo}", "@@ -1,3 +1,2 @@"]
+        return "\n".join(linhas + [f"-{l}" for l in removidas] + [f"+{l}" for l in adicionadas]) + "\n"
+
+    def test_retirada_do_decorador_da_propria_tarefa(self):
+        d = self.diff(["    @unittest.expectedFailure  # pendente da tarefa #11"])
+        self.assertTrue(p.only_own_marks_released(d, 11, "expectedFailure"))
+        self.assertFalse(p.only_own_marks_released(d, 12, "expectedFailure"))  # another task's mark
+
+    def test_test_failing_vira_test(self):
+        d = self.diff(['test.failing("RN-0042 bloqueia", () => {  // pendente da tarefa #11'],
+                      ['test("RN-0042 bloqueia", () => {'])
+        self.assertTrue(p.only_own_marks_released(d, 11, "test.failing"))
+
+    def test_qualquer_outra_mudanca_e_sensivel(self):
+        casos = [self.diff([], ["    self.assertTrue(True)"]),
+                 self.diff(["        self.assertEqual(total, 100)"]),
+                 self.diff(["    @unittest.expectedFailure  # pendente da tarefa #11"], ["    @unittest.skip('x')"])]
+        for d in casos:
+            with self.subTest(diff=d):
+                self.assertFalse(p.only_own_marks_released(d, 11, "expectedFailure"))
+        self.assertFalse(p.only_own_marks_released("", 11, "expectedFailure"))

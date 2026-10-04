@@ -66,6 +66,10 @@ def register(commands, parser_class):
     p = sub.add_parser("documentacao", help="Markdown válido e links relativos do projeto (DOC-14)")
     p.set_defaults(handler=_docs)
 
+    p = sub.add_parser("so-liberacao", help="o diff (entrada padrão) em tests/aceite/ só retira marcas da issue?")
+    p.add_argument("issue", type=int)
+    p.set_defaults(handler=_only_release)
+
     p = sub.add_parser("gravar-versao", help="grava a versão no arquivo de versão da stack (entrega.arquivo_versao)")
     p.add_argument("versao")
     p.set_defaults(handler=_write_version)
@@ -170,6 +174,11 @@ def _sensitive(args):
     for path in pipeline.sensitive_paths(_lines(), zones, acceptance_allowed=args.pr_de_teste):
         print(path)
     return EXIT_OK
+
+
+def _only_release(args):
+    marker = config_module.load(args.raiz)["testes"]["marca_pendente"]
+    return EXIT_OK if pipeline.only_own_marks_released(_stdin(), args.issue, marker) else EXIT_VERIFICATION_FAILED
 
 
 def _docs(args):

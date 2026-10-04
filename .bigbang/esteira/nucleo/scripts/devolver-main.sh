@@ -5,6 +5,7 @@
 #   comment: an AI resolves it in a sync/<n>-<slug> PR.
 # Environment: SIMULAR, GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN, to push), TAG (optional, for the messages).
 set -euo pipefail
+trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 R="${GITHUB_REPOSITORY:?}"; SIMULAR="${SIMULAR:-false}"

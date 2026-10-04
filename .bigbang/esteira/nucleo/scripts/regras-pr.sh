@@ -11,6 +11,7 @@
 # Environment: HEAD_REF, BASE_REF, PR_TITLE, PR_BODY, PR_NUMBER, PR_HEAD_SHA, PR_LABELS (comma separated),
 # GITHUB_REPOSITORY, GH_TOKEN. BB (default: python3 .bigbang/bin/bb.py). DIFF_ARQUIVOS (tests: changed files).
 set -euo pipefail
+trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
 R="${GITHUB_REPOSITORY:?}"
 head="${HEAD_REF:?}"; base="${BASE_REF:?}"; pr="${PR_NUMBER:?}"
@@ -44,6 +45,13 @@ fi
 
 # ---- sensitive zone -> human review (the owner's dono:revisao-ia has the last word)
 opcao_teste=(); [ "${tipo:-}" != teste ] || opcao_teste=(--pr-de-teste)
+# a task that only releases the pending marks of its own tests (spec 11.7) is not a sensitive change
+if [ -z "${opcao_teste[*]}" ] && [ -n "$issue" ] && grep -q '^tests/aceite/' <<<"$arquivos"; then
+  if [ -n "${DIFF_TEXTO:-}" ]; then diff_texto="$DIFF_TEXTO"; else diff_texto=$(gh pr diff "$pr" --repo "$R"); fi
+  if printf '%s\n' "$diff_texto" | "${BB[@]}" esteira so-liberacao "$issue"; then
+    opcao_teste=(--pr-de-teste); echo "tests/aceite/: só a retirada das marcas de pendente da #$issue."
+  fi
+fi
 sensiveis=$(printf '%s\n' "$arquivos" | "${BB[@]}" esteira sensivel "${opcao_teste[@]}")
 labels_issue=""
 [ -z "$issue" ] || labels_issue=$(gh api "repos/$R/issues/$issue" --jq '[.labels[].name] | join(",")' 2>/dev/null || true)

@@ -2,6 +2,7 @@
 # Runs one command of the stack from bigbang.toml [comandos] (defined in F2), e.g. `comando.sh lint`.
 # An empty command is skipped with a notice (before F2 there is no stack yet); a failing one fails the step.
 set -euo pipefail
+trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 chave="${1:?Uso: comando.sh <instalar|lint|tipos|testes|testes_aceite|arquitetura|cobertura|build>}"
 read -r -a BB <<<"${BB:-python3 .bigbang/bin/bb.py}"
 comando=$("${BB[@]}" config get "comandos.$chave")

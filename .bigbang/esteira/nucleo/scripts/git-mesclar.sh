@@ -5,6 +5,7 @@
 # Output per item: MESCLADO <rotulo> | JA_INCLUIDO <rotulo>. On conflict: aborts, prints "CONFLITO <rotulo>" and
 # exits 3, leaving the local branch exactly as before the item. This script never pushes.
 set -euo pipefail
+trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
 destino="${1:?destino}"; base="${2:?base}"; shift 2
 git config user.name >/dev/null 2>&1 || git config user.name "github-actions[bot]"

@@ -380,3 +380,44 @@ def with_version(text, version):
     if count != 1:
         raise ValueError("nenhuma linha com version/versao e número SemVer no arquivo de versão")
     return new
+
+
+# --- acceptance tests: releasing the pending marks of the PR's own task (spec 11.7) ---------------------------------
+
+def _acceptance_changes(diff):
+    """{file: (removed lines, added lines)} of the files under tests/aceite/ in a unified diff."""
+    changes, current = {}, None
+    for line in (diff or "").splitlines():
+        if line.startswith("diff --git "):
+            path = line.split(" b/", 1)[-1]
+            current = path if path.startswith("tests/aceite/") else None
+            if current:
+                changes.setdefault(current, ([], []))
+        elif current and line.startswith("-") and not line.startswith("---"):
+            changes[current][0].append(line[1:])
+        elif current and line.startswith("+") and not line.startswith("+++"):
+            changes[current][1].append(line[1:])
+    return changes
+
+
+def _released(line, marker, issue):
+    """The line without the pending mark of `issue` (decorator removed, or test.failing -> test)."""
+    without_reason = re.sub(rf"\s*(#|//)\s*pendente da tarefa #{issue}\b.*$", "", line)
+    base = marker.rsplit(".", 1)[0] if "." in marker else ""
+    return without_reason.replace(marker, base) if base else without_reason.replace(marker, "")
+
+
+def only_own_marks_released(diff, issue, marker):
+    """True when every change under tests/aceite/ only releases pending marks that cite `#issue`."""
+    changes = _acceptance_changes(diff)
+    if not changes:
+        return False
+    for removed, added in changes.values():
+        for line in removed:
+            if marker not in line or f"#{issue}" not in line:
+                return False
+        expected = [_released(line, marker, issue) for line in removed]
+        for line in added:
+            if line not in expected:
+                return False
+    return True

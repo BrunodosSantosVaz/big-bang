@@ -11,6 +11,11 @@
 # Environment: PR_NUMBER, SIMULAR (true: only explain), CHECKS_OBRIGATORIOS, GITHUB_REPOSITORY,
 # GH_TOKEN (PROJETO_TOKEN: its merge events trigger the next workflows).
 set -euo pipefail
+trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
+
+if [ -z "${BB_CACHE_DIR:-}" ]; then  # board ids and options fetched once per run (projeto.sh)
+  BB_CACHE_DIR=$(mktemp -d); export BB_CACHE_DIR; trap 'rm -rf "$BB_CACHE_DIR"' EXIT
+fi
 
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 R="${GITHUB_REPOSITORY:?}"; PR="${PR_NUMBER:?}"; SIMULAR="${SIMULAR:-false}"

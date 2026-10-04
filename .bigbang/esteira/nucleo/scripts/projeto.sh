@@ -20,26 +20,41 @@
 # Environment: GH_TOKEN (scope project), PROJETO_OWNER, GITHUB_REPOSITORY. DRY_RUN=1 only prints the writes.
 # shellcheck disable=SC2016  # $vars inside single quotes are GraphQL variables, not Bash
 set -euo pipefail
+trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
 : "${PROJETO_OWNER:?defina PROJETO_OWNER}"
 : "${GITHUB_REPOSITORY:?defina GITHUB_REPOSITORY}"
 
+# Board ids and field options do not change during a run: with BB_CACHE_DIR set (the orchestrating scripts set it
+# to a fresh temp dir), they are fetched once. Saves GraphQL points (5000/hour, shared by every workflow).
+cache() { # <chave> <comando...>: prints the cached output, running the command once
+  local chave="$1"; shift
+  if [ -z "${BB_CACHE_DIR:-}" ]; then "$@"; return; fi
+  local arquivo="$BB_CACHE_DIR/$chave"
+  if [ ! -s "$arquivo" ]; then "$@" >"$arquivo.tmp" && mv "$arquivo.tmp" "$arquivo"; fi
+  cat "$arquivo"
+}
+limpar_cache() { [ -z "${BB_CACHE_DIR:-}" ] || rm -f "$BB_CACHE_DIR"/opcoes-"$1"-* "$BB_CACHE_DIR"/campo-"$1"-*; }
+
 OWNER_QUERY='query($o:String!,$n:Int!){ repositoryOwner(login:$o){ ... on ProjectV2Owner { projectV2(number:$n){'
 
-projeto_id() {
+projeto_id() { cache "id-$1" _projeto_id "$1"; }
+_projeto_id() {
   gh api graphql -F n="$1" -f o="$PROJETO_OWNER" -f query="$OWNER_QUERY id } } } }" \
     --jq '.data.repositoryOwner.projectV2.id'
 }
 
 # <field id>\t<option id>\t<option name> for every option of a single-select field
-opcoes() {
+opcoes() { cache "opcoes-$1-$(printf '%s' "$2" | cksum | cut -d' ' -f1)" _opcoes "$1" "$2"; }
+_opcoes() {
   gh api graphql -F n="$1" -f o="$PROJETO_OWNER" -f c="$2" -f query='
     query($o:String!,$n:Int!,$c:String!){ repositoryOwner(login:$o){ ... on ProjectV2Owner { projectV2(number:$n){
       field(name:$c){ ... on ProjectV2SingleSelectField { id options{ id name } } } } } } }' \
     --jq '.data.repositoryOwner.projectV2.field as $f | $f.options[] | "\($f.id)\t\(.id)\t\(.name)"'
 }
 
-campo_id() {
+campo_id() { cache "campo-$1-$(printf '%s' "$2" | cksum | cut -d' ' -f1)" _campo_id "$1" "$2"; }
+_campo_id() {
   gh api graphql -F n="$1" -f o="$PROJETO_OWNER" -f c="$2" -f query='
     query($o:String!,$n:Int!,$c:String!){ repositoryOwner(login:$o){ ... on ProjectV2Owner { projectV2(number:$n){
       field(name:$c){ ... on ProjectV2FieldCommon { id } } } } } }' \
@@ -152,6 +167,7 @@ sprint_criar() {
   lista+="{name: $(json_texto "$titulo"), color: BLUE, description: \"\"}"
   gh api graphql -f query="mutation { updateProjectV2Field(input: { fieldId: $(json_texto "$campo"),
     singleSelectOptions: [$lista] }) { projectV2Field { ... on ProjectV2SingleSelectField { id } } } }" >/dev/null
+  limpar_cache "$painel"
   echo "Sprint '$titulo' criada no painel $painel."
 }
 
@@ -167,6 +183,7 @@ sprint_renomear() {
   done < <(opcoes "$painel" Sprint)
   gh api graphql -f query="mutation { updateProjectV2Field(input: { fieldId: $(json_texto "$campo"),
     singleSelectOptions: [${lista%, }] }) { projectV2Field { ... on ProjectV2SingleSelectField { id } } } }" >/dev/null
+  limpar_cache "$painel"
   echo "Sprint '$de' renomeada para '$para' no painel $painel."
 }
 
