@@ -49,7 +49,10 @@ esac
 tem "$labels" "$aprovacao" || espera "falta a label $aprovacao"
 
 # ---- required checks green on the exact head commit
-runs=$(gh api "repos/$R/commits/$sha/check-runs?per_page=100" --jq '.check_runs[] | "\(.name)\t\(.status)\t\(.conclusion)"')
+# Only the latest run of each check counts (highest id): a check re-run after a decision label, or one cancelled by
+# the concurrency group, leaves older runs of the same name on the commit.
+runs=$(gh api "repos/$R/commits/$sha/check-runs?per_page=100" \
+  --jq '[.check_runs[]] | group_by(.name) | map(max_by(.id // 0))[] | "\(.name)\t\(.status)\t\(.conclusion)"')
 for check in "${CHECKS[@]}"; do
   linhas=$(awk -F'\t' -v c="$check" '$1 == c' <<<"$runs")
   [ -n "$linhas" ] || espera "o check $check ainda não rodou no ${sha:0:7}"

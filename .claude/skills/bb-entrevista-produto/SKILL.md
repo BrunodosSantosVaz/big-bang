@@ -2,7 +2,7 @@
 name: bb-entrevista-produto
 description: Use em F1 da Fundação para entrevistar o dono sobre o sistema, escrever PRODUTO.md e definir o nível ASVS. Não escolhe stack.
 ---
-<!-- Gerado pelo Big Bang v0.11.5 a partir de .bigbang/skills/bb-entrevista-produto/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v0.11.6 a partir de .bigbang/skills/bb-entrevista-produto/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Entrevista do produto
 
