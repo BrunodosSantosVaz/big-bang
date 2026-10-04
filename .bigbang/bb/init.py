@@ -31,6 +31,26 @@ LICENSE_HOLDERS = ("[fullname]", "[name of copyright owner]", "[owner]")
 LICENSE_YEARS = ("[year]", "[yyyy]")
 
 
+def hook_python_problem():
+    """The Claude Code hooks run `python` (exec form, no shell). None when it is Python 3.11+, else how to fix it.
+
+    On Ubuntu/Debian only `python3` exists by default; a hook that cannot start blocks nothing."""
+    import shutil
+    import subprocess
+    executable = shutil.which("python")
+    if not executable:
+        return ("o comando `python` não existe: os hooks do Claude Code não vão rodar. No Ubuntu/Debian: "
+                "sudo apt install python-is-python3; no Windows: instale o Python 3.11+ marcando 'Add to PATH'")
+    try:
+        version = subprocess.run([executable, "-c", "import sys; print(sys.version_info[0], sys.version_info[1])"],
+                                 capture_output=True, text=True, timeout=10, check=True).stdout.split()
+    except (OSError, subprocess.SubprocessError):
+        return "o comando `python` não respondeu: confira a instalação do Python 3.11+"
+    if (int(version[0]), int(version[1])) < (3, 11):
+        return f"`python` é a versão {'.'.join(version)}; os hooks precisam de Python 3.11+ como `python`"
+    return None
+
+
 def slugify(text):
     ascii_text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
     return re.sub(r"[^a-z0-9]+", "-", ascii_text.lower()).strip("-")

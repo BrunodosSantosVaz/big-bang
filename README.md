@@ -3,7 +3,7 @@
 > Um framework para **uma pessoa, com uma ou mais IAs**, planejar, construir e manter sistemas profissionais:
 > bem arquitetados, seguros, testados e 100% documentados.
 
-**Versão:** 0.7.0 (em construção; a 1.0.0 sai depois do piloto) · **Licença do framework:** MIT
+**Versão:** 0.8.0 (em construção; a 1.0.0 sai depois do piloto) · **Licença do framework:** MIT
 
 ## O que é o Big Bang
 
@@ -25,7 +25,7 @@ ferramenta (CI, testes travados, portões), não por promessa.
 
 - [Git](https://git-scm.com/)
 - [GitHub CLI](https://cli.github.com/) (`gh`) autenticado (`gh auth login`)
-- Python 3.11 ou superior
+- Python 3.11 ou superior, disponível também como comando `python` (no Ubuntu/Debian: `sudo apt install python-is-python3`)
 - Uma IA para código, como Claude Code, Codex ou Cursor
 - Uma conta no GitHub
 

@@ -2,7 +2,7 @@
 name: bb-montar-github
 description: Use em F4 da Fundação para guiar permissões e montar labels, painéis, rulesets e ambientes no GitHub, conferindo cada item antes do próximo. Nunca pede o valor de tokens.
 ---
-<!-- Gerado pelo Big Bang v0.7.0 a partir de .bigbang/skills/bb-montar-github/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v0.8.0 a partir de .bigbang/skills/bb-montar-github/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Montar o GitHub
 
@@ -25,7 +25,8 @@ Leia `AGENTS.md`, `.bigbang/processo/02-fundacao.md` (F4), `.bigbang/processo/04
    rulesets de main/develop/epico com PR, checks check/regras/seguranca e bloqueio de força/exclusão.
 4. Deploy: credenciais do alvo, preferindo OIDC. Confira variáveis PROJETO_OWNER/números dos painéis, merge commit
    permitido e exclusão automática de branch desligada. Se o plano não suportar uma proteção, explique e peça decisão.
-5. Com autorização, use `.bigbang/scripts/criar-labels.sh` e `.bigbang/scripts/criar-paineis.sh`, primeiro em simulação;
+5. Com autorização, use `.bigbang/scripts/criar-labels.sh`, `.bigbang/scripts/criar-paineis.sh` e
+   `.bigbang/scripts/configurar-repositorio.sh` (itens 3, 4, 5 e 7), sempre primeiro com `--simular`;
    não recrie sua lógica. Registre os números reais dos painéis no `bigbang.toml`, acrescente as issues da Fundação.
 6. Execute `bb status` e confira os três painéis. Registre evidências no PR de F4 e peça aprovação.
 

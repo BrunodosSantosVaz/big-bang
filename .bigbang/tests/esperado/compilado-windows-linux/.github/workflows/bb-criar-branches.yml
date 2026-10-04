@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v0.7.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-criar-branches.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v0.8.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-criar-branches.yml. Não edite: personalize em bigbang.toml.
 # Botão "Criar branches" (spec 11.6, passo 4). Também roda sozinho depois de cada merge num epico/* (Mesclar PR).
 name: Criar branches
 

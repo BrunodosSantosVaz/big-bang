@@ -6,7 +6,7 @@
 # variables PROJETO_PLANEJAMENTO, PROJETO_EXECUCAO and PROJETO_BUGS.
 #
 # Requires gh with the "project" scope (gh auth refresh -s project).
-# Usage: .bigbang/scripts/criar-paineis.sh OWNER/REPO "Nome do Produto"
+# Usage: .bigbang/scripts/criar-paineis.sh OWNER/REPO "Nome do Produto" [--simular]
 # shellcheck disable=SC2016  # $vars inside single quotes are GraphQL variables, not Bash
 set -euo pipefail
 
@@ -107,6 +107,17 @@ montar() { # <titulo> <array de colunas> -> numero
   visoes "$numero"
   echo "$numero"
 }
+
+if [ "${3:-}" = --simular ]; then
+  for titulo in "$PRODUTO — Planejamento" "$PRODUTO — Execução" "$PRODUTO — Bugs"; do
+    numero=$(numero_do_painel "$titulo")
+    if [ -n "$numero" ]; then echo "[simulado] completar o painel existente #$numero $titulo"
+    else echo "[simulado] criar o painel \"$titulo\" e ligar a $REPO"; fi
+  done
+  echo "[simulado] colunas da seção 11.1, campos Sprint/Épico/Prioridade/Versão, visões Quadro/Tabela/Roadmap;"
+  echo "[simulado] sem o workflow 'Auto-add sub-issues' no Planejamento e em Bugs"
+  exit 0
+fi
 
 echo "== Planejamento ==" >&2
 P=$(montar "$PRODUTO — Planejamento" "${COLUNAS_PLANEJAMENTO[@]}")

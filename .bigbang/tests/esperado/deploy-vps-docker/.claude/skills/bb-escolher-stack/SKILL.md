@@ -2,7 +2,7 @@
 name: bb-escolher-stack
 description: Use em F2 da Fundação para pesquisar e propor stack, arquitetura e hospedagem. O dono escolhe; a skill registra STACK.md, configuração, ADR e C4.
 ---
-<!-- Gerado pelo Big Bang v0.7.0 a partir de .bigbang/skills/bb-escolher-stack/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v0.8.0 a partir de .bigbang/skills/bb-escolher-stack/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Escolher stack
 

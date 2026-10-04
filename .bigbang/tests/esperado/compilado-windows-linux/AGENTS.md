@@ -1,9 +1,9 @@
-<!-- bigbang:inicio v0.7.0 -->
-<!-- Gerado pelo Big Bang v0.7.0 a partir de .bigbang/AGENTS.base.md. Não edite: personalize em bigbang.toml. -->
+<!-- bigbang:inicio v0.8.0 -->
+<!-- Gerado pelo Big Bang v0.8.0 a partir de .bigbang/AGENTS.base.md. Não edite: personalize em bigbang.toml. -->
 
 # Instruções para IAs — Controle Fictício
 
-Este sistema é construído com o **Big Bang v0.7.0**. Estas instruções valem para qualquer IA.
+Este sistema é construído com o **Big Bang v0.8.0**. Estas instruções valem para qualquer IA.
 Leia nesta ordem, no início de toda sessão: `PRODUTO.md`, `STACK.md`, `DESIGN.md` (se houver interface),
 `bigbang.toml`, `docs/memoria.md` e a seção "Projeto" no fim deste arquivo.
 
