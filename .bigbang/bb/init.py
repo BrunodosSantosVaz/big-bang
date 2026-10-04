@@ -64,8 +64,15 @@ def set_value(text, section, key, value):
     following = re.search(r"^\[", text[header.end():], re.M)
     end = header.end() + following.start() if following else len(text)
     pattern = re.compile(rf'^({re.escape(key)}\s*=\s*)("(?:[^"\\]|\\.)*"|[^#\n]*?)([ \t]*(?:#.*)?)$', re.M)
-    body, count = pattern.subn(lambda m: m.group(1) + json.dumps(value, ensure_ascii=False) + m.group(3),
-                               text[header.end():end], count=1)
+    def keep_comment_column(match):
+        new = match.group(1) + json.dumps(value, ensure_ascii=False)
+        comment = match.group(3).strip()
+        if not comment:
+            return new
+        column = len(match.group(1) + match.group(2)) + len(match.group(3)) - len(match.group(3).lstrip())
+        return new + " " * max(1, column - len(new)) + comment
+
+    body, count = pattern.subn(keep_comment_column, text[header.end():end], count=1)
     if count != 1:
         raise BbError(f"modelo do bigbang.toml sem a chave {section}.{key}", EXIT_INVALID_STATE)
     return text[:header.end()] + body + text[end:]
