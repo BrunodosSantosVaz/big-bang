@@ -153,6 +153,12 @@ class Auxiliares(unittest.TestCase):
                          '[a]\nx = "1"   # comentário\n\n[b]\nx = "novo \\"valor\\""\n')
         self.assertEqual(init.set_value(texto, "a", "x", "z"), '[a]\nx = "z"   # comentário\n\n[b]\nx = "2"\n')
 
+    def test_set_value_mantem_a_coluna_do_comentario(self):  # ScreenFakeCam pilot: licenca = "GPL-3.0"
+        texto = '[p]\nlicenca = ""            # SPDX\n'
+        self.assertEqual(init.set_value(texto, "p", "licenca", "GPL-3.0"), '[p]\nlicenca = "GPL-3.0"     # SPDX\n')
+        self.assertEqual(init.set_value(texto, "p", "licenca", "Apache-2.0 WITH LLVM-exception"),
+                         '[p]\nlicenca = "Apache-2.0 WITH LLVM-exception" # SPDX\n')
+
 
 if __name__ == "__main__":
     unittest.main()

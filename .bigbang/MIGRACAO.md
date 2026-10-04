@@ -4,6 +4,24 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [0.11.0] - 2026-10-04
+
+### O que muda
+
+- Perfil compilado aceita o sistema `android` (runner Linux; candidata `.apk`/`.aab`).
+- Guarda da stack lê o Gradle moderno (catálogo `gradle/libs.versions.toml`, bundles, `platform(...)`) e reprova a
+  linha de dependência que não consegue ler, em vez de ignorá-la.
+- `bb init` mantém os comentários do `bigbang.toml` na mesma coluna.
+
+### O que o projeto precisa fazer
+
+Nada.
+
+### Projetos Gradle
+
+Se a guarda passar a apontar dependências que antes não via, inclua-as na tabela do `STACK.md` pelo
+`bb-nova-tecnologia`.
+
 ## [0.10.2] - 2026-10-04
 
 ### O que muda
