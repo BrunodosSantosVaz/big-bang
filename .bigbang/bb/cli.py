@@ -3,7 +3,7 @@ import argparse
 import sys
 
 from . import config as config_module
-from . import acceptance, checksums, decisions, generator, verify
+from . import acceptance, checklist, checksums, decisions, generator, verify
 from . import init as init_module
 from . import pipeline_cli
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
@@ -70,6 +70,14 @@ def build_parser():
     aprovar_parser.add_argument("--relatorio", default=None, help="arquivo com o relatório do revisor")
     aprovar_parser.set_defaults(handler=_revisao_aprovar)
 
+    checklist_parser = commands.add_parser("checklist", help="validação final")
+    checklist_commands = checklist_parser.add_subparsers(dest="checklist_command", metavar="<subcomando>",
+                                                         parser_class=_Parser)
+    producao_parser = checklist_commands.add_parser("producao", help="checklist de produção (seção 8.2)")
+    producao_parser.add_argument("--dados", help="pasta com o conteúdo a conferir (padrão: a raiz)")
+    producao_parser.add_argument("--sem-github", action="store_true", help="não confere os achados de segurança")
+    producao_parser.set_defaults(handler=_checklist_producao)
+
     pipeline_cli.register(commands, _Parser)
 
     checksums_parser = commands.add_parser("checksums", help="confere ou grava .bigbang/CHECKSUMS (manutenção)")
@@ -118,6 +126,21 @@ def _revisao_aprovar(args):
     decisions.approve_review(config["projeto"]["repositorio"], args.pr, _ia(args),
                              config["seguranca"]["zonas_sensiveis"], config["testes"]["marca_pendente"], report)
     print(f"PR #{args.pr}: pr-aprovado (revisão da IA).")
+    return EXIT_OK
+
+
+def _checklist_producao(args):
+    import os
+    repository = os.environ.get("GITHUB_REPOSITORY") or config_module.load(args.raiz)["projeto"]["repositorio"]
+    results, problems = checklist.run(args.dados or args.raiz, repository, with_github=not args.sem_github)
+    for item, status, detail in results:
+        print(f"[{status}] {item}" + (f" ({detail})" if detail else ""))
+    for problem in problems:
+        print(f"  - {problem}", file=sys.stderr)
+    if problems:
+        print(f"Checklist de produção REPROVADO: {len(problems)} problema(s).", file=sys.stderr)
+        return EXIT_VERIFICATION_FAILED
+    print("Checklist de produção aprovado.")
     return EXIT_OK
 
 
