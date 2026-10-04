@@ -97,6 +97,15 @@ class Migracao(unittest.TestCase):
         self.assertIn("### O que muda", texto)
         self.assertIn(package.MANUAL_HEADING, texto)
 
+    def test_versoes_publicadas_sem_passo_manual(self):
+        # Update this list when a version really needs the owner to act (major version, spec 5.7).
+        with_steps = []
+        with open(os.path.join(BIGBANG, "MIGRACAO.md"), encoding="utf-8") as arquivo:
+            secoes = package.migration_sections(arquivo.read())
+        for versao, texto in secoes.items():
+            with self.subTest(versao=versao):
+                self.assertEqual(bool(package.manual_steps(texto)), versao in with_steps)
+
     def test_toda_secao_tem_as_duas_partes(self):
         with open(os.path.join(BIGBANG, "MIGRACAO.md"), encoding="utf-8") as arquivo:
             secoes = package.migration_sections(arquivo.read())
