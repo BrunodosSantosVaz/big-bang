@@ -111,6 +111,9 @@ def _init(args):
         for step in steps:
             print(f"  - {step}")
         return EXIT_OK
+    problem = init_module.hook_python_problem()
+    if problem:
+        print(f"Atenção: {problem}", file=sys.stderr)
     issue = init_module.run(args.raiz, options, with_github=not args.sem_github)
     for step in steps:
         print(f"feito: {step}")
