@@ -110,7 +110,7 @@ SCHEMA = {
     },
     "ias": {
         "nomes": _string_list(SLUG, unique=True), "tarefas_por_ia": _integer(1), "trava_expira_horas": _integer(1),
-        "espera_confirmacao_segundos": _integer(0),
+        "espera_confirmacao_segundos": _integer(1),
     },
     "flags": {"validade_maxima_dias": _integer(1)},
 }

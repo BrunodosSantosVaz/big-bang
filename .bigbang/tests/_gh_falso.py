@@ -219,7 +219,7 @@ def api(state, positional, fields, jq, method):
             ident = state.get("next_comment", 0) + 1
             state["next_comment"] = ident
             record = {"id": ident, "body": fields["body"], "user": {"login": "dono"},
-                      "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()}
+                      "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")}
             records.append(record)
             save(state)
             return emit(record, jq)
@@ -264,6 +264,13 @@ def api(state, positional, fields, jq, method):
             save(state)
             return emit({}, jq)
         return emit([issue_json(state, n) for n in issue.get("blocked_by", [])], jq)
+    match = re.match(rf"^repos/{re.escape(REPO)}/issues/(\d+)/parent$", path)
+    if match:
+        parent = state["issues"][match.group(1)].get("parent")
+        if not parent:
+            sys.stderr.write("HTTP 404: parent not found\n")
+            sys.exit(1)
+        return emit(issue_json(state, parent), jq)
     match = re.match(rf"^repos/{re.escape(REPO)}/git/ref/tags/(.+)$", path)
     if match:
         if f"tags/{match.group(1)}" not in state.get("refs", {}):

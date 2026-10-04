@@ -15,11 +15,14 @@ from bb import config, ownership, workspaces  # noqa: E402
 from bb.errors import BbError, EXIT_INVALID_STATE, EXIT_USAGE  # noqa: E402
 
 
-class Posse(ComCli):
+class ComPosse(ComCli):
     def setUp(self):
         super().setUp()
         self.config = config.load(self.projeto)
-        self.config["ias"]["espera_confirmacao_segundos"] = 0
+        self.config["ias"]["espera_confirmacao_segundos"] = 1
+        self.sleep_patch = patch.object(ownership.time, "sleep", return_value=None)
+        self.sleep_patch.start()
+        self.addCleanup(self.sleep_patch.stop)
         self.issue(12, "Tarefa", labels=["task"])
 
     def assumir(self, number=12, name="claude-1"):
@@ -27,6 +30,9 @@ class Posse(ComCli):
             return ownership.claim(self.config, number, name)
         finally:
             self.ler_estado()
+
+
+class Posse(ComPosse):
 
     def test_assume_libera_e_preserva_historico(self):
         receipt = self.assumir()
@@ -62,8 +68,9 @@ class Posse(ComCli):
             self.assumir(number=13)
 
     def test_recusa_bloqueio_mas_aceita_pr_de_teste_mesclado(self):
-        self.issue(11, "Testes", labels=["teste-aceite"])
-        self.issue(12, "Tarefa", blocked_by=[11])
+        self.issue(7, "Épico", labels=["epic"])
+        self.issue(11, "Testes", labels=["teste-aceite"], parent=7)
+        self.issue(12, "Tarefa", blocked_by=[11], parent=7)
         with self.assertRaisesRegex(BbError, "bloqueada pela #11"):
             self.assumir()
         self.estado["prs"] = {"30": {"body": "Refs #110", "head": "teste/110-outra", "base": "epico/7-x",
@@ -72,6 +79,11 @@ class Posse(ComCli):
         with self.assertRaises(BbError):
             self.assumir()
         self.estado["prs"]["30"].update(body="Refs #11", head="teste/11-testes")
+        self.estado["prs"]["30"]["base"] = "epico/999-outro"
+        self.gravar_estado()
+        with self.assertRaisesRegex(BbError, "bloqueada"):
+            self.assumir()
+        self.estado["prs"]["30"]["base"] = "epico/7-x"
         self.gravar_estado()
         self.assumir()
 
@@ -93,7 +105,7 @@ class Posse(ComCli):
         acquired = self.assumir()
         existing = ownership.active_claims("dono/repo", 12, "dono")[0]
         # Simulate a second client whose initial snapshot predates the first client's mark.
-        with patch.object(ownership, "active_claims", side_effect=[[], [existing], [existing]]), \
+        with patch.object(ownership, "active_claims", side_effect=[[], [existing], [existing], [existing]]), \
                 patch.object(ownership, "issue_data", return_value={"state": "open", "labels": []}):
             with self.assertRaisesRegex(BbError, "disputa perdida"):
                 self.assumir()
@@ -107,6 +119,25 @@ class Posse(ComCli):
         self.estado["comment_records"]["12"][0]["user"]["login"] = "terceiro"
         self.gravar_estado()
         self.assumir()
+
+    def test_recusa_espera_zero(self):
+        self.config["ias"]["espera_confirmacao_segundos"] = 0
+        with self.assertRaisesRegex(BbError, "pelo menos 1"):
+            self.assumir()
+        self.assertEqual(self.chamadas(), [])
+
+    def test_resposta_perdida_do_post_reconcilia_por_uuid(self):
+        original = ownership.api
+        def lose_response(path, method="GET", **fields):
+            result = original(path, method, **fields)
+            if path.endswith("/comments") and method == "POST":
+                raise BbError("resposta perdida")
+            return result
+        with patch.object(ownership, "api", side_effect=lose_response):
+            with self.assertRaisesRegex(BbError, "resposta perdida"):
+                self.assumir()
+        self.assertFalse(ownership.active_claims("dono/repo", 12, "dono"))
+        self.assertNotIn("ia:claude-1", self.ler_estado()["issues"]["12"]["labels"])
 
 
 class Processos(ComGit):
@@ -158,6 +189,30 @@ class Processos(ComGit):
         self.assertEqual(result.returncode, EXIT_INVALID_STATE, result.stdout + result.stderr)
         self.assertNotIn("ia:codex-1", self.ler_estado()["issues"]["12"]["labels"])
         self.assertIn("bb:liberada", self.estado["comments"]["12"][0])
+
+    def test_worktree_usa_avanco_remoto_e_recusa_divergencia(self):
+        branch = "feature/12-tarefa"
+        self.git("fetch", "-q", "origin")
+        self.git("checkout", "-q", branch)
+        self.escrever("docs/remoto.md", "# Remoto\n")
+        self.commit("docs: remote update")
+        tip = self.git("rev-parse", "HEAD", saida=True)
+        self.git("push", "-q", "origin", branch)
+        self.git("checkout", "-q", "main")
+        # Simulate a second clone publishing the new commit while this local branch remains old.
+        self.git("update-ref", "refs/heads/" + branch, tip + "~1", tip)
+        acquired = {"issue": 12, "name": "codex-1", "session": "x"}
+        with patch.dict(os.environ, self.env):
+            folder = workspaces.isolate(self.trabalho, config.load(self.trabalho), acquired,
+                                         os.path.join(self.pasta, "worktree"))
+            self.assertEqual(workspaces.git(folder, "rev-parse", "HEAD"), tip)
+            self.git("worktree", "remove", folder)
+            self.git("checkout", "-q", branch)
+            self.escrever("docs/local.md", "# Local\n")
+            self.commit("docs: unpublished local work")
+            self.git("checkout", "-q", "main")
+            with self.assertRaisesRegex(BbError, "diverge"):
+                workspaces.isolate(self.trabalho, config.load(self.trabalho), acquired, folder)
 
 
 def open_toml(root):
