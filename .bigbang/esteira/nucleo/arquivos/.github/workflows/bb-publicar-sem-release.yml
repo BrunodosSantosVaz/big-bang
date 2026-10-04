@@ -1,0 +1,63 @@
+# Botão "Publicar sem release" (spec 14.2): avança a main até a develop quando o artefato não mudou.
+# "conferir" roda sempre (portão e plano); "publicar" só com simular=false e a aprovação do dono em "producao".
+name: Publicar sem release
+
+on:
+  workflow_dispatch:
+    inputs:
+      simular:
+        description: 'Só conferir o portão e mostrar o plano'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-publicar
+  cancel-in-progress: false
+
+env:
+  PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
+  PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
+  PROJETO_EXECUCAO: ${{ vars.PROJETO_EXECUCAO }}
+
+jobs:
+  conferir:
+    if: ${{ vars.PROJETO_OWNER != '' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Portão e plano (não altera nada)
+        run: bash .bigbang/esteira/nucleo/scripts/publicar-sem-release.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          SIMULAR: 'true'
+
+  publicar:
+    needs: conferir
+    if: ${{ !inputs.simular }}
+    runs-on: ubuntu-24.04
+    environment: producao
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.PROJETO_TOKEN }}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Publicar sem release
+        run: bash .bigbang/esteira/nucleo/scripts/publicar-sem-release.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          SIMULAR: 'false'
