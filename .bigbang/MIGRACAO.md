@@ -4,6 +4,22 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [1.4.0] - 2026-10-05
+
+### O que muda
+
+- **Link de aprovação para quem supervisiona (#153):** ao disparar *Publicar em produção*, *Publicar sem release* ou
+  *Voltar versão* com `simular=false`, a IA roda `link-aprovacao.sh <workflow.yml>` e entrega ao humano que aprova
+  o link direto do run e os passos (*Review deployments* → `producao` → *Approve and deploy*). A regra de ferro 2 do
+  `AGENTS.md` e a skill `bb-entregar-epico` passam a exigir isso.
+- Os três workflows de publicação deixam o mesmo bloco de instruções no resumo do job `conferir` quando
+  `simular=false`.
+- A produção continua sempre com o clique de um humano no ambiente `producao`.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [1.3.1] - 2026-10-05
 
 ### O que muda

@@ -1,6 +1,6 @@
 # Botão "Voltar versão" (spec 14.4): reimplanta em produção a imagem registrada na Release da versão escolhida (o
 # digest de imagem.txt). Nunca desfaz migração (por isso expandir-e-contrair, DAD-02). Só com simular=false e a
-# aprovação do dono no ambiente "producao".
+# aprovação do dono no ambiente "producao"; "conferir" deixa no resumo do run o link e os passos para quem aprova.
 name: Voltar versão
 
 on:
@@ -32,6 +32,16 @@ jobs:
           imagem=$(gh release download "$VERSAO" --repo "$GITHUB_REPOSITORY" --pattern imagem.txt --output - | tr -d '[:space:]')
           [[ "$imagem" =~ @sha256:[0-9a-f]{64}$ ]] || { echo "::error::$VERSAO não registra um digest"; exit 1; }
           echo "Voltaria produção para $VERSAO: $imagem (migrações não são desfeitas)."
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ inputs.versao }}
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: ${{ !inputs.simular }}
+        with:
+          persist-credentials: false
+      - name: Como aprovar (link e passos para quem aprova)
+        if: ${{ !inputs.simular }}
+        run: bash .bigbang/esteira/nucleo/scripts/link-aprovacao.sh --resumo "Voltar produção para $VERSAO"
         env:
           GH_TOKEN: ${{ github.token }}
           VERSAO: ${{ inputs.versao }}
