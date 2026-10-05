@@ -190,7 +190,10 @@ def issue_json(state, number):
             "body": issue.get("body", ""), "state": issue.get("state", "open"),
             "labels": [{"name": label} for label in issue.get("labels", [])],
             "comments": len(state.get("comment_records", {}).get(str(number), [])),
-            "milestone": {"title": issue["milestone"]} if issue.get("milestone") else None}
+            "milestone": {"title": issue["milestone"],
+                          "state": next((m.get("state", "open") for m in state.get("milestones", [])
+                                         if m.get("title") == issue["milestone"]), "open")}
+            if issue.get("milestone") else None}
 
 
 def new_issue(state, title, body, labels, milestone=None):

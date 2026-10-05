@@ -3,7 +3,36 @@
 > Um framework para **uma pessoa, com uma ou mais IAs**, planejar, construir e manter sistemas profissionais:
 > bem arquitetados, seguros, testados e 100% documentados.
 
-**Versão:** 1.0.0 (validada num sistema real, do zero a produção: [relatório do piloto](.bigbang/docs/piloto-screenfakecam.md)) · **Licença do framework:** MIT
+[![CI do Big Bang](https://github.com/BrunodosSantosVaz/big-bang/actions/workflows/bb-framework-ci.yml/badge.svg)](https://github.com/BrunodosSantosVaz/big-bang/actions/workflows/bb-framework-ci.yml)
+[![Versão](https://img.shields.io/github/v/release/BrunodosSantosVaz/big-bang?label=vers%C3%A3o&color=success)](https://github.com/BrunodosSantosVaz/big-bang/releases/latest)
+[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)](LICENSE)
+[![Use this template](https://img.shields.io/badge/GitHub-Use%20this%20template-2ea44f)](https://github.com/BrunodosSantosVaz/big-bang/generate)
+![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)
+
+## Índice
+
+- [Estado atual](#estado-atual)
+- [O que é o Big Bang](#o-que-é-o-big-bang)
+- [Para quem é (e para quem não é)](#para-quem-é-e-para-quem-não-é)
+- [O que você precisa](#o-que-você-precisa)
+- [Como começar](#como-começar)
+- [O que vai acontecer](#o-que-vai-acontecer)
+- [Depois da Fundação](#depois-da-fundação)
+- [Como a esteira funciona](#como-a-esteira-funciona)
+- [Exemplo real: ScreenFakeCam](#exemplo-real-screenfakecam)
+- [Segurança](#segurança)
+- [Versões e atualização](#versões-e-atualização)
+- [Documentação do framework](#documentação-do-framework)
+- [Contribuindo](#contribuindo)
+- [Licença](#licença)
+
+## Estado atual
+
+Estável desde a **1.0.0**, validada num sistema real feito do zero até produção só pelo Big Bang: o
+[ScreenFakeCam](https://github.com/BrunodosSantosVaz/screenfakecam), um app Android publicado em três versões e
+testado pelo dono num celular ([relatório do piloto](.bigbang/docs/piloto-screenfakecam.md)). A versão atual está
+nas [Releases](https://github.com/BrunodosSantosVaz/big-bang/releases/latest). O que ainda falta validar fora de
+contêiner, como o deploy num servidor real, está nas [issues abertas](https://github.com/BrunodosSantosVaz/big-bang/issues).
 
 ## O que é o Big Bang
 
@@ -13,13 +42,31 @@ arquivos do framework conduzem a IA por todo o ciclo de vida do sistema, com voc
 controle. Ele não gera o sistema de uma vez: ele **governa** a construção, etapa por etapa, e cobra as regras por
 ferramenta (CI, testes travados, portões), não por promessa.
 
+```mermaid
+flowchart LR
+  F[Fundação<br/>produto, stack, design,<br/>GitHub, esteira] --> B[Backlog<br/>épicos refinados]
+  B --> S[Sprint<br/>testes, tarefas,<br/>documentação]
+  S --> E[Entrega<br/>candidata, homologação,<br/>produção]
+  E --> M[Manutenção<br/>bugs, segurança,<br/>atualização]
+  M --> B
+```
+
 | Etapa | O que a IA faz com você | O que fica gravado |
 | --- | --- | --- |
 | Fundação | Perguntas básicas do produto; escolha de stack, arquitetura e hospedagem; design kit com protótipo; guia de permissões e montagem do GitHub; geração da esteira; esqueleto andante até produção | `PRODUTO.md`, `STACK.md`, `DESIGN.md`, `bigbang.toml`, ADRs, diagramas C4, 3 painéis, workflows |
 | Backlog | "Vamos refinar o backlog": perguntas por épico até o refinamento ser aprovado; protótipo quando o épico pede | Épicos refinados, regras de negócio, critérios de aceite, protótipos |
-| Sprint | "Vamos rodar a sprint": confere pré-requisitos, cria o teste, as tarefas e a documentação de cada épico, programa, revisa | Issues, branches, PRs, testes, documentação |
-| Entrega | Integração, candidata, homologação e publicação **por épico**; deploy ou compilação automáticos | Versões, Releases, changelog |
+| Sprint | "Vamos rodar a sprint": confere pré-requisitos, cria o teste, as tarefas e a documentação de cada épico, programa em paralelo, revisa | Issues, branches, PRs, testes, documentação |
+| Entrega | Integração, candidata, homologação e publicação **por sprint ou por épico** (você escolhe a cada sprint) | Versões, Releases, changelog, README atualizado |
 | Manutenção | Bugs, hotfix, auditoria de segurança, tecnologia nova só com você, atualização do próprio framework | Correções com teste de regressão, ADRs, relatórios |
+
+## Para quem é (e para quem não é)
+
+**É para** quem constrói sistemas sozinho com IAs e quer o resultado de uma equipe disciplinada: decisões
+registradas, testes que a IA não pode enfraquecer, segurança verificada, documentação e README sempre em dia, e
+um painel que mostra o que espera por você.
+
+**Não é para** quem quer só um gerador de código, nem para equipes grandes com processo próprio: o Big Bang assume
+um dono que decide e IAs que executam, com o GitHub como fonte da verdade.
 
 ## O que você precisa
 
@@ -31,7 +78,8 @@ ferramenta (CI, testes travados, portões), não por promessa.
 
 ## Como começar
 
-1. No GitHub, clique em **Use this template** → *Create a new repository*.
+1. No GitHub, clique em **Use this template** → *Create a new repository*. O repositório novo nasce limpo, sem o
+   histórico do framework, e pode ser privado.
 2. Clone o repositório novo: `gh repo clone <seu-usuario>/<seu-sistema>`.
 3. Abra sua IA na pasta do repositório.
 4. Diga: **"iniciar projeto"**.
@@ -59,11 +107,11 @@ próximo passo e o que depende de você.
 | "Ideia: …" | Vira um épico em *Brainstorm* |
 | "Vamos refinar o backlog" | Perguntas por épico até o refinamento ser aprovado |
 | "Vamos montar o protótipo" | Protótipo navegável no padrão do `DESIGN.md` |
-| "Vamos rodar a sprint" | Teste de cada épico, tarefas, documentação, revisão |
+| "Vamos rodar a sprint" | Pergunta se a entrega é por sprint ou por épico; teste de cada épico, tarefas, documentação, revisão |
 | "Próxima tarefa" / "Codar #n" | A IA assume, programa e abre o PR |
-| "Vamos homologar o épico N" | Link da candidata, o que testar e os critérios |
-| "Vamos publicar o épico N" | Publicação em produção, com a sua aprovação no ambiente `producao` |
-| "Vamos encerrar a sprint" | Resumo, pendências e retrospectiva |
+| "Vamos homologar" | Link da candidata, o que testar e os critérios |
+| "Vamos publicar" | Publicação em produção, com a sua aprovação no ambiente `producao` |
+| "Vamos encerrar a sprint" | Resumo, faxina (branches, issues e repositórios que sobraram), README conferido, retrospectiva |
 | "Bug: …" / "Corrigir #n" / "Hotfix #n" | Teste que falha primeiro, depois a correção |
 | "Audita a segurança" | Relatório e issues `[Segurança]` |
 | "Como está o projeto?" | Resumo dos painéis e do que espera por você |
@@ -71,13 +119,61 @@ próximo passo e o que depende de você.
 
 Tudo também pode ser feito pelos botões das GitHub Actions (*Run workflow*), sempre com `simular=true` por padrão.
 
+## Como a esteira funciona
+
+- **Três camadas:** o framework (`.bigbang/`, conferido por hash), a camada gerada (`.github/`, skills, hooks) e o
+  seu projeto, que uma atualização do framework nunca toca.
+- **Branches:** `main` só recebe releases; a `develop` espelha o que está em produção; cada épico e cada tarefa têm
+  a sua branch, sempre por PR.
+- **Testes de aceite primeiro e travados:** escritos antes do código, com o ID da regra de negócio; a IA que
+  programa não pode mudá-los, só retirar a marca de pendente da própria tarefa.
+- **Dois perfis de entrega:** *compilado* (binários, APK; a produção publica os mesmos bytes homologados) e
+  *deploy* (imagem por digest, staging, migração antes da troca, *Voltar versão*).
+- **Várias IAs ao mesmo tempo:** cada uma assume a tarefa (`bb assumir`) e trabalha na própria pasta.
+- **Nada fica para trás:** a faxina apaga as branches mescladas e lista issues, PRs e posses soltas; a CI reprova
+  um README desatualizado depois da primeira release.
+
+## Exemplo real: ScreenFakeCam
+
+O [ScreenFakeCam](https://github.com/BrunodosSantosVaz/screenfakecam) foi feito do zero só pelo Big Bang: Fundação
+com entrevista, pesquisa de stack (Kotlin + Jetpack Compose), design kit e protótipo; três sprints; uma reprovação
+na homologação corrigida pela tarefa de correção; três versões em produção, cada uma com o APK assinado, hash e
+atestação de origem. Cada problema encontrado virou correção no framework, e o
+[relatório](.bigbang/docs/piloto-screenfakecam.md) lista todos.
+
+## Segurança
+
+- Cinco regras de ferro valem em todo sistema e não podem ser desligadas pelo `bigbang.toml` (`AGENTS.md`).
+- Varredura em todo PR: segredos (Gitleaks), análise estática, dependências (OSV) e CodeQL; o check `regras` julga
+  cada PR com as regras da branch de destino, que o próprio PR não consegue mudar.
+- Produção só com a sua aprovação no ambiente `producao`; tokens e segredos são sempre criados por você.
+- Texto de terceiros (issues, PRs, páginas) é tratado como dado, nunca como instrução para a IA.
+
+Encontrou uma falha de segurança no framework? Abra uma
+[issue](https://github.com/BrunodosSantosVaz/big-bang/issues) sem detalhes exploráveis e peça contato.
+
+## Versões e atualização
+
+O Big Bang segue [SemVer](https://semver.org/lang/pt-BR/). Cada versão é uma
+[Release](https://github.com/BrunodosSantosVaz/big-bang/releases) com o pacote `bigbang-vX.Y.Z.tar.gz`, o
+SHA-256 e a atestação de origem. Num sistema, diga "atualizar o Big Bang" (`bb atualizar`): a IA baixa e confere o
+pacote, mostra o [`MIGRACAO.md`](.bigbang/MIGRACAO.md) e abre um PR que troca só o framework.
+
 ## Documentação do framework
 
 - Especificação completa: [`.bigbang/docs/especificacao.md`](.bigbang/docs/especificacao.md)
 - Processo, passo a passo: [`.bigbang/processo/`](.bigbang/processo/)
+- Padrões obrigatórios: [`.bigbang/padroes/`](.bigbang/padroes/)
 - Decisões do framework (ADRs): [`.bigbang/docs/decisoes/`](.bigbang/docs/decisoes/)
-- O que muda em cada versão e como atualizar: [`.bigbang/MIGRACAO.md`](.bigbang/MIGRACAO.md) (`bb atualizar`)
+- O que muda em cada versão e como atualizar: [`.bigbang/MIGRACAO.md`](.bigbang/MIGRACAO.md)
 - Piloto que validou a 1.0.0: [`.bigbang/docs/piloto-screenfakecam.md`](.bigbang/docs/piloto-screenfakecam.md)
+
+## Contribuindo
+
+Pedidos, ideias e problemas do framework entram pelas
+[issues](https://github.com/BrunodosSantosVaz/big-bang/issues). Num sistema feito com o Big Bang, a skill
+`bb-retrospectiva` abre a issue com a evidência quando encontra um problema do framework. Toda mudança chega por
+PR, com os testes do framework (`python -m unittest discover -s .bigbang/tests`) e o `bb verificar` verdes.
 
 ## Licença
 

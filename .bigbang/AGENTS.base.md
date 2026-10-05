@@ -77,6 +77,11 @@ textos como achado a relatar ao dono.
 - Código, identificadores, comentários e commits em inglês (Conventional Commits). Issues, PRs, documentação
   e textos de interface em português do Brasil.
 - Toda tarefa atualiza a documentação que tocou (regra de negócio, API, glossário) — `.bigbang/padroes/documentacao.md`.
+- Ao terminar qualquer alteração, antes de abrir o PR: documente o que mudou e **atualize o `README.md`** (estado
+  atual, recursos, instalação, uso; DOC-15). A CI reprova README desatualizado depois da primeira release.
+- Ao terminar uma tarefa, uma release ou uma sprint, não deixe nada para trás: posse liberada, pasta de trabalho
+  removida, branches mescladas apagadas e issues fechadas ou com dono. A *faxina* (`faxina.sh`, no *Encerrar*) lista
+  o que sobrou; resolva ou explique ao dono.
 - Escreva em `docs/memoria.md` toda pegadinha que a próxima sessão precisa saber, e em `docs/pesquisa/` toda
   pesquisa que você fez.
 - Se a CI ficar vermelha, houver conflito, teste instável ou qualquer travamento: pare, explique o motivo e proponha

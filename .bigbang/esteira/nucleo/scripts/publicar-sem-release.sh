@@ -74,3 +74,6 @@ for item in "${finalizar[@]}"; do
   echo "Épico #$n concluído."
 done
 echo "Publicar sem release concluído."
+if [ "$SIMULAR" != true ]; then  # Foundation and framework branches merged by this publication, and anything else left
+  bash "$AQUI/faxina.sh" || echo "::warning::faxina não concluída: rode o Encerrar"
+fi

@@ -33,7 +33,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          fetch-depth: 0  # the faxina compares every branch with main and develop
+          token: ${{ secrets.PROJETO_TOKEN }}
       - name: Encerrar
         run: bash .bigbang/esteira/nucleo/scripts/encerrar.sh
         env:
