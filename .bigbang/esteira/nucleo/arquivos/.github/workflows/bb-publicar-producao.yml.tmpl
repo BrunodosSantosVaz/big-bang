@@ -1,5 +1,6 @@
 # Botão "Publicar em produção" (spec 11.6, passo 10). "conferir" roda sempre (portão e plano, nada muda);
 # "publicar" só com simular=false e depois que o dono aprova o ambiente "producao" — o único "ok" que ele não delega.
+# Com simular=false, "conferir" deixa no resumo do run o link e os passos para quem aprova (link-aprovacao.sh).
 name: Publicar em produção
 
 on:
@@ -47,6 +48,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
           SIMULAR: 'true'
+      - name: Como aprovar (link e passos para quem aprova)
+        if: ${{ !inputs.simular }}
+        run: bash .bigbang/esteira/nucleo/scripts/link-aprovacao.sh --resumo "Publicar em produção (versão $VERSAO)"
 
   publicar:
     needs: conferir

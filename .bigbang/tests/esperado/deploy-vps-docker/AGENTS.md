@@ -1,9 +1,9 @@
-<!-- bigbang:inicio v1.3.1 -->
-<!-- Gerado pelo Big Bang v1.3.1 a partir de .bigbang/AGENTS.base.md. Não edite: personalize em bigbang.toml. -->
+<!-- bigbang:inicio v1.4.0 -->
+<!-- Gerado pelo Big Bang v1.4.0 a partir de .bigbang/AGENTS.base.md. Não edite: personalize em bigbang.toml. -->
 
 # Instruções para IAs — Meu Sistema
 
-Este sistema é construído com o **Big Bang v1.3.1**. Estas instruções valem para qualquer IA.
+Este sistema é construído com o **Big Bang v1.4.0**. Estas instruções valem para qualquer IA.
 Leia nesta ordem, no início de toda sessão: `PRODUTO.md`, `STACK.md`, `DESIGN.md` (se houver interface),
 `bigbang.toml`, `docs/memoria.md` e a seção "Projeto" no fim deste arquivo.
 
@@ -33,8 +33,9 @@ Detalhes do processo: `.bigbang/processo/`. Padrões obrigatórios: `.bigbang/pa
 1. Nunca ponha label de decisão do dono (`refinamento-aprovado`, `prototipo-aprovado`, `testes-aprovados`,
    `teste-alterado-aprovado`, `homologado`, `reprovado`, `dono:revisao-ia`) nem `pr-aprovado` em PR com
    `revisao-humana`. Quando o dono decidir na conversa, use `bb decisao`, que registra a frase dele num comentário.
-2. Nunca aprove o ambiente `producao`, nunca rode *Publicar em produção* ou *Voltar versão* de verdade
-   (`simular=false`) sem a ordem do dono nesta conversa.
+2. Nunca aprove o ambiente `producao`, nunca rode *Publicar em produção*, *Publicar sem release* ou *Voltar versão*
+   de verdade (`simular=false`) sem a ordem do dono nesta conversa. Ao disparar um deles, entregue sempre ao humano
+   que aprova o link do run e os passos, com `bash .bigbang/esteira/nucleo/scripts/link-aprovacao.sh <workflow.yml>`.
 3. Nunca faça commit ou push direto em `main`, `develop` ou `epico/*`; nunca use `--force`, `reset --hard` em branch
    compartilhada, nem apague ou mova tags.
 4. Nunca edite `.bigbang/` nem arquivo gerado (começa com "Gerado pelo Big Bang"). Para mudar, altere `bigbang.toml`
