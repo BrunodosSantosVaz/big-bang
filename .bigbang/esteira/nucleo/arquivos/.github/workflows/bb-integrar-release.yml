@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       epico:
-        description: 'Número do épico'
+        description: 'Épico: número, lista (36,37) ou sprint (todos os épicos em andamento)'
         required: false
         type: string
       bug:
