@@ -316,9 +316,16 @@ class AlvoNumServidorEmConteiner(unittest.TestCase):
         return r.stdout
 
     def versao_no_ar(self, porta=18080):
+        """The version answering on the port; waits up to 30 s (the health check only looks at the first service)."""
         import urllib.request
-        with urllib.request.urlopen(f"http://127.0.0.1:{porta}/api/v1/health/live", timeout=5) as resposta:
-            return json.loads(resposta.read())["versao"]
+        for tentativa in range(30):
+            try:
+                with urllib.request.urlopen(f"http://127.0.0.1:{porta}/api/v1/health/live", timeout=5) as resposta:
+                    return json.loads(resposta.read())["versao"]
+            except OSError:
+                if tentativa == 29:
+                    raise
+                time.sleep(1)
 
     def banco(self):
         return subprocess.run(["docker", "ps", "-q", "-f", "name=meu-sistema-staging-banco"], capture_output=True,
