@@ -6,12 +6,20 @@ Release guarda o artefato; **o artefato aprovado é o publicado**.
 ## 1. Integrar release
 
 Disparo: automático quando teste, tarefas e documentação do épico estão mesclados; ou botão (`epico=`, `bug=` ou
-`dependencias=true`).
+`dependencias=true`). `epico=` aceita um número, uma lista (`36,37`) ou `sprint`.
 
-- **Épico com release:** cria `release/x.y.z` a partir da `main`, mescla o `epico/…` (`--no-ff`), calcula a versão,
-  escreve o changelog, cria o milestone `vX.Y.Z` com as issues do épico e envia → candidata.
+**Por épico ou por sprint** (ADR-0015): no início de cada sprint a IA pergunta ao dono como entregar.
+
+- **Por sprint:** quando os épicos da sprint estão prontos, `epico=sprint` leva todos os épicos em *Em
+  desenvolvimento* ou *Homologação* (menos os `sem-release`) numa só release: uma candidata, uma homologação (cada
+  épico recebe `homologado`) e uma publicação. Um épico que depende de outro da mesma release não espera.
+- **Por épico:** `epico=<n>`, um de cada vez, como antes.
+
+- **Épico com release:** cria `release/x.y.z` a partir da `main`, mescla o `epico/…` (`--no-ff`; vários épicos, um
+  merge cada), calcula a versão, escreve o changelog, cria o milestone `vX.Y.Z` com as issues dos épicos e envia →
+  candidata.
 - **Épico `sem-release`:** mescla o `epico/…` na `develop` e segue para *Publicar sem release*.
-- Recusa épico com `tem-dependencia` cujo épico de origem não está em produção.
+- Recusa épico com `tem-dependencia` cujo épico de origem não está em produção nem na mesma release.
 - Conflito: nada é enviado e o épico ganha a label `conflito`.
 
 ## 2. Candidata

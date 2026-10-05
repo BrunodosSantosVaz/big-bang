@@ -2,7 +2,7 @@
 name: bb-entregar-epico
 description: Use para vamos homologar ou vamos publicar um épico ou bug. Mostra candidata e critérios, registra a decisão do dono e confere checklist e portão sem aprovar o ambiente de produção.
 ---
-<!-- Gerado pelo Big Bang v0.11.7 a partir de .bigbang/skills/bb-entregar-epico/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v0.12.0 a partir de .bigbang/skills/bb-entregar-epico/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Entregar épico ou bug
 
@@ -15,6 +15,9 @@ Na homologação ou publicação de release por épico/bug; nunca como aprovaç�
 Leia `AGENTS.md`, `.bigbang/processo/09-entrega.md`, `bigbang.toml`, épico/bug, critérios, documentação e candidata/staging.
 
 ## Passos
+
+0. Entrega por sprint (combinada no início da sprint): quando todos os épicos da sprint estão prontos, rode
+   Integrar release com `epico=sprint`; homologue cada épico da candidata única e publique uma vez.
 
 1. Homologar: mostre link, versão/SHA, o que testar e critérios. Espere homologado ou reprovado com motivo.
    Registre `bb decisao homologado N --frase "palavras do dono"`, ou reprovado com a frase correspondente.
