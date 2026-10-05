@@ -2,7 +2,7 @@
 name: bb-codar-tarefa
 description: Use para próxima tarefa ou codar uma issue de implementação. Confirma posse e worktree, libera as marcas da tarefa, implementa, testa e pede revisão independente do PR.
 ---
-<!-- Gerado pelo Big Bang v0.12.0 a partir de .bigbang/skills/bb-codar-tarefa/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.0.0 a partir de .bigbang/skills/bb-codar-tarefa/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Codar tarefa
 
@@ -38,4 +38,5 @@ Altere `tests/aceite/` fora de bb aceite liberar, enfraqueça teste/check ou ref
 
 ## Pronto quando
 
-PR revisado e mesclado, posse liberada e evidências/documentação atualizadas.
+PR revisado e mesclado, posse liberada e evidências/documentação atualizadas. Libere a posse (`bb liberar N`) **na pasta da tarefa** antes de removê-la com `git worktree remove`: o recibo da
+posse fica nos metadados dessa pasta.

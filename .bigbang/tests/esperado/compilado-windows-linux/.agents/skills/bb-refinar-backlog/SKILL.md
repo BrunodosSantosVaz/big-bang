@@ -2,7 +2,7 @@
 name: bb-refinar-backlog
 description: Use para Ideia, vamos refinar o backlog ou refinar uma issue. Conduz um épico por vez até a Definition of Ready e registra refinamento-aprovado somente após decisão do dono.
 ---
-<!-- Gerado pelo Big Bang v0.12.0 a partir de .bigbang/skills/bb-refinar-backlog/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.0.0 a partir de .bigbang/skills/bb-refinar-backlog/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Refinar backlog
 

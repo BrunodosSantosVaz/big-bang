@@ -147,6 +147,18 @@ class TarefaDeCorrecao(ComBb):
         self.assertEqual(self.status(2, nova), "Feature")
         self.assertIn(f"heads/feature/{nova}-correcao-a-virgula-sai-antes-do-nome", self.estado["refs"])
 
+    def test_motivo_longo_vira_titulo_cortado_em_palavra_inteira(self):  # pilot: title cut mid-word
+        self.estado["refs"] = {"heads/epico/7-saudacao": "ep1"}
+        self.gravar_estado()
+        self.issue(7, "Saudação", labels=["epic", "reprovado"], milestone="v0.2.0", sub=[11])
+        self.issue(11, "Testes", labels=["teste-aceite"], parent=7)
+        self.cartao(1, 7, "Em desenvolvimento", Sprint="Sem sprint")
+        motivo = "Homologação no emulador Android 15 (APK da v0.1.0-rc.1): ao escolher uma imagem, o app falha"
+        r = self.rodar("tarefa-de-correcao.sh", env={"BB": self.bb, "EPICO": "7", "MOTIVO": motivo})
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        titulo = self.estado["issues"][str(max(int(n) for n in self.estado["issues"]))]["title"]
+        self.assertEqual(titulo, "Correção: Homologação no emulador Android 15 (APK da v0.1.0-rc.1): ao…")
+
     def test_recusa_epico_nao_reprovado(self):
         self.issue(7, "Saudação", labels=["epic"])
         r = self.rodar("tarefa-de-correcao.sh", env={"BB": self.bb, "EPICO": "7", "MOTIVO": "x"})
