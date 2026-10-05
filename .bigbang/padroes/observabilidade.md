@@ -36,7 +36,8 @@ com ADR; **PODE** é opção. Exceção só com ADR listado em `docs/padroes/exc
 
 - **Regra:** Todo deploy DEVE ser seguido de health check, com aviso se falhar.
 - **Por quê:** Deploy que "deu certo" mas não responde precisa ser revertido na hora.
-- **Certo:** a esteira consulta `/api/health` por até 2 minutos e alerta se não responder.
+- **Certo:** a esteira consulta o caminho de saúde (`deploy.caminho_saude`, padrão `/api/health`) por até 2 minutos
+  e alerta se não responder.
 - **Errado:** deploy encerrado sem nenhuma verificação.
 - **Referência:** Fabio Akita (staging com smoke e rollback rápido).
 - **Verificação:** operação `saude` do alvo, chamada pela publicação em produção e pela candidata.

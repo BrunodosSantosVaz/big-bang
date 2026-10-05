@@ -3,7 +3,7 @@
 # O gerador valida o esquema e recusa chaves desconhecidas. Depois de mudar, rode `bb gerar`.
 
 [bigbang]
-versao = "1.1.0"                       # versão do framework instalada (igual a .bigbang/VERSION)
+versao = "1.2.0"                       # versão do framework instalada (igual a .bigbang/VERSION)
 origem = "BrunodosSantosVaz/big-bang"  # de onde vêm as atualizações
 
 [projeto]
@@ -33,6 +33,9 @@ imagem = "ghcr.io/brunodossantosvaz/meu-sistema"
 url_staging = "https://staging.exemplo.com"
 url_producao = "https://exemplo.com"
 smoke = "npm run test:smoke"
+# Opcionais (com o padrão): servicos = ["app=Dockerfile"] (servico=Dockerfile, uma imagem por serviço),
+# plataformas = ["linux/amd64"] (linux/arm64 para servidor ARM), caminho_saude = "/api/health",
+# servico_migrar = "migrar", servico_checar = "" (pré-checagem do servidor antes de migrar).
 
 [comandos]                             # definidos em F2 para a stack escolhida
 instalar = "npm ci"

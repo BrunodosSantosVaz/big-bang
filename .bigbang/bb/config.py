@@ -15,11 +15,15 @@ REPOSITORY = re.compile(r"^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$")
 GITHUB_LOGIN = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$")
 SPDX = re.compile(r"^[A-Za-z0-9.+-]+$")
 URL = re.compile(r"^https://\S+$")
+SERVICE = re.compile(r"^[a-z][a-z0-9_-]*$")
+SERVICE_BUILD = re.compile(r"^[a-z][a-z0-9_-]*=\S+$")
+HEALTH_PATH = re.compile(r"^/\S*$")
 
 DEPLOY_TARGETS = ("vps-docker", "aws", "paas")
 DEPENDABOT_ECOSYSTEMS = ("npm", "pip", "uv", "gomod", "cargo", "maven", "gradle", "composer", "nuget", "bundler",
                         "docker", "pub", "mix", "swift", "terraform")
 BUILD_SYSTEMS = ("windows-x64", "windows-arm64", "linux-x64", "linux-arm64", "macos-x64", "macos-arm64", "android")
+DEPLOY_PLATFORMS = ("linux/amd64", "linux/arm64")
 COMMAND_KEYS = ("instalar", "lint", "tipos", "testes", "testes_aceite", "arquitetura", "cobertura", "build")
 
 
@@ -98,6 +102,9 @@ SCHEMA = {
     "compilado": {"sistemas": _string_list(allowed=BUILD_SYSTEMS, unique=True)},  # plus build_<system>
     "deploy": {
         "imagem": _string(), "url_staging": _string(URL), "url_producao": _string(URL), "smoke": _string(),
+        "servicos": _string_list(SERVICE_BUILD), "plataformas": _string_list(allowed=DEPLOY_PLATFORMS, unique=True),
+        "caminho_saude": _string(HEALTH_PATH), "servico_migrar": _string(SERVICE),
+        "servico_checar": _string(SERVICE, required=False),
     },
     "comandos": {key: _string(required=False) for key in COMMAND_KEYS},
     "testes": {"cobertura_minima": _integer(0, 100), "marca_pendente": _string(), "padrao_teste": _regex},
@@ -113,6 +120,18 @@ SCHEMA = {
         "espera_confirmacao_segundos": _integer(1),
     },
     "flags": {"validade_maxima_dias": _integer(1)},
+}
+
+# Keys that may be left out: the default is used (`bb config get` returns it). Added after 1.0, so a project made
+# before them keeps validating.
+OPTIONAL_KEYS = {
+    "deploy": {
+        "servicos": ["app=Dockerfile"],      # service=Dockerfile, one image per service (built from the root)
+        "plataformas": ["linux/amd64"],      # docker buildx --platform
+        "caminho_saude": "/api/health",      # health check path (OBS-04)
+        "servico_migrar": "migrar",          # compose service that runs the migration
+        "servico_checar": "",                # compose service that checks the server before migrating ("" = none)
+    },
 }
 
 # Sections that only exist for one delivery profile; the other one may be present (as in the example) but is ignored.
@@ -158,7 +177,8 @@ def _validate_section(section, table, keys):
             errors.append(f"chave desconhecida: {section}.{key}")
     for key, check in keys.items():
         if key not in table:
-            errors.append(f"chave obrigatória ausente: {section}.{key}")
+            if key not in OPTIONAL_KEYS.get(section, {}):
+                errors.append(f"chave obrigatória ausente: {section}.{key}")
             continue
         error = check(table[key])
         if error:
@@ -177,6 +197,13 @@ def _cross_checks(config, expected_version):
         errors.append("projeto.licenca: obrigatória quando o repositório é público (identificador SPDX, ex.: MIT)")
     if not projeto["repositorio"].lower().startswith(projeto["dono"].lower() + "/"):
         errors.append("projeto.repositorio: deve pertencer ao projeto.dono")
+    deploy = config.get("deploy")
+    if entrega["perfil"] == "deploy" and isinstance(deploy, dict):
+        names = [item.split("=", 1)[0] for item in deploy.get("servicos", [])]
+        if len(set(names)) != len(names):
+            errors.append("deploy.servicos: nome de serviço repetido")
+        if deploy.get("servico_migrar", "migrar") in names or deploy.get("servico_checar") in names:
+            errors.append("deploy.servico_migrar/servico_checar: não pode ser um dos serviços publicados")
     if expected_version is not None and config["bigbang"]["versao"] != expected_version:
         errors.append(f"bigbang.versao ({config['bigbang']['versao']}) diferente de .bigbang/VERSION "
                       f"({expected_version}); rode bb atualizar ou corrija a versão")
@@ -212,7 +239,10 @@ def load(root, required=True):
 def get(config, dotted_key):
     """Return the value at `secao.chave` (only scalar values and lists of scalars)."""
     node = config
-    for part in dotted_key.split("."):
+    parts = dotted_key.split(".")
+    if len(parts) == 2 and parts[1] in OPTIONAL_KEYS.get(parts[0], {}) and isinstance(config.get(parts[0]), dict):
+        return config[parts[0]].get(parts[1], OPTIONAL_KEYS[parts[0]][parts[1]])
+    for part in parts:
         if not isinstance(node, dict) or part not in node:
             raise BbError(f"chave inexistente no bigbang.toml: {dotted_key}", EXIT_UNKNOWN_KEY)
         node = node[part]

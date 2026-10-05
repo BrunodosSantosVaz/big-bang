@@ -31,6 +31,23 @@ nunca desfaz migração. O primeiro alvo é `vps-docker` (SSH + Docker Compose).
 - `aws` e `paas` seguem sem implementação, como manda a especificação: entram quando o primeiro sistema precisar, com
   as mesmas quatro operações.
 
+## Atualização (1.2.0): lacunas do deploy real (#112–#115)
+
+Comparando o alvo com o deploy real de um sistema do dono (VM ARM64, duas imagens, banco no mesmo compose, `sudo
+docker`, segredos num env-file do servidor e health em outro endereço), o alvo ganhou, sem mudar o padrão:
+
+- **Várias imagens:** `deploy.servicos` (`servico=Dockerfile`); a candidata constrói uma imagem por serviço
+  (`deploy.imagem-<servico>` quando há mais de um) e grava `servico=imagem@sha256:…` por linha em `imagem.txt`.
+  O alvo publica o conjunto inteiro e *Voltar versão* restaura o conjunto. O banco nunca é recriado.
+- **ARM64:** `deploy.plataformas` vai para `docker buildx build --platform`; com mais de uma plataforma, o digest é o
+  do índice. Escolha: **QEMU no runner x86** (funciona em repositório público e privado, sem configuração; build mais
+  lento). Runner ARM nativo (`ubuntu-24.04-arm`) é mais rápido e grátis só em repositório público: fica como opção
+  do projeto, trocando o `runs-on` do job `imagem` por ADR do projeto.
+- **Health configurável:** `deploy.caminho_saude` (padrão `/api/health`), validado no esquema.
+- **Servidor:** `VPS_DOCKER_SUDO` (`sudo -n docker`), `VPS_ENV_ARQUIVO` (env-file extra), `deploy.servico_migrar` e
+  `deploy.servico_checar` (pré-checagem antes da migração; se falhar, nada muda no ar).
+- **SBOM** de cada imagem gerado pelo Trivy já fixado, e atestado de procedência de todas por `subject-checksums`.
+
 ## Consequências
 
 ### Positivas
