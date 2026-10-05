@@ -62,3 +62,6 @@ if [ "${SPRINT:-false}" = true ]; then
     echo "Sprint encerrada: $atual → $HOJE"
   fi
 fi
+
+# Housekeeping (DOC/processo 05): merged branches, loose issues, old PRs and open claims; reports, never fails.
+SIMULAR="$SIMULAR" bash "$AQUI/faxina.sh" || echo "::warning::faxina não concluída: rode-a de novo pelo Encerrar"

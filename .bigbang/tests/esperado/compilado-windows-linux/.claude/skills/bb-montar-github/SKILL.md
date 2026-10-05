@@ -2,7 +2,7 @@
 name: bb-montar-github
 description: Use em F4 da Fundação para guiar permissões e montar labels, painéis, rulesets e ambientes no GitHub, conferindo cada item antes do próximo. Nunca pede o valor de tokens.
 ---
-<!-- Gerado pelo Big Bang v1.0.0 a partir de .bigbang/skills/bb-montar-github/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.1.0 a partir de .bigbang/skills/bb-montar-github/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Montar o GitHub
 

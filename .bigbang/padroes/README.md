@@ -116,6 +116,7 @@ aqui como `E<n>` até ser entregue). O teste `.bigbang/tests/test_padroes.py` co
 | DOC-12 | [documentacao.md](documentacao.md) | item do `bb-revisor-pr` e `bb-retrospectiva`. | `.bigbang/agents/revisor-pr.md`, `.bigbang/skills/bb-retrospectiva/SKILL.md` |
 | DOC-13 | [documentacao.md](documentacao.md) | *Iniciar sprint* cria a issue; *Integrar release* exige a tarefa concluída. | `.bigbang/esteira/nucleo/scripts/iniciar-sprint.sh`, `.bigbang/esteira/nucleo/scripts/integrar-release.sh` |
 | DOC-14 | [documentacao.md](documentacao.md) | checagem de Markdown e links no job `check` da CI. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml` |
+| DOC-15 | [documentacao.md](documentacao.md) | `bb esteira documentacao` no job `check` da CI (depois da primeira release, seções obrigatórias, selo da CI e nada de "Fundação", "em construção" ou "(a preencher)"); checklist da tarefa de documentação. | `.bigbang/bb/docs_check.py`, `.bigbang/esteira/nucleo/scripts/iniciar-sprint.sh` |
 | API-01 | [api.md](api.md) | item do `bb-revisor-pr` e teste de contrato. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml`, `.bigbang/agents/revisor-pr.md` |
 | API-02 | [api.md](api.md) | teste de contrato no job `check`. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml` |
 | API-03 | [api.md](api.md) | teste de contrato e item do `bb-revisor-pr`. | `.bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml`, `.bigbang/agents/revisor-pr.md` |

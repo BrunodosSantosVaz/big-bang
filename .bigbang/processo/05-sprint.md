@@ -32,8 +32,15 @@ parada, a IA lista **o que espera pelo dono**: revisar testes, validar PR, homol
 O dono diz **"vamos encerrar a sprint"**. A IA:
 
 1. Mostra o que foi publicado e o que ficou em andamento (que segue para a próxima sprint).
-2. Registra a data de fim (botão *Encerrar*).
-3. Roda `bb-retrospectiva`: o que funcionou, o que travou, o que mudar; atualiza `docs/memoria.md`.
+2. Registra a data de fim (botão *Encerrar*), que também roda a **faxina** (`faxina.sh`): apaga as branches
+   mescladas cujo trabalho acabou (épico, tarefas, `framework/*`, `fundacao/*`, releases publicadas) e lista o que
+   sobrou — branch fora do padrão ou sem PR, issue aberta num milestone já publicado, PR parado, posse aberta.
+   A IA resolve cada ponto ou explica ao dono; nada fica para trás.
+3. Confere a documentação: o `README.md` descreve a versão em produção (DOC-15) e cada épico publicado teve a sua
+   tarefa de documentação; o que faltar vira tarefa da próxima sprint.
+4. Revisa os repositórios auxiliares do dono ligados ao sistema (testes, sandbox, protótipos): os sem uso são
+   arquivados ou apagados com o ok do dono.
+5. Roda `bb-retrospectiva`: o que funcionou, o que travou, o que mudar; atualiza `docs/memoria.md`.
 
 ## O que a automação faz sozinha
 

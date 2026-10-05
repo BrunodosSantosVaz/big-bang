@@ -4,6 +4,29 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [1.1.0] - 2026-10-05
+
+### O que muda
+
+- **README sempre completo e atual (DOC-15):** modelo novo (`.bigbang/modelos/README-sistema.md`) com selos, imagem
+  real e as seções Estado atual, Para que serve, Recursos, Instalação, Como usar, Para desenvolvedores, Versões e
+  releases, Segurança e privacidade, Limitações, Contribuindo e Licença. Depois da primeira release, a CI
+  (`bb esteira documentacao`) reprova README sem essas seções, sem o selo da CI, ou que ainda diga "Fundação",
+  "em construção" ou "(a preencher)". O checklist de documentação de cada épico e as skills cobram o README.
+- **Faxina (`faxina.sh`):** no *Encerrar*, no *Publicar em produção* e no *Publicar sem release*, apaga as branches
+  mescladas cujo trabalho acabou (inclusive `framework/*` e `fundacao/*`) e lista o que sobrou (branches fora do
+  padrão, issues abertas em versão publicada, PRs parados, posses). O encerramento da sprint e a retrospectiva
+  conferem README, documentação e repositórios auxiliares sem uso.
+- `AGENTS.md`: ao terminar qualquer alteração, documentar e atualizar o README; nada fica para trás.
+- README do próprio Big Bang reescrito.
+
+Sistemas que já publicaram uma versão: a CI passa a cobrar as seções do README; no PR da atualização, a IA completa
+o `README.md` pelo modelo novo.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [1.0.0] - 2026-10-05
 
 ### O que muda

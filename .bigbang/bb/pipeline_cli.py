@@ -64,7 +64,7 @@ def register(commands, parser_class):
     p.add_argument("--pr-de-teste", action="store_true", help="PR de teste do épico: tests/aceite/ liberado")
     p.set_defaults(handler=_sensitive)
 
-    p = sub.add_parser("documentacao", help="Markdown válido e links relativos do projeto (DOC-14)")
+    p = sub.add_parser("documentacao", help="Markdown válido, links relativos (DOC-14) e README do sistema (DOC-15)")
     p.set_defaults(handler=_docs)
 
     p = sub.add_parser("so-liberacao", help="o diff (entrada padrão) em tests/aceite/ só retira marcas da issue?")

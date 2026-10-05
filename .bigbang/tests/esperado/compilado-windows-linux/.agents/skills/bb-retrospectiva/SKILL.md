@@ -2,7 +2,7 @@
 name: bb-retrospectiva
 description: Use ao fim de cada épico ou sprint para registrar o que funcionou, travou e deve mudar, atualizar a memória do projeto e propor ajustes sustentados por evidências.
 ---
-<!-- Gerado pelo Big Bang v1.0.0 a partir de .bigbang/skills/bb-retrospectiva/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.1.0 a partir de .bigbang/skills/bb-retrospectiva/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Retrospectiva
 
@@ -20,7 +20,9 @@ Leia `AGENTS.md`, `.bigbang/processo/05-sprint.md`, `docs/memoria.md`, issues/PR
 2. Atualize `docs/memoria.md` com decisões e pegadinhas úteis, preservando entradas válidas; evite narrativa sem ação.
 3. Proponha ajuste das skills do projeto sem prefixo bb-. Para problema do framework, abra issue em sua origem
    com reprodução/evidência dentro da autorização; não altere `.bigbang/` ou skills geradas.
-4. Registre melhoria, responsável e próximo passo. Skill encostada é dívida: revise uso real, não acrescente regra universal
+4. Confira que nada ficou para trás: a saída da faxina (branches, issues, PRs, posses), o README em dia com a versão
+   em produção (DOC-15) e repositórios auxiliares sem uso (proponha arquivar ao dono).
+5. Registre melhoria, responsável e próximo passo. Skill encostada é dívida: revise uso real, não acrescente regra universal
    só por hipótese. Leve as mudanças ao PR adequado, sem push direto em branch compartilhada.
 
 ## Pare e pergunte quando

@@ -19,7 +19,8 @@ Leia `AGENTS.md`, padrões aplicáveis em `.bigbang/padroes/`, tarefa/épico, te
 1. `bb assumir N SEU-NOME`; espere sucesso e entre na pasta própria informada. Se perder a disputa ou faltar branch,
    não programe. Não use forcar sem ordem explícita do dono e posse vencida.
 2. Rode `bb aceite liberar N`, única alteração permitida nas marcas de pendente desta tarefa. Não altere cenários.
-3. Implemente o escopo, incluindo unidade/integração, documentação tocada e evidências SEG-IA aplicáveis.
+3. Implemente o escopo, incluindo unidade/integração, documentação tocada e evidências SEG-IA aplicáveis. Se a
+   tarefa muda o que o usuário vê, instala ou configura, atualize o README.md no mesmo PR (DOC-15).
 4. Execute testes, lint, tipos, arquitetura e demais comandos da stack localmente; `bb verificar` deve passar.
 5. Commit Conventional Commits; abra PR para a branch do épico com alegações verificáveis e resultados.
    Acione `bb-revisor-pr` em contexto limpo, ou revisão humana conforme labels/diff; não revise o próprio raciocínio.
