@@ -2,7 +2,7 @@
 name: bb-entregar-epico
 description: Use para vamos homologar ou vamos publicar um épico ou bug. Mostra candidata e critérios, registra a decisão do dono e confere checklist e portão sem aprovar o ambiente de produção.
 ---
-<!-- Gerado pelo Big Bang v1.3.1 a partir de .bigbang/skills/bb-entregar-epico/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.4.0 a partir de .bigbang/skills/bb-entregar-epico/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Entregar épico ou bug
 
@@ -25,9 +25,13 @@ Leia `AGENTS.md`, `.bigbang/processo/09-entrega.md`, `bigbang.toml`, épico/bug,
    fluxo normal até próxima candidata, sem sobrescrever a candidata anterior.
 3. Publicar: execute `bb checklist producao`; confira homologação, docs, bloqueios de segurança, PR/CI no SHA exato,
    candidata intacta e changelog. Rode Publicar em produção com simular=true e mostre o portão.
-4. Só com ordem explícita do dono nesta conversa execute simular=false. Peça ao dono aprovar ambiente producao
-   nas Actions; não aprove por API. Publique o mesmo artefato/digest homologado, sem recompilar.
-5. Confira release, saúde, fechamento e devolução de main. Para sem-release, siga o botão Publicar sem release e seu portão.
+4. Só com ordem explícita do dono nesta conversa execute simular=false. Logo depois, rode
+   `bash .bigbang/esteira/nucleo/scripts/link-aprovacao.sh bb-publicar-producao.yml` e entregue ao humano que aprova
+   o bloco que ele imprime: link direto do run e passos (Review deployments → producao → Approve and deploy).
+   Não aprove por API. Publique o mesmo artefato/digest homologado, sem recompilar.
+5. Confira release, saúde, fechamento e devolução de main. Para sem-release, siga o botão Publicar sem release e seu
+   portão; Publicar sem release (`bb-publicar-sem-release.yml`) e Voltar versão (`bb-voltar-versao.yml`) também
+   esperam aprovação: entregue o link e os passos do mesmo jeito.
 
 ## Pare e pergunte quando
 

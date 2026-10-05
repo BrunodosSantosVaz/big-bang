@@ -57,6 +57,11 @@ migração antes da troca e health check depois); cria tag e Release `vX.Y.Z` (*
 move os cartões; fecha o milestone; apaga as branches do épico e a `release/x.y.z` (com as travas); devolve a `main`
 para a `develop` e para os `epico/*` abertos. É idempotente: rodar de novo só refaz o que faltou.
 
+Quem dispara com `simular=false` entrega ao humano que aprova o **link direto do run e os passos** (*Review
+deployments* → marcar `producao` → *Approve and deploy*): a IA roda `link-aprovacao.sh <workflow.yml>` e cola o
+bloco; o próprio run também mostra esse bloco no resumo do job `conferir`. Vale para *Publicar em produção*,
+*Publicar sem release* e *Voltar versão*.
+
 ## Versão e changelog
 
 [SemVer](https://semver.org/lang/pt-BR/) por unidade de release. A versão sai dos títulos dos PRs do épico:

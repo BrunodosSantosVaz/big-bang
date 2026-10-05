@@ -102,4 +102,5 @@ resultado.
 Este documento é o catálogo dela: tudo que está nas tabelas acima roda sem ninguém pedir, a partir de eventos do
 GitHub (push, PR, labels, agenda), exceto os **botões**, que o dono ou a IA disparam, sempre com `simular=true`
 primeiro. Publicar em produção, publicar sem release e voltar versão ainda exigem a aprovação do dono no ambiente
-`producao`.
+`producao`; quem dispara entrega o link do run e os passos de aprovação (`link-aprovacao.sh`), que também ficam no
+resumo do run.

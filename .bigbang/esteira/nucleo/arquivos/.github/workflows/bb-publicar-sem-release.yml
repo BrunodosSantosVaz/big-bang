@@ -1,5 +1,6 @@
 # Botão "Publicar sem release" (spec 14.2): avança a main até a develop quando o artefato não mudou.
 # "conferir" roda sempre (portão e plano); "publicar" só com simular=false e a aprovação do dono em "producao".
+# Com simular=false, "conferir" deixa no resumo do run o link e os passos para quem aprova (link-aprovacao.sh).
 name: Publicar sem release
 
 on:
@@ -41,6 +42,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
           SIMULAR: 'true'
+      - name: Como aprovar (link e passos para quem aprova)
+        if: ${{ !inputs.simular }}
+        run: bash .bigbang/esteira/nucleo/scripts/link-aprovacao.sh --resumo "Publicar sem release (main avança até a develop)"
 
   publicar:
     needs: conferir
