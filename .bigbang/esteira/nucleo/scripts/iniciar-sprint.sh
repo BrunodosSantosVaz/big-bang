@@ -170,7 +170,9 @@ ${deps:-nenhuma}" task "${herdadas[@]}")
 - [ ] Runbook, se a operação mudou
 - [ ] Guia de quem usa, se a tela ou o fluxo mudou
 - [ ] ADR de cada decisão tomada no épico
-- [ ] Rascunho da entrada do CHANGELOG.md (a versão é preenchida na integração)" documentacao "${herdadas[@]}")
+- [ ] Rascunho da entrada do CHANGELOG.md (a versão é preenchida na integração)
+- [ ] README.md completo e atual: estado, recursos, instalação, uso e imagem real (DOC-15)
+- [ ] docs/operacao/checklist-producao.md, se o épico mudou algum item" documentacao "${herdadas[@]}")
   cartao "$doc"
   for num in "${numero_da_tarefa[@]}"; do
     [ "$num" = "?" ] || [ "$doc" = "?" ] || bloquear "$doc" "$num"

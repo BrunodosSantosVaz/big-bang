@@ -16,7 +16,7 @@ PADROES = ["arquitetura", "seguranca", "codigo", "testes", "documentacao", "api"
 ULTIMO_EPICO_CONCLUIDO = 9
 
 # Number of rules per prefix, as listed in the spec (section 8).
-QUANTIDADE = {"ARQ": 14, "SEG-IA": 5, "SEG": 24, "COD": 13, "TST": 12, "DOC": 14, "API": 7, "DAD": 10, "FE": 10,
+QUANTIDADE = {"ARQ": 14, "SEG-IA": 5, "SEG": 24, "COD": 13, "TST": 12, "DOC": 15, "API": 7, "DAD": 10, "FE": 10,
               "OBS": 6}
 
 CAMPOS = ["Regra", "Por quê", "Certo", "Errado", "Referência", "Verificação"]

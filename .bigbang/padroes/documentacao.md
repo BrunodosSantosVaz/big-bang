@@ -135,3 +135,17 @@ com ADR; **PODE** é opção. Exceção só com ADR listado em `docs/padroes/exc
 - **Errado:** link para um arquivo renomeado.
 - **Referência:** CommonMark (https://commonmark.org).
 - **Verificação:** checagem de Markdown e links no job `check` da CI.
+
+### DOC-15 · README do sistema completo e atual
+
+- **Regra:** O `README.md` do sistema DEVE estar completo e descrever o sistema como ele está em produção: selos de
+  CI, produção e homologação, uma imagem real, e as seções Estado atual, Para que serve, Recursos, Instalação, Como
+  usar, Para desenvolvedores, Versões e releases, Segurança e privacidade, Limitações conhecidas, Contribuindo e
+  Licença. Toda tarefa que muda o que o usuário vê, instala ou configura atualiza o README no mesmo PR; a tarefa de
+  documentação do épico confere o README inteiro.
+- **Por quê:** O README é a porta de entrada do sistema; um README "em construção" com versões em produção mente.
+- **Certo:** "Estado atual: v0.3.0 em produção — obturador e leitor de QR", com o print da tela principal.
+- **Errado:** "Em Fundação" depois da primeira release; seções "(a preencher)".
+- **Referência:** modelo `.bigbang/modelos/README-sistema.md`; o README do próprio Big Bang como exemplo de nível.
+- **Verificação:** `bb esteira documentacao` no job `check` da CI (depois da primeira release, seções obrigatórias,
+  selo da CI e nada de "Fundação", "em construção" ou "(a preencher)"); checklist da tarefa de documentação.

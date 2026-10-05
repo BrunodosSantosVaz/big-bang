@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.0.0 a partir de .bigbang/esteira/perfis/compilado/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v1.1.0 a partir de .bigbang/esteira/perfis/compilado/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
 # Candidata do perfil compilado (spec 14.3): a cada push em release/**, testes, build de cada sistema (matriz) e,
 # só se TODOS compilarem, a pre-release vX.Y.Z-rc.N com binários, SHA256SUMS, SBOM e atestado de procedência.
 # Depois: épico ou bug em Homologação e PR release -> main. Nada é commitado aqui (o Git guarda só código).
