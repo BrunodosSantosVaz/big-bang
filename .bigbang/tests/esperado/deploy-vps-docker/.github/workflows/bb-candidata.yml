@@ -1,6 +1,6 @@
-# Gerado pelo Big Bang v1.1.0 a partir de .bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
-# Candidata do perfil deploy (spec 14.4): a cada push em release/**, testes, imagem construída UMA vez e publicada
-# por digest, Trivy, staging (migração, publicação, saúde, smoke e ZAP), pre-release vX.Y.Z-rc.N com o digest
+# Gerado pelo Big Bang v1.2.0 a partir de .bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Candidata do perfil deploy (spec 14.4): a cada push em release/**, testes, imagens (deploy.servicos) construídas UMA
+# vez para deploy.plataformas e publicadas por digest, Trivy, staging (migração, publicação, saúde, smoke e ZAP), pre-release vX.Y.Z-rc.N com o digest
 # (imagem.txt), SBOM e atestado, e então épico ou bug em Homologação com o PR release -> main.
 name: Candidata
 
@@ -56,7 +56,10 @@ jobs:
         run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
         env:
           GH_TOKEN: ${{ github.token }}
-      - name: Imagem (uma vez, por digest) e Trivy
+      # QEMU só trabalha quando deploy.plataformas tem uma arquitetura diferente da do runner (ex.: linux/arm64).
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: Imagens (uma vez, por digest) e Trivy
         id: i
         run: bash .bigbang/esteira/perfis/deploy/scripts/candidata-imagem.sh
         env:
@@ -81,6 +84,8 @@ jobs:
           VPS_PORTA: ${{ vars.VPS_PORTA }}
           VPS_USUARIO: ${{ vars.VPS_USUARIO }}
           VPS_PASTA: ${{ vars.VPS_PASTA }}
+          VPS_DOCKER_SUDO: ${{ vars.VPS_DOCKER_SUDO }}
+          VPS_ENV_ARQUIVO: ${{ vars.VPS_ENV_ARQUIVO }}
           VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
           VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
           REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}
@@ -101,31 +106,21 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
-      - name: Registro da imagem
-        run: mkdir -p candidata && printf '%s\n' "$IMAGEM" > candidata/imagem.txt
-        env:
-          IMAGEM: ${{ needs.imagem.outputs.imagem }}
-      - name: SBOM (CycloneDX) da imagem
-        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
-        with:
-          image: ${{ needs.imagem.outputs.imagem }}
-          format: cyclonedx-json
-          output-file: candidata/sbom-cyclonedx.json
-          upload-artifact: false
-          upload-release-assets: false
       - name: Entrar no GHCR
-        if: ${{ github.event.repository.visibility == 'public' }}
         run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
         env:
           GH_TOKEN: ${{ github.token }}
+      - name: Registro das imagens e SBOM (CycloneDX) de cada uma
+        run: bash .bigbang/esteira/perfis/deploy/scripts/candidata-sbom.sh
+        env:
+          IMAGEM: ${{ needs.imagem.outputs.imagem }}
       # Atestados de procedência: grátis em repositório público; em privado exigem GitHub Enterprise Cloud.
-      - name: Atestado de procedência da imagem
+      - name: Atestado de procedência das imagens
         if: ${{ github.event.repository.visibility == 'public' }}
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-name: ${{ needs.imagem.outputs.imagem }}
-          push-to-registry: true
-      - name: Pre-release com o digest
+          subject-checksums: candidata/imagens.sha256
+      - name: Pre-release com os digests
         run: bash .bigbang/esteira/perfis/deploy/scripts/candidata-publicar.sh
         env:
           GH_TOKEN: ${{ github.token }}

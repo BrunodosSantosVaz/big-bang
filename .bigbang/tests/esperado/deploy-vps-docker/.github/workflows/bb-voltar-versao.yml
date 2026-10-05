@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.1.0 a partir de .bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v1.2.0 a partir de .bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl. Não edite: personalize em bigbang.toml.
 # Botão "Voltar versão" (spec 14.4): reimplanta em produção a imagem registrada na Release da versão escolhida (o
 # digest de imagem.txt). Nunca desfaz migração (por isso expandir-e-contrair, DAD-02). Só com simular=false e a
 # aprovação do dono no ambiente "producao".
@@ -60,6 +60,8 @@ jobs:
           VPS_PORTA: ${{ vars.VPS_PORTA }}
           VPS_USUARIO: ${{ vars.VPS_USUARIO }}
           VPS_PASTA: ${{ vars.VPS_PASTA }}
+          VPS_DOCKER_SUDO: ${{ vars.VPS_DOCKER_SUDO }}
+          VPS_ENV_ARQUIVO: ${{ vars.VPS_ENV_ARQUIVO }}
           VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
           VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
           REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}
