@@ -16,11 +16,13 @@ Leia `PRODUTO.md`, `AGENTS.md`, `.bigbang/processo/02-fundacao.md`, `.bigbang/mo
 
 ## Passos
 
-1. Confirme as preferências de identidade e as três a cinco telas principais. Sem interface, registre F3 como não aplicável
-   com concordância do dono, sem criar um front desnecessário.
-2. Registre logo SVG, paleta, tipografia, ícones, tokens, componentes e padrões de lista/formulário/detalhe,
-   incluindo vazio, erro e carregamento, em `DESIGN.md` e `docs/design/`.
-3. Monte protótipo navegável só com tokens e componentes do kit; confira teclado, foco, contraste, rótulos e nível AA.
+1. Confirme as preferências de identidade e as três a cinco telas principais. Sem interface, F3 cria só o ícone global
+   (DOC-17), com aprovação do dono, sem criar um front desnecessário.
+2. Registre logo SVG, o **ícone global** `docs/design/icone.svg` (DOC-17: quadrado, legível em 48 px), paleta,
+   tipografia, ícones, tokens, componentes e padrões de lista/formulário/detalhe, incluindo vazio, erro e
+   carregamento, em `DESIGN.md` e `docs/design/`.
+3. Monte protótipo navegável só com tokens e componentes do kit, mostrando o ícone global onde ele aparece (ícone do
+   app, favicon); confira teclado, foco, contraste, rótulos e nível AA.
 4. Mostre o protótipo, receba ajustes e itere até aprovação explícita. Feche detalhes dependentes de F2 depois da stack.
 5. Abra o PR de F3 e registre a frase do dono antes de mesclar.
 
@@ -34,4 +36,4 @@ Use cor ou fonte fora dos tokens, invente aprovação ou entregue imagem estáti
 
 ## Pronto quando
 
-`DESIGN.md` e protótipo aprovados, ou não aplicabilidade registrada pelo dono.
+`DESIGN.md`, protótipo e ícone global aprovados juntos; sem interface, só o ícone global aprovado.

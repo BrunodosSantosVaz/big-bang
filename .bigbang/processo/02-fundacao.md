@@ -66,9 +66,11 @@ alternativas descartadas e `docs/arquitetura/` com os diagramas C4 de contexto e
 
 ### F3 · Design kit
 
-Só se houver interface. Identidade (logo em SVG, paleta, tipografia, biblioteca de ícones), tokens, padrões de tela
-(lista, formulário, detalhe, vazio, erro, carregando), componentes base e um protótipo navegável das 3 a 5 telas
-principais, acessível no nível AA. O dono valida; reprovado volta com o comentário dele.
+Identidade (logo em SVG, **ícone global** `docs/design/icone.svg`, paleta, tipografia, biblioteca de ícones), tokens,
+padrões de tela (lista, formulário, detalhe, vazio, erro, carregando), componentes base e um protótipo navegável das 3
+a 5 telas principais, acessível no nível AA, que já mostra o ícone onde ele aparece (app, favicon). O dono valida o
+protótipo e o ícone juntos; reprovado volta com o comentário dele. Sem interface, F3 se resume ao ícone global
+(DOC-17), que todo sistema tem: README, imagem do repositório e o que mais levar ícone.
 
 ### F4 · Montar o GitHub
 

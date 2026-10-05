@@ -128,5 +128,39 @@ class ReadmeDoSistema(unittest.TestCase):
         self.assertEqual(docs_check.readme_problems(self.raiz), [])
 
 
+class ComunidadeEIcone(ReadmeDoSistema):
+    """DOC-16 (community files) and DOC-17 (global icon); pilot: the repository showed only README and license."""
+
+    def escrever(self, caminho, texto="x\n"):
+        os.makedirs(os.path.dirname(os.path.join(self.raiz, caminho)) or self.raiz, exist_ok=True)
+        with open(os.path.join(self.raiz, caminho), "w", encoding="utf-8") as arquivo:
+            arquivo.write(texto)
+
+    def test_cobra_os_arquivos_de_comunidade(self):
+        problemas = docs_check.community_problems(self.raiz)
+        for nome in docs_check.COMMUNITY_FILES:
+            self.assertTrue(any(p.startswith(nome) for p in problemas), problemas)
+        for nome in docs_check.COMMUNITY_FILES:
+            self.escrever(nome)
+        self.assertEqual(docs_check.community_problems(self.raiz), [])
+
+    def test_icone_depois_do_design_ou_da_release(self):
+        for nome in docs_check.COMMUNITY_FILES:
+            self.escrever(nome)
+        self.assertEqual(docs_check.community_problems(self.raiz), [])  # still in the Foundation, before F3
+        self.escrever("DESIGN.md")
+        self.assertIn("ícone global", " ".join(docs_check.community_problems(self.raiz)))
+        self.escrever(docs_check.ICON, "<svg/>")
+        self.assertEqual(docs_check.community_problems(self.raiz), [])
+        os.remove(os.path.join(self.raiz, "DESIGN.md"))
+        os.remove(os.path.join(self.raiz, docs_check.ICON))
+        self.publicar()
+        self.assertIn("ícone global", " ".join(docs_check.community_problems(self.raiz)))
+
+    def test_modelos_existem(self):
+        for nome in docs_check.COMMUNITY_FILES:
+            self.assertTrue(os.path.exists(os.path.join(BIGBANG, "modelos", "comunidade", nome)), nome)
+
+
 if __name__ == "__main__":
     unittest.main()

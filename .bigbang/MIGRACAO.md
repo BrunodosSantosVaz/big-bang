@@ -4,6 +4,26 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [1.3.0] - 2026-10-05
+
+### O que muda
+
+- **Arquivos de comunidade (DOC-16):** todo sistema tem `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md` e `SECURITY.md`,
+  criados pelo `bb init` a partir de `.bigbang/modelos/comunidade/`, ou por `bb esteira comunidade` em sistemas já
+  fundados. A CI (`bb esteira documentacao`) cobra os três.
+- **Ícone global (DOC-17):** todo sistema tem `docs/design/icone.svg`, criado no design kit (F3), mostrado no
+  protótipo e aprovado junto com ele, e usado em tudo que leva ícone (app, favicon, README). A CI cobra o arquivo
+  depois do `DESIGN.md` ou da primeira release. O modelo de README abre com o ícone.
+- O próprio Big Bang ganhou código de conduta, guia de contribuição, política de segurança e ícone.
+
+Sistemas já fundados: no PR da atualização, a IA roda `bb esteira comunidade`, completa os arquivos e cria o
+`docs/design/icone.svg` a partir do logo do `DESIGN.md` (e aplica o ícone no app, se ele ainda usar o padrão da
+plataforma, numa tarefa ou bug próprio).
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [1.2.1] - 2026-10-05
 
 ### O que muda
