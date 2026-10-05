@@ -17,7 +17,7 @@ Skill `bb-triar-issue` (o dono diz "triar #n", ou toda issue aberta por terceiro
 Bug é **uma unidade de release**, como um épico pequeno (skill `bb-corrigir-bug`):
 
 1. `bb assumir <issue> <nome>`.
-2. Branch `bugfix/<n>-<slug>` a partir da `main`.
+2. Branch `bugfix/<n>-<slug>` a partir da `main`, criada pelo próprio `bb assumir` quando ainda não existe.
 3. **Commit 1:** o teste de regressão, que falha. **Commit 2:** a correção mínima. A CI confere a ordem rodando o
    teste no primeiro commit.
 4. PR para a `main`, com revisão. Ele não é mesclado direto: entra pela release.

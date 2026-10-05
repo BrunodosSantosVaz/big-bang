@@ -4,6 +4,20 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [1.2.1] - 2026-10-05
+
+### O que muda
+
+- **Bug sem branch:** o `bb assumir` de uma issue com label `bug` (ou `hotfix`) cria a branch `bugfix/<n>-<slug>`
+  (ou `hotfix/`) a partir da `main` quando ela ainda não existe; antes, a posse falhava porque nada criava a branch.
+- **Ordem de regressão em projetos Android/JVM:** o check do PR de bug reconhece como teste os arquivos em
+  `src/test/`, `src/androidTest/`, `src/testFixtures/`, `__tests__/` e os nomes `XTest`, `XTests`, `XSpec`, `XIT`
+  (Kotlin, Java, Scala, Groovy, Swift, C#); antes, um teste Kotlin no primeiro commit era tratado como correção.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [1.2.0] - 2026-10-05
 
 ### O que muda
