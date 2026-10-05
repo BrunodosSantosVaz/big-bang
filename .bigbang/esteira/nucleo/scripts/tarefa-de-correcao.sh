@@ -21,7 +21,8 @@ IFS=$'\t' read -r titulo labels milestone node <<<"$(gh api "repos/$R/issues/$ep
 [[ ",$labels," == *",reprovado,"* ]] || { echo "::error::o épico #$epico não está reprovado (label reprovado)"; exit 1; }
 base=$(gh api "repos/$R/git/matching-refs/heads/epico/$epico-" --jq '.[0].ref // empty' | sed 's|^refs/heads/||')
 [ -n "$base" ] || { echo "::error::épico #$epico sem branch epico/$epico-*"; exit 1; }
-resumo=$(printf '%s' "$motivo" | head -n 1 | cut -c1-60)
+resumo=$(printf '%s' "$motivo" | head -n 1)
+if [ "${#resumo}" -gt 60 ]; then resumo="${resumo:0:60}"; resumo="${resumo% *}…"; fi  # whole words only
 nova="Correção: $resumo"
 args=(--repo "$R" --title "$nova" --label task --body "### Épico
 

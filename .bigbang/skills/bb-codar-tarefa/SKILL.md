@@ -37,4 +37,5 @@ Altere `tests/aceite/` fora de bb aceite liberar, enfraqueça teste/check ou ref
 
 ## Pronto quando
 
-PR revisado e mesclado, posse liberada e evidências/documentação atualizadas.
+PR revisado e mesclado, posse liberada e evidências/documentação atualizadas. Libere a posse (`bb liberar N`) **na pasta da tarefa** antes de removê-la com `git worktree remove`: o recibo da
+posse fica nos metadados dessa pasta.

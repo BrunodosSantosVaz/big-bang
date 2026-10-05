@@ -39,8 +39,10 @@ def isolate(root, config, receipt, folder=None):
         branches.extend(ref["ref"][len("refs/heads/"):] for ref in refs)
     if len(branches) != 1 or pipeline.branch_issue(branches[0])[1] != number:
         raise BbError(f"#{number}: precisa de exatamente uma branch da tarefa criada pela esteira", EXIT_INVALID_STATE)
-    folder = os.path.abspath(folder or os.path.join(os.path.dirname(root),
-                                                  os.path.basename(root) + "-" + receipt["name"]))
+    # Named after the MAIN checkout, also when run from inside another work folder (pilot: "repo-claude-1-claude-1").
+    main_checkout = os.path.dirname(git(root, "rev-parse", "--path-format=absolute", "--git-common-dir"))
+    folder = os.path.abspath(folder or os.path.join(os.path.dirname(main_checkout),
+                                                  os.path.basename(main_checkout) + "-" + receipt["name"]))
     if os.path.exists(folder):
         raise BbError(f"pasta de trabalho já existe: {folder}", EXIT_INVALID_STATE)
     git(root, "fetch", "origin", "--prune")
