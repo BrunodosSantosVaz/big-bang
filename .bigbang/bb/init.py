@@ -121,7 +121,8 @@ def plan_steps(options, with_github):
                   f"abrir a issue \"{F0_TITLE}\" (se ainda não existir)"]
     steps += ["criar bigbang.toml a partir de .bigbang/modelos/bigbang.toml.exemplo",
               "mover README.md e LICENSE do framework para .bigbang/",
-              "criar o README.md do sistema"]
+              "criar o README.md do sistema",
+              "criar CODE_OF_CONDUCT.md, CONTRIBUTING.md e SECURITY.md do sistema (DOC-16)"]
     if options["visibilidade"] == "publico":
         steps.append(f"criar o LICENSE do sistema ({options['licenca']})")
     steps.append("rodar bb gerar (o AGENTS.md passa para o modo do projeto fundado)")
@@ -143,6 +144,11 @@ def run(root, options, with_github=True, today=None):
     readme = read_text(os.path.join(framework_dir(root), "modelos", "README-sistema.md"))
     write_text(os.path.join(root, "README.md"),
                substitute(readme, {"projeto": options}, ".bigbang/modelos/README-sistema.md"))
+    for name in ("CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "SECURITY.md"):  # the framework's own are replaced
+        source = f".bigbang/modelos/comunidade/{name}"
+        write_text(os.path.join(root, name), substitute(read_text(os.path.join(framework_dir(root), "modelos",
+                                                                               "comunidade", name)),
+                                                        {"projeto": options}, source))
     if license_text:
         write_text(os.path.join(root, "LICENSE"), license_text)
     write_text(config_path(root), config_text)

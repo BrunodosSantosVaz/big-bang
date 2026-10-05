@@ -65,7 +65,7 @@ C4Container
 ## Configuração da esteira
 
 <!-- bb:config:inicio -->
-<!-- Gerado pelo Big Bang v1.2.1 a partir de bigbang.toml. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.3.0 a partir de bigbang.toml. Não edite: personalize em bigbang.toml. -->
 
 **Perfil de entrega:** `deploy` · **Alvo:** `vps-docker`
 

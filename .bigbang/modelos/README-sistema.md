@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/design/icone.svg" alt="" width="96"></p>
+
 # {{projeto.nome}}
 
 <!-- README do sistema (DOC-15). Escrito pela IA e mantido em dia a CADA épico e release: depois da primeira release

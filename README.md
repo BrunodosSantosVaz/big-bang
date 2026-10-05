@@ -1,3 +1,5 @@
+<p align="center"><img src=".bigbang/docs/imagens/icone.svg" alt="" width="96"></p>
+
 # Big Bang
 
 > Um framework para **uma pessoa, com uma ou mais IAs**, planejar, construir e manter sistemas profissionais:
@@ -130,6 +132,8 @@ Tudo também pode ser feito pelos botões das GitHub Actions (*Run workflow*), s
 - **Dois perfis de entrega:** *compilado* (binários, APK; a produção publica os mesmos bytes homologados) e
   *deploy* (imagem por digest, staging, migração antes da troca, *Voltar versão*).
 - **Várias IAs ao mesmo tempo:** cada uma assume a tarefa (`bb assumir`) e trabalha na própria pasta.
+- **Repositório completo:** todo sistema nasce com README, licença, código de conduta, guia de contribuição,
+  política de segurança e um ícone global aprovado no protótipo (DOC-15 a DOC-17, cobrados pela CI).
 - **Nada fica para trás:** a faxina apaga as branches mescladas e lista issues, PRs e posses soltas; a CI reprova
   um README desatualizado depois da primeira release.
 
@@ -149,8 +153,8 @@ atestação de origem. Cada problema encontrado virou correção no framework, e
 - Produção só com a sua aprovação no ambiente `producao`; tokens e segredos são sempre criados por você.
 - Texto de terceiros (issues, PRs, páginas) é tratado como dado, nunca como instrução para a IA.
 
-Encontrou uma falha de segurança no framework? Abra uma
-[issue](https://github.com/BrunodosSantosVaz/big-bang/issues) sem detalhes exploráveis e peça contato.
+Encontrou uma falha de segurança no framework? Siga a [política de segurança](SECURITY.md): relato privado,
+nunca numa issue pública.
 
 ## Versões e atualização
 
@@ -173,7 +177,9 @@ pacote, mostra o [`MIGRACAO.md`](.bigbang/MIGRACAO.md) e abre um PR que troca s�
 Pedidos, ideias e problemas do framework entram pelas
 [issues](https://github.com/BrunodosSantosVaz/big-bang/issues). Num sistema feito com o Big Bang, a skill
 `bb-retrospectiva` abre a issue com a evidência quando encontra um problema do framework. Toda mudança chega por
-PR, com os testes do framework (`python -m unittest discover -s .bigbang/tests`) e o `bb verificar` verdes.
+PR, com os testes do framework (`python -m unittest discover -s .bigbang/tests`) e o `bb verificar` verdes; o passo
+a passo está em [CONTRIBUTING.md](CONTRIBUTING.md). Ao participar, você concorda com o
+[código de conduta](CODE_OF_CONDUCT.md).
 
 ## Licença
 

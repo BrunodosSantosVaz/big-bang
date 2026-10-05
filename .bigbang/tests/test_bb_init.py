@@ -92,7 +92,11 @@ class Init(unittest.TestCase):
         self.assertEqual(self.ler(".bigbang/README.md"), readme_framework)
         self.assertTrue(self.ler(".bigbang/LICENSE").startswith("MIT License"))
         self.assertFalse(os.path.exists(os.path.join(self.raiz, "LICENSE")))
-        self.assertTrue(self.ler("README.md").startswith("# Sistema Ação X\n"))
+        self.assertIn("\n# Sistema Ação X\n", self.ler("README.md"))
+        self.assertIn("docs/design/icone.svg", self.ler("README.md"))  # DOC-17: the global icon heads the README
+        for nome in ("CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "SECURITY.md"):  # DOC-16
+            self.assertIn("dona-teste/sistema-x", self.ler(nome))
+            self.assertNotIn("{{", self.ler(nome))
         self.assertIn("a partir de .bigbang/AGENTS.base.md", self.ler("AGENTS.md"))
         self.assertIn("# Instruções para IAs — Sistema Ação X", self.ler("AGENTS.md"))
         self.assertIn("Issue de F0: https://github.com/dona-teste/sistema-x/issues/1", saida)

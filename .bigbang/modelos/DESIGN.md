@@ -9,6 +9,8 @@
 
 - **Nome visual:**
 - **Logo:** `docs/design/logo.svg` <!-- e as variações -->
+- **Ícone global (DOC-17):** `docs/design/icone.svg` <!-- quadrado, legível em 48 px; aprovado no protótipo e usado
+  em tudo que leva ícone: ícone do app, favicon, manifesto PWA, README e imagem do repositório -->
 - **Uso:** <!-- área de respiro, tamanho mínimo, fundo claro/escuro -->
 
 ## Paleta
