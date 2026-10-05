@@ -138,6 +138,52 @@ class IntegrarRelease(ComGit):
         self.issue(5, "Base", labels=["epic"], state="closed")
         self.assertEqual(self.script("integrar-release.sh", EPICO=7).returncode, 0)
 
+    def segundo_epico(self, corpo="### Depende de outro épico ainda não publicado?\n\n#7"):
+        self.git("fetch", "-q", "origin")
+        self.branch("epico/8-leitor", "develop", "src/leitor.js", "leitor\n")
+        self.issue(8, "Leitor", labels=["epic"], corpo=corpo, sub=[21, 22, 23])
+        self.issue(21, "Testes do leitor", labels=["teste-aceite"], parent=8)
+        self.issue(22, "Leitor", labels=["task"], parent=8)
+        self.issue(23, "Documentação do leitor", labels=["documentacao"], parent=8)
+        self.mesclados("teste/21-testes", "feature/22-leitor", "docs/23-documentacao", base="epico/8-leitor",
+                       titulos={"feature/22-leitor": "feat(leitor): le codigos"})
+
+    def test_varios_epicos_numa_release_mesmo_dependentes(self):  # pilot: one release per sprint
+        self.preparar()
+        self.segundo_epico()  # #8 depends on #7, which is not in production yet: fine in the same release
+        r = self.script("integrar-release.sh", EPICO="7,8")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("épicos #7 8", r.stdout)
+        self.assertEqual(self.git_origin("show", "release/0.2.0:src/app.js"), "v2")
+        self.assertEqual(self.git_origin("show", "release/0.2.0:src/leitor.js"), "leitor")
+        changelog = self.git_origin("show", "release/0.2.0:CHANGELOG.md")
+        self.assertIn("Bloqueia pedido sem estoque", changelog)
+        self.assertIn("Le codigos", changelog)
+        for n in ("7", "8", "11", "12", "13", "21", "22", "23"):
+            self.assertEqual(self.estado["issues"][n]["milestone"], "v0.2.0", n)
+        self.assertEqual(self.estado["boards"]["1"]["items"]["8"]["Versão"], "v0.2.0")
+
+    def test_sprint_pega_os_epicos_em_andamento(self):
+        self.preparar()
+        self.segundo_epico(corpo="### Problema ou oportunidade\n\nx")
+        self.cartao(1, 7, "Em desenvolvimento")
+        self.cartao(1, 8, "Homologação")
+        self.issue(9, "Ideia", labels=["epic"])
+        self.cartao(1, 9, "Backlog")  # not in the sprint
+        r = self.script("integrar-release.sh", EPICO="sprint")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("épicos #7 8", r.stdout)
+        self.assertNotIn("#9", r.stdout)
+
+    def test_sem_release_nao_entra_numa_release_de_varios(self):
+        self.preparar()
+        self.segundo_epico(corpo="x")
+        self.estado["issues"]["8"]["labels"].append("sem-release")
+        self.gravar_estado()
+        r = self.script("integrar-release.sh", EPICO="7,8")
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("#8 é sem-release", r.stdout)
+
     def test_epico_sem_release_vai_para_a_develop(self):
         self.preparar(labels=("epic", "sem-release"), caminho="docs/guia.md", texto="# Guia\n")
         r = self.script("integrar-release.sh", EPICO=7)

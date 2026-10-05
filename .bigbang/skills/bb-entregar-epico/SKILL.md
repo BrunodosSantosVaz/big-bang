@@ -15,6 +15,9 @@ Leia `AGENTS.md`, `.bigbang/processo/09-entrega.md`, `bigbang.toml`, épico/bug,
 
 ## Passos
 
+0. Entrega por sprint (combinada no início da sprint): quando todos os épicos da sprint estão prontos, rode
+   Integrar release com `epico=sprint`; homologue cada épico da candidata única e publique uma vez.
+
 1. Homologar: mostre link, versão/SHA, o que testar e critérios. Espere homologado ou reprovado com motivo.
    Registre `bb decisao homologado N --frase "palavras do dono"`, ou reprovado com a frase correspondente.
 2. Reprovado: crie nova tarefa de correção no mesmo épico pelo botão Tarefa de correção, com motivo;

@@ -4,6 +4,19 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [0.12.0] - 2026-10-05
+
+### O que muda
+
+- *Integrar release* aceita vários épicos numa release: `epico=36,37` ou `epico=sprint` (todos os épicos em
+  andamento da sprint). Um épico que depende de outro da mesma release não espera (ADR-0015).
+- `bb-rodar-sprint` pergunta ao dono, no início de cada sprint, se a entrega é por sprint ou por épico, e trabalha
+  em paralelo as tarefas desbloqueadas.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [0.11.7] - 2026-10-04
 
 ### O que muda

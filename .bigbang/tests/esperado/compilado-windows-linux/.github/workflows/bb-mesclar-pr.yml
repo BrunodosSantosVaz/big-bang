@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v0.11.7 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-mesclar-pr.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v0.12.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-mesclar-pr.yml. Não edite: personalize em bigbang.toml.
 # Mescla no epico/* (e na develop, só fundacao/*, framework/* e actions) o PR aprovado e verde; nunca na main.
 # Mescla com o PROJETO_TOKEN para os eventos do merge dispararem os próximos workflows.
 name: Mesclar PR
