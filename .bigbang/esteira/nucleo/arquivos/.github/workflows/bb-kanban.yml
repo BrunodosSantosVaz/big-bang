@@ -16,8 +16,11 @@ on:
 permissions:
   contents: read
 
+# One group per issue/PR AND per event kind (action + label): GitHub keeps only one pending run per group and drops
+# the older one, so distinct events of the same issue (closed then reopened, two decision labels in a row) must not
+# share a group. Only identical events replace each other.
 concurrency:
-  group: bb-kanban-${{ github.event.issue.number || github.event.pull_request.number || github.event.workflow_run.head_branch || github.ref }}
+  group: bb-kanban-${{ github.event.issue.number || github.event.pull_request.number || github.event.workflow_run.head_branch || github.ref }}-${{ github.event.action }}-${{ github.event.label.name }}
   cancel-in-progress: false
 
 jobs:

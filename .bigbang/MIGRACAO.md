@@ -4,6 +4,22 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [1.0.0] - 2026-10-05
+
+### O que muda
+
+- Primeira versão estável: validada num sistema real, do zero a produção (piloto ScreenFakeCam,
+  `.bigbang/docs/piloto-screenfakecam.md`).
+- Kanban: o grupo de concorrência inclui a ação e a label do evento (eventos diferentes da mesma issue não se
+  descartam mais).
+- *Regras do PR* julga com a ponta atual da branch de destino, não com o `base.sha` congelado do evento.
+- Tarefa de correção com título cortado em palavra inteira; `bb assumir` nomeia a pasta pelo repositório principal;
+  `bb liberar` explica que a posse se libera antes de remover a pasta.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [0.12.0] - 2026-10-05
 
 ### O que muda

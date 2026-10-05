@@ -3,7 +3,7 @@ import os
 import re
 import unittest
 
-from _raiz import caminho, importar_bb
+from _raiz import BIGBANG, caminho, importar_bb
 
 importar_bb()
 from bb import workflow_rules  # noqa: E402
@@ -17,6 +17,16 @@ FIXADA = re.compile(r"^[\w.-]+/[\w./-]+@[0-9a-f]{40}$")
 COMENTARIO_VERSAO = re.compile(r"^\s*#\s*v\d+(\.\d+){0,2}\s*$")
 RUNS_ON = re.compile(r"^\s*runs-on:\s*(\S+)\s*$", re.M)
 JOB = re.compile(r"^  ([\w-]+):\s*$", re.M)
+
+
+def modelo_esteira(nome):
+    """A pipeline workflow template (the generator copies it into each project's .github/workflows/)."""
+    pasta = os.path.join(BIGBANG, "esteira", "nucleo", "arquivos", ".github", "workflows")
+    for candidato in (nome, nome + ".tmpl"):
+        if os.path.exists(os.path.join(pasta, candidato)):
+            with open(os.path.join(pasta, candidato), encoding="utf-8") as arquivo:
+                return arquivo.read()
+    raise FileNotFoundError(nome)
 
 
 def workflows():
@@ -91,6 +101,15 @@ class RegrasDosWorkflows(unittest.TestCase):
 
 class AutoTesteDasRegras(unittest.TestCase):
     """The rules must refuse the wrong case and accept the right one."""
+
+    def test_kanban_nao_descarta_eventos_diferentes(self):  # pilot: closed+reopened lost a run
+        texto = modelo_esteira("bb-kanban.yml")
+        self.assertIn("${{ github.event.action }}-${{ github.event.label.name }}", texto)
+
+    def test_regras_julga_com_a_ponta_atual_do_destino(self):  # pilot: base.sha stayed on old rules
+        texto = modelo_esteira("bb-regras-pr.yml")
+        self.assertIn("ref: ${{ github.event.pull_request.base.ref }}", texto)
+        self.assertNotIn("pull_request.base.sha", texto)
 
     def test_recusa_tag_e_aceita_sha(self):
         self.assertNotRegex("actions/checkout@v5", FIXADA)

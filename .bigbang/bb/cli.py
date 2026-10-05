@@ -161,7 +161,8 @@ def _assumir(args):
 def _liberar(args):
     acquired = workspaces.receipt(args.raiz)
     if acquired.get("issue") != args.issue:
-        raise BbError("execute bb liberar na pasta da sessão dona da issue", EXIT_USAGE)
+        raise BbError("execute bb liberar na pasta da sessão dona da issue (o recibo da posse fica nos metadados "
+                      "Git dessa pasta: libere ANTES de remover a pasta com git worktree remove)", EXIT_USAGE)
     ownership.release(config_module.load(args.raiz), args.issue, acquired["name"], acquired["session"])
     print(f"#{args.issue}: posse liberada. A pasta de trabalho foi preservada.")
     return EXIT_OK

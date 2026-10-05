@@ -3,7 +3,7 @@
 > Um framework para **uma pessoa, com uma ou mais IAs**, planejar, construir e manter sistemas profissionais:
 > bem arquitetados, seguros, testados e 100% documentados.
 
-**Versão:** 0.9.0 (em construção; a 1.0.0 sai depois do piloto) · **Licença do framework:** MIT
+**Versão:** 1.0.0 (validada num sistema real, do zero a produção: [relatório do piloto](.bigbang/docs/piloto-screenfakecam.md)) · **Licença do framework:** MIT
 
 ## O que é o Big Bang
 
@@ -76,6 +76,8 @@ Tudo também pode ser feito pelos botões das GitHub Actions (*Run workflow*), s
 - Especificação completa: [`.bigbang/docs/especificacao.md`](.bigbang/docs/especificacao.md)
 - Processo, passo a passo: [`.bigbang/processo/`](.bigbang/processo/)
 - Decisões do framework (ADRs): [`.bigbang/docs/decisoes/`](.bigbang/docs/decisoes/)
+- O que muda em cada versão e como atualizar: [`.bigbang/MIGRACAO.md`](.bigbang/MIGRACAO.md) (`bb atualizar`)
+- Piloto que validou a 1.0.0: [`.bigbang/docs/piloto-screenfakecam.md`](.bigbang/docs/piloto-screenfakecam.md)
 
 ## Licença
 
