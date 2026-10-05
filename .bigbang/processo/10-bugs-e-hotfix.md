@@ -21,7 +21,8 @@ Bug é **uma unidade de release**, como um épico pequeno (skill `bb-corrigir-bu
 3. **Commit 1:** o teste de regressão, que falha. **Commit 2:** a correção mínima. A CI confere a ordem rodando o
    teste no primeiro commit.
 4. PR para a `main`, com revisão. Ele não é mesclado direto: entra pela release.
-5. *Integrar release* com `bug=<n>` cria `release/x.y.z` (sobe o último número) a partir da `main`.
+5. *Integrar release* com `bug=<n>` cria `release/x.y.z` (sobe o último número) a partir da `main`; com a lista
+   `bug=61,64`, vários bugs vão numa release só (uma candidata, uma homologação, uma publicação).
 6. Candidata → o dono homologa o bug → *Publicar em produção*.
 
 ## Hotfix

@@ -220,6 +220,25 @@ class IntegrarRelease(ComGit):
         self.assertIn("v0.1.1", r.stdout)
         self.assertIn("### Corrigido\n\n- Corrige o total (#40)", self.git_origin("show", "release/0.1.1:CHANGELOG.md"))
 
+    def test_varios_bugs_numa_release(self):
+        self.git("fetch", "-q", "origin")
+        self.branch("bugfix/20-total", "main", "src/app.js", "corrigido\n")
+        self.branch("bugfix/21-icone", "main", "docs/icone.md", "# Ícone\n")
+        self.issue(20, "Total errado", labels=["bug"])
+        self.issue(21, "Sem ícone", labels=["bug"])
+        self.estado["prs"] = {"40": {"head": "bugfix/20-total", "base": "main", "state": "OPEN",
+                                     "title": "fix: corrige o total", "labels": []},
+                              "41": {"head": "bugfix/21-icone", "base": "main", "state": "OPEN",
+                                     "title": "fix: ícone do app", "labels": []}}
+        self.gravar_estado()
+        r = self.script("integrar-release.sh", BUG="20,21")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("bugs #20 21", r.stdout)
+        changelog = self.git_origin("show", "release/0.1.1:CHANGELOG.md")
+        self.assertIn("Corrige o total (#40)", changelog)
+        self.assertIn("Ícone do app (#41)", changelog)
+        self.assertEqual(self.git_origin("show", "release/0.1.1:docs/icone.md"), "# Ícone")
+
     def test_simular_nao_envia(self):
         self.preparar()
         r = self.script("integrar-release.sh", EPICO=7, SIMULAR="true")

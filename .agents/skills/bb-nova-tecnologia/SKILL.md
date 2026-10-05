@@ -2,7 +2,7 @@
 name: bb-nova-tecnologia
 description: Use antes de instalar qualquer dependência de execução ou tecnologia ausente da tabela de STACK.md. Compara alternativas e espera aprovação do dono para ADR e mudança da tabela.
 ---
-<!-- Gerado pelo Big Bang v1.3.0 a partir de .bigbang/skills/bb-nova-tecnologia/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.3.1 a partir de .bigbang/skills/bb-nova-tecnologia/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Nova tecnologia
 

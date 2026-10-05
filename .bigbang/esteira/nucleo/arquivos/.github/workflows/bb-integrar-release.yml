@@ -9,7 +9,7 @@ on:
         required: false
         type: string
       bug:
-        description: 'Número do bug (bugfix/hotfix)'
+        description: 'Número do bug (bugfix/hotfix), ou a lista 61,64 numa release só'
         required: false
         type: string
       dependencias:
