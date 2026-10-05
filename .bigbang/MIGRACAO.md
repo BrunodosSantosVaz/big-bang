@@ -4,6 +4,17 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [1.3.1] - 2026-10-05
+
+### O que muda
+
+- *Integrar release* aceita vários bugs numa release só: `bug=61,64` (uma candidata, uma homologação, uma
+  publicação), como já acontecia com os épicos da sprint.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [1.3.0] - 2026-10-05
 
 ### O que muda

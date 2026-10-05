@@ -8,7 +8,8 @@
 #                      otherwise -> release/x.y.z from main (or the existing one, for rc.N+1 after a rejection),
 #                      epico/* merged with --no-ff, version file, CHANGELOG, milestone vX.Y.Z, push (-> candidate).
 #                      Refused while an epic it depends on (tem-dependencia) is not in production (closed).
-#   BUG=<n>            bugfix/<n>-* or hotfix/<n>-* (born from main) -> release/x.y.z (patch).
+#   BUG=<n>[,<m>…]     bugfix/<n>-* or hotfix/<n>-* (born from main) -> release/x.y.z (patch); several bugs go in
+#                      ONE release (one candidate, one homologation, one publication).
 #   DEPENDENCIAS=true  the open Dependabot PRs into main -> one maintenance release.
 # The version comes from the merged PR titles (bb esteira versao); a VERSAO that disagrees needs
 # CONFIRMAR_VERSAO=true. Conflict: nothing is pushed and the epic gets the label `conflito`.
@@ -112,14 +113,20 @@ if [ -n "${EPICO:-}" ]; then
     done
   fi
 elif [ -n "${BUG:-}" ]; then
-  unidade="bug #$BUG"
-  ramo=$(git for-each-ref --format='%(refname:strip=3)' "refs/remotes/origin/bugfix/$BUG-*" \
-    "refs/remotes/origin/hotfix/$BUG-*" | head -n 1)
-  [ -n "$ramo" ] || erro "bug #$BUG sem branch bugfix/$BUG-* ou hotfix/$BUG-*"
-  pr=$(gh pr list --repo "$R" --head "$ramo" --state open --json number,title,labels \
-    --jq '.[0] | "\(.number)\t\(.title)\t\([.labels[].name] | join(","))"')
-  [ -n "$pr" ] || erro "o bug #$BUG não tem PR aberto de $ramo para a main"
-  refs=("bug #$BUG=refs/heads/$ramo"); titulos=$(cut -f2 <<<"$pr"); itens="$pr"; issues=("$BUG")
+  IFS=', ' read -r -a bugs <<<"$BUG"
+  refs=(); titulos=""; itens=""; issues=()
+  for n in "${bugs[@]}"; do
+    [[ "$n" =~ ^[0-9]+$ ]] || erro "bug '$n' inválido (use um número ou a lista 61,64)"
+    ramo=$(git for-each-ref --format='%(refname:strip=3)' "refs/remotes/origin/bugfix/$n-*" \
+      "refs/remotes/origin/hotfix/$n-*" | head -n 1)
+    [ -n "$ramo" ] || erro "bug #$n sem branch bugfix/$n-* ou hotfix/$n-*"
+    pr=$(gh pr list --repo "$R" --head "$ramo" --state open --json number,title,labels \
+      --jq '.[0] | "\(.number)\t\(.title)\t\([.labels[].name] | join(","))"')
+    [ -n "$pr" ] || erro "o bug #$n não tem PR aberto de $ramo para a main"
+    refs+=("bug #$n=refs/heads/$ramo"); titulos+="$(cut -f2 <<<"$pr")"$'\n'; itens+="$pr"$'\n'; issues+=("$n")
+  done
+  if [ "${#bugs[@]}" -eq 1 ]; then unidade="bug #${bugs[0]}"; else unidade="bugs #${bugs[*]}"; fi
+  titulos="${titulos%$'\n'}"; itens="${itens%$'\n'}"
 elif [ "${DEPENDENCIAS:-false}" = true ]; then
   unidade="dependências"
   prs=$(gh pr list --repo "$R" --base main --state open --limit 100 --json number,headRefName,title,labels \
