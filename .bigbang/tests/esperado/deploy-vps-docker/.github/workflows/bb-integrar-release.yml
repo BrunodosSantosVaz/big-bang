@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.2.1 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-integrar-release.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v1.3.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-integrar-release.yml. Não edite: personalize em bigbang.toml.
 # Botão "Integrar release" (spec 11.6, passo 7; 11.12). Também disparado pelo Mesclar PR no último merge do épico.
 name: Integrar release
 

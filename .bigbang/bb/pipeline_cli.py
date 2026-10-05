@@ -64,8 +64,12 @@ def register(commands, parser_class):
     p.add_argument("--pr-de-teste", action="store_true", help="PR de teste do épico: tests/aceite/ liberado")
     p.set_defaults(handler=_sensitive)
 
-    p = sub.add_parser("documentacao", help="Markdown válido, links relativos (DOC-14) e README do sistema (DOC-15)")
+    p = sub.add_parser("documentacao", help="Markdown válido, links relativos (DOC-14), README do sistema (DOC-15), "
+                                            "arquivos de comunidade (DOC-16) e ícone global (DOC-17)")
     p.set_defaults(handler=_docs)
+
+    p = sub.add_parser("comunidade", help="cria os arquivos de comunidade que faltam (DOC-16) a partir dos modelos")
+    p.set_defaults(handler=_community)
 
     p = sub.add_parser("so-liberacao", help="o diff (entrada padrão) em tests/aceite/ só retira marcas da issue?")
     p.add_argument("issue", type=int)
@@ -306,6 +310,21 @@ def _docs(args):
     if not problems:
         print("Documentação: Markdown e links em ordem.")
     return EXIT_VERIFICATION_FAILED if problems else EXIT_OK
+
+
+def _community(args):
+    from .render import substitute
+    config = config_module.load(args.raiz)
+    created = []
+    for name in docs_check.COMMUNITY_FILES:
+        target = os.path.join(args.raiz, name)
+        if os.path.exists(target):
+            continue
+        source = f".bigbang/modelos/comunidade/{name}"
+        write_text(target, substitute(read_text(os.path.join(args.raiz, source)), config, source))
+        created.append(name)
+    print("Criados: " + ", ".join(created) if created else "Arquivos de comunidade já existem.")
+    return EXIT_OK
 
 
 def _write_version(args):

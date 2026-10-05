@@ -1,4 +1,5 @@
-"""Markdown sanity and relative links (DOC-14), and the system README (DOC-15). External links are not fetched:
+"""Markdown sanity and relative links (DOC-14), the system README (DOC-15), the community files (DOC-16) and the
+global icon (DOC-17). External links are not fetched:
 network makes the CI flaky (TST-04)."""
 import os
 import re
@@ -113,9 +114,28 @@ def readme_problems(root):
     return result
 
 
+# DOC-16: community files of every founded system (created by bb init or bb esteira comunidade).
+COMMUNITY_FILES = ("CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "SECURITY.md")
+# DOC-17: the system's single icon, approved with the prototype (F3) and used everywhere an icon appears.
+ICON = "docs/design/icone.svg"
+
+
+def community_problems(root):
+    """DOC-16 and DOC-17, only for founded systems."""
+    if not os.path.exists(os.path.join(root, "bigbang.toml")):
+        return []
+    result = [f"{name}: não existe (DOC-16; crie com bb esteira comunidade)" for name in COMMUNITY_FILES
+              if not os.path.exists(os.path.join(root, name))]
+    if (os.path.exists(os.path.join(root, "DESIGN.md")) or has_release(root)) and \
+            not os.path.exists(os.path.join(root, ICON)):
+        result.append(f"{ICON}: o sistema não tem o ícone global (DOC-17: criado no design kit, aprovado com o "
+                      "protótipo e usado no app, no favicon e no README)")
+    return result
+
+
 def problems(root):
     """Problems of the project's own Markdown (the framework layer is checked in the Big Bang repository)."""
-    result = readme_problems(root)
+    result = readme_problems(root) + community_problems(root)
     for path in markdown_files(root):
         relative = to_posix(os.path.relpath(path, root))
         _, closed = outside_code(read_text(path))
