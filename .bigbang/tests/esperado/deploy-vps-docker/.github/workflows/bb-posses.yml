@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.3.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-posses.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v1.3.1 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-posses.yml. Não edite: personalize em bigbang.toml.
 # Posses sem push há mais que ias.trava_expira_horas; o status é somente leitura.
 name: Marcar posses paradas
 
