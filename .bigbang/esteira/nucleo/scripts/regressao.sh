@@ -14,7 +14,11 @@ if [ "${#commits[@]}" -lt 2 ]; then
   exit 1
 fi
 primeiro="${commits[0]}"
-fora=$(git diff-tree --no-commit-id --name-only -r "$primeiro" | { grep -vE '^tests?/|(^|/)(test_[^/]+|[^/]+_test\.[a-z]+|[^/]+\.(test|spec)\.[a-z]+)$' || true; })
+# Test files in the usual layouts: tests/, Gradle/Maven src/test|androidTest|testFixtures (pilot #61), __tests__/,
+# test_x.py, x_test.go, x.test.ts, x.spec.js, XTest.kt, XTests.java, XSpec.scala, XIT.java.
+teste='^tests?/|(^|/)src/(test|androidTest|testFixtures|[A-Za-z]+Test)/|(^|/)__tests__/'
+teste+='|(^|/)(test_[^/]+|[^/]+_test\.[a-z]+|[^/]+\.(test|spec)\.[a-z]+|[^/]+(Test|Tests|Spec|IT)\.(kt|kts|java|scala|groovy|swift|cs))$'
+fora=$(git diff-tree --no-commit-id --name-only -r "$primeiro" | { grep -vE "$teste" || true; })
 if [ -n "$fora" ]; then
   echo "::error::o primeiro commit (${primeiro:0:7}) deve ter só o teste de regressão; também mexe em: $(tr '\n' ' ' <<<"$fora")"
   exit 1

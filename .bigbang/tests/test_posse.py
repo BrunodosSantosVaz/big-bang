@@ -183,6 +183,16 @@ class Processos(ComGit):
         self.assertFalse(any(x.startswith("ia:") for x in self.ler_estado()["issues"]["12"]["labels"]))
         self.assertTrue(os.path.isdir(winner_root))
 
+    def test_bug_ganha_a_branch_a_partir_da_main(self):
+        self.issue(13, "[Bug] Botão quebra em duas linhas", labels=["bug"])
+        self.gravar_estado()
+        result = subprocess.run(self.command("assumir", "13", "codex-1", "--pasta", os.path.join(self.pasta, "bug")),
+                                capture_output=True, text=True, env=self.env, check=False)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        branch = "bugfix/13-botao-quebra-em-duas-linhas"
+        self.assertEqual(self.git_origin("rev-parse", branch), self.git_origin("rev-parse", "main"))
+        self.assertEqual(workspaces.git(os.path.join(self.pasta, "bug"), "branch", "--show-current"), branch)
+
     def test_falha_no_worktree_desfaz_a_posse(self):
         result = subprocess.run(self.command("assumir", "12", "codex-1", "--pasta", self.trabalho),
                                 capture_output=True, text=True, env=self.env, check=False)

@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.2.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-documentacao.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v1.2.1 a partir de .bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-documentacao.yml. Não edite: personalize em bigbang.toml.
 name: Documentação do épico
 description: A última issue de um épico. Normalmente criada pelo Iniciar sprint.
 labels: ["documentacao"]
