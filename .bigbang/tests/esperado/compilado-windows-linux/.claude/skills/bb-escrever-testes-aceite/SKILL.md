@@ -2,7 +2,7 @@
 name: bb-escrever-testes-aceite
 description: Use para a issue teste-aceite de um épico. Escreve um teste por critério com RN e marca de pendente da tarefa implementadora, sem escrever implementação.
 ---
-<!-- Gerado pelo Big Bang v1.2.0 a partir de .bigbang/skills/bb-escrever-testes-aceite/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.2.1 a partir de .bigbang/skills/bb-escrever-testes-aceite/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Escrever testes de aceite
 

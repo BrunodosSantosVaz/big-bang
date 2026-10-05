@@ -165,6 +165,16 @@ class Regressao(ComGit):
         self.assertEqual(r.returncode, 1)
         self.assertIn("precisa falhar", r.stdout)
 
+    def test_teste_em_layout_gradle_conta_como_teste(self):
+        # pilot #61: app/src/test/.../XTest.kt is a test file, not production code
+        self.escrever("app/src/test/java/io/exemplo/ContaTest.kt", "class ContaTest\n")
+        self.escrever("app/src/androidTest/java/io/exemplo/TelaTest.kt", "class TelaTest\n")
+        self.commit("test: conta em Kotlin")
+        self.correcao()
+        self.commit("fix: total soma")
+        r = self.regressao()
+        self.assertNotIn("só o teste de regressão", r.stdout)  # classified as test, then the stack's tests run
+
     def test_recusa_um_commit_so(self):
         self.teste_de_regressao()
         self.correcao()
