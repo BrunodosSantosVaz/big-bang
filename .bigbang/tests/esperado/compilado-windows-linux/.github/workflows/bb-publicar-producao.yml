@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.1.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v1.2.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl. Não edite: personalize em bigbang.toml.
 # Botão "Publicar em produção" (spec 11.6, passo 10). "conferir" roda sempre (portão e plano, nada muda);
 # "publicar" só com simular=false e depois que o dono aprova o ambiente "producao" — o único "ok" que ele não delega.
 name: Publicar em produção
@@ -73,6 +73,8 @@ jobs:
           VPS_PORTA: ${{ vars.VPS_PORTA }}
           VPS_USUARIO: ${{ vars.VPS_USUARIO }}
           VPS_PASTA: ${{ vars.VPS_PASTA }}
+          VPS_DOCKER_SUDO: ${{ vars.VPS_DOCKER_SUDO }}
+          VPS_ENV_ARQUIVO: ${{ vars.VPS_ENV_ARQUIVO }}
           VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
           VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
           REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}

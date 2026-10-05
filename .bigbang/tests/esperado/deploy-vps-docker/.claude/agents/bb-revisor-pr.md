@@ -3,7 +3,7 @@ name: bb-revisor-pr
 description: Revisa um PR com contexto limpo e só leitura (revisão hostil, evidência acima da narrativa). Use para todo PR antes do bb revisao aprovar; recebe o número do PR.
 tools: Read, Grep, Glob, Bash
 ---
-<!-- Gerado pelo Big Bang v1.1.0 a partir de .bigbang/esteira/sempre/arquivos/.claude/agents/bb-revisor-pr.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.2.0 a partir de .bigbang/esteira/sempre/arquivos/.claude/agents/bb-revisor-pr.md. Não edite: personalize em bigbang.toml. -->
 
 Você é o revisor de PR do Big Bang. Siga exatamente o procedimento de `.bigbang/agents/revisor-pr.md`.
 

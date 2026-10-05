@@ -4,6 +4,28 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [1.2.0] - 2026-10-05
+
+### O que muda
+
+- **Perfil deploy, alvo `vps-docker`, pronto para um deploy real (E9, #112–#115):**
+  - várias imagens por sistema (`deploy.servicos = ["api=apps/api/Dockerfile", "web=apps/web/Dockerfile"]`):
+    a candidata constrói uma por serviço, `imagem.txt` registra `servico=imagem@sha256:…` por linha, o alvo publica
+    o conjunto junto e *Voltar versão* restaura o conjunto; serviços fora da lista (banco) nunca são recriados;
+  - servidor ARM64: `deploy.plataformas = ["linux/arm64"]` (buildx com QEMU; ADR-0013);
+  - health check em outro endereço: `deploy.caminho_saude` (padrão `/api/health`);
+  - `VPS_DOCKER_SUDO=true` (`sudo -n docker`), `VPS_ENV_ARQUIVO` (env-file do servidor),
+    `deploy.servico_migrar` e `deploy.servico_checar` (pré-checagem antes da migração; se falhar, nada muda no ar).
+- Todas as chaves novas são opcionais, com o comportamento anterior como padrão: um projeto com um serviço `app` e
+  `${BB_IMAGEM}` no compose continua funcionando sem mudança.
+- SBOM de cada imagem gerado pelo Trivy fixado; atestado de procedência por `subject-checksums`.
+- Correção: a migração agora roda com stdin fechado (`run -T </dev/null`); antes, um comando depois dela no mesmo
+  script remoto podia ser engolido.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [1.1.0] - 2026-10-05
 
 ### O que muda

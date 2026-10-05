@@ -32,6 +32,21 @@ class Esquema(unittest.TestCase):
     def test_compilado_valido_sem_secao_deploy(self):
         self.assertEqual(config.validate(compilado()), [])
 
+    def test_chaves_opcionais_do_deploy(self):
+        cfg = exemplo()
+        cfg["deploy"].update(servicos=["api=apps/api/Dockerfile", "web=apps/web/Dockerfile"],
+                             plataformas=["linux/arm64"], caminho_saude="/api/v1/health/live",
+                             servico_migrar="migrar", servico_checar="checar")
+        self.assertEqual(config.validate(cfg), [])
+        for chave, valor in (("caminho_saude", "api/health"), ("plataformas", ["linux/s390x"]),
+                             ("servicos", ["API=Dockerfile"]), ("servicos", ["api"]),
+                             ("servicos", ["api=a/Dockerfile", "api=b/Dockerfile"]), ("servico_checar", "api"),
+                             ("servico_migrar", "")):
+            with self.subTest(chave=chave, valor=valor):
+                errado = copy.deepcopy(cfg)
+                errado["deploy"][chave] = valor
+                self.assertTrue(config.validate(errado))
+
     def test_recusa_chave_e_secao_desconhecidas(self):
         cfg = exemplo()
         cfg["projeto"]["nomee"] = "x"
@@ -124,6 +139,10 @@ class ConfigGet(unittest.TestCase):
         self.assertEqual(self.rodar("config", "get", "ias.nomes")[1], "claude-1\nclaude-2\ncodex-1\n")
         self.assertEqual(self.rodar("config", "get", "compilado.build_windows-x64")[1],
                          "python packaging/windows/build.py\n")
+        # optional deploy keys left out: the default
+        self.assertEqual(self.rodar("config", "get", "deploy.servicos")[1], "app=Dockerfile\n")
+        self.assertEqual(self.rodar("config", "get", "deploy.caminho_saude")[1], "/api/health\n")
+        self.assertEqual(self.rodar("config", "get", "deploy.servico_checar")[1], "\n")
 
     def test_codigos_de_saida(self):
         self.assertEqual(self.rodar("config", "get", "projeto.inexistente")[0], EXIT_UNKNOWN_KEY)

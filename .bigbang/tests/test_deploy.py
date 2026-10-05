@@ -74,8 +74,9 @@ class Deploy(CasoDeScript):
         r = self.deploy("promover.sh", RC_TAG="v1.0.0-rc.2", TAG="v1.0.0", TARGET_SHA="abc")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         log = self.ssh()
-        migracao = log.index(f"BB_IMAGEM={IMAGEM} docker compose")
-        publicacao = log.index(f"BB_IMAGEM=%s\\n' {IMAGEM}")
+        self.assertIn(f"BB_IMAGEM_APP={IMAGEM}", log)
+        migracao = log.index("--profile migrar run --rm -T migrar")
+        publicacao = log.index("up -d --remove-orphans app")
         self.assertLess(migracao, publicacao)  # migration with the new image before the switch
         self.assertIn("produção não respondeu ao health check", r.stderr + r.stdout)  # alert, not a stop
         self.assertEqual(self.estado["release_assets"]["v1.0.0"], ["imagem.txt"])
