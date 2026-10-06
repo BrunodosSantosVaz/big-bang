@@ -131,7 +131,7 @@ class AgentsBase(unittest.TestCase):
 
     def test_marcadores_conhecidos(self):
         marcadores = set(re.findall(r"\{\{([a-z_.]+)\}\}", ler(".bigbang", "AGENTS.base.md")))
-        self.assertEqual(marcadores, {"projeto.nome", "bigbang.versao"})
+        self.assertEqual(marcadores, {"projeto.nome", "bigbang.versao", "gerado.modo_trabalho"})
 
     def test_garantias_iguais_em_todos_os_lugares(self):
         seguranca = ler(".bigbang", "padroes", "seguranca.md")

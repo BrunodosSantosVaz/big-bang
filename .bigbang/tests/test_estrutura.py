@@ -20,7 +20,7 @@ DOCUMENTOS_PROCESSO = [
     "01-visao.md", "02-fundacao.md", "03-planejamento.md", "04-paineis.md", "05-sprint.md",
     "06-execucao.md", "07-branches-e-commits.md", "08-revisao.md", "09-entrega.md",
     "10-bugs-e-hotfix.md", "11-seguranca-operacional.md", "12-tecnologia-nova.md",
-    "13-varias-ias.md", "14-automacoes.md", "15-atualizacao-do-framework.md", "16-conversas.md",
+    "13-varias-ias.md", "14-automacoes.md", "15-atualizacao-do-framework.md", "16-conversas.md", "17-flash.md",
 ]
 
 MODELOS = [
