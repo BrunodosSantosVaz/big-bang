@@ -8,8 +8,7 @@ if gh release view "v$versao" --repo "$repo" >/dev/null 2>&1; then
   [ -z "${GITHUB_OUTPUT:-}" ] || echo "sha=retomada" >> "$GITHUB_OUTPUT"
   exit 0
 fi
-git fetch -q origin "refs/heads/release/$versao"
-sha=$(git rev-parse FETCH_HEAD)
+sha=$(git rev-parse --verify --end-of-options "refs/remotes/origin/release/$versao^{commit}")
 git checkout -q --detach "$sha"
 bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
 read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
