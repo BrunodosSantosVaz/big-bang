@@ -113,10 +113,23 @@ def execute(operation, environment, images, cfg, api, env, attempts=120, interva
     app = env.get('TSURU_APP', '')
     if not NAME.fullmatch(app): raise DeployError('Defina TSURU_APP com nome seguro da aplicação existente.')
     image = image_ref(images, cfg)
+    strategy = env.get('TSURU_MIGRACAO') or 'job'
+    if strategy not in ('job', 'inicializacao'):
+        raise DeployError('TSURU_MIGRACAO aceita job (padrão) ou inicializacao.')
+    if operation not in ('migrar', 'publicar'): raise DeployError('Operação inválida.')
+    if strategy == 'inicializacao':
+        info = api.json(f'/1.0/apps/{app}')
+        units = info.get('units')
+        if info.get('name') != app or not isinstance(units, list) or len(units) > 1:
+            raise DeployError('Migração na inicialização exige aplicação identificada com no máximo uma unidade.')
+        if operation == 'migrar':
+            # A separate job cannot access an application's SQLite PVC. The immutable image must migrate the
+            # mounted file before listening. This preflight is deliberately not a successful migration receipt.
+            return {'source': image, 'strategy': strategy, 'migration': 'pending'}
+        return dict(api.deploy('app', app, image), strategy=strategy)
     if operation == 'publicar':
         api.json(f'/1.0/apps/{app}')  # existing app may have zero units on its first deployment
         return api.deploy('app', app, image)
-    if operation != 'migrar': raise DeployError('Operação inválida.')
     job = env.get('TSURU_JOB_MIGRAR', '')
     if not NAME.fullmatch(job): raise DeployError('Defina TSURU_JOB_MIGRAR com nome do job manual existente.')
     path = '/1.13/jobs/' + job

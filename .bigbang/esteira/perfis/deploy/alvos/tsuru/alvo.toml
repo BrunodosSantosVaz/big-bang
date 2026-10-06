@@ -1,7 +1,7 @@
-descricao = "Tsuru API v1.32: aplicação e job manual existentes, um serviço OCI por digest"
+descricao = "Tsuru API v1.32: OCI por digest, migração por job ou inicialização da aplicação"
 situacao = "implementado"
 artefatos = ["imagem"]
 operacoes = ["publicar", "migrar", "saude", "voltar"]
-variaveis = ["TSURU_TARGET", "TSURU_APP", "TSURU_JOB_MIGRAR"]
+variaveis = ["TSURU_TARGET", "TSURU_APP", "TSURU_JOB_MIGRAR", "TSURU_MIGRACAO"]
 segredos = ["TSURU_TOKEN"]
 servicos_maximos = 1
