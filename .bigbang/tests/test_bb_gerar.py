@@ -59,6 +59,16 @@ class FrameworkFalso(unittest.TestCase):
                  "#!/usr/bin/env bash\necho vps\n")
         escrever(r, ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/bb-alvo.sh",
                  "#!/usr/bin/env bash\necho aws\n")
+        # Installed contracts are part of the minimal framework; this fake AWS is implemented, unlike the reserve.
+        target_contract = ('descricao = "Alvo de teste"\nsituacao = "implementado"\nartefatos = ["imagem"]\n'
+                           'operacoes = ["publicar", "migrar", "saude", "voltar"]\nvariaveis = []\nsegredos = []\n')
+        for name in ('vps-docker', 'aws'):
+            escrever(r, f'.bigbang/esteira/perfis/deploy/alvos/{name}/alvo.toml', target_contract)
+            escrever(r, f'.bigbang/esteira/perfis/deploy/alvos/{name}/scripts/alvo.sh', '#!/bin/bash\nexit 0\n')
+        escrever(r, '.bigbang/esteira/perfis/deploy/artefatos/imagem/artefato.toml',
+                 'descricao = "Imagem de teste"\nsituacao = "implementado"\nidentidade = "digest"\n'
+                 '[scripts]\nconstruir = "script.sh"\ncandidata = "script.sh"\npromover = "script.sh"\n')
+        escrever(r, '.bigbang/script.sh', '#!/bin/bash\nexit 0\n')
         escrever(r, ".bigbang/skills/README.md", "# Skills\n")
         escrever(r, ".bigbang/skills/bb-status/SKILL.md.tmpl",
                  "---\nname: bb-status\ndescription: Use quando…\n---\n\n# Status v{{bigbang.versao}}\n")

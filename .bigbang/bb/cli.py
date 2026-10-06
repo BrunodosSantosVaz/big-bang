@@ -3,7 +3,7 @@ import argparse
 import sys
 
 from . import config as config_module
-from . import acceptance, checklist, checksums, decisions, generator, ownership, package, status, update, verify, workspaces
+from . import acceptance, checklist, checksums, decisions, deploy_catalog, generator, ownership, package, status, update, verify, workspaces
 from . import init as init_module
 from . import pipeline_cli
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
@@ -20,6 +20,9 @@ def build_parser():
     parser = _Parser(prog="bb", description="Big Bang: ferramentas do framework.")
     parser.add_argument("--raiz", default=None, help="raiz do projeto (padrão: a pasta acima de .bigbang/)")
     commands = parser.add_subparsers(dest="command", metavar="<comando>", parser_class=_Parser)
+
+    alvos_parser = commands.add_parser("alvos", help="lista alvos e formatos de deploy instalados (somente leitura)")
+    alvos_parser.set_defaults(handler=_alvos)
 
     config_parser = commands.add_parser("config", help="lê o bigbang.toml")
     config_commands = config_parser.add_subparsers(dest="config_command", metavar="<subcomando>",
@@ -286,6 +289,25 @@ def _gerar(args):
         print(f"{kind}: {path}")
     print(f"{len(pending)} arquivo(s) atualizados. Rode bb verificar e revise o diff num PR.")
     return EXIT_OK
+
+
+def _alvos(args):
+    problems = []
+    for collection, title in (('alvos', 'Alvos de deploy'), ('artefatos', 'Formatos de artefato')):
+        print(title + ':')
+        entries = deploy_catalog.entries(args.raiz, collection)
+        if not entries:
+            problems.append(f'{collection}: catálogo instalado ausente ou vazio')
+        for name, entry, error in entries:
+            if error:
+                print(f'  {name}: inválido')
+                problems.append(error)
+            else:
+                capabilities = ' (artefatos: ' + ', '.join(entry.artifacts) + ')' if collection == 'alvos' else ''
+                print(f'  {name}: {entry.state}{capabilities} — {entry.description}')
+    for problem in problems:
+        print('  - ' + problem, file=sys.stderr)
+    return EXIT_VERIFICATION_FAILED if problems else EXIT_OK
 
 
 def _config_get(args):

@@ -1,7 +1,7 @@
 """`bb verificar` (spec 5.1 and 15.5): framework integrity, generated files intact, workflow rules, marked blocks."""
 import os
 
-from . import checksums, generator, workflow_rules
+from . import checksums, deploy_catalog, generator, workflow_rules
 from . import config as config_module
 from .errors import BbError
 from .paths import read_text
@@ -17,6 +17,7 @@ CHANGE_MESSAGES = {
 def run(root):
     """Return the list of problems; empty means the project is consistent."""
     result = list(checksums.problems(root))
+    result += deploy_catalog.problems(root)
     try:
         config = config_module.load(root, required=False)
     except BbError as exc:

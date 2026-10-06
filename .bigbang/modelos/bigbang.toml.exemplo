@@ -16,7 +16,7 @@ licenca = ""                           # obrigatório se publico (identificador 
 
 [entrega]
 perfil = "deploy"                      # deploy | compilado
-alvo = "vps-docker"                    # deploy: vps-docker | aws | paas ; compilado: ""
+alvo = "vps-docker"                    # deploy: alvo implementado em `bb alvos`; compilado: ""
 caminhos_artefato = ["src/", "migrations/", "Dockerfile", "package.json", "package-lock.json"]
 arquivo_versao = "package.json"          # único arquivo com a versão do artefato (definido em F2)
 ecossistemas = ["npm", "docker"]           # pacotes da stack para o Dependabot (definido em F2)
@@ -29,6 +29,7 @@ build_windows-x64 = "python packaging/windows/build.py"
 build_linux-x64 = "bash packaging/linux/build.sh"
 
 [deploy]                               # só no perfil deploy
+# artefato = "imagem"                  # padrão; formatos disponíveis em `bb alvos`
 imagem = "ghcr.io/brunodossantosvaz/meu-sistema"
 url_staging = "https://staging.exemplo.com"
 url_producao = "https://exemplo.com"

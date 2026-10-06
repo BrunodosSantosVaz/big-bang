@@ -1,0 +1,8 @@
+descricao = "Imagem OCI construída uma vez e promovida por digest"
+situacao = "implementado"
+identidade = "digest"
+
+[scripts]
+construir = "esteira/perfis/deploy/scripts/candidata-imagem.sh"
+candidata = "esteira/perfis/deploy/scripts/candidata-publicar.sh"
+promover = "esteira/perfis/deploy/scripts/promover.sh"
