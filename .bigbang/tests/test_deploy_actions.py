@@ -1,6 +1,7 @@
 """Workflows expose only the selected target's credentials and runner (#176)."""
 import os
 import subprocess
+import sys
 import unittest
 import test_deploy_catalog
 from bb import config, generator
@@ -59,13 +60,13 @@ class DeployActions(unittest.TestCase):
         setup = self.targets / 'vps-docker/scripts/preparar.sh'
         setup.write_text('echo target >> network.log\n')
         result = subprocess.run(['bash', '.bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh'],
-                                cwd=self.root, env=dict(os.environ, BB='python3.11 .bigbang/bin/bb.py'),
+                                cwd=self.root, env=dict(os.environ, BB=f'{sys.executable} .bigbang/bin/bb.py'),
                                 capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(log.read_text(), 'network\ntarget\n')
         p.write_text(text.replace('[deploy]', '[deploy]\npreparar_rede = "exit 7"'))
         result = subprocess.run(['bash', '.bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh'],
-                                cwd=self.root, env=dict(os.environ, BB='python3.11 .bigbang/bin/bb.py'))
+                                cwd=self.root, env=dict(os.environ, BB=f'{sys.executable} .bigbang/bin/bb.py'))
         self.assertEqual(result.returncode, 7)
         self.assertEqual(log.read_text(), 'network\ntarget\n')
 
