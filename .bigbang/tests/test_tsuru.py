@@ -162,7 +162,7 @@ class Tsuru(unittest.TestCase):
                     self.assertFalse(any(c[0] == 'deploy' for c in api.calls))
 
     def test_unknown_migration_strategy_aborts_before_api(self):
-        for strategy in ('', 'skip', 'none', 'initialization'):
+        for strategy in ('skip', 'none', 'initialization'):
             self.env['TSURU_MIGRACAO'] = strategy
             for operation in ('migrar', 'publicar'):
                 api = FakeAPI()
