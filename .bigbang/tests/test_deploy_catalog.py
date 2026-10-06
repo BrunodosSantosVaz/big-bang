@@ -88,7 +88,7 @@ class CatalogoDeploy(unittest.TestCase):
 
     def test_alvo_desconhecido_ou_reservado_nao_grava_nada(self):
         before = (self.root / 'AGENTS.md').read_bytes()
-        for name in ('inexistente', 'aws', 'paas', 'tsuru', 'personalizado'):
+        for name in ('inexistente', 'aws', 'paas', 'personalizado'):
             with self.subTest(name=name):
                 self.select(name)
                 code, _, err = self.command('gerar', '--esteira')
@@ -175,7 +175,7 @@ class CatalogoDeploy(unittest.TestCase):
         code, out, err = self.command('alvos')
         self.assertEqual((code, err), (0, ''))
         self.assertIn('vps-docker: implementado', out)
-        self.assertIn('tsuru: reservado', out)
+        self.assertIn('tsuru: implementado', out)
         self.assertIn('imagem: implementado', out)
         self.assertFalse((self.root / 'bigbang.toml').exists())
 

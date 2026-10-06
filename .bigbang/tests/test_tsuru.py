@@ -2,6 +2,7 @@
 import importlib.util
 from pathlib import Path
 import unittest
+import test_deploy_catalog
 from unittest.mock import patch
 from _raiz import RAIZ, exemplo_toml, importar_bb
 
@@ -39,6 +40,7 @@ class FakeAPI:
 
     def deploy(self, kind, name, image):
         self.calls.append(('deploy', kind, name, image))
+        if kind == 'job': self.info['job']['spec']['container']['internalRegistryImage'] = 'registry.internal/imported:v1'
         return {'source': image, 'internal': 'registry.internal/imported:v1', 'event': 'b' * 24}
 
 
@@ -80,6 +82,27 @@ class Tsuru(unittest.TestCase):
             with self.assertRaises(self.module.DeployError): self.run_op(api)
             self.assertFalse(any(c[0] == 'deploy' for c in api.calls))
 
+    def test_running_execution_appearing_during_import_blocks_trigger(self):
+        api = FakeAPI()
+        running = dict(api.info, units=[{'ID': 'concurrent', 'Status': 'started'}])
+        with patch.object(api, 'json', side_effect=[api.info, running]) as call:
+            with self.assertRaises(self.module.DeployError): self.run_op(api)
+            self.assertFalse(any(c.args[0].endswith('/trigger') for c in call.call_args_list))
+
+    def test_http_deploy_verifies_event_origin_and_never_accepts_only_log_success(self):
+        api = self.module.API('https://tsuru.invalid', 'dummy-token')
+        with patch.object(api, 'send', return_value=(b'OK', {})):
+            with self.assertRaises(self.module.DeployError): api.deploy('app', 'snake-hom', IMAGE)
+        valid = {'Running': False, 'Error': '', 'Target': {'Type': 'app', 'Value': 'snake-hom'},
+                 'CustomData': {'Start': {'image': IMAGE}, 'End': {'image': 'registry.internal/app:v1'}}}
+        with patch.object(api, 'send', return_value=(b'', {'X-Tsuru-Eventid': 'b' * 24})) as send:
+            with patch.object(api, 'json', return_value=valid):
+                receipt = api.deploy('app', 'snake-hom', IMAGE)
+                self.assertEqual(receipt['event'], 'b' * 24)
+                self.assertEqual(send.call_args.args, ('/1.0/apps/snake-hom/deploy', 'POST', {'image': IMAGE}))
+        with self.assertRaises(self.module.DeployError):
+            self.module.NoRedirect().redirect_request(None, None, 302, '', {}, 'https://other.invalid')
+
     def test_first_publication_uses_same_digest_without_migrating_again(self):
         api = FakeAPI(); api.info = {'units': []}
         receipt = self.run_op(api, 'publicar')
@@ -111,6 +134,25 @@ class Tsuru(unittest.TestCase):
         api = FakeAPI(); self.env['TSURU_APP'] = '../other'
         with self.assertRaises(self.module.DeployError): self.run_op(api)
         self.assertEqual(api.calls, [])
+
+
+class TsuruGeneration(unittest.TestCase):
+    setUp = test_deploy_catalog.CatalogoDeploy.setUp
+    tearDown = test_deploy_catalog.CatalogoDeploy.tearDown
+    select = test_deploy_catalog.CatalogoDeploy.select
+
+    def test_tsuru_generates_only_its_secrets_and_limits_to_one_service(self):
+        from bb import generator
+        from bb.errors import BbError
+        self.select('tsuru')
+        plan = generator.build_plan(self.root, install_pipeline=True)
+        text = plan.expected['.github/workflows/bb-candidata.yml']
+        self.assertIn('TSURU_TOKEN: ${{ secrets.TSURU_TOKEN }}', text)
+        self.assertNotIn('VPS_HOST', text)
+        p = self.root / 'bigbang.toml'
+        p.write_text(p.read_text().replace('[deploy]', '[deploy]\nservicos = ["app=Dockerfile", "worker=Dockerfile"]'))
+        with self.assertRaises(BbError): generator.build_plan(self.root, install_pipeline=True)
+        self.assertFalse((self.root / '.github/workflows/bb-candidata.yml').exists())
 
 
 if __name__ == '__main__': unittest.main()
