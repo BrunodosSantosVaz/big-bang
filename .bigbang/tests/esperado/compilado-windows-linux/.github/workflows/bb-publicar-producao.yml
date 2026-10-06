@@ -97,4 +97,4 @@ jobs:
           SIMULAR: 'false'
           BB_SHA_TESTADO: ${{ needs.testes-producao.outputs.sha }}
           # perfil deploy: o servidor de produção (variáveis e segredos do ambiente producao)
-
+          # Perfil compilado: sem credenciais de deploy.

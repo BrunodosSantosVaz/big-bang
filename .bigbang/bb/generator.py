@@ -95,7 +95,7 @@ def with_computed(config, root):
                              "**Modo padrão.** Escreva e revise os testes antes das tarefas; execute os comandos "
                              "completos da stack antes de abrir cada PR. Veja `.bigbang/processo/06-execucao.md`."
                          )}
-    context['gerado'].update(env_alvo='', runner_deploy='ubuntu-24.04', preparar_alvo=':')
+    context['gerado'].update(env_alvo='          # Perfil compilado: sem credenciais de deploy.', runner_deploy='ubuntu-24.04', preparar_alvo=':')
     if config['entrega']['perfil'] == 'deploy':
         target, artifact = deploy_catalog.resolve(root, config)
         context['gerado']['preparar_alvo'] = 'bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh'
