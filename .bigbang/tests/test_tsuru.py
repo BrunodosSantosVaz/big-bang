@@ -136,6 +136,45 @@ class Tsuru(unittest.TestCase):
         with self.assertRaises(self.module.DeployError): self.run_op(api)
         self.assertEqual(api.calls, [])
 
+    def test_initialization_preflight_is_explicitly_pending_and_never_creates_job(self):
+        self.env = {'TSURU_APP': 'snake-hom', 'TSURU_MIGRACAO': 'inicializacao'}
+        api = FakeAPI(); api.info = {'name': 'snake-hom', 'units': []}
+        receipt = self.run_op(api)
+        self.assertEqual(receipt, {'source': IMAGE, 'strategy': 'inicializacao', 'migration': 'pending'})
+        self.assertEqual(api.calls, [('GET', '/1.0/apps/snake-hom', None)])
+
+    def test_initialization_publishes_exact_image_and_verifies_event(self):
+        self.env['TSURU_MIGRACAO'] = 'inicializacao'
+        api = FakeAPI(); api.info = {'name': 'snake-hom', 'units': [{'ID': 'current'}]}
+        receipt = self.run_op(api, 'publicar')
+        self.assertEqual(receipt['source'], IMAGE)
+        self.assertEqual(receipt['strategy'], 'inicializacao')
+        self.assertEqual([c for c in api.calls if c[0] == 'deploy'], [('deploy', 'app', 'snake-hom', IMAGE)])
+
+    def test_initialization_refuses_scaled_or_unidentified_application(self):
+        self.env['TSURU_MIGRACAO'] = 'inicializacao'
+        for info in ({'name': 'other', 'units': []}, {'name': 'snake-hom', 'units': {}},
+                     {'name': 'snake-hom'}, {'name': 'snake-hom', 'units': [{}, {}]}):
+            for operation in ('migrar', 'publicar'):
+                with self.subTest(info=info, operation=operation):
+                    api = FakeAPI(); api.info = info
+                    with self.assertRaises(self.module.DeployError): self.run_op(api, operation)
+                    self.assertFalse(any(c[0] == 'deploy' for c in api.calls))
+
+    def test_unknown_migration_strategy_aborts_before_api(self):
+        for strategy in ('', 'skip', 'none', 'initialization'):
+            self.env['TSURU_MIGRACAO'] = strategy
+            for operation in ('migrar', 'publicar'):
+                api = FakeAPI()
+                with self.assertRaises(self.module.DeployError): self.run_op(api, operation)
+                self.assertEqual(api.calls, [])
+
+    def test_initialization_deployment_failure_is_not_confirmed(self):
+        self.env['TSURU_MIGRACAO'] = 'inicializacao'
+        api = FakeAPI(); api.info = {'name': 'snake-hom', 'units': []}
+        with patch.object(api, 'deploy', side_effect=self.module.DeployError('startup failed')):
+            with self.assertRaises(self.module.DeployError): self.run_op(api, 'publicar')
+
 
 class TsuruGeneration(unittest.TestCase):
     setUp = test_deploy_catalog.CatalogoDeploy.setUp
@@ -149,6 +188,7 @@ class TsuruGeneration(unittest.TestCase):
         plan = generator.build_plan(self.root, install_pipeline=True)
         text = plan.expected['.github/workflows/bb-candidata.yml']
         self.assertIn('TSURU_TOKEN: ${{ secrets.TSURU_TOKEN }}', text)
+        self.assertIn('TSURU_MIGRACAO: ${{ vars.TSURU_MIGRACAO }}', text)
         self.assertNotIn('VPS_HOST', text)
         p = self.root / 'bigbang.toml'
         p.write_text(p.read_text().replace('[deploy]', '[deploy]\nservicos = ["app=Dockerfile", "worker=Dockerfile"]'))
