@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.4.0 a partir de .bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v1.5.0 a partir de .bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl. Não edite: personalize em bigbang.toml.
 # Botão "Voltar versão" (spec 14.4): reimplanta em produção a imagem registrada na Release da versão escolhida (o
 # digest de imagem.txt). Nunca desfaz migração (por isso expandir-e-contrair, DAD-02). Só com simular=false e a
 # aprovação do dono no ambiente "producao"; "conferir" deixa no resumo do run o link e os passos para quem aprova.

@@ -19,6 +19,7 @@
 - [O que você precisa](#o-que-você-precisa)
 - [Como começar](#como-começar)
 - [Modo padrão ou Flash](#modo-padrão-ou-flash)
+- [Actions conforme o alvo de deploy](#actions-conforme-o-alvo-de-deploy)
 - [O que vai acontecer](#o-que-vai-acontecer)
 - [Depois da Fundação](#depois-da-fundação)
 - [Como a esteira funciona](#como-a-esteira-funciona)
@@ -34,8 +35,13 @@
 Estável desde a **1.0.0**, validada num sistema real feito do zero até produção só pelo Big Bang: o
 [ScreenFakeCam](https://github.com/BrunodosSantosVaz/screenfakecam), um app Android publicado em três versões e
 testado pelo dono num celular ([relatório do piloto](.bigbang/docs/piloto-screenfakecam.md)). A versão atual está
-nas [Releases](https://github.com/BrunodosSantosVaz/big-bang/releases/latest). O que ainda falta validar fora de
-contêiner, como o deploy num servidor real, está nas [issues abertas](https://github.com/BrunodosSantosVaz/big-bang/issues).
+nas [Releases](https://github.com/BrunodosSantosVaz/big-bang/releases/latest).
+
+O código desta versão é **1.5.0**: inclui modo Flash, catálogo extensível, Actions conforme o alvo e adaptador
+para o Tsuru existente, além de VPS/Docker e entrega compilada. Tsuru entrega um serviço OCI por aplicação,
+com job manual de migração por ambiente. O [runbook](.bigbang/docs/deploy-tsuru.md) separa os testes do adaptador
+da comprovação de uma entrega real no consumidor. AWS, alvo personalizado e formatos de deploy por pacotes ou
+arquivos continuam reservados no [épico #174](https://github.com/BrunodosSantosVaz/big-bang/issues/174).
 
 ## O que é o Big Bang
 
@@ -107,7 +113,7 @@ A Fundação tem seis etapas. Cada uma vira uma issue e um PR, para ficar no his
 
 | Etapa | O que acontece | O que você decide |
 | --- | --- | --- |
-| **F0** · Ligar ao GitHub | A IA confere `git`, Python e `gh`, cria a `develop` e o `bigbang.toml` | Visibilidade (privado por padrão) e, se público, a licença |
+| **F0** · Ligar ao GitHub | A IA confere `git`, Python e `gh`, cria a `develop` e o `bigbang.toml` | Visibilidade (privado por padrão), licença se público e modo padrão ou Flash |
 | **F1** · Entrevista do produto | Até 10 perguntas, uma por vez, viram o `PRODUTO.md` | O que o sistema é, para quem, com quais dados |
 | **F2** · Stack e arquitetura | A IA pesquisa e apresenta de 2 a 3 opções completas, com custo e riscos | A stack, a arquitetura e a hospedagem |
 | **F3** · Design kit | Identidade, tokens, padrões de tela e protótipo navegável (se houver interface) | Aprovar o design e o protótipo |
@@ -147,8 +153,8 @@ Tudo também pode ser feito pelos botões das GitHub Actions (*Run workflow*), s
 - **Dois perfis de entrega:** *compilado* (binários, APK; a produção publica os mesmos bytes homologados) e
   *deploy* (imagem por digest, staging, migração antes da troca, *Voltar versão*).
 - **Catálogo de deploy:** `bb alvos` lista destinos e formatos implementados e reservados, sem acessar servidor.
-  O gerador valida os contratos antes de escrever arquivos. Hoje está disponível `vps-docker` com imagem OCI;
-  Tsuru tem adaptador por imagem e job manual; veja o [runbook](.bigbang/docs/deploy-tsuru.md).
+  O gerador valida os contratos antes de escrever arquivos. `vps-docker` e `tsuru` estão implementados com imagem
+  OCI; Tsuru aceita um serviço por app e exige job manual preparado. Veja o [runbook](.bigbang/docs/deploy-tsuru.md).
   Personalizado e outros formatos continuam no backlog do
   [épico #174](https://github.com/BrunodosSantosVaz/big-bang/issues/174). Veja o
   [contrato de extensão](.bigbang/esteira/perfis/deploy/README.md).
@@ -183,6 +189,10 @@ O Big Bang segue [SemVer](https://semver.org/lang/pt-BR/). Cada versão é uma
 [Release](https://github.com/BrunodosSantosVaz/big-bang/releases) com o pacote `bigbang-vX.Y.Z.tar.gz`, o
 SHA-256 e a atestação de origem. Num sistema, diga "atualizar o Big Bang" (`bb atualizar`): a IA baixa e confere o
 pacote, mostra o [`MIGRACAO.md`](.bigbang/MIGRACAO.md) e abre um PR que troca só o framework.
+
+A 1.5.0 mantém VPS/Docker, runner público e modo padrão para configurações existentes. Adoção de Flash ou Tsuru
+fica numa decisão própria por ADR e `bb gerar`, após a atualização oficial. Consulte o
+[changelog](CHANGELOG.md) e os passos opcionais da migração antes de mudar a entrega do sistema.
 
 ## Documentação do framework
 

@@ -2,7 +2,7 @@
 name: bb-retrospectiva
 description: Use ao fim de cada épico ou sprint para registrar o que funcionou, travou e deve mudar, atualizar a memória do projeto e propor ajustes sustentados por evidências.
 ---
-<!-- Gerado pelo Big Bang v1.4.0 a partir de .bigbang/skills/bb-retrospectiva/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.5.0 a partir de .bigbang/skills/bb-retrospectiva/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Retrospectiva
 

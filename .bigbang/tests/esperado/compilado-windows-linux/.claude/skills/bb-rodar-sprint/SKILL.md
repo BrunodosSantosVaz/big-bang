@@ -2,7 +2,7 @@
 name: bb-rodar-sprint
 description: Use para vamos rodar a sprint ou vamos encerrar a sprint. Confere portões, usa os botões da esteira e coordena testes, tarefas, documentação e retrospectiva.
 ---
-<!-- Gerado pelo Big Bang v1.4.0 a partir de .bigbang/skills/bb-rodar-sprint/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.5.0 a partir de .bigbang/skills/bb-rodar-sprint/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Rodar ou encerrar sprint
 

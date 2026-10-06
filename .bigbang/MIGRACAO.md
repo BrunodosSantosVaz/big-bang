@@ -4,34 +4,47 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
-## Em desenvolvimento — deploy multiplataforma (#174)
-
-Inclui o modo Flash (#183): `projeto.modo` opcional (`padrao` por omissão), escolhido em `bb init --modo flash`
-ou depois por ADR e `bb gerar`. Testes continuam antes do código; `bb testes` executa os afetados após o código
-concluído, ou tudo para estrutura, primeira entrega, major/minor e produção. Sem seletor da stack, roda tudo.
-A candidata reutiliza a CI verde do SHA exato. Nada é necessário para permanecer no padrão.
+## [1.5.0] - 2026-10-06
 
 ### O que muda
 
 - `bb alvos` descobre os contratos de destinos e formatos instalados e distingue implementados de reservados.
 - `deploy.artefato` é opcional, com `imagem` como padrão. O gerador compõe também a camada do formato e recusa
   destinos incompletos ou combinações incompatíveis antes de escrever arquivos.
-- `aws` e `paas` eram reservas sem implementação; agora sua seleção é recusada explicitamente. Tsuru está implementado para um serviço OCI e job manual existentes;
-  personalizado e formatos por hashes continuam reservados. Veja `docs/deploy-tsuru.md` do framework.
+- **Actions conforme o alvo:** staging, produção e rollback recebem só os nomes de variáveis e segredos do
+  contrato escolhido. O formato seleciona os scripts da construção e da candidata. `deploy.runner` e
+  `deploy.preparar_rede` permitem configurar acesso a rede privada; simulações não preparam rede nem autenticam.
+- **Tsuru existente:** adaptador para API v1.32.0, uma aplicação com um serviço OCI por digest e job manual de
+  migração preparado por ambiente. Confere evento de importação, imagem e uma execução nova de migração antes
+  da publicação; rollback reimporta o digest estável sem migrar. Veja o [runbook](docs/deploy-tsuru.md).
+- **Modo Flash:** `projeto.modo` é opcional (`padrao` por omissão), escolhido em `bb init --modo flash` ou depois
+  por ADR e `bb gerar`. Testes continuam escritos antes do código; `bb testes` executa os afetados por
+  dependências após concluir as alterações, ou tudo para estrutura, primeira entrega, major/minor e produção.
+  Sem seletor da stack ou base confiável, roda tudo. Candidata exige a execução verde de `bb-ci.yml` no SHA
+  exato; produção fica vinculada ao SHA dos testes completos e conserva aprovação humana.
+- **Release em repositório privado:** a conferência de ancestralidade usa as referências já obtidas pelo
+  checkout completo, sem novo `git fetch` após a retirada das credenciais.
+- `aws` e `paas` eram reservas sem implementação e agora sua seleção é recusada explicitamente.
+  `personalizado`, `pacote` e `estatico` também continuam reservados; não há entrega universal anunciada.
 
 ### O que o projeto precisa fazer
 
-Projetos `vps-docker` e compilados: nada. Projetos que selecionaram uma reserva: consulte `bb alvos` e escolha uma
-integração implementada, ou aguarde a release que implemente o destino. Não edite `.bigbang/` no projeto.
+Nada.
 
-Esta seção registra trabalho ainda não publicado. A versão final e os passos da release serão fechados na #181.
+### Adoção opcional e compatibilidade
 
-### Actions por alvo
+Projetos `vps-docker` e compilados conservam o comportamento, com modo padrão e runner público por omissão.
+Use `bb atualizar 1.5.0` para obter o pacote verificado e regenerar a camada gerada; não edite `.bigbang/` nem
+workflows gerados no projeto.
 
-Projetos existentes conservam VPS/Docker e runner público por padrão. A atualização oficial regenera
-as referências de ambiente a partir do contrato do alvo. `deploy.runner` e `deploy.preparar_rede` são
-opcionais; o script de rede pertence ao projeto e deve ser aprovado/revisado antes da publicação. Não altere
-arquivos gerados. A preparação não roda na simulação; falha impede a operação do alvo.
+Para adotar Flash, registre a decisão em ADR, escolha `projeto.modo = "flash"` e rode `bb gerar`.
+Configure um seletor de dependências testado em `comandos.testes_alterados`; sem ele, a suíte continua completa.
+Para adotar Tsuru, prepare apps/jobs/credenciais distintos por ambiente e siga o runbook antes de alterar o alvo
+por PR e ADR. Um script de rede pertence ao projeto e precisa de aprovação/revisão antes de publicação.
+
+Projetos que selecionaram uma reserva sem adaptador funcional devem consultar `bb alvos` e escolher uma
+integração implementada, ou aguardar sua implementação. Os testes do framework não substituem a homologação
+real: o consumidor registra URL, SHA, digest, eventos/execução de migração e saúde.
 
 
 ## [1.4.0] - 2026-10-05
