@@ -1,0 +1,116 @@
+"""Tsuru import/deploy verifies the exact source and a fresh successful migration execution (#178)."""
+import importlib.util
+from pathlib import Path
+import unittest
+from unittest.mock import patch
+from _raiz import RAIZ, exemplo_toml, importar_bb
+
+importar_bb()
+from bb import config
+
+FILE = Path(RAIZ) / '.bigbang/esteira/perfis/deploy/alvos/tsuru/scripts/tsuru.py'
+IMAGE = 'ghcr.io/dono/app@sha256:' + 'a' * 64
+
+
+def load_adapter():
+    spec = importlib.util.spec_from_file_location('tsuru_adapter', FILE)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class FakeAPI:
+    def __init__(self, states=()):
+        self.calls = []
+        self.states = list(states)
+        self.info = {'job': {'spec': {'manual': True, 'container': {'command': ['npm', 'run', 'migrate']}}},
+                     'units': [{'ID': 'old', 'Status': 'succeeded'}]}
+        self.triggered = False
+
+    def json(self, path, method='GET', data=None):
+        self.calls.append((method, path, data))
+        if path.endswith('/trigger'):
+            self.triggered = True
+            return {'status': 'success'}
+        if self.triggered:
+            units = self.states.pop(0) if self.states else []
+            return dict(self.info, units=units)
+        return self.info
+
+    def deploy(self, kind, name, image):
+        self.calls.append(('deploy', kind, name, image))
+        return {'source': image, 'internal': 'registry.internal/imported:v1', 'event': 'b' * 24}
+
+
+class Tsuru(unittest.TestCase):
+    def setUp(self):
+        self.module = load_adapter()
+        self.cfg = config.parse(exemplo_toml())
+        self.env = {'TSURU_APP': 'snake-hom', 'TSURU_JOB_MIGRAR': 'snake-hom-migrar'}
+
+    def run_op(self, api, op='migrar', image=IMAGE):
+        return self.module.execute(op, 'staging', image, self.cfg, api, self.env,
+                                   attempts=2, interval=0)
+
+    def test_migration_imports_new_image_and_waits_for_fresh_success(self):
+        api = FakeAPI([[{'ID': 'old', 'Status': 'succeeded'}, {'ID': 'new', 'Status': 'started'}],
+                       [{'ID': 'old', 'Status': 'succeeded'}, {'ID': 'new', 'Status': 'succeeded'}]])
+        receipt = self.run_op(api)
+        self.assertEqual(receipt['execution'], 'new')
+        self.assertEqual(receipt['source'], IMAGE)
+        self.assertIn(('deploy', 'job', 'snake-hom-migrar', IMAGE), api.calls)
+        self.assertFalse(any(c[:2] == ('deploy', 'app') for c in api.calls))
+
+    def test_trigger_ack_or_old_success_is_not_migration_completion(self):
+        for units in ([], [{'ID': 'old', 'Status': 'succeeded'}]):
+            with self.subTest(units=units):
+                with self.assertRaises(self.module.DeployError):
+                    self.run_op(FakeAPI([units, units]))
+
+    def test_failed_or_ambiguous_new_execution_aborts(self):
+        for units in ([{'ID': 'new', 'Status': 'error'}],
+                      [{'ID': 'new', 'Status': 'succeeded'}, {'ID': 'other', 'Status': 'succeeded'}]):
+            with self.subTest(units=units):
+                with self.assertRaises(self.module.DeployError):
+                    self.run_op(FakeAPI([units]))
+
+    def test_nonmanual_or_running_job_is_rejected_before_import(self):
+        for manual, units in ((False, []), (True, [{'ID': 'running', 'Status': 'started'}])):
+            api = FakeAPI(); api.info['job']['spec']['manual'] = manual; api.info['units'] = units
+            with self.assertRaises(self.module.DeployError): self.run_op(api)
+            self.assertFalse(any(c[0] == 'deploy' for c in api.calls))
+
+    def test_first_publication_uses_same_digest_without_migrating_again(self):
+        api = FakeAPI(); api.info = {'units': []}
+        receipt = self.run_op(api, 'publicar')
+        self.assertEqual(receipt['source'], IMAGE)
+        self.assertEqual([c for c in api.calls if c[0] == 'deploy'], [('deploy', 'app', 'snake-hom', IMAGE)])
+
+    def test_mutable_missing_duplicate_or_multiple_images_abort_before_api(self):
+        for image in ('ghcr.io/dono/app:latest', '', 'app=' + IMAGE + ',app=' + IMAGE, 'other=' + IMAGE):
+            api = FakeAPI()
+            with self.assertRaises(self.module.DeployError): self.run_op(api, image=image)
+            self.assertEqual(api.calls, [])
+
+    def test_http_uses_tls_and_rejects_credential_bearing_or_insecure_target(self):
+        for target in ('http://tsuru.invalid', 'https://user:secret@tsuru.invalid', 'https://tsuru.invalid/?token=x'):
+            with self.assertRaises(self.module.DeployError): self.module.API(target, 'dummy-token')
+
+    def test_event_verification_rejects_failed_running_or_another_image(self):
+        api = self.module.API('https://tsuru.invalid', 'dummy-token')
+        valid = {'Running': False, 'Error': '', 'Target': {'Type': 'app', 'Value': 'snake-hom'},
+                 'CustomData': {'Start': {'Image': IMAGE}, 'End': {'image': 'registry.internal/app:v1'}}}
+        self.assertEqual(api.verify_event(valid, 'app', 'snake-hom', IMAGE)['source'], IMAGE)
+        for bad in (dict(valid, Error='database password must not reach logs'), dict(valid, Running=True),
+                    dict(valid, CustomData={'Start': {'Image': 'other'}, 'End': {'image': 'x'}})):
+            with self.assertRaises(self.module.DeployError) as error:
+                api.verify_event(bad, 'app', 'snake-hom', IMAGE)
+            self.assertNotIn('database password', str(error.exception))
+
+    def test_wrong_environment_or_unsafe_names_abort_before_api(self):
+        api = FakeAPI(); self.env['TSURU_APP'] = '../other'
+        with self.assertRaises(self.module.DeployError): self.run_op(api)
+        self.assertEqual(api.calls, [])
+
+
+if __name__ == '__main__': unittest.main()
