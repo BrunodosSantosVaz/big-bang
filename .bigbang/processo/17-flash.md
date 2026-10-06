@@ -25,8 +25,8 @@ Labels e tags de release não são fonte alternativa de configuração: o marcad
 | Mudança estrutural | Suíte completa | Suíte completa |
 | Release major/minor, primeira release | Suíte completa | Suíte completa |
 | Patch | Suíte completa | Afetados, salvo alteração estrutural |
-| Candidata | Repete testes | Espera e reutiliza o `check` verde do mesmo SHA; não aceita outro commit |
-| Produção | Ordem e aprovação humana | Ordem, suíte completa e aprovação humana, inclusive patches |
+| Candidata | Repete testes | Espera e reutiliza a execução verde de `bb-ci.yml` no mesmo SHA; não aceita outro commit |
+| Produção | Ordem e aprovação humana | Ordem, suíte completa e aprovação humana, inclusive patches; publicação vinculada ao SHA testado |
 | Lint, tipos, arquitetura, scanners, documentação | Obrigatórios | Obrigatórios |
 
 ## Seleção de testes

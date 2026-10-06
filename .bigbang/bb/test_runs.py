@@ -31,7 +31,8 @@ def plan(config, paths, *, base_known, phase='tarefa', version=None, previous=No
         reason = 'base de comparação ausente ou desconhecida'
     elif phase == 'candidata' and not version:
         reason = 'versão de entrega não informada'
-    elif any(fnmatch.fnmatchcase(path, pattern) for path in paths for pattern in patterns):
+    elif any(fnmatch.fnmatchcase('/'.join(path.split('/')[start:]), pattern)
+             for path in paths for start in range(len(path.split('/'))) for pattern in patterns):
         reason = 'mudança estrutural'
     elif version:
         current, old = SEMVER.fullmatch(version), SEMVER.fullmatch(previous or '')

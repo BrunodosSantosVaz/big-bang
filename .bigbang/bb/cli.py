@@ -215,8 +215,7 @@ def _revisao_aprovar(args):
         from .paths import read_text
         report = read_text(args.relatorio)
     decisions.approve_review(config["projeto"]["repositorio"], args.pr, _ia(args),
-                             config["seguranca"]["zonas_sensiveis"], config["testes"]["marca_pendente"], report,
-                             mode=config_module.get(config, "projeto.modo"))
+                             config["seguranca"]["zonas_sensiveis"], config["testes"]["marca_pendente"], report)
     print(f"PR #{args.pr}: pr-aprovado (revisão da IA).")
     return EXIT_OK
 

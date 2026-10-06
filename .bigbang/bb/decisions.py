@@ -4,9 +4,11 @@ All AIs use the owner's account, so GitHub cannot tell who put a label. `bb deci
 it first comments the owner's own words, then puts the label. `bb revisao aprovar` only puts `pr-aprovado` when the
 PR does not require the owner's review."""
 import datetime
+import base64
 import json
 
 from . import github, pipeline
+from . import config as config_module
 from .errors import EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 
 DECISIONS = ("refinamento-aprovado", "prototipo-aprovado", "testes-aprovados", "teste-alterado-aprovado",
@@ -75,12 +77,32 @@ def review_blockers(pr_labels, issue_labels, head, changed_paths, diff_text, zon
     return []
 
 
-def approve_review(repository, number, ai_name, zones, marker, report="", mode="padrao"):
+def _target_mode(repository, base):
+    """The PR cannot authorize its own review by changing a local or head config."""
+    try:
+        encoded = github.run("api", f"repos/{repository}/contents/bigbang.toml", "-X", "GET",
+                             "-f", f"ref={base}", "--jq", ".content")
+    except BbError as exc:
+        if "404" in exc.message:
+            return "padrao"  # the framework itself has no project TOML; explicit owner labels still apply
+        raise
+    try:
+        text = base64.b64decode(encoded).decode('utf-8')
+        mode = config_module.parse(text)['projeto'].get('modo', 'padrao')
+    except (ValueError, KeyError, TypeError, UnicodeError) as exc:
+        raise BbError('configuração da branch de destino não pôde ser conferida', EXIT_VERIFICATION_FAILED) from exc
+    if mode not in ('padrao', 'flash'):
+        raise BbError('modo inválido na branch de destino', EXIT_VERIFICATION_FAILED)
+    return mode
+
+
+def approve_review(repository, number, ai_name, zones, marker, report=""):
     data = json.loads(github.run("pr", "view", str(number), "--repo", repository, "--json",
-                                 "headRefName,labels,state"))
+                                 "headRefName,baseRefName,baseRefOid,labels,state"))
     if data["state"] != "OPEN":
         raise BbError(f"o PR #{number} não está aberto", EXIT_USAGE)
     pr_labels = {label["name"] for label in data["labels"]}
+    mode = _target_mode(repository, data.get('baseRefOid') or data['baseRefName'])
     _, issue = pipeline.branch_issue(data["headRefName"])
     issue_labels = _labels(repository, issue) if issue else set()
     diff_text = github.run("pr", "diff", str(number), "--repo", repository)

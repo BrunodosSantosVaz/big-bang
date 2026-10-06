@@ -56,6 +56,12 @@ class Flash(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertTrue(test_runs.plan(self.config, [path], base_known=True)['full'])
 
+    def test_nested_structural_paths_also_require_complete_suite(self):
+        for path in ['apps/api/package.json', 'backend/migrations/0002.sql', 'apps/api/deploy/compose.yaml',
+                     'apps/frontend/package-lock.json', 'packages/web/vite.config.ts']:
+            with self.subTest(path=path):
+                self.assertTrue(test_runs.plan(self.config, [path], base_known=True)['full'])
+
     def test_production_and_minor_major_versions_run_complete_suite(self):
         for args in [{'phase': 'producao'}, {'version': '1.5.0', 'previous': '1.4.2'},
                      {'version': '2.0.0', 'previous': '1.4.2'}, {'version': '0.1.0', 'previous': '0.0.0'}]:

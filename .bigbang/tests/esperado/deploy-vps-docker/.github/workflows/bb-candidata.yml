@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
-      checks: read
+      actions: read
       packages: write
     outputs:
       imagem: ${{ steps.i.outputs.imagem }}
