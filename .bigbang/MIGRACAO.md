@@ -26,6 +26,14 @@ integração implementada, ou aguarde a release que implemente o destino. Não e
 
 Esta seção registra trabalho ainda não publicado. A versão final e os passos da release serão fechados na #181.
 
+### Actions por alvo
+
+Projetos existentes conservam VPS/Docker e runner público por padrão. A atualização oficial regenera
+as referências de ambiente a partir do contrato do alvo. `deploy.runner` e `deploy.preparar_rede` são
+opcionais; o script de rede pertence ao projeto e deve ser aprovado/revisado antes da publicação. Não altere
+arquivos gerados. A preparação não roda na simulação; falha impede a operação do alvo.
+
+
 ## [1.4.0] - 2026-10-05
 
 ### O que muda

@@ -78,7 +78,7 @@ def dependabot_entries(ecosystems):
     return "\n".join(entries)
 
 
-def with_computed(config):
+def with_computed(config, root):
     """Config plus `gerado.*`: values computed in code, so templates stay free of conditional logic."""
     context = dict(config)
     systems = config.get("compilado", {}).get("sistemas", []) if config["entrega"]["perfil"] == "compilado" else []
@@ -95,6 +95,16 @@ def with_computed(config):
                              "**Modo padrão.** Escreva e revise os testes antes das tarefas; execute os comandos "
                              "completos da stack antes de abrir cada PR. Veja `.bigbang/processo/06-execucao.md`."
                          )}
+    context['gerado'].update(env_alvo='          # Perfil compilado: sem credenciais de deploy.', runner_deploy='ubuntu-24.04', preparar_alvo=':')
+    if config['entrega']['perfil'] == 'deploy':
+        target, artifact = deploy_catalog.resolve(root, config)
+        context['gerado']['preparar_alvo'] = 'bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh'
+        context['gerado']['env_alvo'] = '\n'.join(
+            '          ' + name + ': ${{ ' + kind + '.' + name + ' }}'
+            for kind, names in (('vars', target.variables), ('secrets', target.secrets)) for name in names)
+        context['gerado']['runner_deploy'] = config_module.get(config, 'deploy.runner')
+        context['gerado']['artefato_construir'] = artifact.scripts['construir']
+        context['gerado']['artefato_candidata'] = artifact.scripts['candidata']
     return context
 
 
@@ -105,7 +115,7 @@ def build_plan(root, install_pipeline=False):
     installed = config is not None and (install_pipeline or pipeline_installed(root))
     if config is not None and config['entrega']['perfil'] == 'deploy':
         deploy_catalog.resolve(root, config)
-    context = with_computed(config) if config is not None else initial_context(root)
+    context = with_computed(config, root) if config is not None else initial_context(root)
     version = framework_version(root)
     plan = Plan(installed)
 

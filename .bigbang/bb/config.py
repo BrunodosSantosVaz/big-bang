@@ -108,6 +108,8 @@ SCHEMA = {
         "servicos": _string_list(SERVICE_BUILD), "plataformas": _string_list(allowed=DEPLOY_PLATFORMS, unique=True),
         "caminho_saude": _string(HEALTH_PATH), "servico_migrar": _string(SERVICE),
         "servico_checar": _string(SERVICE, required=False),
+        "runner": _string_list(re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*\Z"), unique=True),
+        "preparar_rede": _string(required=False),
     },
     "comandos": {key: _string(required=False) for key in COMMAND_KEYS},
     "testes": {"cobertura_minima": _integer(0, 100), "marca_pendente": _string(), "padrao_teste": _regex,
@@ -134,6 +136,8 @@ OPTIONAL_KEYS = {
     "testes": {"caminhos_estruturais": []},
     "deploy": {
         "artefato": "imagem",                # installed format; capabilities checked before generation
+        "runner": ["ubuntu-24.04"],
+        "preparar_rede": "",
         "servicos": ["app=Dockerfile"],      # service=Dockerfile, one image per service (built from the root)
         "plataformas": ["linux/amd64"],      # docker buildx --platform
         "caminho_saude": "/api/health",      # health check path (OBS-04)

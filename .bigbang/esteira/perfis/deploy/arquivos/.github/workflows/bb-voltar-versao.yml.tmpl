@@ -49,7 +49,7 @@ jobs:
   voltar:
     needs: conferir
     if: ${{ !inputs.simular }}
-    runs-on: ubuntu-24.04
+    runs-on: {{gerado.runner_deploy}}
     environment: producao
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -60,18 +60,10 @@ jobs:
           python-version: '3.12'
       - name: Voltar produção pelo alvo {{entrega.alvo}}
         run: |
+          bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
           bash .bigbang/esteira/perfis/deploy/alvos/{{entrega.alvo}}/scripts/alvo.sh voltar producao "$VERSAO"
           bash .bigbang/esteira/perfis/deploy/alvos/{{entrega.alvo}}/scripts/alvo.sh saude producao
         env:
           GH_TOKEN: ${{ github.token }}
           VERSAO: ${{ inputs.versao }}
-          VPS_HOST: ${{ vars.VPS_HOST }}
-          VPS_PORTA: ${{ vars.VPS_PORTA }}
-          VPS_USUARIO: ${{ vars.VPS_USUARIO }}
-          VPS_PASTA: ${{ vars.VPS_PASTA }}
-          VPS_DOCKER_SUDO: ${{ vars.VPS_DOCKER_SUDO }}
-          VPS_ENV_ARQUIVO: ${{ vars.VPS_ENV_ARQUIVO }}
-          VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
-          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
-          REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}
-          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+{{gerado.env_alvo}}
