@@ -175,6 +175,17 @@ class Tsuru(unittest.TestCase):
         with patch.object(api, 'deploy', side_effect=self.module.DeployError('startup failed')):
             with self.assertRaises(self.module.DeployError): self.run_op(api, 'publicar')
 
+    def test_initialization_refuses_partial_app_info_even_when_http_succeeds(self):
+        self.env['TSURU_MIGRACAO'] = 'inicializacao'
+        for partial_error in ('unable to list app units', {'reason': 'unknown'}, True):
+            for operation in ('migrar', 'publicar'):
+                api = FakeAPI(); api.info = {'name': 'snake-hom', 'units': [], 'error': partial_error}
+                with self.subTest(error=partial_error, operation=operation):
+                    with self.assertRaises(self.module.DeployError) as error:
+                        self.run_op(api, operation)
+                    self.assertNotIn('unable to list app units', str(error.exception))
+                    self.assertFalse(any(c[0] == 'deploy' for c in api.calls))
+
 
 class TsuruGeneration(unittest.TestCase):
     setUp = test_deploy_catalog.CatalogoDeploy.setUp
