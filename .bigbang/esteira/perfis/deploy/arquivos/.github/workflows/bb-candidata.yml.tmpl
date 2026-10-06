@@ -64,13 +64,13 @@ jobs:
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
       - name: Imagens (uma vez, por digest) e Trivy
         id: i
-        run: bash .bigbang/esteira/perfis/deploy/scripts/candidata-imagem.sh
+        run: bash .bigbang/{{gerado.artefato_construir}}
         env:
           TAG: ${{ needs.preparar.outputs.tag }}
 
   staging:
     needs: [preparar, imagem]
-    runs-on: ubuntu-24.04
+    runs-on: {{gerado.runner_deploy}}
     environment: staging
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -80,19 +80,12 @@ jobs:
         with:
           python-version: '3.12'
       - name: Staging pelo alvo {{entrega.alvo}} (migração, publicação, saúde, smoke, ZAP)
-        run: bash .bigbang/esteira/perfis/deploy/scripts/staging.sh
+        run: |
+          bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
+          bash .bigbang/esteira/perfis/deploy/scripts/staging.sh
         env:
           IMAGEM: ${{ needs.imagem.outputs.imagem }}
-          VPS_HOST: ${{ vars.VPS_HOST }}
-          VPS_PORTA: ${{ vars.VPS_PORTA }}
-          VPS_USUARIO: ${{ vars.VPS_USUARIO }}
-          VPS_PASTA: ${{ vars.VPS_PASTA }}
-          VPS_DOCKER_SUDO: ${{ vars.VPS_DOCKER_SUDO }}
-          VPS_ENV_ARQUIVO: ${{ vars.VPS_ENV_ARQUIVO }}
-          VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
-          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
-          REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}
-          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+{{gerado.env_alvo}}
 
   publicar:
     needs: [preparar, imagem, staging]
@@ -124,7 +117,7 @@ jobs:
         with:
           subject-checksums: candidata/imagens.sha256
       - name: Pre-release com os digests
-        run: bash .bigbang/esteira/perfis/deploy/scripts/candidata-publicar.sh
+        run: bash .bigbang/{{gerado.artefato_candidata}}
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.preparar.outputs.tag }}

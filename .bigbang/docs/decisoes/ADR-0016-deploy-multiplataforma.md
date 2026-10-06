@@ -60,3 +60,13 @@ características do Tsuru real não são inferidos da palavra “Amazon” nem d
 - [Épico #174 e decisão do dono](https://github.com/BrunodosSantosVaz/big-bang/issues/174)
 - [Contrato de deploy](../../esteira/perfis/deploy/README.md)
 - [ADR-0013](ADR-0013-perfil-deploy.md), especificação §5.1/14.4; ARQ-07/09/11, DAD-02/03, SEG-15/18, OBS-04
+
+## Composição de Actions (#176)
+
+O gerador usa variáveis/segredos declarados no alvo, sem nomes de VPS no núcleo. Nomes reservados ao processo e à
+esteira são recusados para impedir sobreposição de credenciais e identidade de artefato. O contrato de artefato
+seleciona os scripts de construção e candidata. `deploy.runner` decide o acesso de rede dos jobs de publicação;
+`deploy.preparar_rede` executa um script aprovado do projeto. Uma preparação falha antes de acionar o alvo.
+A simulação não prepara rede nem autentica. Builds/testes permanecem no runner público e os portões humanos de
+produção/rollback continuam no GitHub. Segredos só nos ambientes; ferramentas específicas podem usar o script
+opcional `scripts/preparar.sh` do adaptador instalado.

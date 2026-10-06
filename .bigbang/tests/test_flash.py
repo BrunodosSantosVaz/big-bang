@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from _raiz import exemplo_toml, importar_bb
+from _raiz import RAIZ, exemplo_toml, importar_bb
 
 importar_bb()
 from bb import config, decisions, generator, init, test_runs
@@ -35,7 +35,7 @@ class Flash(unittest.TestCase):
         self.assertIn('flash', '\n'.join(init.plan_steps(options, False)))
 
     def test_generated_policy_keeps_test_first(self):
-        policy = generator.with_computed(self.config)['gerado']['modo_trabalho']
+        policy = generator.with_computed(self.config, RAIZ)['gerado']['modo_trabalho']
         self.assertIn('Flash', policy)
         self.assertIn('antes', policy)
         self.assertIn('produção', policy)

@@ -89,19 +89,12 @@ jobs:
         with:
           python-version: '3.12'
       - name: Publicar (compilado)
-        run: bash .bigbang/esteira/nucleo/scripts/publicar-producao.sh
+        run: |
+          :
+          bash .bigbang/esteira/nucleo/scripts/publicar-producao.sh
         env:
           GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
           SIMULAR: 'false'
           BB_SHA_TESTADO: ${{ needs.testes-producao.outputs.sha }}
           # perfil deploy: o servidor de produção (variáveis e segredos do ambiente producao)
-          VPS_HOST: ${{ vars.VPS_HOST }}
-          VPS_PORTA: ${{ vars.VPS_PORTA }}
-          VPS_USUARIO: ${{ vars.VPS_USUARIO }}
-          VPS_PASTA: ${{ vars.VPS_PASTA }}
-          VPS_DOCKER_SUDO: ${{ vars.VPS_DOCKER_SUDO }}
-          VPS_ENV_ARQUIVO: ${{ vars.VPS_ENV_ARQUIVO }}
-          VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
-          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
-          REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}
-          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+

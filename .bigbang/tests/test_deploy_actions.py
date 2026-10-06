@@ -1,14 +1,16 @@
 """Workflows expose only the selected target's credentials and runner (#176)."""
+import os
+import subprocess
 import unittest
-from test_deploy_catalog import CatalogoDeploy
+import test_deploy_catalog
 from bb import config, generator
 
 
 class DeployActions(unittest.TestCase):
-    setUp = CatalogoDeploy.setUp
-    tearDown = CatalogoDeploy.tearDown
-    target = CatalogoDeploy.target
-    select = CatalogoDeploy.select
+    setUp = test_deploy_catalog.CatalogoDeploy.setUp
+    tearDown = test_deploy_catalog.CatalogoDeploy.tearDown
+    target = test_deploy_catalog.CatalogoDeploy.target
+    select = test_deploy_catalog.CatalogoDeploy.select
 
     def workflows(self):
         plan = generator.build_plan(self.root, install_pipeline=True)
@@ -48,6 +50,32 @@ class DeployActions(unittest.TestCase):
             self.assertIn('scripts/preparar-alvo.sh', text)
             if name != 'bb-candidata.yml':
                 self.assertIn('!inputs.simular', text)
+
+    def test_network_preparation_executes_once_and_failure_stops_target_setup(self):
+        p = self.root / 'bigbang.toml'
+        log = self.root / 'network.log'
+        text = p.read_text()
+        p.write_text(text.replace('[deploy]', '[deploy]\npreparar_rede = "echo network >> network.log"'))
+        setup = self.targets / 'vps-docker/scripts/preparar.sh'
+        setup.write_text('echo target >> network.log\n')
+        result = subprocess.run(['bash', '.bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh'],
+                                cwd=self.root, env=dict(os.environ, BB='python3.11 .bigbang/bin/bb.py'),
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(log.read_text(), 'network\ntarget\n')
+        p.write_text(text.replace('[deploy]', '[deploy]\npreparar_rede = "exit 7"'))
+        result = subprocess.run(['bash', '.bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh'],
+                                cwd=self.root, env=dict(os.environ, BB='python3.11 .bigbang/bin/bb.py'))
+        self.assertEqual(result.returncode, 7)
+        self.assertEqual(log.read_text(), 'network\ntarget\n')
+
+    def test_target_cannot_override_runtime_credentials_or_process_controls(self):
+        for name in ('GH_TOKEN', 'IMAGEM', 'GITHUB_OUTPUT', 'PATH', 'BB', 'PYTHONPATH'):
+            with self.subTest(name=name):
+                self.target(text=test_deploy_catalog.TARGET.replace('TESTE_APP', name))
+                self.select('novo-provedor')
+                with self.assertRaises(Exception):
+                    self.workflows()
 
     def test_artifact_build_and_candidate_scripts_come_from_contract(self):
         p = self.artifacts / 'imagem/artefato.toml'

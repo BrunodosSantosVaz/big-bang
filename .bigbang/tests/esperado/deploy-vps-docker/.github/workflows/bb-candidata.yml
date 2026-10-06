@@ -71,7 +71,7 @@ jobs:
 
   staging:
     needs: [preparar, imagem]
-    runs-on: ubuntu-24.04
+    runs-on: ["ubuntu-24.04"]
     environment: staging
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -81,7 +81,9 @@ jobs:
         with:
           python-version: '3.12'
       - name: Staging pelo alvo vps-docker (migração, publicação, saúde, smoke, ZAP)
-        run: bash .bigbang/esteira/perfis/deploy/scripts/staging.sh
+        run: |
+          bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
+          bash .bigbang/esteira/perfis/deploy/scripts/staging.sh
         env:
           IMAGEM: ${{ needs.imagem.outputs.imagem }}
           VPS_HOST: ${{ vars.VPS_HOST }}
@@ -91,8 +93,8 @@ jobs:
           VPS_DOCKER_SUDO: ${{ vars.VPS_DOCKER_SUDO }}
           VPS_ENV_ARQUIVO: ${{ vars.VPS_ENV_ARQUIVO }}
           VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
-          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
           REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}
+          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
           REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
 
   publicar:

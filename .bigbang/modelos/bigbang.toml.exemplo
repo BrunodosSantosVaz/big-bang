@@ -31,6 +31,8 @@ build_linux-x64 = "bash packaging/linux/build.sh"
 
 [deploy]                               # só no perfil deploy
 # artefato = "imagem"                  # padrão; formatos disponíveis em `bb alvos`
+# runner = ["self-hosted", "rede-deploy"]  # só publicação; build/testes continuam no runner público
+# preparar_rede = "bash deploy/rede.sh"    # script aprovado; segredo apenas por ambiente, nunca literal
 imagem = "ghcr.io/brunodossantosvaz/meu-sistema"
 url_staging = "https://staging.exemplo.com"
 url_producao = "https://exemplo.com"

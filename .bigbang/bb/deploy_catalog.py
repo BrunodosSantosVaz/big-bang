@@ -104,6 +104,11 @@ def read_target(root, name):
         _fail(f"{name}: operacoes exige publicar, migrar, saude e voltar (checar é opcional)")
     variables = _names(data, 'variaveis', ENV_NAME, non_empty=False)
     secrets = _names(data, 'segredos', ENV_NAME, non_empty=False)
+    reserved = {'GH_TOKEN', 'IMAGEM', 'VERSAO', 'SIMULAR', 'RC_TAG', 'TAG', 'TARGET_SHA',
+                'BB', 'PATH', 'HOME', 'PYTHONPATH', 'PYTHONHOME', 'NODE_OPTIONS', 'BASH_ENV', 'ENV'}
+    if any(name in reserved or name.startswith(('BB_', 'GITHUB_', 'RUNNER_', 'INPUT_', 'LD_'))
+           for name in variables + secrets):
+        _fail(f"{name}: nome de ambiente reservado ao processo/esteira")
     if set(variables) & set(secrets):
         _fail(f"{name}: variaveis e segredos não podem repetir o mesmo nome")
     if data['situacao'] == 'implementado':

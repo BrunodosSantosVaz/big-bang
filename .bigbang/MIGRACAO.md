@@ -419,3 +419,10 @@ Nada.
 ### O que o projeto precisa fazer
 
 Nada.
+
+## Actions por alvo — próxima versão
+
+Projetos existentes conservam VPS/Docker e runner público por padrão. Depois de atualizar, rode `bb gerar` para
+regenerar as referências de ambiente a partir do contrato do alvo. `deploy.runner` e `deploy.preparar_rede` são
+opcionais; o script de rede pertence ao projeto e deve ser aprovado/revisado antes da publicação. Não altere
+arquivos gerados. A preparação não roda na simulação; falha impede a operação do alvo.

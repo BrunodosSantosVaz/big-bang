@@ -209,3 +209,11 @@ O **framework** Big Bang (tudo que está em `.bigbang/` e os arquivos gerados a 
 O **sistema que você criar** a partir do Big Bang é seu: o código pertence a você, que escolhe a licença dele,
 inclusive fechada. A única obrigação é manter o aviso de copyright do framework, que na Fundação vai para
 `.bigbang/LICENSE`.
+
+### Actions conforme o alvo de deploy
+
+`bb gerar` injeta somente os nomes de variáveis e segredos do contrato escolhido em staging, produção e rollback.
+O contrato de artefato define os scripts da construção e da candidata. A construção permanece no runner público;
+`[deploy] runner = ["self-hosted", "rede-deploy"]` seleciona o runner das publicações (inclusive rede privada).
+`preparar_rede = "bash deploy/rede.sh"` executa a preparação aprovada antes do alvo, somente no deploy real.
+Valores de segredo ficam nos ambientes do GitHub; nunca no TOML. Produção e rollback mantêm aprovação humana.

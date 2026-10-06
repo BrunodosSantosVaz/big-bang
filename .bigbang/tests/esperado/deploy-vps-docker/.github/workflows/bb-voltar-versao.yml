@@ -50,7 +50,7 @@ jobs:
   voltar:
     needs: conferir
     if: ${{ !inputs.simular }}
-    runs-on: ubuntu-24.04
+    runs-on: ["ubuntu-24.04"]
     environment: producao
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -61,6 +61,7 @@ jobs:
           python-version: '3.12'
       - name: Voltar produção pelo alvo vps-docker
         run: |
+          bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
           bash .bigbang/esteira/perfis/deploy/alvos/vps-docker/scripts/alvo.sh voltar producao "$VERSAO"
           bash .bigbang/esteira/perfis/deploy/alvos/vps-docker/scripts/alvo.sh saude producao
         env:
@@ -73,6 +74,6 @@ jobs:
           VPS_DOCKER_SUDO: ${{ vars.VPS_DOCKER_SUDO }}
           VPS_ENV_ARQUIVO: ${{ vars.VPS_ENV_ARQUIVO }}
           VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
-          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
           REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}
+          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
           REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
