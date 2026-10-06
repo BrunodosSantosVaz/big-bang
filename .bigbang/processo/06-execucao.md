@@ -1,5 +1,7 @@
 # 06 · Execução de um épico
 
+No [modo Flash](17-flash.md), a ordem teste → tarefas permanece. Escreva os testes antes, conclua o código e execute uma rodada dos testes afetados (`bb testes --base <base>`). Não repita a suíte completa por hábito; a CI do mesmo commit serve como evidência. Mudanças estruturais, major/minor e produção exigem tudo.
+
 Ordem fixa: **teste do épico → tarefas → documentação**. Painel: **Execução**.
 
 ## 1. Teste do épico (issue `teste-aceite`)

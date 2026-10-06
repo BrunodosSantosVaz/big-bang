@@ -1,5 +1,7 @@
 # 14 · Automações
 
+O [modo Flash](17-flash.md) muda a execução dos testes no job `check`: após o build, usa `bb testes` com a base do PR/push; mudanças estruturais e releases major/minor forçam suíte completa. A candidata espera o `check` verde do SHA exato, e produção executa suíte completa antes da aprovação do ambiente.
+
 ## Coordenação de IAs
 
 **Marcar posses paradas** (`bb-posses.yml`) roda a cada hora e marca `parada` quando não houve push registrado por

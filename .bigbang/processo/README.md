@@ -20,3 +20,4 @@ Um arquivo por assunto, cada um com "quem faz o quê" e "o que a automação faz
 | [14-automacoes.md](14-automacoes.md) | Workflows, botões, segredos e limites do GitHub |
 | [15-atualizacao-do-framework.md](15-atualizacao-do-framework.md) | Camadas e `bb atualizar` |
 | [16-conversas.md](16-conversas.md) | As frases do dono e o que acontece |
+| [17-flash.md](17-flash.md) | Modo Flash: teste antes, execução seletiva depois e autorizações reutilizadas |

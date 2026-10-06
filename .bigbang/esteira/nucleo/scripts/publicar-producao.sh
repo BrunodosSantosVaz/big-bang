@@ -70,6 +70,9 @@ fi
 IFS=$'\t' read -r pr mergeable head_sha <<<"$(gh pr list --repo "$R" --head "$branch" --base main --state open \
   --json number,mergeable,headRefOid --jq '.[0] | "\(.number // "")\t\(.mergeable // "")\t\(.headRefOid // "")"')"
 if [ -z "$pr" ]; then falha "não há PR aberto de $branch para a main (a candidata o abre)"; else
+  if [ -n "${BB_SHA_TESTADO:-}" ] && [ "$head_sha" != "$BB_SHA_TESTADO" ]; then
+    falha "a candidata mudou após os testes completos: $head_sha não é o SHA testado $BB_SHA_TESTADO; inicie outro run"
+  fi
   [ "$mergeable" != CONFLICTING ] || falha "o PR #$pr tem conflito com a main"
   runs=$(gh api "repos/$R/commits/$head_sha/check-runs?per_page=100" --jq '.check_runs[] | "\(.name)\t\(.status)\t\(.conclusion)"')
   for check in "${CHECKS[@]}"; do

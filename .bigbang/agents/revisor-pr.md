@@ -20,6 +20,8 @@ de `Refs #`, o épico, `AGENTS.md`, os padrões em `.bigbang/padroes/` e o `STAC
 3. **Testes.** Os testes de aceite da tarefa passam; só as marcas desta tarefa foram retiradas; nenhum teste
    enfraquecido (asserção removida, teste pulado, tempo limite aumentado sem motivo — TST-11); há testes de unidade e
    de integração da mudança. Rode os comandos de `[comandos]` do `bigbang.toml` quando puder.
+   No Flash, use evidências da CI do SHA exato e confira o plano de `bb testes`; não repita a suíte toda por
+   hábito. Rode casos afetados adicionais para investigar achados ou suprir evidência ausente.
 4. **Padrões.** Aplique ARQ, COD, TST, API, DAD, FE e OBS, citando o número de cada regra violada.
 5. **Segurança.** As cinco SEG-IA, a lista do nível ASVS do projeto (`seguranca.nivel_asvs`), segredos, entradas
    validadas por esquema, autorização no backend, consultas filtradas pelo dono.

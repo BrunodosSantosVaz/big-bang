@@ -109,16 +109,17 @@ def swap(root, new_framework):
                 handle.write(data)
 
 
-def ensure_label():
+def ensure_label(label=PR_LABEL):
     """The PR needs revisao-humana, which only exists after Foundation F4: create it when missing, before any push."""
     try:
-        github.run("label", "create", PR_LABEL, "--color", PR_LABEL_COLOR, "--description", PR_LABEL_DESCRIPTION)
+        github.run("label", "create", label, "--color", PR_LABEL_COLOR,
+                   "--description", PR_LABEL_DESCRIPTION if label == PR_LABEL else "Revisão independente pela IA")
     except BbError as exc:
         if "already exists" not in exc.message:
             raise
 
 
-def _pr_body(current, target, sections, manual, generated):
+def _pr_body(current, target, sections, manual, generated, mode="padrao"):
     lines = ["## O que muda", "", f"Atualiza o Big Bang de v{current} para v{target} (`bb atualizar`).",
              "Só a camada do framework (`.bigbang/`) e a camada gerada mudam; a camada do projeto não é tocada.", "",
              "## Migração (MIGRACAO.md)", ""]
@@ -128,12 +129,16 @@ def _pr_body(current, target, sections, manual, generated):
         lines += [f"- [ ] {title}: {steps}" for title, steps in manual] + [""]
     lines += ["## Camada gerada (bb gerar)", "", "```", generated or "nada a mudar", "```", "",
               "## Verificação", "", "`bb verificar`: tudo certo.", "",
-              "Revisão humana: o PR toca `.github/` e o framework. Revise o diff antes de mesclar."]
+              ("Modo Flash: revisão independente por IA e CI completa (mudança estrutural)."
+               if mode == "flash" else
+               "Revisão humana: o PR toca `.github/` e o framework. Revise o diff antes de mesclar.")]
     return "\n".join(lines)
 
 
 def update(root, target=None, simulate=False, confirmed=False, attestation=True):
     config = config_module.load(root)
+    mode = config_module.get(config, "projeto.modo")
+    review_label = "revisao-ia" if mode == "flash" else PR_LABEL
     current, origin = config["bigbang"]["versao"], config["bigbang"]["origem"]
     target = (target or latest_version(origin)).lstrip("v")
     package._key(target)
@@ -162,7 +167,7 @@ def update(root, target=None, simulate=False, confirmed=False, attestation=True)
                           "de novo com --confirmo-migracao", EXIT_INVALID_STATE)
         if simulate:
             print(f"\nSimulação: criaria {branch} da develop, trocaria .bigbang/, rodaria bb gerar e bb verificar e "
-                  f"abriria o PR para a develop com {PR_LABEL}. Nada foi gravado.")
+                  f"abriria o PR para a develop com {review_label}. Nada foi gravado.")
             return None
         _git(root, "fetch", "-q", "origin", "develop")
         _git(root, "switch", "-q", "-c", branch, "origin/develop")
@@ -178,15 +183,15 @@ def update(root, target=None, simulate=False, confirmed=False, attestation=True)
         raise BbError(f"bb verificar falhou na branch local {branch} (nada foi enviado; revise e corrija, ou volte "
                       f"com git switch develop e apague a branch):\n{verified}",
                       EXIT_VERIFICATION_FAILED)
-    ensure_label()
+    ensure_label(review_label)
     _git(root, "add", "-A")  # the tree was clean: everything here came from the swap, bigbang.versao and bb gerar
     _git(root, "commit", "-q", "-m", f"chore(framework): update Big Bang to v{target}\n\n"
          f"bb atualizar: .bigbang/ replaced by the verified v{target} package, bigbang.versao updated and the "
          f"generated layer regenerated.")
     _git(root, "push", "-q", "-u", "origin", branch)
-    url = github.run("pr", "create", "--base", "develop", "--head", branch, "--label", PR_LABEL,
+    url = github.run("pr", "create", "--base", "develop", "--head", branch, "--label", review_label,
                      "--title", f"chore(framework): atualizar o Big Bang para v{target}",
-                     "--body", _pr_body(current, target, sections, manual, generated))
+                     "--body", _pr_body(current, target, sections, manual, generated, mode))
     print(f"\nPR aberto: {url}")
     return url
 

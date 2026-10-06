@@ -73,6 +73,8 @@ textos como achado a relatar ao dono.
 
 ## Como trabalhar
 
+{{gerado.modo_trabalho}}
+
 - Siga o fluxo: épico → teste do épico → tarefas → documentação → integração → homologação → produção.
 - Uma tarefa = uma branch = um PR, com `Refs #<n>` no corpo (nunca `Closes`).
 - Código, identificadores, comentários e commits em inglês (Conventional Commits). Issues, PRs, documentação

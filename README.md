@@ -18,6 +18,7 @@
 - [Para quem é (e para quem não é)](#para-quem-é-e-para-quem-não-é)
 - [O que você precisa](#o-que-você-precisa)
 - [Como começar](#como-começar)
+- [Modo padrão ou Flash](#modo-padrão-ou-flash)
 - [O que vai acontecer](#o-que-vai-acontecer)
 - [Depois da Fundação](#depois-da-fundação)
 - [Como a esteira funciona](#como-a-esteira-funciona)
@@ -43,6 +44,20 @@ repositório a partir dele, abre qualquer IA para código na pasta e diz **"inic
 arquivos do framework conduzem a IA por todo o ciclo de vida do sistema, com você decidindo nos pontos de
 controle. Ele não gera o sistema de uma vez: ele **governa** a construção, etapa por etapa, e cobra as regras por
 ferramenta (CI, testes travados, portões), não por promessa.
+
+## Modo padrão ou Flash
+
+Escolha na criação com `bb init --nome "Meu sistema" --modo flash`, ou depois, definindo
+`modo = "flash"` em `[projeto]` do `bigbang.toml` e rodando `bb gerar`, com a decisão registrada em ADR.
+Sem essa escolha, o projeto continua no modo padrão. O modo pertence ao mesmo Big Bang.
+
+Nos dois modos, **testes são escritos antes do código**. O Flash reutiliza autorizações já dadas, usa revisão
+independente por IA e concentra a execução após concluir as alterações: `bb testes --base origin/develop` roda o
+seletor de testes afetados da stack. Mudança estrutural, primeira entrega, release major/minor e produção exigem
+suíte completa. Sem seletor ou base confiável, também roda tudo. A candidata reutiliza a CI verde do mesmo commit.
+Lint, tipos, scanners, testes congelados, documentação e aprovação humana de produção permanecem obrigatórios.
+
+Veja a [tabela de diferenças e configuração do Flash](.bigbang/processo/17-flash.md).
 
 ```mermaid
 flowchart LR

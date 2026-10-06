@@ -125,6 +125,11 @@ class PublicarEmProducao(BaseCompilado):
         self.assertIn("retomada", r.stdout)
         self.assertEqual(self.estado["releases"].count("v0.2.0"), 1)
 
+    def test_production_refuses_candidate_changed_after_complete_tests(self):
+        result = self.publicar(SIMULAR='true', BB_SHA_TESTADO='outro-sha')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('mudou após os testes completos', result.stdout)
+
 
 
 class TarefaDeCorrecao(ComBb):
