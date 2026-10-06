@@ -77,11 +77,18 @@ class Esquema(unittest.TestCase):
 
     def test_alvo_conforme_o_perfil(self):
         cfg = exemplo()
-        cfg["entrega"]["alvo"] = "heroku"
+        cfg["entrega"]["alvo"] = "../heroku"
         self.assertTrue(any(e.startswith("entrega.alvo") for e in config.validate(cfg)))
         cfg = compilado()
         cfg["entrega"]["alvo"] = "aws"
         self.assertIn('entrega.alvo: no perfil compilado deve ser ""', config.validate(cfg))
+
+    def test_esquema_de_alvos_e_extensivel_capacidades_sao_do_gerador(self):
+        cfg = exemplo()
+        cfg['entrega']['alvo'] = 'novo-provedor'
+        self.assertEqual(config.validate(cfg), [])
+        cfg['entrega']['alvo'] = ''
+        self.assertTrue(any(e.startswith('entrega.alvo') for e in config.validate(cfg)))
 
     def test_publico_exige_licenca(self):
         cfg = exemplo()

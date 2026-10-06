@@ -1,0 +1,6 @@
+descricao = "Tsuru; implementação na tarefa #178 do framework"
+situacao = "reservado"
+artefatos = ["imagem"]
+operacoes = ["publicar", "migrar", "saude", "voltar"]
+variaveis = []
+segredos = []

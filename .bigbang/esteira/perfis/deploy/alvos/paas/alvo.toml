@@ -1,0 +1,6 @@
+descricao = "Reserva PaaS; a plataforma concreta exige adaptador"
+situacao = "reservado"
+artefatos = ["imagem"]
+operacoes = ["publicar", "migrar", "saude", "voltar"]
+variaveis = []
+segredos = []

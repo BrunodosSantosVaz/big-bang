@@ -1,0 +1,6 @@
+descricao = "Servidor por SSH com Docker Compose"
+situacao = "implementado"
+artefatos = ["imagem"]
+operacoes = ["publicar", "migrar", "saude", "voltar", "checar"]
+variaveis = ["VPS_HOST", "VPS_PORTA", "VPS_USUARIO", "VPS_PASTA", "VPS_DOCKER_SUDO", "VPS_ENV_ARQUIVO", "VPS_KNOWN_HOSTS", "REGISTRY_USUARIO"]
+segredos = ["VPS_CHAVE_SSH", "REGISTRY_TOKEN"]

@@ -1,0 +1,4 @@
+descricao = "Arquivos estáticos por manifesto e SHA-256; implementação na tarefa #179 do framework"
+situacao = "reservado"
+identidade = "sha256"
+scripts = {}

@@ -14,7 +14,7 @@ import re
 import tomllib
 
 from . import config as config_module
-from . import pipeline
+from . import deploy_catalog, pipeline
 from .errors import EXIT_INVALID_STATE, BbError
 from .paths import framework_dir, framework_version, read_text, to_posix, write_text
 from .render import TEMPLATE_SUFFIX, add_notice, has_notice, notice_text, substitute
@@ -92,6 +92,8 @@ def build_plan(root, install_pipeline=False):
     if install_pipeline and config is None:
         raise BbError("a esteira só pode ser gerada depois do bb init (falta o bigbang.toml)", EXIT_INVALID_STATE)
     installed = config is not None and (install_pipeline or pipeline_installed(root))
+    if config is not None and config['entrega']['perfil'] == 'deploy':
+        deploy_catalog.resolve(root, config)
     context = with_computed(config) if config is not None else initial_context(root)
     version = framework_version(root)
     plan = Plan(installed)
@@ -115,6 +117,8 @@ def _layers(config, installed):
         perfil = config["entrega"]["perfil"]
         layers += ["esteira/nucleo", f"esteira/perfis/{perfil}"]
         if perfil == "deploy":
+            artifact = config['deploy'].get('artefato', 'imagem')
+            layers.append(f"esteira/perfis/deploy/artefatos/{artifact}")
             layers.append(f"esteira/perfis/deploy/alvos/{config['entrega']['alvo']}")
     return layers
 

@@ -20,3 +20,4 @@ sistema ficam em `docs/decisoes/` do sistema, não aqui.
 | [0013](ADR-0013-perfil-deploy.md) | Perfil deploy e alvo vps-docker | aceita |
 | [0014](ADR-0014-pacote-e-atualizacao.md) | Pacote do framework e `bb atualizar` | aceita |
 | [0015](ADR-0015-release-por-sprint.md) | Release por sprint ou por épico | aceita |
+| [0016](ADR-0016-deploy-multiplataforma.md) | Deploy multiplataforma por contratos instalados | aceita (refinamento #174) |

@@ -131,6 +131,11 @@ Tudo também pode ser feito pelos botões das GitHub Actions (*Run workflow*), s
   programa não pode mudá-los, só retirar a marca de pendente da própria tarefa.
 - **Dois perfis de entrega:** *compilado* (binários, APK; a produção publica os mesmos bytes homologados) e
   *deploy* (imagem por digest, staging, migração antes da troca, *Voltar versão*).
+- **Catálogo de deploy:** `bb alvos` lista destinos e formatos implementados e reservados, sem acessar servidor.
+  O gerador valida os contratos antes de escrever arquivos. Hoje está disponível `vps-docker` com imagem OCI;
+  Tsuru, personalizado e outros formatos estão em implementação no
+  [épico #174](https://github.com/BrunodosSantosVaz/big-bang/issues/174). Veja o
+  [contrato de extensão](.bigbang/esteira/perfis/deploy/README.md).
 - **Várias IAs ao mesmo tempo:** cada uma assume a tarefa (`bb assumir`) e trabalha na própria pasta.
 - **Repositório completo:** todo sistema nasce com README, licença, código de conduta, guia de contribuição,
   política de segurança e um ícone global aprovado no protótipo (DOC-15 a DOC-17, cobrados pela CI).

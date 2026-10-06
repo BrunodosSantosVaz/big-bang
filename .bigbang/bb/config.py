@@ -11,6 +11,7 @@ from .paths import config_path, framework_version
 
 SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+DELIVERY_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 REPOSITORY = re.compile(r"^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$")
 GITHUB_LOGIN = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$")
 SPDX = re.compile(r"^[A-Za-z0-9.+-]+$")
@@ -19,7 +20,6 @@ SERVICE = re.compile(r"^[a-z][a-z0-9_-]*$")
 SERVICE_BUILD = re.compile(r"^[a-z][a-z0-9_-]*=\S+$")
 HEALTH_PATH = re.compile(r"^/\S*$")
 
-DEPLOY_TARGETS = ("vps-docker", "aws", "paas")
 DEPENDABOT_ECOSYSTEMS = ("npm", "pip", "uv", "gomod", "cargo", "maven", "gradle", "composer", "nuget", "bundler",
                         "docker", "pub", "mix", "swift", "terraform")
 BUILD_SYSTEMS = ("windows-x64", "windows-arm64", "linux-x64", "linux-arm64", "macos-x64", "macos-arm64", "android")
@@ -95,12 +95,13 @@ SCHEMA = {
         "licenca": _string(SPDX, required=False),
     },
     "entrega": {
-        "perfil": _string(allowed=("deploy", "compilado")), "alvo": _string(required=False),
+        "perfil": _string(allowed=("deploy", "compilado")), "alvo": _string(DELIVERY_NAME, required=False),
         "caminhos_artefato": _string_list(), "arquivo_versao": _string(required=False),
         "ecossistemas": _string_list(allowed=DEPENDABOT_ECOSYSTEMS, non_empty=False, unique=True),
     },
     "compilado": {"sistemas": _string_list(allowed=BUILD_SYSTEMS, unique=True)},  # plus build_<system>
     "deploy": {
+        "artefato": _string(DELIVERY_NAME),
         "imagem": _string(), "url_staging": _string(URL), "url_producao": _string(URL), "smoke": _string(),
         "servicos": _string_list(SERVICE_BUILD), "plataformas": _string_list(allowed=DEPLOY_PLATFORMS, unique=True),
         "caminho_saude": _string(HEALTH_PATH), "servico_migrar": _string(SERVICE),
@@ -126,6 +127,7 @@ SCHEMA = {
 # before them keeps validating.
 OPTIONAL_KEYS = {
     "deploy": {
+        "artefato": "imagem",                # installed format; capabilities checked before generation
         "servicos": ["app=Dockerfile"],      # service=Dockerfile, one image per service (built from the root)
         "plataformas": ["linux/amd64"],      # docker buildx --platform
         "caminho_saude": "/api/health",      # health check path (OBS-04)
@@ -189,8 +191,8 @@ def _validate_section(section, table, keys):
 def _cross_checks(config, expected_version):
     errors = []
     entrega, projeto = config["entrega"], config["projeto"]
-    if entrega["perfil"] == "deploy" and entrega["alvo"] not in DEPLOY_TARGETS:
-        errors.append(f"entrega.alvo: no perfil deploy deve ser um de: {', '.join(DEPLOY_TARGETS)}")
+    if entrega["perfil"] == "deploy" and not entrega["alvo"]:
+        errors.append("entrega.alvo: no perfil deploy deve indicar um alvo (consulte bb alvos)")
     if entrega["perfil"] == "compilado" and entrega["alvo"]:
         errors.append('entrega.alvo: no perfil compilado deve ser ""')
     if projeto["visibilidade"] == "publico" and not projeto["licenca"]:

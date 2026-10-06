@@ -4,6 +4,23 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## Em desenvolvimento — deploy multiplataforma (#174)
+
+### O que muda
+
+- `bb alvos` descobre os contratos de destinos e formatos instalados e distingue implementados de reservados.
+- `deploy.artefato` é opcional, com `imagem` como padrão. O gerador compõe também a camada do formato e recusa
+  destinos incompletos ou combinações incompatíveis antes de escrever arquivos.
+- `aws` e `paas` eram reservas sem implementação; agora sua seleção é recusada explicitamente. Tsuru,
+  personalizado e formatos por hashes continuam reservados até suas tarefas estarem concluídas.
+
+### O que o projeto precisa fazer
+
+Projetos `vps-docker` e compilados: nada. Projetos que selecionaram uma reserva: consulte `bb alvos` e escolha uma
+integração implementada, ou aguarde a release que implemente o destino. Não edite `.bigbang/` no projeto.
+
+Esta seção registra trabalho ainda não publicado. A versão final e os passos da release serão fechados na #181.
+
 ## [1.4.0] - 2026-10-05
 
 ### O que muda
