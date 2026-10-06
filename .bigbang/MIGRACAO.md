@@ -16,8 +16,8 @@ A candidata reutiliza a CI verde do SHA exato. Nada é necessário para permanec
 - `bb alvos` descobre os contratos de destinos e formatos instalados e distingue implementados de reservados.
 - `deploy.artefato` é opcional, com `imagem` como padrão. O gerador compõe também a camada do formato e recusa
   destinos incompletos ou combinações incompatíveis antes de escrever arquivos.
-- `aws` e `paas` eram reservas sem implementação; agora sua seleção é recusada explicitamente. Tsuru,
-  personalizado e formatos por hashes continuam reservados até suas tarefas estarem concluídas.
+- `aws` e `paas` eram reservas sem implementação; agora sua seleção é recusada explicitamente. Tsuru está implementado para um serviço OCI e job manual existentes;
+  personalizado e formatos por hashes continuam reservados. Veja `docs/deploy-tsuru.md` do framework.
 
 ### O que o projeto precisa fazer
 

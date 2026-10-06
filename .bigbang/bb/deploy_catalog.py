@@ -28,6 +28,7 @@ class Target:
     variables: tuple
     secrets: tuple
     folder: Path
+    max_services: int | None = None
 
 
 @dataclass(frozen=True)
@@ -54,7 +55,7 @@ def _base(root, collection):
     return Path(framework_dir(root)) / 'esteira/perfis/deploy' / collection
 
 
-def _read(root, collection, name, filename, keys):
+def _read(root, collection, name, filename, keys, optional=frozenset()):
     if not isinstance(name, str) or not NAME.fullmatch(name):
         _fail(f"nome de {collection} inválido: {name!r}")
     base = _base(root, collection)
@@ -69,7 +70,7 @@ def _read(root, collection, name, filename, keys):
             data = tomllib.load(handle)
     except (OSError, UnicodeError, tomllib.TOMLDecodeError) as exc:
         _fail(f"{path}: contrato TOML inválido ({exc})")
-    missing, extra = keys - set(data), set(data) - keys
+    missing, extra = keys - set(data), set(data) - keys - optional
     if missing or extra:
         _fail(f"{path}: chaves ausentes {sorted(missing)}; desconhecidas {sorted(extra)}")
     if not isinstance(data['descricao'], str) or not data['descricao'].strip():
@@ -97,7 +98,10 @@ def _file(path, parent):
 
 def read_target(root, name):
     folder, data = _read(root, 'alvos', name, 'alvo.toml', {
-        'descricao', 'situacao', 'artefatos', 'operacoes', 'variaveis', 'segredos'})
+        'descricao', 'situacao', 'artefatos', 'operacoes', 'variaveis', 'segredos'}, optional={'servicos_maximos'})
+    maximum = data.get('servicos_maximos')
+    if maximum is not None and (type(maximum) is not int or maximum < 1):
+        _fail(f'{name}: servicos_maximos deve ser inteiro positivo')
     artifacts = _names(data, 'artefatos')
     operations = _names(data, 'operacoes')
     if not REQUIRED_OPERATIONS <= set(operations) or set(operations) - REQUIRED_OPERATIONS - {'checar'}:
@@ -113,7 +117,7 @@ def read_target(root, name):
         _fail(f"{name}: variaveis e segredos não podem repetir o mesmo nome")
     if data['situacao'] == 'implementado':
         _file(folder / 'scripts/alvo.sh', folder)
-    return Target(name, data['descricao'], data['situacao'], artifacts, operations, variables, secrets, folder)
+    return Target(name, data['descricao'], data['situacao'], artifacts, operations, variables, secrets, folder, maximum)
 
 
 def read_artifact(root, name):
@@ -141,6 +145,10 @@ def resolve(root, config):
     target = read_target(root, config['entrega']['alvo'])
     if target.state != 'implementado':
         _fail(f"entrega.alvo: '{target.name}' é reservado, sem implementação; consulte bb alvos")
+    if target.max_services is not None and len(config['deploy'].get('servicos', ['app=Dockerfile'])) > target.max_services:
+        _fail(f'{target.name}: aceita no máximo {target.max_services} serviço por aplicação')
+    if config['deploy'].get('servico_checar') and 'checar' not in target.operations:
+        _fail(f'{target.name}: não implementa a pré-checagem configurada')
     artifact = read_artifact(root, config['deploy'].get('artefato', 'imagem'))
     if artifact.state != 'implementado':
         _fail(f"deploy.artefato: '{artifact.name}' é reservado, sem implementação; consulte bb alvos")

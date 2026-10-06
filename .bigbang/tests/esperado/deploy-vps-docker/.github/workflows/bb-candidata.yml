@@ -70,6 +70,9 @@ jobs:
           TAG: ${{ needs.preparar.outputs.tag }}
 
   staging:
+    concurrency:
+      group: bb-staging
+      cancel-in-progress: false
     needs: [preparar, imagem]
     runs-on: ["ubuntu-24.04"]
     environment: staging

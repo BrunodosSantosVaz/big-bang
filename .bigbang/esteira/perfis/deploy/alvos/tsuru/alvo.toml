@@ -1,6 +1,7 @@
-descricao = "Tsuru; implementação na tarefa #178 do framework"
-situacao = "reservado"
+descricao = "Tsuru API v1.32: aplicação e job manual existentes, um serviço OCI por digest"
+situacao = "implementado"
 artefatos = ["imagem"]
 operacoes = ["publicar", "migrar", "saude", "voltar"]
-variaveis = []
-segredos = []
+variaveis = ["TSURU_TARGET", "TSURU_APP", "TSURU_JOB_MIGRAR"]
+segredos = ["TSURU_TOKEN"]
+servicos_maximos = 1

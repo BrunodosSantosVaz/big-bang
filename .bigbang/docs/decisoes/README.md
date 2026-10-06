@@ -22,3 +22,4 @@ sistema ficam em `docs/decisoes/` do sistema, não aqui.
 | [0015](ADR-0015-release-por-sprint.md) | Release por sprint ou por épico | aceita |
 | [0016](ADR-0016-deploy-multiplataforma.md) | Deploy multiplataforma por contratos instalados | aceita (refinamento #174) |
 | [0017](ADR-0017-modo-flash.md) | Modo Flash: teste antes, execução seletiva após código pronto | aceita |
+| [0018](ADR-0018-alvo-tsuru.md) | Deploy no Tsuru existente com migração comprovada | aceita |
