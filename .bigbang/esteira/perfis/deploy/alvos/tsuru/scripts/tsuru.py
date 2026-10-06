@@ -120,7 +120,9 @@ def execute(operation, environment, images, cfg, api, env, attempts=120, interva
     if strategy == 'inicializacao':
         info = api.json(f'/1.0/apps/{app}')
         units = info.get('units')
-        if info.get('name') != app or not isinstance(units, list) or len(units) > 1:
+        if (info.get('name') != app or info.get('error') not in (None, '')
+                or not isinstance(units, list) or len(units) > 1
+                or any(not isinstance(unit, dict) for unit in units)):
             raise DeployError('Migração na inicialização exige aplicação identificada com no máximo uma unidade.')
         if operation == 'migrar':
             # A separate job cannot access an application's SQLite PVC. The immutable image must migrate the
