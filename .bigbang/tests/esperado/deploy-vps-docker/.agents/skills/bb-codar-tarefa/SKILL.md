@@ -22,7 +22,10 @@ Leia `AGENTS.md`, padrões aplicáveis em `.bigbang/padroes/`, tarefa/épico, te
 2. Rode `bb aceite liberar N`, única alteração permitida nas marcas de pendente desta tarefa. Não altere cenários.
 3. Implemente o escopo, incluindo unidade/integração, documentação tocada e evidências SEG-IA aplicáveis. Se a
    tarefa muda o que o usuário vê, instala ou configura, atualize o README.md no mesmo PR (DOC-15).
-4. Execute testes, lint, tipos, arquitetura e demais comandos da stack localmente; `bb verificar` deve passar.
+4. Consulte `projeto.modo`. No padrão, execute os comandos completos da stack. No Flash, escreva os testes antes
+   do código e, após concluir as alterações, use `bb testes --base <base>` para uma rodada dos afetados; prefira a
+   CI do mesmo commit como evidência e não repita a suíte inteira sem mudança/falha. Mudanças estruturais,
+   produção e major/minor exigem tudo. Lint, tipos, arquitetura, scanners e `bb verificar` continuam obrigatórios.
 5. Commit Conventional Commits; abra PR para a branch do épico com alegações verificáveis e resultados.
    Acione `bb-revisor-pr` em contexto limpo, ou revisão humana conforme labels/diff; não revise o próprio raciocínio.
 6. Se aprovado pelo revisor e permitido, `bb revisao aprovar PR --relatorio ARQUIVO`; acompanhe Mesclar PR e CI.

@@ -5,7 +5,7 @@ import sys
 from . import config as config_module
 from . import acceptance, checklist, checksums, decisions, deploy_catalog, generator, ownership, package, status, update, verify, workspaces
 from . import init as init_module
-from . import pipeline_cli
+from . import pipeline_cli, test_runs
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 from .paths import default_root
 
@@ -44,12 +44,21 @@ def build_parser():
     init_parser.add_argument("--repositorio", help="dono/nome (padrão: o remote origin)")
     init_parser.add_argument("--visibilidade", choices=("privado", "publico"), default="privado")
     init_parser.add_argument("--licenca", default="", help="identificador SPDX (obrigatório se público)")
+    init_parser.add_argument("--modo", choices=("padrao", "flash"), default="padrao", help="modo de trabalho (pode mudar depois)")
     init_parser.add_argument("--sem-github", action="store_true", help="não cria label nem issue no GitHub")
     init_parser.add_argument("--simular", action="store_true", help="só mostra o plano")
     init_parser.set_defaults(handler=_init)
 
     verificar_parser = commands.add_parser("verificar", help="confere framework, arquivos gerados e workflows")
     verificar_parser.set_defaults(handler=_verificar)
+
+    testes_parser = commands.add_parser("testes", help="executa a suíte completa ou os testes afetados no Flash")
+    testes_parser.add_argument("--base", help="referência Git de comparação; ausência força suíte completa")
+    testes_parser.add_argument("--fase", choices=("tarefa", "candidata", "producao"), default="tarefa")
+    testes_parser.add_argument("--versao", help="versão de entrega X.Y.Z (major/minor exige suíte completa)")
+    testes_parser.add_argument("--completo", action="store_true", help="força suíte completa")
+    testes_parser.add_argument("--simular", action="store_true", help="mostra a decisão sem executar testes")
+    testes_parser.set_defaults(handler=_testes)
 
     assumir_parser = commands.add_parser("assumir", help="confirma a posse e abre uma pasta de trabalho própria")
     assumir_parser.add_argument("issue", type=int)
@@ -121,7 +130,7 @@ def build_parser():
 
 def _init(args):
     options = init_module.resolve_options(args.raiz, args.nome, args.slug, args.dono, args.repositorio,
-                                          args.visibilidade, args.licenca)
+                                          args.visibilidade, args.licenca, args.modo)
     steps = init_module.plan_steps(options, with_github=not args.sem_github)
     if args.simular:
         print("Simulação do bb init para " + options["repositorio"] + ":")
@@ -143,6 +152,12 @@ def _init(args):
 def _ia(args):
     import os
     return args.ia or os.environ.get("BB_IA") or "ia"
+
+
+def _testes(args):
+    test_runs.run(args.raiz, config_module.load(args.raiz), base=args.base, phase=args.fase,
+                  version=args.versao, full=args.completo, simulate=args.simular)
+    return EXIT_OK
 
 
 def _assumir(args):
@@ -200,7 +215,8 @@ def _revisao_aprovar(args):
         from .paths import read_text
         report = read_text(args.relatorio)
     decisions.approve_review(config["projeto"]["repositorio"], args.pr, _ia(args),
-                             config["seguranca"]["zonas_sensiveis"], config["testes"]["marca_pendente"], report)
+                             config["seguranca"]["zonas_sensiveis"], config["testes"]["marca_pendente"], report,
+                             mode=config_module.get(config, "projeto.modo"))
     print(f"PR #{args.pr}: pr-aprovado (revisão da IA).")
     return EXIT_OK
 

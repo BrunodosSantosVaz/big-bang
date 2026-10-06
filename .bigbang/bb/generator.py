@@ -83,7 +83,18 @@ def with_computed(config):
     context = dict(config)
     systems = config.get("compilado", {}).get("sistemas", []) if config["entrega"]["perfil"] == "compilado" else []
     context["gerado"] = {"dependabot": dependabot_entries(config["entrega"].get("ecossistemas", [])),
-                         "matriz_compilado": pipeline.build_matrix(systems)}
+                         "matriz_compilado": pipeline.build_matrix(systems),
+                         "modo_trabalho": (
+                             "**Modo Flash.** Escreva os testes antes do código e preserve a ordem teste → tarefas. "
+                             "Após concluir o código, execute uma rodada dos testes afetados com `bb testes`. "
+                             "Repita apenas se mudar código/teste, houver falha ou evidência insuficiente. "
+                             "Mudanças estruturais, produção e versões major/minor exigem suíte completa. "
+                             "Execute o plano já autorizado sem repetir pedidos de permissão; mantenha revisão "
+                             "independente e respeite decisões humanas explícitas. Veja `.bigbang/processo/17-flash.md`."
+                             if config_module.get(config, "projeto.modo") == "flash" else
+                             "**Modo padrão.** Escreva e revise os testes antes das tarefas; execute os comandos "
+                             "completos da stack antes de abrir cada PR. Veja `.bigbang/processo/06-execucao.md`."
+                         )}
     return context
 
 

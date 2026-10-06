@@ -18,6 +18,7 @@ F0_BODY = """Etapa F0 da Fundação (`.bigbang/processo/02-fundacao.md`).
 ## Decisão registrada
 - Visibilidade: {visibilidade}
 - Licença do sistema: {licenca}
+- Modo de trabalho: {modo} (testes escritos antes; Flash executa os afetados após concluir o código)
 
 ## Feito por `bb init`
 - `bigbang.toml` criado a partir do modelo
@@ -87,7 +88,7 @@ def _repository_from_git(root):
     return match.group(1) if match else None
 
 
-def resolve_options(root, nome, slug=None, dono=None, repositorio=None, visibilidade="privado", licenca=""):
+def resolve_options(root, nome, slug=None, dono=None, repositorio=None, visibilidade="privado", licenca="", modo="padrao"):
     if not nome or not nome.strip():
         raise BbError("informe o nome do sistema (--nome)", EXIT_USAGE)
     repositorio = repositorio or _repository_from_git(root)
@@ -96,7 +97,9 @@ def resolve_options(root, nome, slug=None, dono=None, repositorio=None, visibili
     repositorio = repositorio or f"{dono}/{slug}"
     if visibilidade == "publico" and not licenca:
         raise BbError("repositório público precisa de licença (--licenca, identificador SPDX como MIT)", EXIT_USAGE)
-    return {"nome": nome.strip(), "slug": slug, "dono": dono, "repositorio": repositorio,
+    if modo not in ("padrao", "flash"):
+        raise BbError("modo deve ser padrao ou flash", EXIT_USAGE)
+    return {"nome": nome.strip(), "slug": slug, "dono": dono, "repositorio": repositorio, "modo": modo,
             "visibilidade": visibilidade, "licenca": licenca if visibilidade == "publico" else ""}
 
 
@@ -105,6 +108,7 @@ def build_config_text(root, options):
     text = set_value(text, "bigbang", "versao", framework_version(root))
     for key in ("nome", "slug", "dono", "repositorio", "visibilidade", "licenca"):
         text = set_value(text, "projeto", key, options[key])
+    text = set_value(text, "projeto", "modo", options.get("modo", "padrao"))
     text = set_value(text, "paineis", "owner", options["dono"])
     text = set_value(text, "deploy", "imagem", f"ghcr.io/{options['dono'].lower()}/{options['slug']}")
     errors = config_module.validate(config_module.parse(text), framework_version(root))
@@ -119,7 +123,8 @@ def plan_steps(options, with_github):
     if with_github:
         steps += [f"criar (ou atualizar) a label {FOUNDATION_LABEL[0]} em {options['repositorio']}",
                   f"abrir a issue \"{F0_TITLE}\" (se ainda não existir)"]
-    steps += ["criar bigbang.toml a partir de .bigbang/modelos/bigbang.toml.exemplo",
+    steps += [f"adotar o modo {options.get('modo', 'padrao')} (testes continuam escritos antes do código)",
+              "criar bigbang.toml a partir de .bigbang/modelos/bigbang.toml.exemplo",
               "mover README.md e LICENSE do framework para .bigbang/",
               "criar o README.md do sistema",
               "criar CODE_OF_CONDUCT.md, CONTRIBUTING.md e SECURITY.md do sistema (DOC-16)"]
@@ -176,5 +181,6 @@ def _github_steps(options):
         if issue["title"].startswith("F0 "):
             return issue["number"]
     body = F0_BODY.format(visibilidade=options["visibilidade"], licenca=options["licenca"] or "nenhuma (privado)",
+                          modo=options.get("modo", "padrao"),
                           licenca_criada=f"\n- LICENSE do sistema ({options['licenca']})" if options["licenca"] else "")
     return github.run("issue", "create", "-R", repository, "--label", name, "--title", F0_TITLE, "--body", body)

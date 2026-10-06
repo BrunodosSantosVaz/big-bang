@@ -53,7 +53,7 @@ def record_decision(repository, label, number, phrase, ai_name):
         _remove_label(repository, number, opposite)
 
 
-def review_blockers(pr_labels, issue_labels, head, changed_paths, diff_text, zones, marker):
+def review_blockers(pr_labels, issue_labels, head, changed_paths, diff_text, zones, marker, mode="padrao"):
     """Reasons why the AI may NOT approve this PR (empty = the AI review is enough)."""
     owner_says_ai = "dono:revisao-ia" in pr_labels or "dono:revisao-ia" in issue_labels
     kind, issue = pipeline.branch_issue(head)
@@ -64,8 +64,10 @@ def review_blockers(pr_labels, issue_labels, head, changed_paths, diff_text, zon
         return []
     if owner_says_ai:
         return []
-    if "revisao-humana" in pr_labels:
+    if "revisao-humana" in pr_labels or "revisao-humana" in issue_labels:
         return ["o PR tem revisao-humana: só o dono põe pr-aprovado"]
+    if mode == "flash":
+        return []  # opting into Flash delegates routine PR review, never an explicitly human review
     allow_acceptance = issue is not None and pipeline.only_own_marks_released(diff_text, issue, marker)
     sensitive = pipeline.sensitive_paths(changed_paths, zones, acceptance_allowed=allow_acceptance)
     if sensitive:
@@ -73,7 +75,7 @@ def review_blockers(pr_labels, issue_labels, head, changed_paths, diff_text, zon
     return []
 
 
-def approve_review(repository, number, ai_name, zones, marker, report=""):
+def approve_review(repository, number, ai_name, zones, marker, report="", mode="padrao"):
     data = json.loads(github.run("pr", "view", str(number), "--repo", repository, "--json",
                                  "headRefName,labels,state"))
     if data["state"] != "OPEN":
@@ -83,7 +85,7 @@ def approve_review(repository, number, ai_name, zones, marker, report=""):
     issue_labels = _labels(repository, issue) if issue else set()
     diff_text = github.run("pr", "diff", str(number), "--repo", repository)
     changed = [line.split(" b/", 1)[1] for line in diff_text.splitlines() if line.startswith("diff --git ")]
-    blockers = review_blockers(pr_labels, issue_labels, data["headRefName"], changed, diff_text, zones, marker)
+    blockers = review_blockers(pr_labels, issue_labels, data["headRefName"], changed, diff_text, zones, marker, mode)
     if blockers:
         raise BbError("bb revisao aprovar recusado: " + "; ".join(blockers), EXIT_VERIFICATION_FAILED)
     body = f"**Revisão da IA: aprovado** (`{ai_name}`, {_now()}, contexto limpo: `.bigbang/agents/revisor-pr.md`)."

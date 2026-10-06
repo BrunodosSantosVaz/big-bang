@@ -33,16 +33,14 @@ jobs:
         run: bash .bigbang/esteira/nucleo/scripts/comando.sh lint
       - name: Tipos
         run: bash .bigbang/esteira/nucleo/scripts/comando.sh tipos
-      - name: Testes (unidade e integração)
-        run: bash .bigbang/esteira/nucleo/scripts/comando.sh testes
-      - name: Testes de aceite
-        run: bash .bigbang/esteira/nucleo/scripts/comando.sh testes_aceite
       - name: Arquitetura
         run: bash .bigbang/esteira/nucleo/scripts/comando.sh arquitetura
-      - name: Cobertura
-        run: bash .bigbang/esteira/nucleo/scripts/comando.sh cobertura
       - name: Build
         run: bash .bigbang/esteira/nucleo/scripts/comando.sh build
+      - name: Testes e cobertura (completos ou afetados no Flash)
+        run: bash .bigbang/esteira/nucleo/scripts/testes.sh
+        env:
+          BB_BASE_TESTES: ${{ github.event.pull_request.base.sha || github.event.before }}
       - name: Ordem da regressão (PR de bug)
         if: ${{ startsWith(github.head_ref, 'bugfix/') || startsWith(github.head_ref, 'hotfix/') }}
         run: bash .bigbang/esteira/nucleo/scripts/regressao.sh

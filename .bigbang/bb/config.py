@@ -24,7 +24,8 @@ DEPENDABOT_ECOSYSTEMS = ("npm", "pip", "uv", "gomod", "cargo", "maven", "gradle"
                         "docker", "pub", "mix", "swift", "terraform")
 BUILD_SYSTEMS = ("windows-x64", "windows-arm64", "linux-x64", "linux-arm64", "macos-x64", "macos-arm64", "android")
 DEPLOY_PLATFORMS = ("linux/amd64", "linux/arm64")
-COMMAND_KEYS = ("instalar", "lint", "tipos", "testes", "testes_aceite", "arquitetura", "cobertura", "build")
+COMMAND_KEYS = ("instalar", "lint", "tipos", "testes", "testes_aceite", "arquitetura", "cobertura", "build",
+                "testes_alterados")
 
 
 # --- value checkers: each returns an error message (Portuguese) or None ---------------------------------------------
@@ -93,6 +94,7 @@ SCHEMA = {
         "nome": _string(), "slug": _string(SLUG), "dono": _string(GITHUB_LOGIN),
         "repositorio": _string(REPOSITORY), "visibilidade": _string(allowed=("privado", "publico")),
         "licenca": _string(SPDX, required=False),
+        "modo": _string(allowed=("padrao", "flash")),
     },
     "entrega": {
         "perfil": _string(allowed=("deploy", "compilado")), "alvo": _string(DELIVERY_NAME, required=False),
@@ -108,7 +110,8 @@ SCHEMA = {
         "servico_checar": _string(SERVICE, required=False),
     },
     "comandos": {key: _string(required=False) for key in COMMAND_KEYS},
-    "testes": {"cobertura_minima": _integer(0, 100), "marca_pendente": _string(), "padrao_teste": _regex},
+    "testes": {"cobertura_minima": _integer(0, 100), "marca_pendente": _string(), "padrao_teste": _regex,
+               "caminhos_estruturais": _string_list(non_empty=False)},
     "seguranca": {
         "nivel_asvs": _string(allowed=("L1", "L2", "L3")), "banco_no_navegador": _boolean,
         "zonas_sensiveis": _string_list(non_empty=False),
@@ -126,6 +129,9 @@ SCHEMA = {
 # Keys that may be left out: the default is used (`bb config get` returns it). Added after 1.0, so a project made
 # before them keeps validating.
 OPTIONAL_KEYS = {
+    "projeto": {"modo": "padrao"},
+    "comandos": {"testes_alterados": ""},
+    "testes": {"caminhos_estruturais": []},
     "deploy": {
         "artefato": "imagem",                # installed format; capabilities checked before generation
         "servicos": ["app=Dockerfile"],      # service=Dockerfile, one image per service (built from the root)

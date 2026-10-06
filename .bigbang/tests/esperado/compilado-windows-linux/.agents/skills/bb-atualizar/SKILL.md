@@ -1,6 +1,6 @@
 ---
 name: bb-atualizar
-description: Use para atualizar o Big Bang. Confere versão e migração, preserva a camada do projeto e prepara PR framework/vX.Y.Z para revisão humana; não atualiza dependências do sistema.
+description: Use para atualizar o Big Bang. Confere versão e migração, preserva a camada do projeto e prepara PR framework/vX.Y.Z para revisão independente; não atualiza dependências do sistema.
 ---
 <!-- Gerado pelo Big Bang v1.4.0 a partir de .bigbang/skills/bb-atualizar/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
@@ -21,7 +21,7 @@ Leia `AGENTS.md`, `bigbang.toml`, `.bigbang/processo/15-atualizacao-do-framework
 2. Mostre ao dono o que muda. Se houver "O que o projeto precisa fazer" diferente de "Nada.", pergunte ao dono e
    registre a resposta dele; só com o sim dele rode com `--confirmo-migracao`.
 3. Rode `bb atualizar [versão]`: cria `framework/vX.Y.Z` da `develop`, troca `.bigbang/`, atualiza
-   `bigbang.versao`, roda `bb gerar` e `bb verificar` da versão nova e abre o PR com `revisao-humana`.
+   `bigbang.versao`, roda `bb gerar` e `bb verificar` da versão nova e abre o PR com `revisao-humana` no padrão ou `revisao-ia` no Flash.
 4. Rode os testes do projeto na branch e confira no diff do PR que só `.bigbang/`, a camada gerada e
    `bigbang.versao` mudaram. Faça os passos manuais confirmados em commits seguintes, na mesma branch.
 
@@ -37,3 +37,6 @@ de origem não confirmada.
 ## Pronto quando
 
 PR framework/vX.Y.Z aberto para revisão humana, com a camada do projeto preservada.
+
+No modo Flash, a atualização abre PR com `revisao-ia`: revisão independente e CI completa (estrutura).
+Reutilize autorização já dada para passos manuais conhecidos; não repita pedidos de confirmação.

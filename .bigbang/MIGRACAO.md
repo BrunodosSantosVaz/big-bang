@@ -6,6 +6,11 @@ Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando 
 
 ## Em desenvolvimento — deploy multiplataforma (#174)
 
+Inclui o modo Flash (#183): `projeto.modo` opcional (`padrao` por omissão), escolhido em `bb init --modo flash`
+ou depois por ADR e `bb gerar`. Testes continuam antes do código; `bb testes` executa os afetados após o código
+concluído, ou tudo para estrutura, primeira entrega, major/minor e produção. Sem seletor da stack, roda tudo.
+A candidata reutiliza a CI verde do SHA exato. Nada é necessário para permanecer no padrão.
+
 ### O que muda
 
 - `bb alvos` descobre os contratos de destinos e formatos instalados e distingue implementados de reservados.
