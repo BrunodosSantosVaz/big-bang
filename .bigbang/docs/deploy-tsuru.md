@@ -9,6 +9,8 @@ piloto usa essa API em ARM64. A homologação do Snake é uma evidência separad
 Em F2 ou mediante ADR posterior, selecione `entrega.alvo = "tsuru"`, `deploy.artefato = "imagem"` (padrão) e
 `deploy.servicos = ["app=Dockerfile"]`. Esta implementação aceita **um serviço por aplicação**; outra combinação
 é recusada antes da geração. `deploy.plataformas` define a arquitetura da imagem, independentemente do alvo.
+O Node.js/runtime já vai dentro da imagem: deploy por imagem não exige instalar plataforma Node no Tsuru.
+A plataforma existente pode atender ao cadastro da app; o runtime executado é o da imagem importada.
 O caminho e as URLs de saúde continuam no `[deploy]`; `BASE_PATH` do sistema deve corresponder à rota pública.
 Após alterar a decisão, rode `bb gerar`.
 

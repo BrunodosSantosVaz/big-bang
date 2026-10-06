@@ -96,9 +96,10 @@ class Tsuru(unittest.TestCase):
         valid = {'Running': False, 'Error': '', 'Target': {'Type': 'app', 'Value': 'snake-hom'},
                  'CustomData': {'Start': {'image': IMAGE}, 'End': {'image': 'registry.internal/app:v1'}}}
         with patch.object(api, 'send', return_value=(b'', {'X-Tsuru-Eventid': 'b' * 24})) as send:
-            with patch.object(api, 'json', return_value=valid):
+            with patch.object(api, 'json', return_value=valid) as read_event:
                 receipt = api.deploy('app', 'snake-hom', IMAGE)
                 self.assertEqual(receipt['event'], 'b' * 24)
+                self.assertEqual(read_event.call_args.args, ('/1.1/events/' + 'b' * 24,))
                 self.assertEqual(send.call_args.args, ('/1.0/apps/snake-hom/deploy', 'POST', {'image': IMAGE}))
         with self.assertRaises(self.module.DeployError):
             self.module.NoRedirect().redirect_request(None, None, 302, '', {}, 'https://other.invalid')

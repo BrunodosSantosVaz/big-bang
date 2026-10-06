@@ -1,14 +1,14 @@
-# ADR-0018 — Deploy no Tsuru existente
+# ADR-0018: Deploy no Tsuru existente
 
-- **Estado:** aceita (requisito do dono e execução Flash autorizados; #174/#178).
+- **Situação:** aceita (requisito do dono e execução Flash autorizados; #174/#178).
 - **Data:** 2026-10-06.
 
-## Contexto
+## Contexto e problema
 
 O Snake deve rodar dentro do Tsuru que o dono já mantém, sem provisionar outro servidor. A inspeção identificou
 API v1.32.0, Kubernetes e ARM64. Enviar um comando de migração não comprova que ele terminou.
 
-## Decisão
+## Decisão e justificativa
 
 Implementar adaptador isolado usando Python stdlib e HTTPS, sem instalar CLI/binary externo. Apps e jobs manuais
 são preparados explicitamente. A CI entrega um serviço OCI por aplicação, sempre por digest. Migração importa a

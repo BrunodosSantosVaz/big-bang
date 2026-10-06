@@ -81,7 +81,7 @@ class API:
         if not re.fullmatch(r'[0-9a-f]{24}', event_id):
             raise DeployError('Tsuru não forneceu evento verificável; publicação não confirmada.')
         for attempt in range(20):
-            event = self.json('/1.0/events/' + event_id)
+            event = self.json('/1.1/events/' + event_id)
             if event.get('Running') is False:
                 return dict(self.verify_event(event, kind, name, image), event=event_id)
             if attempt < 19: time.sleep(1)
