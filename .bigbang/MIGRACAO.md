@@ -4,6 +4,25 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [1.5.3] - 2026-10-07
+
+### O que muda
+
+Mesclar PR recebe `PROJETO_OWNER`, `PROJETO_PLANEJAMENTO` e `PROJETO_EXECUCAO` das variáveis públicas do
+repositório, como o botão Criar branches já recebia. Isso corrige a falha pós-merge que interrompia a criação
+da próxima branch e o avanço automático até a integração. Aprovação, checks do SHA exato e publicação conservam
+os mesmos portões; a correção não mescla nem publica um PR sem aprovação.
+
+### O que o projeto precisa fazer
+
+Nada.
+
+### Atualização opcional
+
+Use `bb atualizar 1.5.3` para regenerar o workflow oficial. Em um épico já afetado, o PR pode ter sido mesclado
+mesmo que o run tenha falhado; confira seu estado antes de repetir ações. Criar branches, primeiro simulação,
+é a recuperação canônica da próxima branch após o merge. Esta atualização não reexecuta merges anteriores.
+
 ## [1.5.2] - 2026-10-07
 
 ### O que muda
