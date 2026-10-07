@@ -37,7 +37,7 @@ Estável desde a **1.0.0**, validada num sistema real feito do zero até produç
 testado pelo dono num celular ([relatório do piloto](.bigbang/docs/piloto-screenfakecam.md)). A versão atual está
 nas [Releases](https://github.com/BrunodosSantosVaz/big-bang/releases/latest).
 
-O código desta versão é **1.5.1**: inclui modo Flash, catálogo extensível, Actions conforme o alvo e adaptador
+O código desta versão é **1.5.2**: inclui modo Flash, catálogo extensível, Actions conforme o alvo e adaptador
 para o Tsuru existente, além de VPS/Docker e entrega compilada. Tsuru entrega um serviço OCI por aplicação,
 com `TSURU_MIGRACAO=job` por padrão ou `inicializacao` para SQLite em volume persistente. O [runbook](.bigbang/docs/deploy-tsuru.md) separa os testes do adaptador
 da comprovação de uma entrega real no consumidor. AWS, alvo personalizado e formatos de deploy por pacotes ou
@@ -45,6 +45,11 @@ arquivos continuam reservados no [épico #174](https://github.com/BrunodosSantos
 
 A versão 1.5.1 corrige o registro de revisão em PRs com mais de 300 arquivos: a CLI consulta todos os
 caminhos pela API paginada, mantém a proteção de renomes e recusa patch de aceite indisponível.
+
+A versão 1.5.2 verifica vulnerabilidades e gera SBOM para **cada serviço e plataforma** de `deploy.plataformas`,
+inclusive ARM64 em runner AMD64. Os SBOMs `sbom-<servico>.linux-<arquitetura>.json` acompanham a candidata e a
+produção; `sbom-<servico>.json` conserva a primeira plataforma configurada. Os digests do índice de imagens e
+os portões de segurança permanecem iguais. Veja [a migração](.bigbang/MIGRACAO.md).
 
 ## O que é o Big Bang
 
