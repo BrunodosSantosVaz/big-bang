@@ -1,5 +1,7 @@
 # 02 · Fundação (F0 a F5)
 
+Escolha `padrao` ou `flash` em F0 (`bb init --modo flash`). O marcador é `projeto.modo`; pode mudar depois com ADR e `bb gerar`. Testes continuam anteriores ao código. Veja [Modo Flash](17-flash.md).
+
 A Fundação transforma um repositório recém-criado a partir do Big Bang num sistema com produto definido, stack
 escolhida, design aprovado, GitHub montado e esteira funcionando. Ela termina com um **esqueleto andante** (*walking
 skeleton*): a menor versão do sistema que já passa pela esteira inteira até produção.

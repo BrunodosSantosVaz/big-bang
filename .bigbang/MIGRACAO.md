@@ -4,6 +4,55 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [1.5.0] - 2026-10-06
+
+### O que muda
+
+- `bb alvos` descobre os contratos de destinos e formatos instalados e distingue implementados de reservados.
+- `deploy.artefato` é opcional, com `imagem` como padrão. O gerador compõe também a camada do formato e recusa
+  destinos incompletos ou combinações incompatíveis antes de escrever arquivos.
+- **Actions conforme o alvo:** staging, produção e rollback recebem só os nomes de variáveis e segredos do
+  contrato escolhido. O formato seleciona os scripts da construção e da candidata. `deploy.runner` e
+  `deploy.preparar_rede` permitem configurar acesso a rede privada; simulações não preparam rede nem autenticam.
+- **Tsuru existente:** adaptador para API v1.32.0, uma aplicação com um serviço OCI por digest e
+  `TSURU_MIGRACAO=job` por padrão. O job manual por ambiente confere importação, imagem e uma execução nova
+  de migração antes da publicação. `inicializacao` admite SQLite em volume persistente: a pré-checagem registra
+  `migration=pending`, e o inicializador da imagem migra antes de abrir a porta. Saúde/readiness consulta o banco
+  e os testes posteriores comprovam a entrega. Uma réplica permanente pode ter sobreposição transitória no
+  rollout do mesmo volume, exigindo transações e compatibilidade do esquema. Rollback reimporta o digest
+  estável sem desfazer migrações. Veja o [runbook](docs/deploy-tsuru.md).
+- **Modo Flash:** `projeto.modo` é opcional (`padrao` por omissão), escolhido em `bb init --modo flash` ou depois
+  por ADR e `bb gerar`. Testes continuam escritos antes do código; `bb testes` executa os afetados por
+  dependências após concluir as alterações, ou tudo para estrutura, primeira entrega, major/minor e produção.
+  Sem seletor da stack ou base confiável, roda tudo. Candidata exige a execução verde de `bb-ci.yml` no SHA
+  exato; produção fica vinculada ao SHA dos testes completos e conserva aprovação humana.
+- **Release em repositório privado:** a conferência de ancestralidade usa as referências já obtidas pelo
+  checkout completo, sem novo `git fetch` após a retirada das credenciais.
+- `aws` e `paas` eram reservas sem implementação e agora sua seleção é recusada explicitamente.
+  `personalizado`, `pacote` e `estatico` também continuam reservados; não há entrega universal anunciada.
+
+### O que o projeto precisa fazer
+
+Nada.
+
+### Adoção opcional e compatibilidade
+
+Projetos `vps-docker` e compilados conservam o comportamento, com modo padrão e runner público por omissão.
+Use `bb atualizar 1.5.0` para obter o pacote verificado e regenerar a camada gerada; não edite `.bigbang/` nem
+workflows gerados no projeto.
+
+Para adotar Flash, registre a decisão em ADR, escolha `projeto.modo = "flash"` e rode `bb gerar`.
+Configure um seletor de dependências testado em `comandos.testes_alterados`; sem ele, a suíte continua completa.
+Para adotar Tsuru, prepare apps/credenciais distintos por ambiente e, no modo padrão, os jobs manuais.
+Para SQLite, prepare volume, backup, inicializador e readiness conforme o runbook, antes de alterar o alvo por
+PR e ADR. A plataforma Node.js do servidor é uma preparação separada; esta versão promove imagens OCI por
+digest, sem upload de fontes. Um script de rede pertence ao projeto e precisa de aprovação/revisão antes de publicação.
+
+Projetos que selecionaram uma reserva sem adaptador funcional devem consultar `bb alvos` e escolher uma
+integração implementada, ou aguardar sua implementação. Os testes do framework não substituem a homologação
+real: o consumidor registra URL, SHA, digest, eventos/execução de migração e saúde.
+
+
 ## [1.4.0] - 2026-10-05
 
 ### O que muda

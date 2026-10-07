@@ -2,7 +2,7 @@
 name: bb-escolher-stack
 description: Use em F2 da Fundação para pesquisar e propor stack, arquitetura e hospedagem. O dono escolhe; a skill registra STACK.md, configuração, ADR e C4.
 ---
-<!-- Gerado pelo Big Bang v1.4.0 a partir de .bigbang/skills/bb-escolher-stack/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.5.0 a partir de .bigbang/skills/bb-escolher-stack/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Escolher stack
 
@@ -14,6 +14,9 @@ Em F2, depois do produto aprovado. Para dependência nova em projeto fundado, us
 
 Leia `PRODUTO.md`, `AGENTS.md`, `.bigbang/processo/02-fundacao.md` e os padrões em `.bigbang/padroes/`.
 Confira `.bigbang/modelos/STACK.md`, `bigbang.toml` e decisões já aprovadas.
+No perfil deploy, consulte `bb alvos`: proponha apenas um alvo e formato **implementados** nessa versão.
+Alvo reservado exige tarefa no framework ou atualização para uma versão que o implemente; nome de provedor não
+comprova suporte. O gerador recusa alvos incompletos e combinações incompatíveis antes de escrever arquivos.
 
 ## Passos
 

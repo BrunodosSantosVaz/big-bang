@@ -16,6 +16,7 @@ trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2'
 R="${GITHUB_REPOSITORY:?}"
 head="${HEAD_REF:?}"; base="${BASE_REF:?}"; pr="${PR_NUMBER:?}"
 read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
+modo=$("${BB_CMD[@]}" config get projeto.modo)
 erros=0
 erro() { echo "::error::$*"; erros=$((erros + 1)); }
 tem_label() { [[ ",${PR_LABELS:-}," == *",$1,"* ]]; }
@@ -72,6 +73,8 @@ if [ -n "$sensiveis" ]; then
   echo "Zona sensível neste PR:"; while IFS= read -r linha; do echo "  - $linha"; done <<<"$sensiveis"
   if tem_label dono:revisao-ia || [[ ",$labels_issue," == *",dono:revisao-ia,"* ]]; then
     echo "O dono pôs dono:revisao-ia: a revisão continua com a IA."
+  elif [ "$modo" = flash ] && ! tem_label revisao-humana && [[ ",$labels_issue," != *",revisao-humana,"* ]]; then
+    echo "Modo Flash da branch de destino: revisão independente por IA; decisão humana explícita preservada."
   elif ! tem_label revisao-humana; then
     editar pr edit "$pr" --repo "$R" --add-label revisao-humana --remove-label revisao-ia
     echo "Revisão trocada para humana (revisao-humana)."

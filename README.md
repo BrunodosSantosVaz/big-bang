@@ -18,6 +18,8 @@
 - [Para quem é (e para quem não é)](#para-quem-é-e-para-quem-não-é)
 - [O que você precisa](#o-que-você-precisa)
 - [Como começar](#como-começar)
+- [Modo padrão ou Flash](#modo-padrão-ou-flash)
+- [Actions conforme o alvo de deploy](#actions-conforme-o-alvo-de-deploy)
 - [O que vai acontecer](#o-que-vai-acontecer)
 - [Depois da Fundação](#depois-da-fundação)
 - [Como a esteira funciona](#como-a-esteira-funciona)
@@ -33,8 +35,13 @@
 Estável desde a **1.0.0**, validada num sistema real feito do zero até produção só pelo Big Bang: o
 [ScreenFakeCam](https://github.com/BrunodosSantosVaz/screenfakecam), um app Android publicado em três versões e
 testado pelo dono num celular ([relatório do piloto](.bigbang/docs/piloto-screenfakecam.md)). A versão atual está
-nas [Releases](https://github.com/BrunodosSantosVaz/big-bang/releases/latest). O que ainda falta validar fora de
-contêiner, como o deploy num servidor real, está nas [issues abertas](https://github.com/BrunodosSantosVaz/big-bang/issues).
+nas [Releases](https://github.com/BrunodosSantosVaz/big-bang/releases/latest).
+
+O código desta versão é **1.5.0**: inclui modo Flash, catálogo extensível, Actions conforme o alvo e adaptador
+para o Tsuru existente, além de VPS/Docker e entrega compilada. Tsuru entrega um serviço OCI por aplicação,
+com `TSURU_MIGRACAO=job` por padrão ou `inicializacao` para SQLite em volume persistente. O [runbook](.bigbang/docs/deploy-tsuru.md) separa os testes do adaptador
+da comprovação de uma entrega real no consumidor. AWS, alvo personalizado e formatos de deploy por pacotes ou
+arquivos continuam reservados no [épico #174](https://github.com/BrunodosSantosVaz/big-bang/issues/174).
 
 ## O que é o Big Bang
 
@@ -43,6 +50,20 @@ repositório a partir dele, abre qualquer IA para código na pasta e diz **"inic
 arquivos do framework conduzem a IA por todo o ciclo de vida do sistema, com você decidindo nos pontos de
 controle. Ele não gera o sistema de uma vez: ele **governa** a construção, etapa por etapa, e cobra as regras por
 ferramenta (CI, testes travados, portões), não por promessa.
+
+## Modo padrão ou Flash
+
+Escolha na criação com `bb init --nome "Meu sistema" --modo flash`, ou depois, definindo
+`modo = "flash"` em `[projeto]` do `bigbang.toml` e rodando `bb gerar`, com a decisão registrada em ADR.
+Sem essa escolha, o projeto continua no modo padrão. O modo pertence ao mesmo Big Bang.
+
+Nos dois modos, **testes são escritos antes do código**. O Flash reutiliza autorizações já dadas, usa revisão
+independente por IA e concentra a execução após concluir as alterações: `bb testes --base origin/develop` roda o
+seletor de testes afetados da stack. Mudança estrutural, primeira entrega, release major/minor e produção exigem
+suíte completa. Sem seletor ou base confiável, também roda tudo. A candidata reutiliza a CI verde do mesmo commit.
+Lint, tipos, scanners, testes congelados, documentação e aprovação humana de produção permanecem obrigatórios.
+
+Veja a [tabela de diferenças e configuração do Flash](.bigbang/processo/17-flash.md).
 
 ```mermaid
 flowchart LR
@@ -92,7 +113,7 @@ A Fundação tem seis etapas. Cada uma vira uma issue e um PR, para ficar no his
 
 | Etapa | O que acontece | O que você decide |
 | --- | --- | --- |
-| **F0** · Ligar ao GitHub | A IA confere `git`, Python e `gh`, cria a `develop` e o `bigbang.toml` | Visibilidade (privado por padrão) e, se público, a licença |
+| **F0** · Ligar ao GitHub | A IA confere `git`, Python e `gh`, cria a `develop` e o `bigbang.toml` | Visibilidade (privado por padrão), licença se público e modo padrão ou Flash |
 | **F1** · Entrevista do produto | Até 10 perguntas, uma por vez, viram o `PRODUTO.md` | O que o sistema é, para quem, com quais dados |
 | **F2** · Stack e arquitetura | A IA pesquisa e apresenta de 2 a 3 opções completas, com custo e riscos | A stack, a arquitetura e a hospedagem |
 | **F3** · Design kit | Identidade, tokens, padrões de tela e protótipo navegável (se houver interface) | Aprovar o design e o protótipo |
@@ -131,6 +152,12 @@ Tudo também pode ser feito pelos botões das GitHub Actions (*Run workflow*), s
   programa não pode mudá-los, só retirar a marca de pendente da própria tarefa.
 - **Dois perfis de entrega:** *compilado* (binários, APK; a produção publica os mesmos bytes homologados) e
   *deploy* (imagem por digest, staging, migração antes da troca, *Voltar versão*).
+- **Catálogo de deploy:** `bb alvos` lista destinos e formatos implementados e reservados, sem acessar servidor.
+  O gerador valida os contratos antes de escrever arquivos. `vps-docker` e `tsuru` estão implementados com imagem
+  OCI; Tsuru aceita um serviço por app, com job manual preparado ou migração na inicialização. Veja o [runbook](.bigbang/docs/deploy-tsuru.md).
+  Personalizado e outros formatos continuam no backlog do
+  [épico #174](https://github.com/BrunodosSantosVaz/big-bang/issues/174). Veja o
+  [contrato de extensão](.bigbang/esteira/perfis/deploy/README.md).
 - **Várias IAs ao mesmo tempo:** cada uma assume a tarefa (`bb assumir`) e trabalha na própria pasta.
 - **Repositório completo:** todo sistema nasce com README, licença, código de conduta, guia de contribuição,
   política de segurança e um ícone global aprovado no protótipo (DOC-15 a DOC-17, cobrados pela CI).
@@ -163,6 +190,10 @@ O Big Bang segue [SemVer](https://semver.org/lang/pt-BR/). Cada versão é uma
 SHA-256 e a atestação de origem. Num sistema, diga "atualizar o Big Bang" (`bb atualizar`): a IA baixa e confere o
 pacote, mostra o [`MIGRACAO.md`](.bigbang/MIGRACAO.md) e abre um PR que troca só o framework.
 
+A 1.5.0 mantém VPS/Docker, runner público e modo padrão para configurações existentes. Adoção de Flash ou Tsuru
+fica numa decisão própria por ADR e `bb gerar`, após a atualização oficial. Consulte o
+[changelog](CHANGELOG.md) e os passos opcionais da migração antes de mudar a entrega do sistema.
+
 ## Documentação do framework
 
 - Especificação completa: [`.bigbang/docs/especificacao.md`](.bigbang/docs/especificacao.md)
@@ -189,3 +220,21 @@ O **framework** Big Bang (tudo que está em `.bigbang/` e os arquivos gerados a 
 O **sistema que você criar** a partir do Big Bang é seu: o código pertence a você, que escolhe a licença dele,
 inclusive fechada. A única obrigação é manter o aviso de copyright do framework, que na Fundação vai para
 `.bigbang/LICENSE`.
+
+### Actions conforme o alvo de deploy
+
+`bb gerar` injeta somente os nomes de variáveis e segredos do contrato escolhido em staging, produção e rollback.
+O contrato de artefato define os scripts da construção e da candidata. A construção permanece no runner público;
+`[deploy] runner = ["self-hosted", "rede-deploy"]` seleciona o runner das publicações (inclusive rede privada).
+`preparar_rede = "bash deploy/rede.sh"` executa a preparação aprovada antes do alvo, somente no deploy real.
+Valores de segredo ficam nos ambientes do GitHub; nunca no TOML. Produção e rollback mantêm aprovação humana.
+
+### SQLite no Tsuru
+
+O alvo Tsuru aceita `TSURU_MIGRACAO=inicializacao`: a aplicação migra o arquivo de seu volume persistente antes
+de começar a atender. O modo de job manual continua como padrão para bancos externos. Configure uma réplica,
+readiness que consulta o banco e backup; veja o [runbook](.bigbang/docs/deploy-tsuru.md#sqlite-e-migração-na-inicialização).
+A pré-checagem registra `migration=pending`; a imagem migra antes de abrir a porta, e só saúde/readiness e
+testes posteriores comprovam a entrega. O rollout pode sobrepor temporariamente duas unidades no mesmo volume,
+exigindo migrações transacionais e compatíveis. A instalação da plataforma Node.js é uma preparação separada do
+servidor: o alvo desta versão importa imagem OCI por digest, com seu inicializador, sem upload de fontes.

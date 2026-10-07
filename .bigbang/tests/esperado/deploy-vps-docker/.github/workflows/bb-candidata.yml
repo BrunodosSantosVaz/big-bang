@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.4.0 a partir de .bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v1.5.0 a partir de .bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
 # Candidata do perfil deploy (spec 14.4): a cada push em release/**, testes, imagens (deploy.servicos) construídas UMA
 # vez para deploy.plataformas e publicadas por digest, Trivy, staging (migração, publicação, saúde, smoke e ZAP), pre-release vX.Y.Z-rc.N com o digest
 # (imagem.txt), SBOM e atestado, e então épico ou bug em Homologação com o PR release -> main.
@@ -39,19 +39,23 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      actions: read
       packages: write
     outputs:
       imagem: ${{ steps.i.outputs.imagem }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
       - run: bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
-      - run: bash .bigbang/esteira/nucleo/scripts/comando.sh testes
-      - run: bash .bigbang/esteira/nucleo/scripts/comando.sh testes_aceite
+      - name: Validar testes (Flash reutiliza CI do mesmo commit)
+        run: bash .bigbang/esteira/nucleo/scripts/testes-candidata.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Entrar no GHCR
         run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
         env:
@@ -66,8 +70,11 @@ jobs:
           TAG: ${{ needs.preparar.outputs.tag }}
 
   staging:
+    concurrency:
+      group: bb-staging
+      cancel-in-progress: false
     needs: [preparar, imagem]
-    runs-on: ubuntu-24.04
+    runs-on: ["ubuntu-24.04"]
     environment: staging
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -77,7 +84,9 @@ jobs:
         with:
           python-version: '3.12'
       - name: Staging pelo alvo vps-docker (migração, publicação, saúde, smoke, ZAP)
-        run: bash .bigbang/esteira/perfis/deploy/scripts/staging.sh
+        run: |
+          bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
+          bash .bigbang/esteira/perfis/deploy/scripts/staging.sh
         env:
           IMAGEM: ${{ needs.imagem.outputs.imagem }}
           VPS_HOST: ${{ vars.VPS_HOST }}
@@ -87,8 +96,8 @@ jobs:
           VPS_DOCKER_SUDO: ${{ vars.VPS_DOCKER_SUDO }}
           VPS_ENV_ARQUIVO: ${{ vars.VPS_ENV_ARQUIVO }}
           VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
-          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
           REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}
+          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
           REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
 
   publicar:

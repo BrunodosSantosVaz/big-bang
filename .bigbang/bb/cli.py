@@ -3,9 +3,9 @@ import argparse
 import sys
 
 from . import config as config_module
-from . import acceptance, checklist, checksums, decisions, generator, ownership, package, status, update, verify, workspaces
+from . import acceptance, checklist, checksums, decisions, deploy_catalog, generator, ownership, package, status, update, verify, workspaces
 from . import init as init_module
-from . import pipeline_cli
+from . import pipeline_cli, test_runs
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 from .paths import default_root
 
@@ -20,6 +20,9 @@ def build_parser():
     parser = _Parser(prog="bb", description="Big Bang: ferramentas do framework.")
     parser.add_argument("--raiz", default=None, help="raiz do projeto (padrão: a pasta acima de .bigbang/)")
     commands = parser.add_subparsers(dest="command", metavar="<comando>", parser_class=_Parser)
+
+    alvos_parser = commands.add_parser("alvos", help="lista alvos e formatos de deploy instalados (somente leitura)")
+    alvos_parser.set_defaults(handler=_alvos)
 
     config_parser = commands.add_parser("config", help="lê o bigbang.toml")
     config_commands = config_parser.add_subparsers(dest="config_command", metavar="<subcomando>",
@@ -41,12 +44,21 @@ def build_parser():
     init_parser.add_argument("--repositorio", help="dono/nome (padrão: o remote origin)")
     init_parser.add_argument("--visibilidade", choices=("privado", "publico"), default="privado")
     init_parser.add_argument("--licenca", default="", help="identificador SPDX (obrigatório se público)")
+    init_parser.add_argument("--modo", choices=("padrao", "flash"), default="padrao", help="modo de trabalho (pode mudar depois)")
     init_parser.add_argument("--sem-github", action="store_true", help="não cria label nem issue no GitHub")
     init_parser.add_argument("--simular", action="store_true", help="só mostra o plano")
     init_parser.set_defaults(handler=_init)
 
     verificar_parser = commands.add_parser("verificar", help="confere framework, arquivos gerados e workflows")
     verificar_parser.set_defaults(handler=_verificar)
+
+    testes_parser = commands.add_parser("testes", help="executa a suíte completa ou os testes afetados no Flash")
+    testes_parser.add_argument("--base", help="referência Git de comparação; ausência força suíte completa")
+    testes_parser.add_argument("--fase", choices=("tarefa", "candidata", "producao"), default="tarefa")
+    testes_parser.add_argument("--versao", help="versão de entrega X.Y.Z (major/minor exige suíte completa)")
+    testes_parser.add_argument("--completo", action="store_true", help="força suíte completa")
+    testes_parser.add_argument("--simular", action="store_true", help="mostra a decisão sem executar testes")
+    testes_parser.set_defaults(handler=_testes)
 
     assumir_parser = commands.add_parser("assumir", help="confirma a posse e abre uma pasta de trabalho própria")
     assumir_parser.add_argument("issue", type=int)
@@ -118,7 +130,7 @@ def build_parser():
 
 def _init(args):
     options = init_module.resolve_options(args.raiz, args.nome, args.slug, args.dono, args.repositorio,
-                                          args.visibilidade, args.licenca)
+                                          args.visibilidade, args.licenca, args.modo)
     steps = init_module.plan_steps(options, with_github=not args.sem_github)
     if args.simular:
         print("Simulação do bb init para " + options["repositorio"] + ":")
@@ -140,6 +152,12 @@ def _init(args):
 def _ia(args):
     import os
     return args.ia or os.environ.get("BB_IA") or "ia"
+
+
+def _testes(args):
+    test_runs.run(args.raiz, config_module.load(args.raiz), base=args.base, phase=args.fase,
+                  version=args.versao, full=args.completo, simulate=args.simular)
+    return EXIT_OK
 
 
 def _assumir(args):
@@ -286,6 +304,25 @@ def _gerar(args):
         print(f"{kind}: {path}")
     print(f"{len(pending)} arquivo(s) atualizados. Rode bb verificar e revise o diff num PR.")
     return EXIT_OK
+
+
+def _alvos(args):
+    problems = []
+    for collection, title in (('alvos', 'Alvos de deploy'), ('artefatos', 'Formatos de artefato')):
+        print(title + ':')
+        entries = deploy_catalog.entries(args.raiz, collection)
+        if not entries:
+            problems.append(f'{collection}: catálogo instalado ausente ou vazio')
+        for name, entry, error in entries:
+            if error:
+                print(f'  {name}: inválido')
+                problems.append(error)
+            else:
+                capabilities = ' (artefatos: ' + ', '.join(entry.artifacts) + ')' if collection == 'alvos' else ''
+                print(f'  {name}: {entry.state}{capabilities} — {entry.description}')
+    for problem in problems:
+        print('  - ' + problem, file=sys.stderr)
+    return EXIT_VERIFICATION_FAILED if problems else EXIT_OK
 
 
 def _config_get(args):

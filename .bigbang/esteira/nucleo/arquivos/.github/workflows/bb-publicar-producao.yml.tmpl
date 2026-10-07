@@ -52,10 +52,31 @@ jobs:
         if: ${{ !inputs.simular }}
         run: bash .bigbang/esteira/nucleo/scripts/link-aprovacao.sh --resumo "Publicar em produção (versão $VERSAO)"
 
-  publicar:
+  testes-producao:
     needs: conferir
     if: ${{ !inputs.simular }}
     runs-on: ubuntu-24.04
+    outputs:
+      sha: ${{ steps.testes.outputs.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Suíte completa antes de produção (inclusive patches)
+        id: testes
+        run: bash .bigbang/esteira/nucleo/scripts/testes-producao.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  publicar:
+    needs: [conferir, testes-producao]
+    if: ${{ !inputs.simular }}
+    runs-on: {{gerado.runner_deploy}}
     environment: producao
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -67,18 +88,12 @@ jobs:
         with:
           python-version: '3.12'
       - name: Publicar ({{entrega.perfil}})
-        run: bash .bigbang/esteira/nucleo/scripts/publicar-producao.sh
+        run: |
+          {{gerado.preparar_alvo}}
+          bash .bigbang/esteira/nucleo/scripts/publicar-producao.sh
         env:
           GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
           SIMULAR: 'false'
+          BB_SHA_TESTADO: ${{ needs.testes-producao.outputs.sha }}
           # perfil deploy: o servidor de produção (variáveis e segredos do ambiente producao)
-          VPS_HOST: ${{ vars.VPS_HOST }}
-          VPS_PORTA: ${{ vars.VPS_PORTA }}
-          VPS_USUARIO: ${{ vars.VPS_USUARIO }}
-          VPS_PASTA: ${{ vars.VPS_PASTA }}
-          VPS_DOCKER_SUDO: ${{ vars.VPS_DOCKER_SUDO }}
-          VPS_ENV_ARQUIVO: ${{ vars.VPS_ENV_ARQUIVO }}
-          VPS_KNOWN_HOSTS: ${{ vars.VPS_KNOWN_HOSTS }}
-          VPS_CHAVE_SSH: ${{ secrets.VPS_CHAVE_SSH }}
-          REGISTRY_USUARIO: ${{ vars.REGISTRY_USUARIO }}
-          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+{{gerado.env_alvo}}

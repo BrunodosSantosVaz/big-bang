@@ -13,6 +13,7 @@ from test_integrar_publicar import ComGit
 BB = os.path.join(BIGBANG, "bin", "bb.py")
 sys.path.insert(0, BIGBANG)
 from bb import cli  # noqa: E402
+from unittest.mock import patch
 from bb.errors import EXIT_OK, EXIT_USAGE, EXIT_VERIFICATION_FAILED  # noqa: E402
 
 DIFF_SRC = "diff --git a/src/a.py b/src/a.py\n--- a/src/a.py\n+++ b/src/a.py\n@@ -1 +1 @@\n-x\n+y\n"
@@ -100,6 +101,34 @@ class RevisaoAprovar(ComCli):
         self.issue(12, "Tarefa", labels=["task", "dono:revisao-ia"])
         self.pr(labels=["revisao-humana"], diff=DIFF_AUTH)
         self.assertEqual(self.bb("revisao", "aprovar", "30")[0], EXIT_OK)
+
+    def test_local_flash_cannot_change_target_review_policy(self):
+        path = os.path.join(self.projeto, 'bigbang.toml')
+        with open(path, encoding='utf-8') as handle:
+            text = handle.read()
+        with open(path, 'w', encoding='utf-8') as handle:
+            handle.write(text.replace('modo = "padrao"', 'modo = "flash"'))
+        self.issue(12, 'Tarefa', labels=['task'])
+        self.pr(diff=DIFF_AUTH)
+        with patch('bb.decisions._target_mode', return_value='padrao'):
+            self.assertEqual(self.bb('revisao', 'aprovar', '30')[0], EXIT_VERIFICATION_FAILED)
+
+    def test_target_flash_is_used_even_when_local_config_is_standard(self):
+        self.issue(12, 'Tarefa', labels=['task'])
+        self.pr(diff=DIFF_AUTH)
+        with patch('bb.decisions._target_mode', return_value='flash') as target:
+            self.assertEqual(self.bb('revisao', 'aprovar', '30')[0], EXIT_OK)
+        target.assert_called_once_with('dono/repo', 'epico/7-x')
+
+    def test_destination_config_is_fetched_from_github(self):
+        self.estado['repository_files'] = {'epico/7-x': {'bigbang.toml':
+            '[projeto]\nmodo="flash"\n'}}
+        self.issue(12, 'Tarefa', labels=['task'])
+        self.pr(diff=DIFF_AUTH)
+        self.assertEqual(self.bb('revisao', 'aprovar', '30')[0], EXIT_OK)
+        self.estado['repository_files']['epico/7-x']['bigbang.toml'] = '[projeto]\nmodo="padrao"\n'
+        self.pr(diff=DIFF_AUTH)
+        self.assertEqual(self.bb('revisao', 'aprovar', '30')[0], EXIT_VERIFICATION_FAILED)
 
     def test_testes_com_revisao_humana(self):
         self.issue(11, "Testes", labels=["teste-aceite", "testes-revisao-humana"])

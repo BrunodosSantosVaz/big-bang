@@ -1,0 +1,6 @@
+descricao = "Reserva AWS; o serviço concreto exige adaptador e decisão do projeto"
+situacao = "reservado"
+artefatos = ["imagem", "pacote", "estatico"]
+operacoes = ["publicar", "migrar", "saude", "voltar"]
+variaveis = []
+segredos = []

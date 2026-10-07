@@ -2,7 +2,7 @@
 name: bb-design-kit
 description: Use em F3 da Fundação para criar identidade, tokens, componentes e protótipo navegável das telas principais, com aprovação do dono e acessibilidade AA.
 ---
-<!-- Gerado pelo Big Bang v1.4.0 a partir de .bigbang/skills/bb-design-kit/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.5.0 a partir de .bigbang/skills/bb-design-kit/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Design kit
 

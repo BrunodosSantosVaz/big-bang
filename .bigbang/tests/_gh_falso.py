@@ -210,6 +210,12 @@ def api(state, positional, fields, jq, method):
     path = unquote(positional[0])
     if "per_page=100" in path and "/issues?" not in path:
         path = path.split("?", 1)[0]
+    if path == f'repos/{REPO}/contents/bigbang.toml':
+        import base64
+        text = state.get('repository_files', {}).get(fields.get('ref'), {}).get('bigbang.toml')
+        if text is None:
+            sys.stderr.write('HTTP 404: Not Found\n'); sys.exit(1)
+        return emit({'content': base64.b64encode(text.encode()).decode()}, jq)
     match = re.match(rf"^repos/{re.escape(REPO)}/issues/(\d+)$", path)
     if match:
         return emit(issue_json(state, match.group(1)), jq)

@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.4.0 a partir de .bigbang/esteira/perfis/compilado/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v1.5.0 a partir de .bigbang/esteira/perfis/compilado/arquivos/.github/workflows/bb-candidata.yml.tmpl. Não edite: personalize em bigbang.toml.
 # Candidata do perfil compilado (spec 14.3): a cada push em release/**, testes, build de cada sistema (matriz) e,
 # só se TODOS compilarem, a pre-release vX.Y.Z-rc.N com binários, SHA256SUMS, SBOM e atestado de procedência.
 # Depois: épico ou bug em Homologação e PR release -> main. Nada é commitado aqui (o Git guarda só código).
@@ -39,6 +39,9 @@ jobs:
     needs: preparar
     if: ${{ needs.preparar.outputs.pular != 'true' }}
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -47,8 +50,10 @@ jobs:
         with:
           python-version: '3.12'
       - run: bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
-      - run: bash .bigbang/esteira/nucleo/scripts/comando.sh testes
-      - run: bash .bigbang/esteira/nucleo/scripts/comando.sh testes_aceite
+      - name: Validar testes (Flash reutiliza CI do mesmo commit)
+        run: bash .bigbang/esteira/nucleo/scripts/testes-candidata.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
 
   build:
     needs: [preparar, testes]

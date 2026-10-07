@@ -1,5 +1,7 @@
 # 14 · Automações
 
+O [modo Flash](17-flash.md) muda a execução dos testes no job `check`: após o build, usa `bb testes` com a base do PR/push; mudanças estruturais e releases major/minor forçam suíte completa. A candidata espera o `check` verde do SHA exato, e produção executa suíte completa antes da aprovação do ambiente.
+
 ## Coordenação de IAs
 
 **Marcar posses paradas** (`bb-posses.yml`) roda a cada hora e marca `parada` quando não houve push registrado por
@@ -61,8 +63,15 @@ repositório público (em privado exige GitHub Enterprise Cloud).
 | `bb-candidata.yml` | push em `release/**` | imagem uma vez, registro com digest, Trivy, staging, migração, smoke, ZAP; abre o PR da release |
 | `bb-voltar-versao.yml` | botão + ambiente `producao` | reimplanta a imagem da tag anterior; nunca desfaz migração |
 
-Cada alvo de deploy (`vps-docker`, `aws`, `paas`) implementa quatro operações: `publicar <ambiente> <digest>`,
-`voltar <ambiente> <tag>`, `migrar <ambiente> <digest>` e `saude <ambiente>`.
+Consulte `bb alvos` (somente leitura, disponível antes da Fundação) para distinguir alvos e formatos implementados
+das reservas. Hoje a entrega disponível é `vps-docker` + `imagem`; `aws`, `paas`, `tsuru`, `personalizado`, `pacote` e
+`estatico` estão reservados e o gerador recusa sua seleção. A configuração `deploy.artefato` é opcional e usa
+`imagem` por padrão.
+
+Cada alvo implementado declara as operações `publicar <ambiente> <digest>`, `voltar <ambiente> <tag>`,
+`migrar <ambiente> <digest>` e `saude <ambiente>`, podendo oferecer `checar`. Os contratos instalados são validados
+antes de gerar arquivos. A composição passa pelo formato do artefato antes do alvo. Veja o
+[contrato de extensão](../esteira/perfis/deploy/README.md) e o [ADR-0016](../docs/decisoes/ADR-0016-deploy-multiplataforma.md).
 
 ## Segredos e variáveis
 

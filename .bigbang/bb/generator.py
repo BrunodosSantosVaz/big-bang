@@ -14,7 +14,7 @@ import re
 import tomllib
 
 from . import config as config_module
-from . import pipeline
+from . import deploy_catalog, pipeline
 from .errors import EXIT_INVALID_STATE, BbError
 from .paths import framework_dir, framework_version, read_text, to_posix, write_text
 from .render import TEMPLATE_SUFFIX, add_notice, has_notice, notice_text, substitute
@@ -78,12 +78,33 @@ def dependabot_entries(ecosystems):
     return "\n".join(entries)
 
 
-def with_computed(config):
+def with_computed(config, root):
     """Config plus `gerado.*`: values computed in code, so templates stay free of conditional logic."""
     context = dict(config)
     systems = config.get("compilado", {}).get("sistemas", []) if config["entrega"]["perfil"] == "compilado" else []
     context["gerado"] = {"dependabot": dependabot_entries(config["entrega"].get("ecossistemas", [])),
-                         "matriz_compilado": pipeline.build_matrix(systems)}
+                         "matriz_compilado": pipeline.build_matrix(systems),
+                         "modo_trabalho": (
+                             "**Modo Flash.** Escreva os testes antes do código e preserve a ordem teste → tarefas. "
+                             "Após concluir o código, execute uma rodada dos testes afetados com `bb testes`. "
+                             "Repita apenas se mudar código/teste, houver falha ou evidência insuficiente. "
+                             "Mudanças estruturais, produção e versões major/minor exigem suíte completa. "
+                             "Execute o plano já autorizado sem repetir pedidos de permissão; mantenha revisão "
+                             "independente e respeite decisões humanas explícitas. Veja `.bigbang/processo/17-flash.md`."
+                             if config_module.get(config, "projeto.modo") == "flash" else
+                             "**Modo padrão.** Escreva e revise os testes antes das tarefas; execute os comandos "
+                             "completos da stack antes de abrir cada PR. Veja `.bigbang/processo/06-execucao.md`."
+                         )}
+    context['gerado'].update(env_alvo='          # Perfil compilado: sem credenciais de deploy.', runner_deploy='ubuntu-24.04', preparar_alvo=':')
+    if config['entrega']['perfil'] == 'deploy':
+        target, artifact = deploy_catalog.resolve(root, config)
+        context['gerado']['preparar_alvo'] = 'bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh'
+        context['gerado']['env_alvo'] = '\n'.join(
+            '          ' + name + ': ${{ ' + kind + '.' + name + ' }}'
+            for kind, names in (('vars', target.variables), ('secrets', target.secrets)) for name in names)
+        context['gerado']['runner_deploy'] = config_module.get(config, 'deploy.runner')
+        context['gerado']['artefato_construir'] = artifact.scripts['construir']
+        context['gerado']['artefato_candidata'] = artifact.scripts['candidata']
     return context
 
 
@@ -92,7 +113,9 @@ def build_plan(root, install_pipeline=False):
     if install_pipeline and config is None:
         raise BbError("a esteira só pode ser gerada depois do bb init (falta o bigbang.toml)", EXIT_INVALID_STATE)
     installed = config is not None and (install_pipeline or pipeline_installed(root))
-    context = with_computed(config) if config is not None else initial_context(root)
+    if config is not None and config['entrega']['perfil'] == 'deploy':
+        deploy_catalog.resolve(root, config)
+    context = with_computed(config, root) if config is not None else initial_context(root)
     version = framework_version(root)
     plan = Plan(installed)
 
@@ -115,6 +138,8 @@ def _layers(config, installed):
         perfil = config["entrega"]["perfil"]
         layers += ["esteira/nucleo", f"esteira/perfis/{perfil}"]
         if perfil == "deploy":
+            artifact = config['deploy'].get('artefato', 'imagem')
+            layers.append(f"esteira/perfis/deploy/artefatos/{artifact}")
             layers.append(f"esteira/perfis/deploy/alvos/{config['entrega']['alvo']}")
     return layers
 

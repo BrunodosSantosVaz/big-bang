@@ -1,5 +1,9 @@
 # 15 · Atualização do framework
 
+No modo Flash, atualização continua exigindo hash, atestação e validação estrutural completa; a revisão
+independente é por IA, salvo pedido explícito do dono. Reutilize a autorização já dada para passos manuais
+conhecidos; peça decisão somente para ação nova. Testes são escritos antes, executados após concluir o código.
+
 O Big Bang é atualizável: tudo que é do framework fica isolado e pode ser trocado por uma versão nova **sem tocar no
 que é do projeto**.
 

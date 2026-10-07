@@ -1,5 +1,7 @@
 # Padrão de testes (TST)
 
+**Modo Flash:** TST-03 e a trava de aceite permanecem. A execução pode ser concentrada após o código concluído, com testes afetados por dependências e cobertura das camadas alteradas. Mudanças estruturais, produção e versões major/minor exigem toda a suíte. Consulte [o contrato](../processo/17-flash.md).
+
 Regras obrigatórias para todo sistema do Big Bang. **DEVE**/**NÃO DEVE** são obrigação; **DEVERIA** só se descumpre
 com ADR; **PODE** é opção. Exceção só com ADR listado em `docs/padroes/excecoes.md`. Veja a
 [tabela de rastreio](README.md).

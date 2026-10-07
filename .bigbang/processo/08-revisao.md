@@ -1,5 +1,7 @@
 # 08 · Revisão
 
+No [modo Flash](17-flash.md), revisão independente por IA é padrão inclusive em zonas sensíveis comuns. O modo é lido da branch de destino: um PR não altera a regra que o julga. Labels explícitas `revisao-humana` e `testes-revisao-humana`, trabalho crítico e decisões do dono permanecem respeitados.
+
 Nenhum PR é mesclado sem revisão. Quem escreveu o código não aprova o próprio raciocínio.
 
 ## Revisão pela IA (padrão: `revisao-ia`)

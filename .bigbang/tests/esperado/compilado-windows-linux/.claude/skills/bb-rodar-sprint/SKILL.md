@@ -2,13 +2,18 @@
 name: bb-rodar-sprint
 description: Use para vamos rodar a sprint ou vamos encerrar a sprint. Confere portões, usa os botões da esteira e coordena testes, tarefas, documentação e retrospectiva.
 ---
-<!-- Gerado pelo Big Bang v1.4.0 a partir de .bigbang/skills/bb-rodar-sprint/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.5.0 a partir de .bigbang/skills/bb-rodar-sprint/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Rodar ou encerrar sprint
 
 ## Quando usar
 
 Ao iniciar, retomar ou encerrar sprint; não confunda sprint com release de épico.
+
+Consulte `projeto.modo`. No Flash, reutilize a autorização do plano sem pedir outro sim por tarefa. A ordem
+teste → tarefas continua: escreva os testes antes e execute os afetados após concluir o código (`bb testes`).
+Use a CI do mesmo SHA e não repita tudo por hábito. Estrutura, major/minor e produção exigem suíte completa.
+Veja `.bigbang/processo/17-flash.md`.
 
 ## Antes de começar
 

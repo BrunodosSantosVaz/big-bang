@@ -9,6 +9,11 @@ description: Use para vamos rodar a sprint ou vamos encerrar a sprint. Confere p
 
 Ao iniciar, retomar ou encerrar sprint; não confunda sprint com release de épico.
 
+Consulte `projeto.modo`. No Flash, reutilize a autorização do plano sem pedir outro sim por tarefa. A ordem
+teste → tarefas continua: escreva os testes antes e execute os afetados após concluir o código (`bb testes`).
+Use a CI do mesmo SHA e não repita tudo por hábito. Estrutura, major/minor e produção exigem suíte completa.
+Veja `.bigbang/processo/17-flash.md`.
+
 ## Antes de começar
 
 Leia `AGENTS.md`, `.bigbang/processo/05-sprint.md`, `06-execucao.md`, `14-automacoes.md` e `bigbang.toml`.

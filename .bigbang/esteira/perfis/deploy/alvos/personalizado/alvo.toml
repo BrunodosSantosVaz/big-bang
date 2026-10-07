@@ -1,0 +1,6 @@
+descricao = "Scripts do projeto; implementação na tarefa #177 do framework"
+situacao = "reservado"
+artefatos = ["imagem", "pacote", "estatico"]
+operacoes = ["publicar", "migrar", "saude", "voltar"]
+variaveis = []
+segredos = []

@@ -7,6 +7,8 @@ Este repositório foi criado a partir do **Big Bang v{{bigbang.versao}}** e **ai
 
 - Ao receber "iniciar projeto" — ou qualquer pedido de trabalho —, use a skill `bb-iniciar-projeto`.
 - Leia `.bigbang/processo/02-fundacao.md` antes de começar.
+- Escolha com o dono o modo padrão ou Flash (`bb init --modo flash`). Testes continuam escritos antes do código;
+  Flash concentra a execução após concluir as alterações, selecionando os testes afetados. Pode mudar depois.
 - Não crie código do sistema antes do fim da etapa F2 (stack, arquitetura e hospedagem escolhidas pelo dono).
 - Pergunte antes de agir fora do repositório (criar tokens, segredos, ambientes, rulesets, mudar visibilidade):
   mostre o comando exato e espere o dono rodar ou autorizar.

@@ -146,6 +146,22 @@ class Atualizar(CasoDeScript):
         self.assertEqual(git(self.projeto, "status", "--porcelain"), "")
         self.assertEqual(git(self.projeto, "branch", "--show-current"), "develop")
 
+    def test_flash_updates_with_independent_ai_review(self):
+        toml = os.path.join(self.projeto, "bigbang.toml")
+        self.escrever("bigbang.toml", ler(toml).replace('modo = "padrao"', 'modo = "flash"'))
+        self.bb("gerar")
+        git(self.projeto, "add", "-A")
+        git(self.projeto, "commit", "-qm", "chore: choose Flash")
+        git(self.projeto, "push", "-q", "origin", "develop")
+        self.publicar_versao()
+        result = self.bb("atualizar")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        pr = next(iter(self.estado["prs"].values()))
+        self.assertIn("revisao-ia", pr["labels"])
+        self.assertNotIn("revisao-humana", pr["labels"])
+        self.assertIn("Modo Flash", pr["body"])
+        self.projeto_intacto(f"framework/v{NOVA}")
+
     def test_atestacao_que_nao_confere_recusa(self):
         self.publicar_versao()
         self.estado["atestacao_falha"] = True

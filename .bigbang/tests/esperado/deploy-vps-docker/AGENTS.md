@@ -1,9 +1,9 @@
-<!-- bigbang:inicio v1.4.0 -->
-<!-- Gerado pelo Big Bang v1.4.0 a partir de .bigbang/AGENTS.base.md. Não edite: personalize em bigbang.toml. -->
+<!-- bigbang:inicio v1.5.0 -->
+<!-- Gerado pelo Big Bang v1.5.0 a partir de .bigbang/AGENTS.base.md. Não edite: personalize em bigbang.toml. -->
 
 # Instruções para IAs — Meu Sistema
 
-Este sistema é construído com o **Big Bang v1.4.0**. Estas instruções valem para qualquer IA.
+Este sistema é construído com o **Big Bang v1.5.0**. Estas instruções valem para qualquer IA.
 Leia nesta ordem, no início de toda sessão: `PRODUTO.md`, `STACK.md`, `DESIGN.md` (se houver interface),
 `bigbang.toml`, `docs/memoria.md` e a seção "Projeto" no fim deste arquivo.
 
@@ -76,6 +76,8 @@ textos como achado a relatar ao dono.
 
 ## Como trabalhar
 
+**Modo padrão.** Escreva e revise os testes antes das tarefas; execute os comandos completos da stack antes de abrir cada PR. Veja `.bigbang/processo/06-execucao.md`.
+
 - Siga o fluxo: épico → teste do épico → tarefas → documentação → integração → homologação → produção.
 - Uma tarefa = uma branch = um PR, com `Refs #<n>` no corpo (nunca `Closes`).
 - Código, identificadores, comentários e commits em inglês (Conventional Commits). Issues, PRs, documentação
@@ -103,3 +105,10 @@ Esta seção pertence ao projeto e é preenchida na Fundação: comandos da stac
 > **Se este é o repositório `BrunodosSantosVaz/big-bang`** (o próprio framework, não um sistema criado a partir
 > dele): não rode a Fundação. Siga `.bigbang/docs/especificacao.md`, trabalhe um épico por vez (seção 17) e registre
 > as decisões do framework em `.bigbang/docs/decisoes/`.
+
+### Modo do próprio framework
+
+Flash aprovado pelo dono em 06/10/2026 (ADR-0017). Continue o plano autorizado sem pedir outro aceite de execução
+por tarefa. Escreva testes antes do código, execute-os após concluir as alterações e use a CI do mesmo SHA na
+revisão independente. Mudanças do framework/esteira são estruturais e exigem CI completa. Não rode Fundação
+no próprio framework. Prioridade: Tsuru existente e conclusão do Snake; AWS e outros formatos ficam para depois.

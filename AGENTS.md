@@ -1,15 +1,17 @@
-<!-- bigbang:inicio v1.4.0 -->
-<!-- Gerado pelo Big Bang v1.4.0 a partir de .bigbang/AGENTS.inicial.md. Não edite: personalize em bigbang.toml. -->
+<!-- bigbang:inicio v1.5.0 -->
+<!-- Gerado pelo Big Bang v1.5.0 a partir de .bigbang/AGENTS.inicial.md. Não edite: personalize em bigbang.toml. -->
 
 # Instruções para IAs — sistema ainda não fundado
 
-Este repositório foi criado a partir do **Big Bang v1.4.0** e **ainda não foi fundado** (não existe
+Este repositório foi criado a partir do **Big Bang v1.5.0** e **ainda não foi fundado** (não existe
 `bigbang.toml`). Estas instruções valem para qualquer IA.
 
 ## O que fazer agora
 
 - Ao receber "iniciar projeto" — ou qualquer pedido de trabalho —, use a skill `bb-iniciar-projeto`.
 - Leia `.bigbang/processo/02-fundacao.md` antes de começar.
+- Escolha com o dono o modo padrão ou Flash (`bb init --modo flash`). Testes continuam escritos antes do código;
+  Flash concentra a execução após concluir as alterações, selecionando os testes afetados. Pode mudar depois.
 - Não crie código do sistema antes do fim da etapa F2 (stack, arquitetura e hospedagem escolhidas pelo dono).
 - Pergunte antes de agir fora do repositório (criar tokens, segredos, ambientes, rulesets, mudar visibilidade):
   mostre o comando exato e espere o dono rodar ou autorizar.
@@ -70,3 +72,10 @@ Esta seção pertence ao projeto e é preenchida na Fundação: comandos da stac
 > **Se este é o repositório `BrunodosSantosVaz/big-bang`** (o próprio framework, não um sistema criado a partir
 > dele): não rode a Fundação. Siga `.bigbang/docs/especificacao.md`, trabalhe um épico por vez (seção 17) e registre
 > as decisões do framework em `.bigbang/docs/decisoes/`.
+
+### Modo do próprio framework
+
+Flash aprovado pelo dono em 06/10/2026 (ADR-0017). Continue o plano autorizado sem pedir outro aceite de execução
+por tarefa. Escreva testes antes do código, execute-os após concluir as alterações e use a CI do mesmo SHA na
+revisão independente. Mudanças do framework/esteira são estruturais e exigem CI completa. Não rode Fundação
+no próprio framework. Prioridade: Tsuru existente e conclusão do Snake; AWS e outros formatos ficam para depois.

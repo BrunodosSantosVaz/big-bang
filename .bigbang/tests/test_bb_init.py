@@ -85,7 +85,7 @@ class Init(unittest.TestCase):
             config = tomllib.load(arquivo)
         self.assertEqual(config["projeto"], {"nome": "Sistema Ação X", "slug": "sistema-acao-x", "dono": "dona-teste",
                                              "repositorio": "dona-teste/sistema-x", "visibilidade": "privado",
-                                             "licenca": ""})
+                                             "licenca": "", "modo": "padrao"})
         self.assertEqual(config["deploy"]["imagem"], "ghcr.io/dona-teste/sistema-acao-x")
         self.assertEqual(config["paineis"]["owner"], "dona-teste")
         self.assertIn("# versão do framework instalada", self.ler("bigbang.toml"))  # comments kept
