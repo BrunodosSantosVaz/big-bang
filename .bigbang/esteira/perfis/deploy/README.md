@@ -26,13 +26,16 @@ suporte. Não há acesso ao servidor nessa conferência.
 | Formato | `imagem` (identidade por digest) | `pacote`, `estatico` (identidade por SHA-256) |
 
 O [épico #174](https://github.com/BrunodosSantosVaz/big-bang/issues/174) entregou o catálogo (#175), composição de
-credenciais, preparação e acesso à rede (#176) e Tsuru por imagem/job manual (#178). Personalizado (#177), pacotes
+credenciais, preparação e acesso à rede (#176) e Tsuru por imagem/job manual (#178), com migração na
+inicialização para SQLite (#187). Personalizado (#177), pacotes
 e arquivos (#179) e serviço AWS concreto (#180) continuam reservados. A presença de uma reserva documenta a
 intenção, sem prometer funcionalidade. Entrega de deploy por hashes permanece recusada enquanto o perfil
 implementar somente imagens; o perfil compilado conserva sua própria promoção de binários por hashes.
 
 O [runbook do Tsuru](../../../docs/deploy-tsuru.md) documenta API, apps/jobs por ambiente, importação por
-digest, migração comprovada e limites dessa implementação.
+digest, `TSURU_MIGRACAO=job` (padrão) ou `inicializacao` e limites dessa implementação. Neste último modo,
+a pré-checagem registra `migration=pending`; a imagem migra antes de ouvir a porta e saúde/readiness consulta
+o banco. Exige uma réplica permanente, com possível sobreposição transitória no rollout do mesmo volume.
 
 ## Contrato de um alvo
 

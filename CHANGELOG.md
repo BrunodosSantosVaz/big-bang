@@ -9,7 +9,10 @@ anteriores estão em [MIGRACAO.md](.bigbang/MIGRACAO.md). A versão instalada é
 
 - Modo Flash persistente: testes escritos antes do código, execução posterior dos afetados e revisão independente.
 - Catálogo extensível de alvos e artefatos (`bb alvos`), com validação de disponibilidade e capacidades.
-- Adaptador do Tsuru existente para um serviço OCI por aplicação, digest e job manual de migração por ambiente.
+- Adaptador do Tsuru existente para um serviço OCI por aplicação e digest, com `TSURU_MIGRACAO=job` por padrão
+  ou `inicializacao` para SQLite em volume persistente.
+- Pré-checagem de inicialização registra `migration=pending`; a imagem migra antes de ouvir a porta. Readiness
+  consulta o banco; uma réplica permanente pode ter sobreposição transitória no rollout do mesmo volume.
 - Seleção de runner e preparação de rede nas publicações, conforme a configuração aprovada do projeto.
 
 ### Alterado
@@ -29,5 +32,6 @@ anteriores estão em [MIGRACAO.md](.bigbang/MIGRACAO.md). A versão instalada é
 ### Limitações
 
 - VPS/Docker, runner público e modo padrão continuam sendo os padrões de projetos existentes.
+- Plataforma Node.js nativa é preparação separada do servidor; o alvo Tsuru entrega imagem OCI, sem upload de fontes.
 - AWS/paas, alvo personalizado e formatos de deploy `pacote`/`estatico` permanecem reservados.
 - Testes do adaptador não comprovam homologação de uma aplicação no Tsuru real; essa evidência pertence ao consumidor.

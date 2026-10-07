@@ -39,7 +39,7 @@ nas [Releases](https://github.com/BrunodosSantosVaz/big-bang/releases/latest).
 
 O código desta versão é **1.5.0**: inclui modo Flash, catálogo extensível, Actions conforme o alvo e adaptador
 para o Tsuru existente, além de VPS/Docker e entrega compilada. Tsuru entrega um serviço OCI por aplicação,
-com job manual de migração por ambiente. O [runbook](.bigbang/docs/deploy-tsuru.md) separa os testes do adaptador
+com `TSURU_MIGRACAO=job` por padrão ou `inicializacao` para SQLite em volume persistente. O [runbook](.bigbang/docs/deploy-tsuru.md) separa os testes do adaptador
 da comprovação de uma entrega real no consumidor. AWS, alvo personalizado e formatos de deploy por pacotes ou
 arquivos continuam reservados no [épico #174](https://github.com/BrunodosSantosVaz/big-bang/issues/174).
 
@@ -154,7 +154,7 @@ Tudo também pode ser feito pelos botões das GitHub Actions (*Run workflow*), s
   *deploy* (imagem por digest, staging, migração antes da troca, *Voltar versão*).
 - **Catálogo de deploy:** `bb alvos` lista destinos e formatos implementados e reservados, sem acessar servidor.
   O gerador valida os contratos antes de escrever arquivos. `vps-docker` e `tsuru` estão implementados com imagem
-  OCI; Tsuru aceita um serviço por app e exige job manual preparado. Veja o [runbook](.bigbang/docs/deploy-tsuru.md).
+  OCI; Tsuru aceita um serviço por app, com job manual preparado ou migração na inicialização. Veja o [runbook](.bigbang/docs/deploy-tsuru.md).
   Personalizado e outros formatos continuam no backlog do
   [épico #174](https://github.com/BrunodosSantosVaz/big-bang/issues/174). Veja o
   [contrato de extensão](.bigbang/esteira/perfis/deploy/README.md).
@@ -234,3 +234,7 @@ Valores de segredo ficam nos ambientes do GitHub; nunca no TOML. Produção e ro
 O alvo Tsuru aceita `TSURU_MIGRACAO=inicializacao`: a aplicação migra o arquivo de seu volume persistente antes
 de começar a atender. O modo de job manual continua como padrão para bancos externos. Configure uma réplica,
 readiness que consulta o banco e backup; veja o [runbook](.bigbang/docs/deploy-tsuru.md#sqlite-e-migração-na-inicialização).
+A pré-checagem registra `migration=pending`; a imagem migra antes de abrir a porta, e só saúde/readiness e
+testes posteriores comprovam a entrega. O rollout pode sobrepor temporariamente duas unidades no mesmo volume,
+exigindo migrações transacionais e compatíveis. A instalação da plataforma Node.js é uma preparação separada do
+servidor: o alvo desta versão importa imagem OCI por digest, com seu inicializador, sem upload de fontes.
