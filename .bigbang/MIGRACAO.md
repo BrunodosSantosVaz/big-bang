@@ -4,6 +4,18 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [1.5.1] - 2026-10-07
+
+### O que muda
+
+`bb revisao aprovar` usa a API paginada de arquivos, que atende atualizações do framework com mais de 300 arquivos.
+Renomes conferem o caminho antigo e o novo. Lista incompleta ou patch de aceite ausente interrompem o registro.
+As decisões de revisão e o modo continuam vindo da branch de destino; nenhum portão foi dispensado.
+
+### O que o projeto precisa fazer
+
+Nada. Atualize por `bb atualizar 1.5.1` para obter a correção oficial e regenerar os arquivos.
+
 ## [1.5.0] - 2026-10-06
 
 ### O que muda
