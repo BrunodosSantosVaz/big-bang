@@ -1,6 +1,5 @@
 """Bug #195: scan every service/platform at the immutable index digest, regardless of runner architecture."""
 import json
-import os
 from pathlib import Path
 import sys
 import unittest

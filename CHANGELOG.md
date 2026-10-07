@@ -3,6 +3,14 @@
 Mudanças do framework em português, no formato Keep a Changelog. Passos de atualização e histórico das versões
 anteriores estão em [MIGRACAO.md](.bigbang/MIGRACAO.md). A versão instalada é registrada em `.bigbang/VERSION`.
 
+## [1.5.2] - 2026-10-07
+
+### Corrigido
+
+- SBOM ARM64 em runner AMD64 seleciona a plataforma configurada, usando o digest imutável do índice.
+- Todas as arquiteturas de todos os serviços passam pelo Trivy; falhas interrompem a candidata.
+- SBOMs por plataforma acompanham a promoção, mantendo o arquivo primário da primeira plataforma.
+
 ## [1.5.1] - 2026-10-07
 
 ### Corrigido

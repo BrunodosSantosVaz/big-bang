@@ -4,6 +4,26 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [1.5.2] - 2026-10-07
+
+### O que muda
+
+A candidata de deploy passa `--platform` ao Trivy para cada serviço e plataforma de `deploy.plataformas`, tanto
+na varredura de vulnerabilidades quanto no SBOM CycloneDX. Isso permite gerar o SBOM ARM64 num runner AMD64 e
+impede que a segunda arquitetura escape da varredura. Falha do scanner ou da leitura da configuração interrompe
+a etapa. Cada serviço publica `sbom-<servico>.linux-<arquitetura>.json`; `sbom-<servico>.json` continua disponível
+e representa a primeira plataforma configurada. Candidata, atestação e promoção conservam o digest do índice,
+sem reconstruir a imagem nem substituir a referência por um digest filho.
+
+### O que o projeto precisa fazer
+
+Nada.
+
+### Atualização opcional
+
+Use `bb atualizar 1.5.2` para obter a correção oficial e regenerar os arquivos. Candidatas cujo SBOM falhou
+precisam de uma nova execução com a camada atualizada; esta correção não publica a candidata por conta própria.
+
 ## [1.5.1] - 2026-10-07
 
 ### O que muda

@@ -93,7 +93,14 @@ após um erro exige conferir eventos e estado no Tsuru; timeout não é prova de
 
 ## Pesquisa e validação
 
+O pipeline de imagens verifica vulnerabilidades e gera SBOM em cada plataforma de `deploy.plataformas`,
+independentemente da arquitetura do runner. Para ARM64, o Trivy recebe `--platform linux/arm64` junto ao digest
+do índice. Os arquivos `sbom-<servico>.linux-<arquitetura>.json` registram cada arquitetura; o arquivo primário
+`sbom-<servico>.json` representa a primeira plataforma configurada. A promoção leva esses mesmos arquivos e
+o mesmo digest. Falha em qualquer arquitetura impede o avanço da candidata.
+
 - [Deploy por imagem](https://docs.tsuru.io/tsuru_client/tsuru_deploy/).
+- [Seleção de plataforma no Trivy](https://github.com/aquasecurity/trivy/blob/v0.75.0/docs/guide/target/container_image.md).
 - [Job manual e limite de tempo](https://docs.tsuru.io/tsuru_client/tsuru_job_create/).
 - [Tokens de automação](https://docs.tsuru.io/tsuru_client/tsuru_token_create/).
 - [Rotas reais da API v1.32.0](https://github.com/tsuru/tsuru/blob/v1.32.0/api/server.go): o trigger é
