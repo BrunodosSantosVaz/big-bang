@@ -228,3 +228,9 @@ O contrato de artefato define os scripts da construção e da candidata. A const
 `[deploy] runner = ["self-hosted", "rede-deploy"]` seleciona o runner das publicações (inclusive rede privada).
 `preparar_rede = "bash deploy/rede.sh"` executa a preparação aprovada antes do alvo, somente no deploy real.
 Valores de segredo ficam nos ambientes do GitHub; nunca no TOML. Produção e rollback mantêm aprovação humana.
+
+### SQLite no Tsuru
+
+O alvo Tsuru aceita `TSURU_MIGRACAO=inicializacao`: a aplicação migra o arquivo de seu volume persistente antes
+de começar a atender. O modo de job manual continua como padrão para bancos externos. Configure uma réplica,
+readiness que consulta o banco e backup; veja o [runbook](.bigbang/docs/deploy-tsuru.md#sqlite-e-migração-na-inicialização).
