@@ -98,15 +98,32 @@ def _target_mode(repository, base):
 
 def approve_review(repository, number, ai_name, zones, marker, report=""):
     data = json.loads(github.run("pr", "view", str(number), "--repo", repository, "--json",
-                                 "headRefName,baseRefName,baseRefOid,labels,state"))
+                                 "headRefName,baseRefName,baseRefOid,labels,state,changedFiles"))
     if data["state"] != "OPEN":
         raise BbError(f"o PR #{number} não está aberto", EXIT_USAGE)
     pr_labels = {label["name"] for label in data["labels"]}
     mode = _target_mode(repository, data.get('baseRefOid') or data['baseRefName'])
     _, issue = pipeline.branch_issue(data["headRefName"])
     issue_labels = _labels(repository, issue) if issue else set()
-    diff_text = github.run("pr", "diff", str(number), "--repo", repository)
-    changed = [line.split(" b/", 1)[1] for line in diff_text.splitlines() if line.startswith("diff --git ")]
+    # The diff endpoint rejects more than 300 files. Preserve old paths on renames, too.
+    pages = json.loads(github.run('api', f'repos/{repository}/pulls/{number}/files?per_page=100',
+                                  '--paginate', '--slurp'))
+    if sum(len(page) for page in pages) != data.get('changedFiles', sum(len(page) for page in pages)):
+        raise BbError('listagem de arquivos incompleta; revisão não registrada', EXIT_VERIFICATION_FAILED)
+    changed, acceptance_diffs = [], []
+    for page in pages:
+        for file in page:
+            path = file['filename']
+            previous = file.get('previous_filename', path)
+            changed.extend((previous, path))
+            if path.startswith('tests/aceite/') or previous.startswith('tests/aceite/'):
+                patch = file.get('patch')
+                if not isinstance(patch, str) or not patch.strip():
+                    raise BbError(f'patch de aceite indisponível para {path}; revisão não registrada',
+                                  EXIT_VERIFICATION_FAILED)
+                acceptance_diffs.append(f'diff --git a/{previous} b/{path}\n--- a/{previous}\n'
+                                        f'+++ b/{path}\n{patch}')
+    diff_text = '\n'.join(acceptance_diffs)
     blockers = review_blockers(pr_labels, issue_labels, data["headRefName"], changed, diff_text, zones, marker, mode)
     if blockers:
         raise BbError("bb revisao aprovar recusado: " + "; ".join(blockers), EXIT_VERIFICATION_FAILED)

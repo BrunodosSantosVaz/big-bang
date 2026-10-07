@@ -76,7 +76,47 @@ class RevisaoAprovar(ComCli):
     def pr(self, head="feature/12-tarefa", labels=(), diff=DIFF_SRC):
         self.estado.setdefault("prs", {})["30"] = {"head": head, "base": "epico/7-x", "labels": list(labels),
                                                    "state": "OPEN", "diff": diff}
+        files = []
+        for block in diff.split('diff --git ')[1:]:
+            header, _, content = block.partition('\n')
+            before, after = header.split(' b/', 1)
+            entry = {'filename': after, 'patch': content[content.index('@@'):], 'status': 'modified'}
+            if before[2:] != after:
+                entry['previous_filename'] = before[2:]
+            files.append(entry)
+        self.estado.setdefault('pr_files', {})['30'] = files
         self.gravar_estado()
+
+    def test_large_review_uses_paginated_files_without_diff_endpoint(self):
+        self.issue(12, 'Tarefa', labels=['task'])
+        self.pr()
+        self.estado['pr_files']['30'] = [{'filename': f'src/{n}.py'} for n in range(330)]
+        self.gravar_estado()
+        codigo, saida = self.bb('revisao', 'aprovar', '30')
+        self.assertEqual(codigo, EXIT_OK, saida)
+        self.assertFalse(any(c[:2] == ['pr', 'diff'] for c in self.chamadas()))
+        self.assertTrue(any('--paginate' in c and 'repos/dono/repo/pulls/30/files?per_page=100' in c
+                            for c in self.chamadas()))
+
+    def test_renamed_sensitive_path_still_requires_owner(self):
+        self.issue(12, 'Tarefa', labels=['task'])
+        self.pr()
+        self.estado['pr_files']['30'] = [{'filename': 'src/a.py',
+                                         'previous_filename': 'src/app/auth/login.py', 'status': 'renamed'}]
+        self.gravar_estado()
+        codigo, saida = self.bb('revisao', 'aprovar', '30')
+        self.assertEqual(codigo, EXIT_VERIFICATION_FAILED, saida)
+        self.assertNotIn('pr-aprovado', self.estado['prs']['30']['labels'])
+
+    def test_missing_acceptance_patch_fails_before_approval(self):
+        self.issue(12, 'Tarefa', labels=['task', 'dono:revisao-ia'])
+        self.pr()
+        self.estado['pr_files']['30'] = [{'filename': 'tests/aceite/test_rn.py', 'status': 'modified'}]
+        self.gravar_estado()
+        codigo, saida = self.bb('revisao', 'aprovar', '30')
+        self.assertEqual(codigo, EXIT_VERIFICATION_FAILED, saida)
+        self.assertIn('patch', saida)
+        self.assertNotIn('pr-aprovado', self.estado['prs']['30']['labels'])
 
     def test_aprova_pr_comum(self):
         self.issue(12, "Tarefa", labels=["task"])

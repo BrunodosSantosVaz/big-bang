@@ -3,6 +3,13 @@
 Mudanças do framework em português, no formato Keep a Changelog. Passos de atualização e histórico das versões
 anteriores estão em [MIGRACAO.md](.bigbang/MIGRACAO.md). A versão instalada é registrada em `.bigbang/VERSION`.
 
+## [1.5.1] - 2026-10-07
+
+### Corrigido
+
+- Registro de revisão independente de PRs grandes pela API paginada, sem depender do diff limitado a 300 arquivos.
+- Caminhos anteriores de renomes continuam sujeitos à revisão sensível; patch de aceite ausente e lista incompleta impedem aprovação.
+
 ## [1.5.0] - 2026-10-06
 
 ### Adicionado
