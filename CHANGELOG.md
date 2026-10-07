@@ -3,6 +3,14 @@
 Mudanças do framework em português, no formato Keep a Changelog. Passos de atualização e histórico das versões
 anteriores estão em [MIGRACAO.md](.bigbang/MIGRACAO.md). A versão instalada é registrada em `.bigbang/VERSION`.
 
+## [1.5.3] - 2026-10-07
+
+### Corrigido
+
+- Mesclar PR fornece as variáveis públicas dos painéis ao pós-merge, permitindo criar próximas branches e
+  disparar a integração final sem intervenção manual causada por variável ausente.
+- Regressão executa o caminho pós-merge com as variáveis declaradas no workflow, sem as injeções da harness.
+
 ## [1.5.2] - 2026-10-07
 
 ### Corrigido
