@@ -1,7 +1,8 @@
 # Entrega no Tsuru existente
 
 O alvo `tsuru` importa uma imagem OCI construída pela CI e referenciada por digest. Não faz build remoto de
-Dockerfile nem instala servidor. Compatibilidade pesquisada no código oficial **Tsuru v1.32.0**; o servidor do
+Dockerfile nem instala servidor. Oferece migração por job manual ou na inicialização da aplicação, para um
+arquivo SQLite persistente. Compatibilidade pesquisada no código oficial **Tsuru v1.32.0**; o servidor do
 piloto usa essa API em ARM64. A homologação do Snake é uma evidência separada dos testes do adaptador.
 
 ## Configuração
@@ -21,6 +22,7 @@ Configure os nomes abaixo em **cada ambiente** do GitHub, com apps/jobs distinto
 | Variável | `TSURU_TARGET` | Origem HTTPS da API, sem caminho, credencial, query ou fragmento |
 | Variável | `TSURU_APP` | Nome da aplicação existente daquele ambiente |
 | Variável | `TSURU_JOB_MIGRAR` | Nome do job manual de migração existente daquele ambiente |
+| Variável | `TSURU_MIGRACAO` | `job` (padrão quando vazio) ou `inicializacao` |
 | Segredo | `TSURU_TOKEN` | Token da automação restrito à aplicação/job/equipe necessários |
 
 Token, senha, conexão de banco e credencial do registry nunca entram no TOML, front, histórico ou logs.
@@ -28,6 +30,27 @@ O token precisa ler aplicação/job/eventos, fazer deploy por imagem e disparar 
 aplicações ou jobs. Prepare a credencial e os recursos explicitamente com o dono, respeitando suas autorizações.
 As imagens privadas exigem acesso do Tsuru ao registry: configure esse acesso no servidor, sem imprimir o token.
 O piloto público pode usar GHCR público.
+
+## SQLite e migração na inicialização
+
+Escolha `TSURU_MIGRACAO=inicializacao` quando o banco é um arquivo montado na aplicação. Não configure um job
+independente: o volume da app não é automaticamente montado nele. Prepare um volume persistente separado por
+ambiente, uma única réplica da app, backup e permissão de escrita para o usuário sem root da imagem.
+
+A imagem deve executar as migrações transacionais/idempotentes no mesmo arquivo do servidor **antes de abrir a
+porta**. Falha de migração encerra o processo; a imagem não pode servir com banco parcialmente migrado. Configure
+`deploy.caminho_saude` e a readiness do Tsuru para o endpoint que consulta o banco (por exemplo `/api/ready`).
+Comprove esse comportamento com testes de arquivo, migração, falha de inicialização e reinício do sistema.
+
+Neste modo, `migrar` é uma pré-checagem: confirma identidade da app e no máximo uma unidade atual. O recibo registra
+`migration=pending`, pois a migração acontecerá no processo novo. `publicar` importa a imagem por digest e espera
+o evento verificável; saúde/readiness, smoke e ZAP continuam obrigatórios. Evento de deploy não é recibo de um job
+de migração. A entrega completa só é confirmada depois da saúde e dos testes da aplicação.
+
+Rollout pode sobrepor temporariamente a unidade antiga e a nova no mesmo nó e volume RWO. Use transações,
+`busy_timeout` e migrações compatíveis com a versão anterior; não escale SQLite para réplicas independentes.
+Rollback não dispara job nem desfaz o esquema. O inicializador da imagem antiga confere suas migrações já
+aplicadas, sem reaplicá-las. Restaurar arquivo é uma operação separada de manutenção com backup.
 
 ## Preparar o sistema, sem recriar o Tsuru
 
@@ -59,7 +82,9 @@ Isso comprova o import por imagem e não promete igualdade entre nomes/digests d
 O recibo da migração inclui também a identidade da execução. Corpos/logs completos da API não são impressos.
 
 Depois vêm saúde, smoke e ZAP no staging. Candidatas compartilham a trava `bb-staging`; produção/rollback mantêm
-concorrência protegida e aprovação humana. Falha de migração deixa a aplicação em sua versão anterior.
+concorrência protegida e aprovação humana. No modo job, falha de migração impede a publicação da app. No modo
+inicialização, falha impede a nova unidade de ficar pronta; não prometa disponibilidade da versão anterior sem
+conferir a estratégia de rollout configurada no servidor.
 
 `voltar` lê `imagem.txt` de uma release estável e reimporta seu digest, **sem executar nem desfazer migrações**.
 Use migrações de expansão/contração; a saúde continua obrigatória no workflow de rollback. Retomar publicação

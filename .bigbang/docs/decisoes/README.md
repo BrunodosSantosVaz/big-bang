@@ -23,3 +23,4 @@ sistema ficam em `docs/decisoes/` do sistema, não aqui.
 | [0016](ADR-0016-deploy-multiplataforma.md) | Deploy multiplataforma por contratos instalados | aceita (refinamento #174) |
 | [0017](ADR-0017-modo-flash.md) | Modo Flash: teste antes, execução seletiva após código pronto | aceita |
 | [0018](ADR-0018-alvo-tsuru.md) | Deploy no Tsuru existente com migração comprovada | aceita |
+| [0019](ADR-0019-tsuru-migracao-na-inicializacao.md) | Migração na inicialização com arquivo SQLite persistente | aceita |
