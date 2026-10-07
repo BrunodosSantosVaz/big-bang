@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.5.2 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-seguranca.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v1.5.3 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-seguranca.yml. Não edite: personalize em bigbang.toml.
 # Job obrigatório `seguranca` (spec 14.2 e 15.5): Gitleaks, Opengrep (OWASP), Bandit, OSV-Scanner, segredo no pacote
 # do front e RLS. Em PR olha o diff; no push e toda segunda-feira, o histórico completo.
 name: Segurança

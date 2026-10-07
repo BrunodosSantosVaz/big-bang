@@ -1,9 +1,9 @@
-<!-- bigbang:inicio v1.5.2 -->
-<!-- Gerado pelo Big Bang v1.5.2 a partir de .bigbang/AGENTS.inicial.md. Não edite: personalize em bigbang.toml. -->
+<!-- bigbang:inicio v1.5.3 -->
+<!-- Gerado pelo Big Bang v1.5.3 a partir de .bigbang/AGENTS.inicial.md. Não edite: personalize em bigbang.toml. -->
 
 # Instruções para IAs — sistema ainda não fundado
 
-Este repositório foi criado a partir do **Big Bang v1.5.2** e **ainda não foi fundado** (não existe
+Este repositório foi criado a partir do **Big Bang v1.5.3** e **ainda não foi fundado** (não existe
 `bigbang.toml`). Estas instruções valem para qualquer IA.
 
 ## O que fazer agora

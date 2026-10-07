@@ -1,11 +1,13 @@
 """kanban.sh and mesclar-pr.sh against the fake GitHub."""
 import os
+import re
+import subprocess
 import shutil
 import sys
 import unittest
 
 from _raiz import BIGBANG, exemplo_toml
-from _scripts import CasoDeScript
+from _scripts import CasoDeScript, SCRIPTS
 
 BB = os.path.join(BIGBANG, "bin", "bb.py")
 
@@ -136,6 +138,58 @@ class Mesclar(ComBb):
         self.issue(11, "Testes", labels=["teste-aceite"], parent=7)
         self.issue(12, "Tarefa", labels=["task"], parent=7)
         self.issue(13, "Documentação", labels=["documentacao"], parent=7)
+
+    def workflow_project_env(self):
+        template = os.path.join(BIGBANG, "esteira", "nucleo", "arquivos", ".github", "workflows",
+                                "bb-mesclar-pr.yml")
+        with open(template, encoding="utf-8") as handle:
+            step = handle.read().split("- name: Mesclar se aprovado e verde", 1)[1]
+        bindings = dict(re.findall(r"^          (PROJETO_\w+): (.+)$", step, re.MULTILINE))
+        values = {"PROJETO_OWNER": "dono", "PROJETO_PLANEJAMENTO": "1", "PROJETO_EXECUCAO": "2"}
+        return {key: values[key] for key, expression in bindings.items()
+                if key in values and expression == "${{ vars." + key + " }}"}
+
+    def merge_from_workflow(self):
+        # Do not use rodar(): its synthetic project vars hid the missing Action env (#198).
+        environment = {key: value for key, value in os.environ.items() if not key.startswith("PROJETO_")}
+        environment.update(PATH=self.bin + os.pathsep + os.environ["PATH"],
+                           FAKE_GH_STATE=self.estado_arquivo, FAKE_GH_LOG=self.log,
+                           GITHUB_REPOSITORY="dono/repo", PR_NUMBER="30", SIMULAR="false", BB=self.bb)
+        environment.update(self.workflow_project_env())
+        result = subprocess.run(["bash", os.path.join(SCRIPTS, "mesclar-pr.sh")], cwd=self.pasta,
+                                env=environment, capture_output=True, text=True, check=False)
+        self.ler_estado()
+        return result
+
+    def test_workflow_fornece_variaveis_publicas_dos_paineis(self):
+        self.assertEqual(self.workflow_project_env(),
+                         {"PROJETO_OWNER": "dono", "PROJETO_PLANEJAMENTO": "1", "PROJETO_EXECUCAO": "2"})
+
+    def test_merge_de_testes_cria_proxima_tarefa_com_env_real_do_workflow(self):
+        self.epico()
+        self.estado["refs"]["heads/epico/7-estoque"] = "epic-sha"
+        self.gravar_estado()
+        self.pr(head="teste/11-testes")
+        result = self.merge_from_workflow()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(self.mesclado())
+        self.assertEqual(self.estado["refs"].get("heads/feature/12-tarefa"), "epic-sha")
+        self.assertEqual(self.status(2, 12), "Feature")
+        self.assertNotIn("heads/docs/13-documentacao", self.estado["refs"])
+        self.assertFalse([call for call in self.chamadas() if call[:2] == ["workflow", "run"]])
+
+    def test_merge_final_integra_com_env_real_do_workflow(self):
+        self.epico()
+        self.estado["refs"]["heads/epico/7-estoque"] = "epic-sha"
+        self.estado["prs"] = {"20": {"head": "teste/11-testes", "base": "epico/7-estoque", "state": "MERGED"},
+                              "21": {"head": "feature/12-tarefa", "base": "epico/7-estoque", "state": "MERGED"}}
+        self.gravar_estado()
+        self.pr(head="docs/13-documentacao")
+        result = self.merge_from_workflow()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(self.mesclado())
+        self.assertIn(["workflow", "run", "bb-integrar-release.yml", "--repo", "dono/repo", "-f", "epico=7", "-f",
+                       "simular=false"], self.chamadas())
 
     def test_aprovado_e_verde_mescla(self):
         self.epico()
