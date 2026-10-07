@@ -14,7 +14,11 @@ As decisões de revisão e o modo continuam vindo da branch de destino; nenhum p
 
 ### O que o projeto precisa fazer
 
-Nada. Atualize por `bb atualizar 1.5.1` para obter a correção oficial e regenerar os arquivos.
+Nada.
+
+### Atualização opcional
+
+Use `bb atualizar 1.5.1` para obter a correção oficial e regenerar os arquivos.
 
 ## [1.5.0] - 2026-10-06
 
