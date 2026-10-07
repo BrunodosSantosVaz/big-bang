@@ -18,17 +18,24 @@ a sintaxe dos nomes. `bb gerar` e `bb verificar` conferem a disponibilidade e a 
 framework instalado, antes de planejar alterações de arquivos. Um nome sintaticamente válido não é prova de
 suporte. Não há acesso ao servidor nessa conferência.
 
-## Disponível nesta etapa
+## Disponível na 1.5.0
 
 | Categoria | Implementado | Reservado (não gera esteira) |
 | --- | --- | --- |
-| Alvo | `vps-docker` | `tsuru`, `personalizado`, `aws`, `paas` |
+| Alvo | `vps-docker`, `tsuru` (um serviço OCI por app) | `personalizado`, `aws`, `paas` |
 | Formato | `imagem` (identidade por digest) | `pacote`, `estatico` (identidade por SHA-256) |
 
-Este é o contrato inicial do [épico #174](https://github.com/BrunodosSantosVaz/big-bang/issues/174). A composição de
-credenciais, preparação e acesso à rede será implementada na #176; personalizado na #177; Tsuru na #178; pacotes
-e arquivos na #179; serviço AWS concreto na #180. A presença de uma reserva documenta a intenção, sem prometer
-funcionalidade. Entrega por hashes permanece recusada enquanto o perfil implementar somente imagens.
+O [épico #174](https://github.com/BrunodosSantosVaz/big-bang/issues/174) entregou o catálogo (#175), composição de
+credenciais, preparação e acesso à rede (#176) e Tsuru por imagem/job manual (#178), com migração na
+inicialização para SQLite (#187). Personalizado (#177), pacotes
+e arquivos (#179) e serviço AWS concreto (#180) continuam reservados. A presença de uma reserva documenta a
+intenção, sem prometer funcionalidade. Entrega de deploy por hashes permanece recusada enquanto o perfil
+implementar somente imagens; o perfil compilado conserva sua própria promoção de binários por hashes.
+
+O [runbook do Tsuru](../../../docs/deploy-tsuru.md) documenta API, apps/jobs por ambiente, importação por
+digest, `TSURU_MIGRACAO=job` (padrão) ou `inicializacao` e limites dessa implementação. Neste último modo,
+a pré-checagem registra `migration=pending`; a imagem migra antes de ouvir a porta e saúde/readiness consulta
+o banco. Exige uma réplica permanente, com possível sobreposição transitória no rollout do mesmo volume.
 
 ## Contrato de um alvo
 
@@ -50,8 +57,8 @@ migração antes da troca e rollback sem desfazer migração (DAD-02/DAD-03, OBS
 metadados não substitui esses testes nem a validação contra o servidor real.
 
 Listas de variáveis/segredos só aceitam nomes de ambiente em maiúsculas e não podem repetir um nome entre si.
-São informações do contrato; sua injeção nas Actions ainda pertence à #176. As Actions atuais de VPS preservam
-seu comportamento nesta etapa.
+As Actions injetam somente essas referências, conforme o alvo. Os valores ficam nas variáveis e segredos dos
+ambientes do GitHub. As Actions de VPS preservam seu comportamento para os projetos existentes.
 
 ## Contrato de um formato
 
@@ -70,8 +77,8 @@ promover = "esteira/perfis/deploy/scripts/promover.sh"
 
 Os caminhos são relativos a `.bigbang/`, sem `..`, caminho absoluto ou comando de shell. Os três scripts devem
 existir e não ser vazios para um formato implementado. Uma reserva pode declarar `scripts = {}`. Esses caminhos
-descrevem o contrato existente; o consumo dinâmico na esteira e a entrega de novos formatos serão implementados
-nas tarefas seguintes. Não se deve marcar um formato novo como implementado antes dessa integração e seus testes.
+selecionam os scripts executados pela esteira. A entrega de novos formatos continua nas tarefas seguintes.
+Não se deve marcar um formato novo como implementado antes dessa integração e seus testes.
 
 ## Composição e extensão
 

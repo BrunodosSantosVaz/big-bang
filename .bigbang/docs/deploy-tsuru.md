@@ -21,13 +21,13 @@ Configure os nomes abaixo em **cada ambiente** do GitHub, com apps/jobs distinto
 | --- | --- | --- |
 | Variável | `TSURU_TARGET` | Origem HTTPS da API, sem caminho, credencial, query ou fragmento |
 | Variável | `TSURU_APP` | Nome da aplicação existente daquele ambiente |
-| Variável | `TSURU_JOB_MIGRAR` | Nome do job manual de migração existente daquele ambiente |
+| Variável | `TSURU_JOB_MIGRAR` | Nome do job manual existente daquele ambiente; somente no modo `job` |
 | Variável | `TSURU_MIGRACAO` | `job` (padrão quando vazio) ou `inicializacao` |
 | Segredo | `TSURU_TOKEN` | Token da automação restrito à aplicação/job/equipe necessários |
 
 Token, senha, conexão de banco e credencial do registry nunca entram no TOML, front, histórico ou logs.
-O token precisa ler aplicação/job/eventos, fazer deploy por imagem e disparar o job; não precisa criar servidor,
-aplicações ou jobs. Prepare a credencial e os recursos explicitamente com o dono, respeitando suas autorizações.
+O token precisa ler aplicação/eventos e fazer deploy por imagem; no modo `job`, também lê o job e dispara sua
+execução. Não precisa criar servidor, aplicações ou jobs. Prepare a credencial e os recursos explicitamente com o dono, respeitando suas autorizações.
 As imagens privadas exigem acesso do Tsuru ao registry: configure esse acesso no servidor, sem imprimir o token.
 O piloto público pode usar GHCR público.
 
@@ -56,11 +56,12 @@ aplicadas, sem reaplicá-las. Restaurar arquivo é uma operação separada de ma
 
 1. Confirme API, pool, arquitetura, recursos e rota do Tsuru existente.
 2. Prepare apps distintos, configuração e banco por ambiente; a aplicação não pode usar a credencial de migração.
-3. Crie o job **manual** de cada ambiente, com comando revisado que executa a migração dentro da imagem do
-   sistema. Configure nele a conexão/credencial de migração e limite de tempo; a aplicação permanece com seu
+3. No modo `job` (padrão), crie o job **manual** de cada ambiente, com comando revisado que executa a migração
+   dentro da imagem do sistema. Configure nele a conexão/credencial de migração e limite de tempo; a aplicação permanece com seu
    próprio papel de banco. Jobs agendados, sem comando ou já executando são recusados pelo adaptador.
+   No modo `inicializacao`, prepare volume persistente, inicializador e readiness conforme a seção SQLite.
 4. Configure a rota/base path e saúde antes da primeira candidata. A app pode existir sem unidades antes do
-   primeiro deploy; o job e a configuração precisam existir para a migração prévia.
+   primeiro deploy; no modo `job`, o job e a configuração precisam existir para a migração prévia.
 5. Configure vars/secret no ambiente e escolha runner público ou `deploy.runner` para rede privada. Um script de
    VPN aprovado pode usar `deploy.preparar_rede`; falha de rede interrompe o deploy. Nenhuma preparação roda em
    simulação.
@@ -70,7 +71,7 @@ Não altere recursos de outras aplicações no servidor.
 
 ## Ordem e prova de entrega
 
-`migrar` lê o job, verifica modo manual/comando e ausência de execução ativa, importa a **nova imagem por digest**
+No modo `job`, `migrar` lê o job, verifica modo manual/comando e ausência de execução ativa, importa a **nova imagem por digest**
 e consulta o evento do Tsuru. O evento precisa concluir sem erro, identificar o job correto e registrar a mesma
 imagem de origem. Depois, confere a referência interna importada e o comando, registra as identidades anteriores,
 dispara o job e espera **uma execução nova** chegar a `succeeded`. `trigger` aceito, sucesso antigo, execução

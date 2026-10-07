@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.4.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-tarefa-de-correcao.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v1.5.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-tarefa-de-correcao.yml. Não edite: personalize em bigbang.toml.
 # Botão "Tarefa de correção" (spec 11.6, passo 9): uma tarefa nova no épico reprovado, com o motivo do dono.
 name: Tarefa de correção
 
