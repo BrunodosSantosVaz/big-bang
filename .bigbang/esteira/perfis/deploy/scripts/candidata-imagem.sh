@@ -4,8 +4,8 @@
 # reference (imagem@sha256:…; with several platforms, the digest of the multi-platform index). The image set goes to
 # $GITHUB_OUTPUT (imagem=servico=ref,servico=ref) and to imagem.txt (one "servico=ref" line per service; a single
 # service "app" keeps the bare one-line format). Everything after this (Trivy, staging, production) uses those
-# digests, never a tag. Then Trivy scans each pushed image: a HIGH or CRITICAL vulnerability fails the candidate
-# (SEG-19). Trivy is pinned by version and SHA-256 (trivy.sh).
+# digests, never a tag. Then Trivy scans every configured platform of each pushed image: a HIGH or CRITICAL
+# vulnerability fails the candidate (SEG-19). Trivy is pinned by version and SHA-256 (trivy.sh).
 # Image name: deploy.imagem with one service; deploy.imagem-<servico> with several.
 # Environment: TAG (vX.Y.Z-rc.N), GITHUB_OUTPUT, RUNNER_TEMP, BB. The runner is already logged in to the registry and
 # has buildx (and QEMU when a platform is not the runner's).
@@ -18,8 +18,12 @@ AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 tag="${TAG:?}"
 repositorio=$("${BB_CMD[@]}" config get deploy.imagem)
 [[ "$repositorio" == "${repositorio,,}" ]] || { echo "::error::deploy.imagem precisa estar em minúsculas: $repositorio"; exit 1; }
-mapfile -t servicos < <("${BB_CMD[@]}" config get deploy.servicos)
-plataformas=$("${BB_CMD[@]}" config get deploy.plataformas | paste -sd, -)
+servicos_config=$("${BB_CMD[@]}" config get deploy.servicos)
+plataformas_config=$("${BB_CMD[@]}" config get deploy.plataformas)
+[[ -n "$servicos_config" && -n "$plataformas_config" ]] || { echo "::error::serviços e plataformas não podem ser vazios"; exit 1; }
+mapfile -t servicos <<<"$servicos_config"
+mapfile -t arquiteturas <<<"$plataformas_config"
+plataformas=$(IFS=,; echo "${arquiteturas[*]}")
 tmp="${RUNNER_TEMP:-$(mktemp -d)}"
 
 conjunto=(); linhas=()
@@ -44,7 +48,9 @@ echo "Imagens da candidata: $saida"
 
 trivy=$(bash "$AQUI/trivy.sh")
 for item in "${conjunto[@]}"; do
-  "$trivy" image --quiet --platform "${plataformas%%,*}" --severity HIGH,CRITICAL --exit-code 1 --scanners vuln "${item#*=}" \
-    || { echo "::error::Trivy: vulnerabilidade alta ou crítica em ${item%%=*} (SEG-19); corrija a base ou registre a exceção com ADR"; exit 1; }
+  for plataforma in "${arquiteturas[@]}"; do
+    "$trivy" image --quiet --platform "$plataforma" --severity HIGH,CRITICAL --exit-code 1 --scanners vuln "${item#*=}" \
+      || { echo "::error::Trivy: varredura falhou em ${item%%=*} ($plataforma, SEG-19); corrija a falha ou registre a exceção com ADR"; exit 1; }
+  done
 done
 echo "Trivy: nenhuma vulnerabilidade alta ou crítica."

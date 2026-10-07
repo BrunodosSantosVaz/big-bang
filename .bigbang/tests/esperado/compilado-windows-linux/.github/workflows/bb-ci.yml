@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.5.1 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v1.5.2 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml. Não edite: personalize em bigbang.toml.
 # Job obrigatório `check` (spec 14.2): os comandos da stack do bigbang.toml, documentação e bb verificar.
 name: CI
 
