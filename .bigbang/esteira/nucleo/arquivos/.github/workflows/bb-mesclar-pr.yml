@@ -49,3 +49,6 @@ jobs:
           GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number || inputs.pr }}
           SIMULAR: ${{ inputs.simular || 'false' }}
+          PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
+          PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
+          PROJETO_EXECUCAO: ${{ vars.PROJETO_EXECUCAO }}
