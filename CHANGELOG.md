@@ -3,6 +3,14 @@
 Mudanças do framework em português, no formato Keep a Changelog. Passos de atualização e histórico das versões
 anteriores estão em [MIGRACAO.md](.bigbang/MIGRACAO.md). A versão instalada é registrada em `.bigbang/VERSION`.
 
+## [1.5.4] - 2026-10-08
+
+### Documentação
+
+- README, índices das skills/perfil compilado e guia de contribuição atualizados conforme os recursos entregues.
+- Relatório de produção Flash/Tsuru com resultados da CI, evidências dos consumidores e limites dos ensaios.
+- Ordem de geração, snapshots e CHECKSUMS corrigida no guia de contribuição; nenhum portão ou código muda.
+
 ## [1.5.3] - 2026-10-07
 
 ### Corrigido

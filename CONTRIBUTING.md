@@ -13,13 +13,18 @@ Obrigado pelo interesse! O Big Bang é um framework para uma pessoa e suas IAs c
 
 - Leia a [especificação](.bigbang/docs/especificacao.md): ela é a fonte da verdade, e cada decisão de projeto vira
   um ADR em [`.bigbang/docs/decisoes/`](.bigbang/docs/decisoes/).
-- Branch a partir da `develop` (`feature/<issue>-<slug>`), commits em inglês
+- No próprio framework, use uma branch isolada a partir da `main`, confirme a posse da issue e abra PR para
+  `main`. Depois da CI, revisão independente e release oficial, sincronize `main` em `develop` por outro PR.
+  A [decisão do modo Flash](.bigbang/docs/decisoes/ADR-0017-modo-flash.md) dispensa a Fundação deste repositório.
+  Use commits em inglês
   ([Conventional Commits](https://www.conventionalcommits.org/pt-br/)), textos e documentação em português do Brasil.
 - Só biblioteca padrão do Python 3.11+ na CLI `bb`; scripts da esteira em Bash, aprovados pelo `shellcheck`.
-- Mudou algo em `.bigbang/`? Rode `bb checksums --escrever`, `bb gerar`, `python .bigbang/tests/atualizar_esperado.py`
-  e a suíte: `python -m unittest discover -s .bigbang/tests` (com `BB_TESTE_DOCKER=1` para o alvo de deploy).
+- Mudou algo em `.bigbang/`? Rode `bb gerar`, `python .bigbang/tests/atualizar_esperado.py`, `bb checksums --escrever`,
+  `bb verificar` e a suíte: `python -m unittest discover -s .bigbang/tests` (com `BB_TESTE_DOCKER=1` para o alvo de deploy).
 - Registre o que muda para os projetos em [`.bigbang/MIGRACAO.md`](.bigbang/MIGRACAO.md) e atualize o README.
-- Abra o PR para a `develop` com *O que muda*, *Testes* e *Issue*; a CI precisa ficar verde.
+- Abra o PR com *O que muda*, *Testes* e *Issue*; a CI completa do mesmo SHA precisa ficar verde.
+  Escreva os testes antes do código. Execute depois de concluir a alteração e reutilize a evidência da CI
+  na revisão, sem repetir a suíte local por hábito. Os consumidores seguem os fluxos gerados de seus projetos.
 
 ## Código de conduta
 

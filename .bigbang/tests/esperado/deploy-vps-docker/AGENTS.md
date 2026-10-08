@@ -1,9 +1,9 @@
-<!-- bigbang:inicio v1.5.3 -->
-<!-- Gerado pelo Big Bang v1.5.3 a partir de .bigbang/AGENTS.base.md. Não edite: personalize em bigbang.toml. -->
+<!-- bigbang:inicio v1.5.4 -->
+<!-- Gerado pelo Big Bang v1.5.4 a partir de .bigbang/AGENTS.base.md. Não edite: personalize em bigbang.toml. -->
 
 # Instruções para IAs — Meu Sistema
 
-Este sistema é construído com o **Big Bang v1.5.3**. Estas instruções valem para qualquer IA.
+Este sistema é construído com o **Big Bang v1.5.4**. Estas instruções valem para qualquer IA.
 Leia nesta ordem, no início de toda sessão: `PRODUTO.md`, `STACK.md`, `DESIGN.md` (se houver interface),
 `bigbang.toml`, `docs/memoria.md` e a seção "Projeto" no fim deste arquivo.
 
