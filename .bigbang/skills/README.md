@@ -6,5 +6,6 @@ O catálogo segue a seção 15.2 da [especificação](../docs/especificacao.md).
 comandos existentes, sem duplicar a lógica da esteira. Os caminhos citados são relativos à raiz do projeto.
 As cópias são geradas desde o template, antes da Fundação; personalize com skills próprias sem prefixo `bb-`.
 
-`bb-atualizar` informa explicitamente a pendência do CLI até sua entrega no E10. Aprovações de produto, stack,
-design e produção continuam sendo do dono; uma skill não concede permissões nem transforma CI verde em aprovação.
+`bb-atualizar` usa o CLI `bb atualizar` para obter uma release oficial com hash e atestação verificados, regenerar
+a camada do projeto e abrir um PR. Aprovações de produto, stack, design e produção continuam sendo do dono;
+uma skill não concede permissões nem transforma CI verde em aprovação.

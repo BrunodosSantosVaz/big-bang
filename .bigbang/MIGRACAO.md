@@ -4,6 +4,24 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [1.5.4] - 2026-10-08
+
+### O que muda
+
+Os índices das skills e do perfil compilado descrevem os recursos já implementados: atualização oficial por
+hash/atestação e promoção dos mesmos binários da candidata. O README, o guia de contribuição e o relatório da
+entrega distinguem produção comprovada, histórico de homologação e critérios de campo ainda pendentes.
+Nenhum comando, adaptador, teste ou portão muda nesta atualização documental.
+
+### O que o projeto precisa fazer
+
+Nada.
+
+### Atualização opcional
+
+Use `bb atualizar 1.5.4` para obter os índices corrigidos. Projetos em 1.5.3 preservam o mesmo comportamento
+de Flash, Tsuru, verificação por arquitetura e avanço pós-merge; não precisam de atualização para executar esses recursos.
+
 ## [1.5.3] - 2026-10-07
 
 ### O que muda

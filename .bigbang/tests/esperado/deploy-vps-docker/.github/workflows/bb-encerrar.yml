@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.5.3 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-encerrar.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v1.5.4 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-encerrar.yml. Não edite: personalize em bigbang.toml.
 # Botão "Encerrar" (spec 14.2): completa a limpeza depois de uma publicação e/ou encerra a sprint.
 name: Encerrar
 

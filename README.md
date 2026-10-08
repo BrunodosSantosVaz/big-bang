@@ -33,11 +33,11 @@
 ## Estado atual
 
 Estável desde a **1.0.0**, validada num sistema real feito do zero até produção só pelo Big Bang: o
-[ScreenFakeCam](https://github.com/BrunodosSantosVaz/screenfakecam), um app Android publicado em três versões e
-testado pelo dono num celular ([relatório do piloto](.bigbang/docs/piloto-screenfakecam.md)). A versão atual está
+[ScreenFakeCam](https://github.com/BrunodosSantosVaz/screenfakecam), um app Android com releases assinadas e
+homologação registrada em emulador Android 15 ([relatório atual](docs/relatorios/2026-10-07-entrega-flash-tsuru.md)). A versão atual está
 nas [Releases](https://github.com/BrunodosSantosVaz/big-bang/releases/latest).
 
-O código desta versão é **1.5.3**: inclui modo Flash, catálogo extensível, Actions conforme o alvo e adaptador
+O código desta versão é **1.5.4**: inclui modo Flash, catálogo extensível, Actions conforme o alvo e adaptador
 para o Tsuru existente, além de VPS/Docker e entrega compilada. Tsuru entrega um serviço OCI por aplicação,
 com `TSURU_MIGRACAO=job` por padrão ou `inicializacao` para SQLite em volume persistente. O [runbook](.bigbang/docs/deploy-tsuru.md) separa os testes do adaptador
 da comprovação de uma entrega real no consumidor. AWS, alvo personalizado e formatos de deploy por pacotes ou
@@ -54,6 +54,10 @@ os portões de segurança permanecem iguais. Veja [a migração](.bigbang/MIGRAC
 A versão 1.5.3 fornece ao workflow **Mesclar PR** as variáveis públicas dos painéis (`PROJETO_OWNER`,
 `PROJETO_PLANEJAMENTO` e `PROJETO_EXECUCAO`). Depois de mesclar um PR aprovado, a esteira pode criar a próxima
 branch e, no último PR do épico, disparar a integração. Revisão, checks do SHA exato e portões continuam exigidos.
+
+O [relatório da entrega Flash/Tsuru](docs/relatorios/2026-10-07-entrega-flash-tsuru.md) registra a distribuição,
+os testes completos no SHA exato e as evidências dos consumidores. A produção do framework é o pacote
+atestado nas Releases; os consumidores têm seus próprios portões de homologação e produção.
 
 ## O que é o Big Bang
 
@@ -180,9 +184,10 @@ Tudo também pode ser feito pelos botões das GitHub Actions (*Run workflow*), s
 
 O [ScreenFakeCam](https://github.com/BrunodosSantosVaz/screenfakecam) foi feito do zero só pelo Big Bang: Fundação
 com entrevista, pesquisa de stack (Kotlin + Jetpack Compose), design kit e protótipo; três sprints; uma reprovação
-na homologação corrigida pela tarefa de correção; três versões em produção, cada uma com o APK assinado, hash e
-atestação de origem. Cada problema encontrado virou correção no framework, e o
-[relatório](.bigbang/docs/piloto-screenfakecam.md) lista todos.
+na homologação corrigida pela tarefa de correção; APKs em produção com assinatura, hash e atestação de origem.
+O [relatório histórico](.bigbang/docs/piloto-screenfakecam.md) descreve as três versões do piloto;
+o [relatório atual](docs/relatorios/2026-10-07-entrega-flash-tsuru.md) registra a auditoria e as entregas posteriores.
+Referências históricas a aparelho físico não substituem os ensaios desta entrega em emulador.
 
 ## Segurança
 
@@ -202,7 +207,7 @@ O Big Bang segue [SemVer](https://semver.org/lang/pt-BR/). Cada versão é uma
 SHA-256 e a atestação de origem. Num sistema, diga "atualizar o Big Bang" (`bb atualizar`): a IA baixa e confere o
 pacote, mostra o [`MIGRACAO.md`](.bigbang/MIGRACAO.md) e abre um PR que troca só o framework.
 
-A 1.5.0 mantém VPS/Docker, runner público e modo padrão para configurações existentes. Adoção de Flash ou Tsuru
+A série 1.5 mantém VPS/Docker, runner público e modo padrão para configurações existentes. Adoção de Flash ou Tsuru
 fica numa decisão própria por ADR e `bb gerar`, após a atualização oficial. Consulte o
 [changelog](CHANGELOG.md) e os passos opcionais da migração antes de mudar a entrega do sistema.
 

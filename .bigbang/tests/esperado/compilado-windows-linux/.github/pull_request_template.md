@@ -1,4 +1,4 @@
-<!-- Gerado pelo Big Bang v1.5.3 a partir de .bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.5.4 a partir de .bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md. Não edite: personalize em bigbang.toml. -->
 ## O que muda
 
 ## Issue
