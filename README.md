@@ -10,6 +10,7 @@ A documentação oficial deste repositório público está na **[Wiki](https://g
 
 - [Começar a usar](https://github.com/BrunodosSantosVaz/big-bang/wiki/Guia-de-inicio)
 - [Referência da CLI](https://github.com/BrunodosSantosVaz/big-bang/wiki/Referencia-CLI)
+- [Histórico e decisões](https://github.com/BrunodosSantosVaz/big-bang/wiki/Historico)
 - [Rastreabilidade e cobertura](https://github.com/BrunodosSantosVaz/big-bang/wiki/Rastreabilidade)
 - [Releases e pacote oficial](https://github.com/BrunodosSantosVaz/big-bang/releases)
 - [Discussions](https://github.com/BrunodosSantosVaz/big-bang/discussions) · [Boas-vindas da IA](https://github.com/BrunodosSantosVaz/big-bang/discussions/210)

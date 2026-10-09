@@ -3,10 +3,10 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "7ae9039ef9b23e8c82a703d52f485ae3e683f97e",
-    "commit": "1054c8df969408d2d4fe9d81a4b99deeaf9323c2",
+    "base": "1054c8df969408d2d4fe9d81a4b99deeaf9323c2",
+    "commit": "b19883dc38964bc48e465d2999df03985300b2ba",
     "branch": "master",
-    "proposta": "bigbang/proposta-213-badges"
+    "proposta": "bigbang/proposta-208-identificacao-final"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -2055,11 +2055,11 @@
   },
   "revisao": {
     "codigo": "9c73feb3e357a1216011eaf64bf4b5d944827087",
-    "wiki_base": "7ae9039ef9b23e8c82a703d52f485ae3e683f97e",
+    "wiki_base": "1054c8df969408d2d4fe9d81a4b99deeaf9323c2",
     "independente": "aprovada",
-    "issue": 213,
+    "issue": 208,
     "revisor": "revisar_wiki_208",
-    "wiki": "1054c8df969408d2d4fe9d81a4b99deeaf9323c2",
+    "wiki": "b19883dc38964bc48e465d2999df03985300b2ba",
     "publicada": true
   },
   "social_preview": {
