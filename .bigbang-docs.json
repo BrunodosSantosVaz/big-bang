@@ -3,10 +3,10 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "d8924c3703d8e38551e410bafca4f4d4dd8c4dd3",
-    "commit": "f6d5b3b123e7f3a1da6172a5cc42bf539ca12caa",
+    "base": "7ae9039ef9b23e8c82a703d52f485ae3e683f97e",
+    "commit": "1054c8df969408d2d4fe9d81a4b99deeaf9323c2",
     "branch": "master",
-    "proposta": "bigbang/proposta-208-finalizacao"
+    "proposta": "bigbang/proposta-213-badges"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -222,8 +222,8 @@
     }
   },
   "codigo": {
-    "commit": "89d2c98fbeaa721f4e2ed5acf2c0d65f8b3de9f9",
-    "versao": "2.0.0",
+    "commit": "9c73feb3e357a1216011eaf64bf4b5d944827087",
+    "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
       ".github/workflows/",
@@ -423,7 +423,7 @@
       ],
       "hashes": {
         ".bigbang/bb/config.py": "sha256:93aa511d040ad4f866008129c0697f777c6e6cad291930c47a664f8a72222794",
-        ".bigbang/modelos/bigbang.toml.exemplo": "sha256:6fc8c5936e706000c225d3234b7ba2f5e438047cfdcbc8a0419cf84b4e33feec",
+        ".bigbang/modelos/bigbang.toml.exemplo": "sha256:778ba08e5498600441fc495f8aa4f60d6df3fb995022aec32c6c75221cf8a702",
         ".bigbang/modelos/flags.toml": "sha256:3f4bf065d88d1b4b344e2ec8d24e536ef7433333bacb2cf974fc4194703a47ba"
       },
       "descricao": "Ler bigbang.toml sem aceitar erros de digitação que silenciem controles do projeto."
@@ -802,8 +802,8 @@
       ],
       "hashes": {
         ".bigbang/bb/package.py": "sha256:277954b69c243354a4d726708463293e874b13470081be68054aa8948fc98eff",
-        ".bigbang/MIGRACAO.md": "sha256:d3c3c49c312f6c9d6c377ecef65861723536619a062648ec488ad5b8e15cd987",
-        ".bigbang/VERSION": "sha256:c28fcca53637bc88e124af1725df13cb98c69dedefd62fb3cdbe1cdb6b760624"
+        ".bigbang/MIGRACAO.md": "sha256:9434f80edd5b9686885f3c5e0635114a12f1de04eafe58fab1402b61894067ad",
+        ".bigbang/VERSION": "sha256:fe840f52fb5578d3f77eb497115eb02c6036601c3a53e60df7995c7276baa77a"
       },
       "descricao": "Empacotar .bigbang com integridade e notas de migração que permitem atualização oficial verificável."
     },
@@ -1178,10 +1178,13 @@
         ".bigbang/tests/test_wiki.py:test_traversal_manifest_cannot_read_outside_wiki",
         ".bigbang/tests/test_wiki.py:test_uninitialized_wiki_does_not_modify_local_documents",
         ".bigbang/tests/test_wiki.py:test_publish_fast_forwards_and_rerun_is_idempotent",
-        ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected"
+        ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected",
+        ".bigbang/tests/test_wiki.py:test_nested_badge_destination_is_validated",
+        ".bigbang/tests/test_wiki.py:test_valid_nested_badge_keeps_image_validation",
+        ".bigbang/tests/test_wiki.py:test_nested_badge_handles_parentheses_in_image_url_and_title"
       ],
       "hashes": {
-        ".bigbang/bb/wiki_links.py": "sha256:52bc6d0aacb56c2d9e2b6fdd56d5fcdd14cf267968fa1be97d08af3724e56637"
+        ".bigbang/bb/wiki_links.py": "sha256:bb711a1fc0b80ca2076b49822eef2272bb409f36740149732e49c693f0ad7874"
       },
       "descricao": "Garantir Home, navegação, páginas, imagens e âncoras internas válidas antes de concluir documentação."
     },
@@ -2025,7 +2028,7 @@
         ".bigbang/esteira/perfis/deploy/alvos/paas/README.md": "sha256:d8b52c4956fab996c303edcfbda6e162874b8311a23def757877de0aa272ad20",
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md": "sha256:bb04007d9e8e6977492685e35299a7801fdbd87b5fbeb4d5f78132d2cfc57411",
         ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md": "sha256:48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
-        "AGENTS.md": "sha256:8bab0ab0eb9832f3762c6824c35c7593a5442ce846ad90fc8c9c7dd98a761bd3",
+        "AGENTS.md": "sha256:3afdb46379e68f5f0b713ede912b8ec5a2c8f2631335b107811ce07970eb9694",
         "CLAUDE.md": "sha256:336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49"
       },
       "descricao": "Orientar Fundação, planejamento, execução, revisão, entrega e manutenção com contratos compartilhados entre as IAs."
@@ -2051,12 +2054,13 @@
     }
   },
   "revisao": {
-    "codigo": "89d2c98fbeaa721f4e2ed5acf2c0d65f8b3de9f9",
-    "wiki_base": "a436ca94e7453c095332f5a76f83e5e45efc72e8",
-    "independente": "publicacao documental e complemento aprovados; revisao final do PR apos CI",
-    "pr": 211,
-    "codigo_revisado": "fd8ab6b11adb8c66caa029c0fda6e401fd3dadbf",
-    "wiki_revisada": "f6d5b3b123e7f3a1da6172a5cc42bf539ca12caa"
+    "codigo": "9c73feb3e357a1216011eaf64bf4b5d944827087",
+    "wiki_base": "7ae9039ef9b23e8c82a703d52f485ae3e683f97e",
+    "independente": "aprovada",
+    "issue": 213,
+    "revisor": "revisar_wiki_208",
+    "wiki": "1054c8df969408d2d4fe9d81a4b99deeaf9323c2",
+    "publicada": true
   },
   "social_preview": {
     "arquivo_wiki": "assets/social-preview.png",

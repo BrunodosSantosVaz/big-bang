@@ -246,6 +246,41 @@ class Wiki(unittest.TestCase):
         for target in ("assets/missing.png", "Ausente", "Partida#nao-existe"):
             self.assertTrue(any(target in p for p in found), found)
 
+    def test_nested_badge_destination_is_validated(self):
+        for target in ("Pagina-ausente", "Produto#nao-existe",
+                       "https://github.com/owner/game/wiki/Pagina-ausente"):
+            with self.subTest(target=target):
+                self.wiki.joinpath("Home.md").write_text(
+                    "# Jogo\n\n[![Licença](https://img.shields.io/badge/licenca-MIT-blue)](" + target + ")\n")
+                self.commit_wiki()
+                self.assertTrue(any(target in p for p in self.problems()), self.problems())
+
+    def test_valid_nested_badge_keeps_image_validation(self):
+        self.wiki.joinpath("assets").mkdir()
+        self.wiki.joinpath("assets/icone.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg"/>')
+        self.wiki.joinpath("Home.md").write_text("# Jogo\n\n[![Produto](assets/icone.svg)](Produto)\n")
+        self.commit_wiki()
+        self.assertEqual(self.problems(), [])
+        self.wiki.joinpath("Home.md").write_text("# Jogo\n\n[![Produto](assets/ausente.svg)](Produto)\n")
+        self.commit_wiki()
+        self.assertTrue(any("assets/ausente.svg" in p for p in self.problems()))
+
+    def test_nested_badge_handles_parentheses_in_image_url_and_title(self):
+        self.wiki.joinpath("assets").mkdir()
+        for name in ("icone.svg", "icone(estavel).svg", "icone (estavel).svg"):
+            self.wiki.joinpath("assets", name).write_text('<svg xmlns="http://www.w3.org/2000/svg"/>')
+        images = ('assets/icone.svg "Versão (estável)"',
+                  'https://example.test/a(b).png', 'assets/icone(estavel).svg',
+                  r'assets/icone\(estavel\).svg', '<assets/icone (estavel).svg>')
+        for image in images:
+            with self.subTest(image=image):
+                self.wiki.joinpath("Home.md").write_text("# Jogo\n\n[![Produto](" + image + ")](Ausente)\n")
+                self.commit_wiki()
+                self.assertTrue(any("Ausente" in p for p in self.problems()), self.problems())
+                self.wiki.joinpath("Home.md").write_text("# Jogo\n\n[![Produto](" + image + ")](Produto)\n")
+                self.commit_wiki()
+                self.assertEqual(self.problems(), [])
+
     def test_local_system_docs_block_but_functional_contracts_remain(self):
         self.root.joinpath("PRODUTO.md").write_text("Duplicado")
         self.assertTrue(any("PRODUTO.md" in p for p in self.problems()))
