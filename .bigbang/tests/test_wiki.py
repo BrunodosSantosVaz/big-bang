@@ -4,6 +4,8 @@ import json
 import subprocess
 import tempfile
 import unittest
+import contextlib
+import io
 from pathlib import Path
 from unittest.mock import patch
 
@@ -81,6 +83,37 @@ class Wiki(unittest.TestCase):
         with patch.object(documentation, "checkout", return_value=self.wiki):
             self.assertIn("Objetivo", documentation.read(self.root, "PRODUTO.md"))
         self.assertFalse(self.root.joinpath("PRODUTO.md").exists())
+
+    def test_cli_proposal_review_and_publication_preserve_original_until_confirmed(self):
+        from bb import cli
+        original = self.root.joinpath('PRODUTO.md')
+        original.write_text('Documento original preservado')
+        draft = self.root.parent.joinpath('draft.md')
+        draft.write_text('# Produto\n\nRF-001: mover a cobra com documentação revisada.\n')
+        real_git = documentation.git
+        def canonical_remote(folder, *args):
+            if args == ('remote', 'get-url', 'origin'):
+                return 'https://github.com/owner/game.wiki.git'
+            return real_git(folder, *args)
+        with contextlib.redirect_stdout(io.StringIO()), \
+                patch.object(documentation, 'prepare', return_value=(self.wiki, {})), \
+                patch.object(documentation, 'checkout', return_value=self.wiki), \
+                patch.object(documentation, 'repository_state', return_value={'private': False, 'has_wiki': True}), \
+                patch.object(documentation, 'git', side_effect=canonical_remote):
+            self.assertEqual(cli.main(['--raiz', str(self.root), 'documentacao', 'gravar',
+                                      'PRODUTO.md', '--arquivo', str(draft)]), 0)
+            self.assertEqual(cli.main(['--raiz', str(self.root), 'documentacao', 'propor',
+                                      '--wiki', str(self.wiki), '--branch', 'bigbang/proposta-1-docs']), 0)
+            proposal = json.loads(self.root.joinpath(documentation.MANIFEST).read_text())
+            self.assertNotEqual(proposal['wiki']['commit'], self.base_sha)
+            self.assertEqual(git(self.remote, 'rev-parse', 'master'), self.base_sha)
+            self.assertEqual(original.read_text(), 'Documento original preservado')
+            self.assertEqual(cli.main(['--raiz', str(self.root), 'documentacao', 'publicar']), 0)
+            self.assertEqual(git(self.remote, 'rev-parse', 'master'), proposal['wiki']['commit'])
+            self.assertEqual(original.read_text(), 'Documento original preservado')
+            self.assertTrue(any('duplicada' in p for p in self.problems()))
+            original.unlink()
+            self.assertEqual(cli.main(['--raiz', str(self.root), 'documentacao', 'validar', '--publicada']), 0)
 
     def test_private_reads_existing_file_and_does_not_access_github(self):
         self.root.joinpath(documentation.MANIFEST).unlink()
