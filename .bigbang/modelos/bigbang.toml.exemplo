@@ -3,7 +3,7 @@
 # O gerador valida o esquema e recusa chaves desconhecidas. Depois de mudar, rode `bb gerar`.
 
 [bigbang]
-versao = "2.0.0"                       # versão do framework instalada (igual a .bigbang/VERSION)
+versao = "2.0.1"                       # versão do framework instalada (igual a .bigbang/VERSION)
 origem = "BrunodosSantosVaz/big-bang"  # de onde vêm as atualizações
 
 [projeto]

@@ -2,7 +2,7 @@
 name: bb-status
 description: Use para como está o projeto ou pedido de status. Lê painéis, posses, flags e achados de segurança e resume o que espera pelo dono, sem alterar estado.
 ---
-<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/skills/bb-status/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v2.0.1 a partir de .bigbang/skills/bb-status/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Status do projeto
 
