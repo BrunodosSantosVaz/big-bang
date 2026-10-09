@@ -89,6 +89,18 @@ class Wiki(unittest.TestCase):
         with patch.object(documentation, "checkout", side_effect=AssertionError("network")):
             self.assertEqual(documentation.read(self.root, "PRODUTO.md"), "Local privado")
 
+    def test_public_repository_cannot_bypass_policy_with_private_config(self):
+        self.root.joinpath('bigbang.toml').write_text(
+            '[projeto]\nvisibilidade="privado"\nrepositorio="owner/game"\n')
+        with patch.object(documentation, 'repository_state', return_value={'private': False}):
+            self.assertTrue(documentation.visibility_problems(self.root))
+
+    def test_private_repository_visibility_keeps_current_policy(self):
+        self.root.joinpath('bigbang.toml').write_text(
+            '[projeto]\nvisibilidade="privado"\nrepositorio="owner/game"\n')
+        with patch.object(documentation, 'repository_state', return_value={'private': True}):
+            self.assertEqual(documentation.visibility_problems(self.root), [])
+
     def test_complete_inventory_passes(self):
         self.assertEqual(self.problems(), [])
 
