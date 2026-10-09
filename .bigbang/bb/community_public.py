@@ -16,12 +16,23 @@ DISCUSSIONS_QUERY = """query($owner:String!,$name:String!,$cursor:String){
  discussions(first:100,after:$cursor){nodes{id title body url} pageInfo{hasNextPage endCursor}}}}"""
 PROJECT_QUERY = """query($owner:String!,$number:Int!){user(login:$owner){projectV2(number:$number){
  id number title public url shortDescription readme viewerCanUpdate
- fields(first:100){nodes{... on ProjectV2Field{id name dataType}
+ views(first:100){nodes{id name filter layout}pageInfo{hasNextPage}}
+ fields(first:100){nodes{__typename ... on ProjectV2Field{id name dataType}
  ... on ProjectV2SingleSelectField{id name options{id name description}}}pageInfo{hasNextPage}}
  items(first:100){nodes{id content{__typename ... on Issue{title body url repository{nameWithOwner isPrivate}}
  ... on PullRequest{title body url repository{nameWithOwner isPrivate}} ... on DraftIssue{title body}}
- fieldValues(first:100){nodes{... on ProjectV2ItemFieldTextValue{text}
- ... on ProjectV2ItemFieldSingleSelectValue{name}}pageInfo{hasNextPage}}}pageInfo{hasNextPage}}}}}"""
+ fieldValues(first:50){nodes{__typename
+ ... on ProjectV2ItemFieldTextValue{text}
+ ... on ProjectV2ItemFieldSingleSelectValue{name}
+ ... on ProjectV2ItemFieldNumberValue{number}
+ ... on ProjectV2ItemFieldDateValue{date}
+ ... on ProjectV2ItemFieldUserValue{users(first:20){nodes{login name}pageInfo{hasNextPage}}}
+ ... on ProjectV2ItemFieldRepositoryValue{repository{nameWithOwner isPrivate description}}
+ ... on ProjectV2ItemFieldLabelValue{labels(first:20){nodes{name description repository{nameWithOwner isPrivate}}
+ pageInfo{hasNextPage}}}
+ ... on ProjectV2ItemFieldMilestoneValue{milestone{title description url repository{nameWithOwner isPrivate}}}
+ ... on ProjectV2ItemFieldPullRequestValue{pullRequests(first:20){nodes{title body url repository{nameWithOwner isPrivate}}
+ pageInfo{hasNextPage}}}}pageInfo{hasNextPage}}}pageInfo{hasNextPage}}}}}"""
 
 
 def discussion_state(repository):
@@ -88,10 +99,50 @@ def project_state(owner, number):
     board = response["data"]["user"]["projectV2"]
     if not board:
         fail("painel não encontrado ou sem acesso")
-    if board["items"]["pageInfo"]["hasNextPage"] or board["fields"]["pageInfo"]["hasNextPage"] or any(
+    if board["views"]["pageInfo"]["hasNextPage"] or board["items"]["pageInfo"]["hasNextPage"] or board["fields"]["pageInfo"]["hasNextPage"] or any(
             item["fieldValues"]["pageInfo"]["hasNextPage"] for item in board["items"]["nodes"]):
         fail("painel excede o limite do inventário automático; audite todas as páginas antes de publicar")
+    allowed_fields = {"ProjectV2Field", "ProjectV2SingleSelectField"}
+    allowed_values = {"ProjectV2ItemFieldTextValue", "ProjectV2ItemFieldSingleSelectValue",
+                      "ProjectV2ItemFieldNumberValue", "ProjectV2ItemFieldDateValue", "ProjectV2ItemFieldUserValue",
+                      "ProjectV2ItemFieldRepositoryValue", "ProjectV2ItemFieldLabelValue",
+                      "ProjectV2ItemFieldMilestoneValue", "ProjectV2ItemFieldPullRequestValue"}
+    if any(not field or field.get("__typename") not in allowed_fields for field in board["fields"]["nodes"]) or any(
+            not value or value.get("__typename") not in allowed_values
+            for item in board["items"]["nodes"] for value in item["fieldValues"]["nodes"]):
+        fail("painel contém tipo de campo/valor sem inventário completo; mantenha protegido e audite antes de publicar")
+    if _nested_flag(board, "hasNextPage"):
+        fail("painel contém conexão paginada incompleta; mantenha protegido antes de publicar")
     return board
+
+
+def _nested_flag(value, key):
+    if isinstance(value, dict):
+        return value.get(key) is True or any(_nested_flag(item, key) for item in value.values())
+    if isinstance(value, list):
+        return any(_nested_flag(item, key) for item in value)
+    return False
+
+
+def audit_created_project(repository, owner, number, expected_title):
+    """Audit an empty, default board against the title explicitly chosen for creation."""
+    board = project_state(owner, number)
+    defaults = {"Title", "Assignees", "Labels", "Linked pull requests", "Milestone", "Repository",
+                "Reviewers", "Parent issue", "Sub-issues progress", "Created", "Updated", "Closed"}
+    safe = board["title"] == expected_title and not (board["items"]["nodes"] or
+            board.get("shortDescription") or board.get("readme"))
+    for field in board["fields"]["nodes"]:
+        if field["__typename"] == "ProjectV2SingleSelectField":
+            safe = safe and field["name"] == "Status" and {option["name"] for option in field["options"]} == {
+                "Todo", "In Progress", "Done"} and not any(option.get("description") for option in field["options"])
+        else:
+            safe = safe and field["name"] in defaults
+    safe = safe and all(not view.get("filter") and view["name"] in {"View 1", "Table", "Board", "Roadmap"}
+                        for view in board["views"]["nodes"])
+    if not safe:
+        fail("auditoria automática de painel recém-criado encontrou conteúdo fora do padrão; preserve a visibilidade")
+    return {"repositorio": repository, "painel": board["id"], "sha256": audit_digest(board),
+            "sem_conteudo_sensivel": True, "revisor": "BigBang/F4/criacao-com-conteudo-padrao"}
 
 
 def audit_digest(board):
@@ -124,21 +175,21 @@ def anonymous_project(owner, number):
 
 def ensure_public_project(repository, owner, number, publish=False, audit=None):
     board = project_state(owner, number)
+    if _nested_flag(board, "isPrivate"):
+        fail("painel contém referência a repositório privado: mantenha protegido antes de publicar")
     for item in board["items"]["nodes"]:
         content = item.get("content")
-        if not content or content["__typename"] == "DraftIssue" or content.get("repository", {}).get("isPrivate"):
+        if not content or content.get("__typename") not in {"Issue", "PullRequest"} or content.get("repository", {}).get("isPrivate"):
             fail("painel contém conteúdo privado, oculto ou rascunho: mantenha protegido antes de publicar")
     if board["public"]:
         return board.get("url", f"https://github.com/users/{owner}/projects/{number}")
     if not publish:
         fail(f"repositório público com painel privado: {owner}/projects/{number}")
-    nonempty = bool(board["items"]["nodes"] or board.get("shortDescription") or board.get("readme"))
-    if nonempty:
-        reviewed = json.loads(Path(audit).read_text(encoding="utf-8")) if audit else {}
-        if (reviewed.get("repositorio") != repository or reviewed.get("painel") != board["id"] or
-                reviewed.get("sha256") != audit_digest(board) or not reviewed.get("sem_conteudo_sensivel") or
-                not reviewed.get("revisor")):
-            fail("painel existente exige auditoria revisada do conteúdo e dos campos no estado atual")
+    reviewed = json.loads(Path(audit).read_text(encoding="utf-8")) if audit else {}
+    if (reviewed.get("repositorio") != repository or reviewed.get("painel") != board["id"] or
+            reviewed.get("sha256") != audit_digest(board) or reviewed.get("sem_conteudo_sensivel") is not True or
+            not reviewed.get("revisor")):
+        fail("painel existente exige auditoria revisada do conteúdo e dos campos no estado atual")
     query = """mutation($id:ID!){updateProjectV2(input:{projectId:$id,public:true}){projectV2{id public}}}"""
     github.run("api", "graphql", "-f", "query=" + query, "-f", "id=" + board["id"])
     # Only the visibility bit changes: no repository/project grants, collaborators or default role mutation.

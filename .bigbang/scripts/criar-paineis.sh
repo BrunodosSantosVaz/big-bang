@@ -28,10 +28,11 @@ numero_do_painel() { # existing board with this exact title, or empty
 }
 
 criar_painel() {
-  local titulo="$1" numero
+  local titulo="$1" numero criado=false recibo=""
   numero=$(numero_do_painel "$titulo")
   if [ -z "$numero" ]; then
     numero=$(gh project create --owner "$OWNER" --title "$titulo" --format json --jq '.number')
+    criado=true
     echo "  painel criado: #$numero $titulo" >&2
   else
     echo "  painel existente: #$numero $titulo" >&2
@@ -39,9 +40,17 @@ criar_painel() {
   gh project link "$numero" --owner "$OWNER" --repo "$REPO" >/dev/null
   if [ "$PUBLICO" = true ]; then
     local auditoria=()
-    if [ -n "${BB_AUDITORIA_PAINEL:-}" ]; then auditoria=(--auditoria "$BB_AUDITORIA_PAINEL"); fi
+    if [ "$criado" = true ]; then
+      recibo=$(mktemp)
+      if ! "${BB_CMD[@]}" comunidade painel auditar-criacao "$numero" --repositorio "$REPO" --owner "$OWNER" \
+          --titulo-criado "$titulo" >"$recibo"; then rm -f "$recibo"; return 1; fi
+      auditoria=(--auditoria "$recibo")
+    elif [ -n "${BB_AUDITORIA_PAINEL:-}" ]; then auditoria=(--auditoria "$BB_AUDITORIA_PAINEL"); fi
+    local resultado=0
     "${BB_CMD[@]}" comunidade painel publicar "$numero" --repositorio "$REPO" --owner "$OWNER" \
-      "${auditoria[@]}" >&2
+      "${auditoria[@]}" >&2 || resultado=$?
+    if [ -n "$recibo" ]; then rm -f "$recibo"; fi
+    if [ "$resultado" -ne 0 ]; then return "$resultado"; fi
   fi
   echo "$numero"
 }

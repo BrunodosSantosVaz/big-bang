@@ -1,0 +1,3 @@
+# ADR-0021: SHA-256 público de padroes/api.md, validado contra o arquivo; não é credencial.
+# Exceção restrita ao fingerprint histórico; todas as demais ocorrências continuam bloqueadas.
+cded74f41c199f5622a4b9a3ea0ea497647a7b5b:.bigbang-docs.json:generic-api-key:1956

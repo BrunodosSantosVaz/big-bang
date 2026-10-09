@@ -236,7 +236,8 @@ def _feature_problems(root, wiki, data):
             code = safe_path(root, source)
             covered.add(source)
             digest = hashlib.sha256(code.read_bytes()).hexdigest() if code.is_file() else "ausente"
-            if feature.get("hashes", {}).get(source) != digest:
+            expected = feature.get("hashes", {}).get(source)
+            if expected not in (digest, "sha256:" + digest):
                 found.append(f"{label}: documentação desatualizada para {source}")
         for reference in feature.get("testes", []):
             name, _, symbol = reference.partition(":")

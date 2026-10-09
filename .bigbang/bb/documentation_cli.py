@@ -45,11 +45,12 @@ def register(commands, parser_class):
     p.add_argument("--simular", action="store_true")
     p.set_defaults(handler=_welcome)
     p = sub.add_parser("painel", help="audita, verifica ou publica um painel sem alterar permissões de edição")
-    p.add_argument("acao", choices=("auditar", "validar", "publicar"))
+    p.add_argument("acao", choices=("auditar", "auditar-criacao", "validar", "publicar"))
     p.add_argument("numero", type=int)
     p.add_argument("--repositorio", required=True)
     p.add_argument("--owner", required=True)
     p.add_argument("--auditoria", help="recibo da revisão do conteúdo atual antes de mudar a visibilidade")
+    p.add_argument("--titulo-criado", help="título escolhido na criação, para auditar apenas conteúdo padrão vazio")
     p.set_defaults(handler=_project)
     p = sub.add_parser("social-preview", help="mostra se a imagem personalizada foi instalada no GitHub")
     p.add_argument("--repositorio", required=True)
@@ -76,6 +77,8 @@ def _write(args):
     text = Path(args.arquivo).read_text(encoding="utf-8")
     if documentation.is_public(args.raiz):
         data = documentation.load(args.raiz)
+        folder, state = documentation.prepare(args.raiz)
+        _revision_base(data, state["commit"])
         if args.documento not in data["paginas"]:
             import re
             documentation.safe_path(args.raiz, args.documento)
@@ -83,19 +86,26 @@ def _write(args):
             if page in data["paginas"].values():
                 documentation.fail("colisão de nomes: escolha explicitamente o destino no manifesto")
             data["paginas"][args.documento] = page
-            Path(args.raiz, documentation.MANIFEST).write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
-        folder, _ = documentation.prepare(args.raiz)
         if documentation.git(folder, "rev-parse", "HEAD") != data["wiki"]["commit"]:
             if documentation.git(folder, "status", "--porcelain"):
                 documentation.fail("proposta local divergente; preserve o diff antes de trocar o commit")
             documentation.git(folder, "switch", "--detach", data["wiki"]["commit"])
-        path = documentation.resolve(args.raiz, args.documento, folder)
+        path = documentation.page_path(folder, data["paginas"][args.documento])
+        Path(args.raiz, documentation.MANIFEST).write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
     else:
         path = documentation.resolve(args.raiz, args.documento)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
     print(f"Proposta gravada em {path}; revise e use documentacao propor antes de entregar")
     return EXIT_OK
+
+
+def _revision_base(data, live):
+    """Renew only a published revision; keep a pending proposal's original base."""
+    if live == data["wiki"]["commit"]:
+        data["wiki"]["base"] = live
+    elif live != data["wiki"]["base"]:
+        documentation.fail("Wiki alterada por outro autor; preserve a proposta e revise o diff concorrente")
 
 
 def _propose(args):
@@ -107,6 +117,11 @@ def _propose(args):
     expected = f"https://github.com/{data['repositorio']}.wiki.git"
     if documentation.git(folder, "remote", "get-url", "origin") != expected:
         documentation.fail("proposta deve pertencer à Wiki do próprio projeto")
+    refs = documentation.git(folder, "ls-remote", "origin", "refs/heads/" + data["wiki"]["branch"])
+    live = refs.split()[0] if refs else ""
+    if not re.fullmatch(r"[a-f0-9]{40}", live):
+        documentation.fail("HEAD oficial da Wiki não confirmado; proposta preservada")
+    _revision_base(data, live)
     if documentation.git(folder, "status", "--porcelain"):
         documentation.git(folder, "add", "--all")
         documentation.git(folder, "commit", "-m", "docs: update canonical documentation proposal")
@@ -160,7 +175,12 @@ def _welcome(args):
 
 
 def _project(args):
-    if args.acao == "auditar":
+    if args.acao == "auditar-criacao":
+        if not args.titulo_criado:
+            documentation.fail("auditoria de criação exige --titulo-criado")
+        print(json.dumps(community_public.audit_created_project(args.repositorio, args.owner, args.numero,
+                         args.titulo_criado), ensure_ascii=False, indent=2))
+    elif args.acao == "auditar":
         board = community_public.project_state(args.owner, args.numero)
         print(json.dumps({"repositorio": args.repositorio, "painel": board["id"],
                           "sha256": community_public.audit_digest(board), "conteudo": board,

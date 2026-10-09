@@ -27,6 +27,8 @@ jobs:
         with:
           python-version: '3.12'
       - name: bb verificar (framework, camada gerada e workflows)
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: python .bigbang/bin/bb.py verificar
       - name: Instalar
         run: bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
