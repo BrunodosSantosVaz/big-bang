@@ -4,13 +4,13 @@
 - **Data:** 2026-10-09
 - **Decisores:** Bruno dos Santos Vaz (dono); Codex
 
-## Contexto
+## Contexto e problema
 
 A publicação v1.5.4 do próprio Big Bang deixou doze branches incorporadas no GitHub. A distribuição própria
 não chamava a faxina; nos consumidores, Encerrar transformava falhas da limpeza em aviso. O dono pediu a
 correção e a atualização de Snake3310 e ScreenFakeCam, sem novo deploy ou compilação dos aplicativos (#205).
 
-## Decisão
+## Decisão e justificativa
 
 - O workflow próprio Faxina do Big Bang responde à conclusão de CI/release de push, fechamento de issues,
   agenda diária e botão com simulação. Usa somente scripts da main, sem código, cache ou artefatos de PR.
