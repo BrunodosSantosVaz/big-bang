@@ -9,7 +9,7 @@ import tempfile
 from . import config as config_module
 from .errors import EXIT_EXTERNAL_COMMAND, EXIT_USAGE, BbError
 
-STRUCTURAL = ('.bigbang/**', '.github/**', 'bigbang.toml', 'STACK.md', 'PRODUTO.md', 'DESIGN.md',
+STRUCTURAL = ('.bigbang/**', '.github/**', '.bigbang-docs.json', '.bigbang-producao.json', 'bigbang.toml', 'STACK.md', 'PRODUTO.md', 'DESIGN.md',
               'flags.toml', '*lock*', 'package.json', 'pyproject.toml', 'requirements*.txt', 'go.mod', 'go.sum',
               'Cargo.toml', '*.csproj', '*.sln', 'pom.xml', '*gradle*', '*Dockerfile*',
               'Gemfile', 'Pipfile', 'composer.json', '.python-version', '.node-version',

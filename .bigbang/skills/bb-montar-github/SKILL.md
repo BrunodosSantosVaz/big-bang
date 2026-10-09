@@ -11,10 +11,16 @@ Em F4, com produto, stack e design aprovados ou design não aplicável registrad
 
 ## Antes de começar
 
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
+
 Leia `AGENTS.md`, `.bigbang/processo/02-fundacao.md` (F4), `.bigbang/processo/04-paineis.md`,
 `.bigbang/processo/11-seguranca-operacional.md` e `bigbang.toml`. Consulte a documentação/plano atuais do GitHub.
 
 ## Passos
+
+Habilite Discussions no escopo autorizado e publique o primeiro post factual com `bb comunidade primeiro-post`.
+Em públicos, confira Wiki e painéis separados; audite conteúdo antes de publicar um painel existente.
+Registre Wiki, Discussions e três painéis no README e na Wiki; confira Social preview preparado em F3.
 
 1. Um item por vez: mostre comando exato, propósito, efeito e qualquer limitação do plano. Espere o dono agir ou autorizar;
    confira o resultado com leitura por gh antes de seguir. Nunca trate configuração desejada como aplicada.

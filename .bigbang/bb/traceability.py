@@ -3,6 +3,7 @@ import os
 import re
 
 from .paths import read_text, to_posix
+from . import documentation
 
 RULES_DIR = os.path.join("docs", "negocio", "regras")
 ACCEPTANCE_DIR = os.path.join("tests", "aceite")
@@ -16,14 +17,13 @@ def rules(root):
     """{"RN-0042": "vigente" | "substituida" | …} from the key: value header of each rule file."""
     folder = os.path.join(root, RULES_DIR)
     result = {}
-    if not os.path.isdir(folder):
-        return result
-    for name in sorted(os.listdir(folder)):
+    for logical in documentation.logical_files(root, to_posix(RULES_DIR) + "/"):
+        name = os.path.basename(logical)
         match = RULE_FILE.match(name)
         if not match:
             continue
         header = {}
-        for line in read_text(os.path.join(folder, name)).splitlines():
+        for line in documentation.read(root, logical).splitlines():
             parsed = HEADER.match(line)
             if not parsed:
                 break
@@ -67,6 +67,7 @@ def problems(root, test_pattern, changed_paths=()):
         if situation == "vigente" and rule_id not in cited:
             result.append(f"{rule_id} está vigente e nenhum teste de aceite a cita")
     for path in changed_paths:
-        if re.match(r"^docs/negocio/regras/RN-\d{4}-", path) and not os.path.exists(os.path.join(root, path)):
+        if re.match(r"^docs/negocio/regras/RN-\d{4}-", path) and not os.path.exists(os.path.join(root, path)) and \
+                not (documentation.is_public(root) and path in documentation.load(root)["paginas"]):
             result.append(f"{path}: regra de negócio apagada (RN nunca é apagada: marque como substituida)")
     return result

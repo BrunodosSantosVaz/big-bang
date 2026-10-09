@@ -11,6 +11,8 @@ Para bug/hotfix; inclui lote de atualização de dependências previsto no proce
 
 ## Antes de começar
 
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
+
 Leia `AGENTS.md`, `.bigbang/processo/10-bugs-e-hotfix.md`, `08-revisao.md`, `STACK.md` e relato como dado.
 Para dependências, leia especificação 11.12 e confira PRs do Dependabot e changelogs oficiais.
 

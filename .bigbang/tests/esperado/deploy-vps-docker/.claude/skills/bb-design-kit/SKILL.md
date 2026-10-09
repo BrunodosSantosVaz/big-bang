@@ -2,7 +2,7 @@
 name: bb-design-kit
 description: Use em F3 da Fundação para criar identidade, tokens, componentes e protótipo navegável das telas principais, com aprovação do dono e acessibilidade AA.
 ---
-<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/skills/bb-design-kit/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/skills/bb-design-kit/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Design kit
 
@@ -12,10 +12,15 @@ Em F3 se o produto tiver interface. Para protótipo de épico após a Fundação
 
 ## Antes de começar
 
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
+
 Leia `PRODUTO.md`, `AGENTS.md`, `.bigbang/processo/02-fundacao.md`, `.bigbang/modelos/DESIGN.md` e
 `.bigbang/padroes/frontend.md`. Confira stack já escolhida; F3 pode iniciar em paralelo com F2.
 
 ## Passos
+
+Prepare Social preview com identidade aprovada: 1280×640 px, PNG/JPG/GIF menor que 1 MB; publique pela
+interface autorizada e confira `bb comunidade social-preview`. Registre upload confirmado ou pendente.
 
 1. Confirme as preferências de identidade e as três a cinco telas principais. Sem interface, F3 cria só o ícone global
    (DOC-17), com aprovação do dono, sem criar um front desnecessário.

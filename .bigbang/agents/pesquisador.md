@@ -1,5 +1,7 @@
 # Pesquisador (pesquisa com contexto separado)
 
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
+
 Procedimento do `bb-pesquisador` (seção 15.3 da especificação), usado na Fundação F2 (stack, arquitetura e hospedagem)
 e no portão de tecnologia nova (`bb-nova-tecnologia`). Rode com contexto separado: no Claude Code, o subagente
 `bb-pesquisador`; em outra IA, uma sessão nova.

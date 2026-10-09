@@ -1,7 +1,7 @@
 """`bb verificar` (spec 5.1 and 15.5): framework integrity, generated files intact, workflow rules, marked blocks."""
 import os
 
-from . import checksums, deploy_catalog, generator, workflow_rules
+from . import checksums, deploy_catalog, documentation, generator, workflow_rules
 from . import config as config_module
 from .errors import BbError
 from .paths import read_text
@@ -33,6 +33,16 @@ def run(root):
 
 
 def _stack_dependencies(root, config):
+    if config and config["projeto"].get("visibilidade") == "publico" and \
+            os.path.exists(os.path.join(root, documentation.MANIFEST)):
+        if "STACK.md" not in documentation.load(root)["paginas"]:
+            return []  # F0/F1: the approved Stack page is created during F2.
+        try:
+            text = documentation.read(root, "STACK.md")
+        except BbError as exc:
+            return [exc.message]
+        return [f"Stack na Wiki: o marcador {marker} precisa aparecer uma vez" for marker in DEPENDENCY_MARKERS
+                if text.count(marker) != 1]
     path = os.path.join(root, generator.STACK_FILE)
     if config is None or not os.path.exists(path):
         return []

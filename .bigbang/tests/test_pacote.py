@@ -99,7 +99,7 @@ class Migracao(unittest.TestCase):
 
     def test_versoes_publicadas_sem_passo_manual(self):
         # Update this list when a version really needs the owner to act (major version, spec 5.7).
-        with_steps = []
+        with_steps = ['2.0.0']  # public Wiki migration requires explicit, reviewed steps
         with open(os.path.join(BIGBANG, "MIGRACAO.md"), encoding="utf-8") as arquivo:
             secoes = package.migration_sections(arquivo.read())
         for versao, texto in secoes.items():

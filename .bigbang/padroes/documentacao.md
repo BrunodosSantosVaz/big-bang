@@ -4,15 +4,19 @@ Regras obrigatórias para todo sistema do Big Bang. **DEVE**/**NÃO DEVE** são 
 com ADR; **PODE** é opção. Exceção só com ADR listado em `docs/padroes/excecoes.md`. Veja a
 [tabela de rastreio](README.md).
 
-### DOC-01 · Documentação no repositório
+### DOC-01 · Documentação no destino definido pela visibilidade
 
-- **Regra:** A documentação DEVE ficar no repositório, em Markdown, versionada com o código, na estrutura de `docs/`
-  definida pelo Big Bang.
+- **Regra:** Públicos DEVEM usar a GitHub Wiki como fonte oficial; privados mantêm Markdown local na estrutura
+  atual. O manifesto fixa commits de código/documentação, inventário e rastreabilidade; publique sem force
+  e preserve alterações concorrentes. Aplique o procedimento operacional 18-documentacao.
 - **Por quê:** Documento fora do repositório desatualiza e nenhuma IA o encontra.
 - **Certo:** `docs/negocio/regras/RN-0042-bloquear-pedido-sem-estoque.md`.
 - **Errado:** regra de negócio só numa planilha ou numa conversa.
 - **Referência:** Docs as Code (Write the Docs).
 - **Verificação:** item do `bb-revisor-pr` e checklist da tarefa de documentação.
+
+Os caminhos locais citados abaixo são identificadores lógicos; públicos resolvem com `bb documentacao ler`.
+Contrato OpenAPI, tokens, configurações, licenças e instruções necessárias ao funcionamento permanecem no Git.
 
 ### DOC-02 · Uma regra de negócio por arquivo, nunca apagada
 
@@ -136,9 +140,11 @@ com ADR; **PODE** é opção. Exceção só com ADR listado em `docs/padroes/exc
 - **Referência:** CommonMark (https://commonmark.org).
 - **Verificação:** checagem de Markdown e links no job `check` da CI.
 
-### DOC-15 · README do sistema completo e atual
+### DOC-15 · README do sistema atual e conforme a visibilidade
 
-- **Regra:** O `README.md` do sistema DEVE estar completo e descrever o sistema como ele está em produção: selos de
+- **Regra:** Em público, o README DEVE ser breve, factual e dar acesso à Wiki, Discussions e painéis; a
+  documentação completa mora na Wiki. Em privado, o `README.md` mantém o padrão completo e descrever o sistema
+  como ele está em produção: selos de
   CI, produção e homologação, uma imagem real, e as seções Estado atual, Para que serve, Recursos, Instalação, Como
   usar, Para desenvolvedores, Versões e releases, Segurança e privacidade, Limitações conhecidas, Contribuindo e
   Licença. Toda tarefa que muda o que o usuário vê, instala ou configura atualiza o README no mesmo PR; a tarefa de

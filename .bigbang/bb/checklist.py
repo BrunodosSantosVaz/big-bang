@@ -10,7 +10,7 @@ import os
 import re
 import subprocess
 
-from . import github
+from . import documentation, github
 from .errors import BbError
 from .paths import read_text
 
@@ -57,7 +57,8 @@ def _env_problems(root):
         keys.append(key.strip())
         if value.strip().strip('"').strip("'"):
             problems.append(f".env.example: {key.strip()} tem valor (o modelo nunca leva valores, SEG-15)")
-    readme = read_text(os.path.join(root, "README.md")) if os.path.exists(os.path.join(root, "README.md")) else ""
+    readme = (documentation.read(root, "docs/operacao/ambiente.md") if documentation.is_public(root) else
+              read_text(os.path.join(root, "README.md")) if os.path.exists(os.path.join(root, "README.md")) else "")
     for key in keys:
         if key not in readme:
             problems.append(f"README.md não documenta a variável de ambiente {key}")
@@ -74,11 +75,26 @@ def _security_findings(repository):
 
 def run(root, repository=None, with_github=True):
     """(results [(item, status, detail)], problems [str])."""
+    public = documentation.is_public(root)
     path = os.path.join(root, CHECKLIST_FILE)
-    if not os.path.exists(path):
+    if public:
+        # Execution authorizations are reviewed code/config, never commands retrieved from Wiki Markdown.
+        contract = os.path.join(root, ".bigbang-producao.json")
+        if not os.path.isfile(contract):
+            return [], ["falta .bigbang-producao.json: comandos de produção devem estar no contrato revisado"]
+        try:
+            defined = json.loads(read_text(contract))
+            if not isinstance(defined, dict) or any(
+                    not isinstance(value, list) or len(value) != 2 or
+                    not all(isinstance(part, str) for part in value) for value in defined.values()):
+                raise ValueError('cada item precisa de [tipo, verificação]')
+        except (ValueError, OSError) as exc:
+            return [], [f'contrato de produção inválido: {exc}']
+    elif not os.path.exists(path):
         return [], [f"{CHECKLIST_FILE} não existe: crie a partir de .bigbang/modelos/checklist-producao.md e diga "
                     "como o projeto verifica cada item"]
-    defined = _item_lines(read_text(path))
+    else:
+        defined = _item_lines(read_text(path))
     results, problems = [], []
     for item in ITEMS:
         if item not in defined:
@@ -86,6 +102,10 @@ def run(root, repository=None, with_github=True):
             results.append((item, "faltando", ""))
             continue
         kind, value = defined[item]
+        if kind not in ("cmd", "portao", "nao-se-aplica") or not value.strip():
+            problems.append(f"verificação inválida: {item}")
+            results.append((item, "reprovado", value))
+            continue
         if kind == "cmd":
             completed = subprocess.run(value, shell=True, cwd=root, capture_output=True, text=True, check=False)
             ok = completed.returncode == 0
@@ -106,4 +126,6 @@ def run(root, repository=None, with_github=True):
             raise BbError("informe o repositório para conferir os achados de segurança")
         builtin += _security_findings(repository)
     problems += builtin
+    if public:
+        problems += documentation.validate(root, published=True)
     return results, problems

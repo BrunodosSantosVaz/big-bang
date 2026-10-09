@@ -2,7 +2,7 @@
 name: bb-rodar-sprint
 description: Use para vamos rodar a sprint ou vamos encerrar a sprint. Confere portões, usa os botões da esteira e coordena testes, tarefas, documentação e retrospectiva.
 ---
-<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/skills/bb-rodar-sprint/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/skills/bb-rodar-sprint/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Rodar ou encerrar sprint
 
@@ -16,6 +16,8 @@ Use a CI do mesmo SHA e não repita tudo por hábito. Estrutura, major/minor e p
 Veja `.bigbang/processo/17-flash.md`.
 
 ## Antes de começar
+
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
 
 Leia `AGENTS.md`, `.bigbang/processo/05-sprint.md`, `06-execucao.md`, `14-automacoes.md` e `bigbang.toml`.
 Use `bb status` para conferir estado e pendências.

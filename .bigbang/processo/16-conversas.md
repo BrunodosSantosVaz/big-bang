@@ -1,5 +1,7 @@
 # 16 · Conversas com a IA
 
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
+
 Depois da Fundação, o dia a dia é conversa. O dono diz a intenção com as palavras dele; a IA reconhece o pedido,
 confere o que precisa, faz e termina dizendo o próximo passo e **o que depende do dono**.
 

@@ -1,12 +1,18 @@
-<!-- bigbang:inicio v1.5.5 -->
-<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/AGENTS.inicial.md. Não edite: personalize em bigbang.toml. -->
+<!-- bigbang:inicio v2.0.0 -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/AGENTS.inicial.md. Não edite: personalize em bigbang.toml. -->
 
 # Instruções para IAs — sistema ainda não fundado
 
-Este repositório foi criado a partir do **Big Bang v1.5.5** e **ainda não foi fundado** (não existe
+Este repositório foi criado a partir do **Big Bang v2.0.0** e **ainda não foi fundado** (não existe
 `bigbang.toml`). Estas instruções valem para qualquer IA.
 
 ## O que fazer agora
+
+- Aplique `.bigbang/processo/18-documentacao.md`: sistemas públicos documentam exclusivamente na Wiki;
+  privados mantêm arquivos locais. Verifique Wiki habilitada e Home antes de migrar; preserve originais se faltar acesso.
+- Discussions é padrão: a IA responsável publica o primeiro post factual e idempotente. Em públicos, painéis
+  têm leitura pública após auditoria; preserve permissões de edição. Prepare Social preview em F3 e registre o
+  upload confirmado ou pendente. Atualize o README de entrada com Wiki, Discussions e painéis.
 
 - Ao receber "iniciar projeto" — ou qualquer pedido de trabalho —, use a skill `bb-iniciar-projeto`.
 - Leia `.bigbang/processo/02-fundacao.md` antes de começar.
@@ -70,8 +76,8 @@ Esta seção pertence ao projeto e é preenchida na Fundação: comandos da stac
 (em `docs/memoria.md`).
 
 > **Se este é o repositório `BrunodosSantosVaz/big-bang`** (o próprio framework, não um sistema criado a partir
-> dele): não rode a Fundação. Siga `.bigbang/docs/especificacao.md`, trabalhe um épico por vez (seção 17) e registre
-> as decisões do framework em `.bigbang/docs/decisoes/`.
+> dele): não rode a Fundação. Leia a especificação oficial com `bb documentacao ler .bigbang/docs/especificacao.md`, trabalhe um épico por vez (seção 17) e registre
+> as decisões na Wiki, pelos identificadores `.bigbang/docs/decisoes/` do manifesto.
 
 ### Modo do próprio framework
 

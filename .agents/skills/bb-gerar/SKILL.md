@@ -2,7 +2,7 @@
 name: bb-gerar
 description: Use em F5 ou quando bigbang.toml mudar ou o framework for atualizado, para simular, gerar e verificar a camada gerada e abrir PR com revisão humana.
 ---
-<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/skills/bb-gerar/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/skills/bb-gerar/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Gerar a camada do Big Bang
 
@@ -11,6 +11,8 @@ description: Use em F5 ou quando bigbang.toml mudar ou o framework for atualizad
 Para regenerar após mudança aprovada; na primeira instalação da esteira, em F5.
 
 ## Antes de começar
+
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
 
 Leia `AGENTS.md`, `bigbang.toml`, `.bigbang/processo/15-atualizacao-do-framework.md` e a etapa de Fundação se aplicável.
 Confira branch e alterações existentes; preserve arquivos e alterações do projeto.

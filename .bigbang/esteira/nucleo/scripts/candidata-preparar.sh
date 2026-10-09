@@ -18,7 +18,7 @@ arquivo=$("${BB_CMD[@]}" config get entrega.arquivo_versao)
 if [ -n "$arquivo" ] && ! grep -qF "$v" "$arquivo"; then
   echo "::warning::$arquivo ainda não está na versão $v: candidata pulada."; saida "pular=true"; exit 0
 fi
-if ! grep -qF "## [$v]" CHANGELOG.md 2>/dev/null; then
+if ! "${BB_CMD[@]}" documentacao ler CHANGELOG.md | grep -F "## [$v]" >/dev/null; then
   echo "::warning::CHANGELOG.md sem a seção [$v]: candidata pulada."; saida "pular=true"; exit 0
 fi
 n=$(( $(git tag -l "v$v-rc.*" | wc -l) + 1 ))

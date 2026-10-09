@@ -65,7 +65,7 @@ C4Container
 ## Configuração da esteira
 
 <!-- bb:config:inicio -->
-<!-- Gerado pelo Big Bang v1.5.5 a partir de bigbang.toml. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de bigbang.toml. Não edite: personalize em bigbang.toml. -->
 
 **Perfil de entrega:** `deploy` · **Alvo:** `vps-docker`
 
@@ -82,7 +82,7 @@ C4Container
 - `src/**/auth/**`
 - `src/**/payments/**`
 - `migrations/**`
-- Sempre: `.github/**`, `tests/aceite/**`, `STACK.md`, `DESIGN.md`, `PRODUTO.md`, `bigbang.toml`, `flags.toml` e os arquivos de dependência da stack.
+- Sempre: `.github/**`, `tests/aceite/**`, `.bigbang-docs.json`, `.bigbang-producao.json`, `STACK.md`, `DESIGN.md`, `PRODUTO.md`, `bigbang.toml`, `flags.toml` e os arquivos de dependência da stack.
 
 <!-- bb:config:fim -->
 

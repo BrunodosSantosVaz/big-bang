@@ -27,7 +27,7 @@ STACK_BLOCK_END = "<!-- bb:config:fim -->"
 SKILL_TARGETS = (".agents/skills", ".claude/skills")
 FRAMEWORK_WORKFLOW_PREFIX = "bb-framework-"
 IGNORED_NAMES = ("__pycache__", ".DS_Store")
-ALWAYS_SENSITIVE = (".github/**", "tests/aceite/**", "STACK.md", "DESIGN.md", "PRODUTO.md", "bigbang.toml",
+ALWAYS_SENSITIVE = (".github/**", "tests/aceite/**", ".bigbang-docs.json", ".bigbang-producao.json", "STACK.md", "DESIGN.md", "PRODUTO.md", "bigbang.toml",
                     "flags.toml")
 
 
@@ -213,6 +213,8 @@ def stack_block(config, version):
 
 
 def _add_stack_md(plan, root, config, version):
+    if config["projeto"].get("visibilidade") == "publico":
+        return  # Public documentation belongs to the separately reviewed Wiki Git history.
     path = os.path.join(root, STACK_FILE)
     if not os.path.exists(path):
         return  # STACK.md is born in F2
