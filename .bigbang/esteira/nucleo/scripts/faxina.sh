@@ -42,7 +42,10 @@ echo "== Branches"
 while IFS= read -r b; do
   case "$b" in main|develop|HEAD|dependabot/*) continue ;; esac
   pr_aberto=false; [[ "$abertos" == *" $b "* ]] && pr_aberto=true
-  $pr_aberto && continue
+  if $pr_aberto; then
+    [ "${FAXINA_EXIGIR_LIMPA:-false}" != true ] || aviso "$b: PR aberto; branch preservada"
+    continue
+  fi
   if [[ "$b" =~ ^release/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
     tag="v${BASH_REMATCH[1]}"
     if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
