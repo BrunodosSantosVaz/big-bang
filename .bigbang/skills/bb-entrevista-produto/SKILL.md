@@ -11,6 +11,8 @@ Em F1, após F0, ou para retomar a entrevista incompleta.
 
 ## Antes de começar
 
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
+
 Leia `AGENTS.md`, `.bigbang/processo/02-fundacao.md`, `.bigbang/modelos/PRODUTO.md` e respostas já registradas.
 
 ## Passos

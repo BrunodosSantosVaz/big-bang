@@ -7,6 +7,7 @@ import subprocess
 import urllib.parse
 
 from .paths import read_text, to_posix
+from . import documentation
 
 FENCE = re.compile(r"^\s*(`{3,}|~{3,})")
 LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
@@ -96,6 +97,21 @@ def has_release(root):
 
 def readme_problems(root):
     """DOC-15: after the first release the README is complete and current (only for founded systems)."""
+    if documentation.is_public(root):
+        path = os.path.join(root, "README.md")
+        if not os.path.isfile(path):
+            return ["README.md: apresentação pública ausente"]
+        text = read_text(path)
+        result = []
+        if len(text.split()) > 500:
+            result.append("README.md público deve ser breve; mova a documentação completa para a Wiki")
+        if "github.com/" not in text or "/wiki" not in text:
+            result.append("README.md público sem acesso à Wiki oficial")
+        if "/discussions" not in text:
+            result.append("README.md sem acesso ao Discussions do projeto")
+        if "/projects/" not in text:
+            result.append("README.md público sem acesso aos painéis públicos")
+        return result
     if not os.path.exists(os.path.join(root, "bigbang.toml")) or not has_release(root):
         return []
     path = os.path.join(root, "README.md")
@@ -136,6 +152,8 @@ def community_problems(root):
 def problems(root):
     """Problems of the project's own Markdown (the framework layer is checked in the Big Bang repository)."""
     result = readme_problems(root) + community_problems(root)
+    if documentation.is_public(root):
+        result += documentation.validate(root)
     for path in markdown_files(root):
         relative = to_posix(os.path.relpath(path, root))
         _, closed = outside_code(read_text(path))

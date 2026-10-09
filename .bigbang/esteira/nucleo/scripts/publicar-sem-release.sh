@@ -33,6 +33,11 @@ sha=$(git rev-parse origin/develop)
 ci=$(gh api "repos/$R/commits/$sha/check-runs?per_page=100" --jq '[.check_runs[] | select(.name == "check")]
   | if length > 0 and (map(.status) | all(. == "completed")) and (map(.conclusion) | all(. == "success")) then "ok" else "pendente" end')
 [ "$ci" = ok ] || falha "o check 'check' na ponta da develop (${sha:0:7}) está pendente ou falhando"
+docs_dir=$(mktemp -d)
+git worktree add -q --detach "$docs_dir" origin/develop
+"${BB_CMD[@]}" esteira documentacao --dados "$docs_dir" --publicada --comunidade \
+  || falha "documentação ou publicação da Wiki da develop reprovada"
+git worktree remove "$docs_dir"
 if [ "$falhas" -gt 0 ]; then echo "Publicação RECUSADA ($falhas problema(s)). Nada foi alterado."; exit 1; fi
 
 # ---- sem-release epics finished (every sub-issue merged into the epic branch, already in develop)

@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.5.5 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-faxina.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v2.0.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-faxina.yml. Não edite: personalize em bigbang.toml.
 # Daily recovery complements cleanup already performed by real publication and sprint closure.
 # No workflow_run: simulated publications must never trigger a separate real cleanup.
 name: Faxina

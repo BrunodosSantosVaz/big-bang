@@ -4,7 +4,7 @@ import re
 import tomllib
 import unittest
 
-from _raiz import BIGBANG, caminho, ler
+from _raiz import BIGBANG, RAIZ, caminho, ler, importar_bb
 
 ARQUIVOS_RAIZ = ["README.md", "LICENSE", "AGENTS.md", "CLAUDE.md"]
 
@@ -13,14 +13,14 @@ PASTAS_BIGBANG = [
     "esteira/nucleo", "esteira/perfis/compilado",
     "esteira/perfis/deploy/alvos/vps-docker", "esteira/perfis/deploy/alvos/aws",
     "esteira/perfis/deploy/alvos/paas",
-    "modelos", "scripts", "docs", "docs/decisoes", "tests",
+    "modelos", "scripts", "tests",
 ]
 
 DOCUMENTOS_PROCESSO = [
     "01-visao.md", "02-fundacao.md", "03-planejamento.md", "04-paineis.md", "05-sprint.md",
     "06-execucao.md", "07-branches-e-commits.md", "08-revisao.md", "09-entrega.md",
     "10-bugs-e-hotfix.md", "11-seguranca-operacional.md", "12-tecnologia-nova.md",
-    "13-varias-ias.md", "14-automacoes.md", "15-atualizacao-do-framework.md", "16-conversas.md", "17-flash.md",
+    "13-varias-ias.md", "14-automacoes.md", "15-atualizacao-do-framework.md", "16-conversas.md", "17-flash.md", "18-documentacao.md",
 ]
 
 MODELOS = [
@@ -125,7 +125,7 @@ class ReadmeDeBoasVindas(unittest.TestCase):
     ]
 
     def test_secoes_na_ordem(self):
-        texto = ler("README.md")
+        texto = self.guia()
         posicoes = [texto.find(secao) for secao in self.SECOES]
         for secao, posicao in zip(self.SECOES, posicoes):
             with self.subTest(secao=secao):
@@ -133,16 +133,27 @@ class ReadmeDeBoasVindas(unittest.TestCase):
         self.assertEqual(posicoes, sorted(posicoes))
 
     def test_como_comecar(self):
-        texto = ler("README.md")
+        texto = self.guia()
         for trecho in ("Use this template", "iniciar projeto", "Python 3.11", "`gh`"):
             with self.subTest(trecho=trecho):
                 self.assertIn(trecho, texto)
 
     def test_etapas_da_fundacao(self):
-        texto = ler("README.md")
+        texto = self.guia()
         for etapa in ("F0", "F1", "F2", "F3", "F4", "F5"):
             with self.subTest(etapa=etapa):
                 self.assertIn(f"**{etapa}**", texto)
+
+    def guia(self):
+        importar_bb()
+        from bb import documentation
+        return documentation.read(RAIZ, 'README.md') if documentation.is_public(RAIZ) else ler('README.md')
+
+    def test_entrada_publica_breve_aponta_para_fonte_oficial(self):
+        importar_bb()
+        from bb import documentation, docs_check
+        if documentation.is_public(RAIZ):
+            self.assertEqual(docs_check.readme_problems(RAIZ), [])
 
 
 class DocumentosDeProcesso(unittest.TestCase):
@@ -203,9 +214,12 @@ class Modelos(unittest.TestCase):
 
 class DecisoesDoFramework(unittest.TestCase):
     def test_adrs_no_formato_madr_e_no_indice(self):
-        pasta = os.path.join(BIGBANG, "docs", "decisoes")
+        importar_bb()
+        from bb import documentation
+        pasta = '.bigbang/docs/decisoes/'
         indice = ler(".bigbang", "docs", "decisoes", "README.md")
-        adrs = sorted(n for n in os.listdir(pasta) if n.startswith("ADR-"))
+        adrs = sorted(os.path.basename(n) for n in documentation.logical_files(RAIZ, pasta)
+                      if os.path.basename(n).startswith('ADR-'))
         self.assertGreaterEqual(len(adrs), 5)
         for numero, nome in enumerate(adrs, start=1):
             with self.subTest(adr=nome):
@@ -214,7 +228,15 @@ class DecisoesDoFramework(unittest.TestCase):
                 self.assertTrue(texto.startswith(f"# ADR-{numero:04d}: "))
                 for trecho in ("**Situação:**", "**Data:**", "## Contexto e problema", "## Decisão e justificativa"):
                     self.assertIn(trecho, texto)
-                self.assertIn(f"({nome})", indice)
+                target = (documentation.load(RAIZ)['paginas'][pasta + nome]
+                          if documentation.is_public(RAIZ) else nome)
+                self.assertIn(f"({target})", indice)
+
+    def test_inventario_publico_completo_e_sem_documentacao_duplicada(self):
+        importar_bb()
+        from bb import documentation
+        if documentation.is_public(RAIZ):
+            self.assertEqual(documentation.validate(RAIZ, check_repository=False), [])
 
 
 if __name__ == "__main__":

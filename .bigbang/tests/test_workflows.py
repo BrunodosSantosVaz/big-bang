@@ -46,6 +46,12 @@ def jobs(texto):
 
 
 class RegrasDosWorkflows(unittest.TestCase):
+    def test_wiki_verification_has_only_read_token_at_its_step(self):
+        template = modelo_esteira('bb-ci.yml')
+        step = template.split('name: bb verificar', 1)[1].split('\n      - name:', 1)[0]
+        self.assertIn('GH_TOKEN: ${{ github.token }}', step)
+        self.assertNotIn('PROJETO_TOKEN', step)
+
     def test_existe_a_ci_do_framework(self):
         self.assertIn("bb-framework-ci.yml", dict(workflows()))
 

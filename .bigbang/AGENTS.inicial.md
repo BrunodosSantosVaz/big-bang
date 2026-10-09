@@ -5,6 +5,12 @@ Este repositório foi criado a partir do **Big Bang v{{bigbang.versao}}** e **ai
 
 ## O que fazer agora
 
+- Aplique `.bigbang/processo/18-documentacao.md`: sistemas públicos documentam exclusivamente na Wiki;
+  privados mantêm arquivos locais. Verifique Wiki habilitada e Home antes de migrar; preserve originais se faltar acesso.
+- Discussions é padrão: a IA responsável publica o primeiro post factual e idempotente. Em públicos, painéis
+  têm leitura pública após auditoria; preserve permissões de edição. Prepare Social preview em F3 e registre o
+  upload confirmado ou pendente. Atualize o README de entrada com Wiki, Discussions e painéis.
+
 - Ao receber "iniciar projeto" — ou qualquer pedido de trabalho —, use a skill `bb-iniciar-projeto`.
 - Leia `.bigbang/processo/02-fundacao.md` antes de começar.
 - Escolha com o dono o modo padrão ou Flash (`bb init --modo flash`). Testes continuam escritos antes do código;

@@ -1,5 +1,7 @@
 # 02 · Fundação (F0 a F5)
 
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
+
 Escolha `padrao` ou `flash` em F0 (`bb init --modo flash`). O marcador é `projeto.modo`; pode mudar depois com ADR e `bb gerar`. Testes continuam anteriores ao código. Veja [Modo Flash](17-flash.md).
 
 A Fundação transforma um repositório recém-criado a partir do Big Bang num sistema com produto definido, stack

@@ -2,7 +2,7 @@
 
 As 20 skills no padrão aberto Agent Skills (seção 15). O gerador as copia para `.agents/skills/` e `.claude/skills/`.
 
-O catálogo segue a seção 15.2 da [especificação](../docs/especificacao.md). Cada skill encaminha aos processos e
+O catálogo segue a seção 15.2 da [especificação](https://github.com/BrunodosSantosVaz/big-bang/wiki/Especificacao). Cada skill encaminha aos processos e
 comandos existentes, sem duplicar a lógica da esteira. Os caminhos citados são relativos à raiz do projeto.
 As cópias são geradas desde o template, antes da Fundação; personalize com skills próprias sem prefixo `bb-`.
 

@@ -5,7 +5,7 @@ import sys
 from . import config as config_module
 from . import acceptance, checklist, checksums, decisions, deploy_catalog, generator, ownership, package, status, update, verify, workspaces
 from . import init as init_module
-from . import pipeline_cli, test_runs
+from . import documentation_cli, pipeline_cli, test_runs
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 from .paths import default_root
 
@@ -106,6 +106,7 @@ def build_parser():
     producao_parser.set_defaults(handler=_checklist_producao)
 
     pipeline_cli.register(commands, _Parser)
+    documentation_cli.register(commands, _Parser)
 
     atualizar_parser = commands.add_parser("atualizar", help="atualiza o framework numa branch framework/vX.Y.Z (PR)")
     atualizar_parser.add_argument("versao", nargs="?", help="versão alvo X.Y.Z (padrão: a última da origem)")

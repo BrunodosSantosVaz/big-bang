@@ -1,5 +1,7 @@
 # 08 · Revisão
 
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
+
 No [modo Flash](17-flash.md), revisão independente por IA é padrão inclusive em zonas sensíveis comuns. O modo é lido da branch de destino: um PR não altera a regra que o julga. Labels explícitas `revisao-humana` e `testes-revisao-humana`, trabalho crítico e decisões do dono permanecem respeitados.
 
 Nenhum PR é mesclado sem revisão. Quem escreveu o código não aprova o próprio raciocínio.

@@ -41,6 +41,8 @@ class ConfigurarRepositorio(CasoDeScript):
         r = self.configurar()
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         chamadas = self.chamadas()
+        self.assertTrue(any('has_discussions=true' in c for c in chamadas))
+        self.assertTrue(any('hasDiscussionsEnabled' in ' '.join(c) for c in chamadas))
         rulesets = [c for c in chamadas if c[:4] == ["api", "-X", "POST", "repos/dono/repo/rulesets"]]
         self.assertEqual(len(rulesets), 3)
         self.assertIn(["api", "-X", "PATCH", "repos/dono/repo", "-f",

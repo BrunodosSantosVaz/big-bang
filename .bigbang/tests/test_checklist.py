@@ -1,9 +1,11 @@
 """bb checklist producao (spec 8.2): an item without verification, a failing command, a value in .env.example or an
 undocumented variable each refuse the checklist."""
 import os
+import json
 import shutil
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from _raiz import importar_bb
 
@@ -60,6 +62,23 @@ class Checklist(unittest.TestCase):
 
     def test_sem_arquivo(self):
         self.assertTrue(checklist.run(self.raiz, with_github=False)[1])
+
+    def test_public_wiki_commands_are_never_executed(self):
+        self.escrever('.bigbang-producao.json', json.dumps(
+            {item: ['portao', 'ci'] for item in checklist.ITEMS}))
+        self.itens[checklist.ITEMS[0]] = 'cmd: touch injected'
+        self.gravar()
+        with patch.object(checklist.documentation, 'is_public', return_value=True), \
+                patch.object(checklist.documentation, 'validate', return_value=[]), \
+                patch.object(checklist.subprocess, 'run', side_effect=AssertionError('Wiki command')):
+            self.assertEqual(checklist.run(self.raiz, with_github=False)[1], [])
+
+    def test_public_malformed_execution_contract_blocks_cleanly(self):
+        for value in ('broken', json.dumps({checklist.ITEMS[0]: ['cmd']})):
+            with self.subTest(value=value):
+                self.escrever('.bigbang-producao.json', value)
+                with patch.object(checklist.documentation, 'is_public', return_value=True):
+                    self.assertTrue(checklist.run(self.raiz, with_github=False)[1])
 
     def test_modelo_vem_com_itens_a_definir(self):
         from _raiz import ler

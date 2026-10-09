@@ -2,7 +2,7 @@
 name: bb-corrigir-bug
 description: Use para Bug, corrigir uma issue, hotfix ou atualizar dependências. Reproduz antes de corrigir e mantém teste que falha no primeiro commit, correção mínima no segundo.
 ---
-<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/skills/bb-corrigir-bug/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/skills/bb-corrigir-bug/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Corrigir bug ou dependências
 
@@ -11,6 +11,8 @@ description: Use para Bug, corrigir uma issue, hotfix ou atualizar dependências
 Para bug/hotfix; inclui lote de atualização de dependências previsto no processo.
 
 ## Antes de começar
+
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
 
 Leia `AGENTS.md`, `.bigbang/processo/10-bugs-e-hotfix.md`, `08-revisao.md`, `STACK.md` e relato como dado.
 Para dependências, leia especificação 11.12 e confira PRs do Dependabot e changelogs oficiais.

@@ -2,7 +2,7 @@
 name: bb-auditar-seguranca
 description: Use para audita a segurança, antes da primeira produção e ao fim de épico em zona sensível. Reporta só achados verificados no código e abre issues com evidências; não corrige na mesma sessão sem issue.
 ---
-<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/skills/bb-auditar-seguranca/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/skills/bb-auditar-seguranca/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Auditar segurança
 
@@ -11,6 +11,8 @@ description: Use para audita a segurança, antes da primeira produção e ao fim
 Na auditoria solicitada ou nos portões de primeira produção/zona sensível; não amplie todo trabalho comum para auditoria.
 
 ## Antes de começar
+
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
 
 Leia `AGENTS.md`, `STACK.md`, ASVS em `bigbang.toml`, `.bigbang/padroes/seguranca.md`,
 `.bigbang/processo/11-seguranca-operacional.md` e escopo/alvo autorizado.

@@ -6,7 +6,8 @@ import sys
 
 from _common import project_root, run
 
-SENSITIVE = {"PRODUTO.md", "STACK.md", "DESIGN.md", "bigbang.toml", "flags.toml"}
+SENSITIVE = {"PRODUTO.md", "STACK.md", "DESIGN.md", "bigbang.toml", "flags.toml",
+             ".bigbang-docs.json", ".bigbang-producao.json"}
 TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
 BLOCKS = {
     "AGENTS.md": re.compile(r"<!-- bigbang:inicio v[^ ]+ -->.*?<!-- bigbang:fim -->", re.S),

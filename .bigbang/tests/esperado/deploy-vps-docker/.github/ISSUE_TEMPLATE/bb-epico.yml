@@ -1,9 +1,16 @@
-# Gerado pelo Big Bang v1.5.5 a partir de .bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-epico.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v2.0.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-epico.yml. Não edite: personalize em bigbang.toml.
 name: Épico
 description: Uma mudança com valor para quem usa. A IA refina com você até a Definition of Ready.
 title: "[Épico] "
 labels: ["epic"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        **Documentação canônica por visibilidade:** públicos usam a Wiki; privados preservam os arquivos atuais.
+        Registre páginas, requisitos, testes e commits na matriz. A entrega, inclusive Flash, exige cobertura,
+        links válidos e publicação confirmada. Discussions recebe o primeiro post factual da IA; README apresenta
+        o sistema e os links da documentação, comunidade e painéis públicos auditados.
   - type: textarea
     attributes:
       label: Problema ou oportunidade
