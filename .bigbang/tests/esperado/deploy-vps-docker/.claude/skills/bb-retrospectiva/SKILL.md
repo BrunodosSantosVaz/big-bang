@@ -2,7 +2,7 @@
 name: bb-retrospectiva
 description: Use ao fim de cada épico ou sprint para registrar o que funcionou, travou e deve mudar, atualizar a memória do projeto e propor ajustes sustentados por evidências.
 ---
-<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/skills/bb-retrospectiva/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/skills/bb-retrospectiva/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Retrospectiva
 
@@ -11,6 +11,8 @@ description: Use ao fim de cada épico ou sprint para registrar o que funcionou,
 Ao concluir épico ou encerrar sprint; não substitui portões de conclusão/publicação.
 
 ## Antes de começar
+
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
 
 Leia `AGENTS.md`, `.bigbang/processo/05-sprint.md`, `docs/memoria.md`, issues/PRs e resultados reais da etapa.
 

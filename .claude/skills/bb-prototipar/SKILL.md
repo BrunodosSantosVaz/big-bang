@@ -2,7 +2,7 @@
 name: bb-prototipar
 description: Use para vamos montar o protótipo de um épico com-prototipo cujo refinamento já foi aprovado. Itera um protótipo navegável até aprovação do dono.
 ---
-<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/skills/bb-prototipar/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/skills/bb-prototipar/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Prototipar épico
 
@@ -11,6 +11,8 @@ description: Use para vamos montar o protótipo de um épico com-prototipo cujo 
 Para protótipo de épico; para design da Fundação, use `bb-design-kit`.
 
 ## Antes de começar
+
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
 
 Leia `AGENTS.md`, `DESIGN.md`, épico/critérios, `.bigbang/processo/03-planejamento.md` e `.bigbang/padroes/frontend.md`.
 Confirme com-prototipo e refinamento-aprovado.

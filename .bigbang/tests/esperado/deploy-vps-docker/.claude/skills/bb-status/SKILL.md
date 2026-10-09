@@ -2,7 +2,7 @@
 name: bb-status
 description: Use para como está o projeto ou pedido de status. Lê painéis, posses, flags e achados de segurança e resume o que espera pelo dono, sem alterar estado.
 ---
-<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/skills/bb-status/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/skills/bb-status/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Status do projeto
 
@@ -11,6 +11,8 @@ description: Use para como está o projeto ou pedido de status. Lê painéis, po
 Para consulta de andamento, não para iniciar sprint, recuperar posse ou corrigir achados.
 
 ## Antes de começar
+
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
 
 Leia `AGENTS.md`, `.bigbang/processo/04-paineis.md`, `13-varias-ias.md` e `bigbang.toml`.
 

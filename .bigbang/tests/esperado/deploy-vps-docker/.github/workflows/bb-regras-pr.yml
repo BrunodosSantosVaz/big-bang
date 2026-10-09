@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v1.5.5 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-regras-pr.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v2.0.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-regras-pr.yml. Não edite: personalize em bigbang.toml.
 # Job obrigatório `regras` (spec 14.2 e 15.5). Os scripts e o bigbang.toml vêm da ponta ATUAL da branch de DESTINO
 # (protegida): o PR não consegue mudar as regras que o julgam. Não o base.sha do evento, que fica congelado no último
 # push do PR e julgaria com regras antigas depois que o destino avança (achado do piloto).

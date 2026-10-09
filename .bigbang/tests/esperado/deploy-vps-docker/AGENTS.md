@@ -1,11 +1,18 @@
-<!-- bigbang:inicio v1.5.5 -->
-<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/AGENTS.base.md. Não edite: personalize em bigbang.toml. -->
+<!-- bigbang:inicio v2.0.0 -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/AGENTS.base.md. Não edite: personalize em bigbang.toml. -->
 
 # Instruções para IAs — Meu Sistema
 
-Este sistema é construído com o **Big Bang v1.5.5**. Estas instruções valem para qualquer IA.
+Este sistema é construído com o **Big Bang v2.0.0**. Estas instruções valem para qualquer IA.
 Leia nesta ordem, no início de toda sessão: `PRODUTO.md`, `STACK.md`, `DESIGN.md` (se houver interface),
 `bigbang.toml`, `docs/memoria.md` e a seção "Projeto" no fim deste arquivo.
+
+Os nomes documentais acima são identificadores lógicos. Em repositório público, leia-os com
+`bb documentacao ler <nome>` na Wiki fixada pelo manifesto; nunca recrie documentos de sistema na raiz ou `docs/`.
+Em privado, mantenha os arquivos e procedimentos atuais. Aplique `.bigbang/processo/18-documentacao.md` em toda
+etapa. A IA responsável publica o primeiro post em Discussions (`bb comunidade primeiro-post`, idempotente),
+mantém README breve com Wiki/Discussions/painéis públicos e prepara Social preview no design kit.
+Cobertura documental, links, revisão e publicação confirmada da Wiki também são obrigatórios no modo Flash.
 
 ## Como reconhecer o que o dono pede
 
@@ -103,8 +110,8 @@ Esta seção pertence ao projeto e é preenchida na Fundação: comandos da stac
 (em `docs/memoria.md`).
 
 > **Se este é o repositório `BrunodosSantosVaz/big-bang`** (o próprio framework, não um sistema criado a partir
-> dele): não rode a Fundação. Siga `.bigbang/docs/especificacao.md`, trabalhe um épico por vez (seção 17) e registre
-> as decisões do framework em `.bigbang/docs/decisoes/`.
+> dele): não rode a Fundação. Leia a especificação oficial com `bb documentacao ler .bigbang/docs/especificacao.md`, trabalhe um épico por vez (seção 17) e registre
+> as decisões na Wiki, pelos identificadores `.bigbang/docs/decisoes/` do manifesto.
 
 ### Modo do próprio framework
 

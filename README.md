@@ -32,6 +32,12 @@
 
 ## Estado atual
 
+A comunidade está em [Discussions](https://github.com/BrunodosSantosVaz/big-bang/discussions), com o
+[primeiro anúncio da IA](https://github.com/BrunodosSantosVaz/big-bang/discussions/210). A
+[Wiki](https://github.com/BrunodosSantosVaz/big-bang/wiki) foi habilitada; a migração canônica e os padrões
+de comunidade estão em implementação na [#208](https://github.com/BrunodosSantosVaz/big-bang/issues/208).
+Os documentos atuais permanecem preservados até confirmar a publicação.
+
 Estável desde a **1.0.0**, validada num sistema real feito do zero até produção só pelo Big Bang: o
 [ScreenFakeCam](https://github.com/BrunodosSantosVaz/screenfakecam), um app Android com releases assinadas e
 homologação registrada em emulador Android 15 ([relatório atual](docs/relatorios/2026-10-07-entrega-flash-tsuru.md)). A versão atual está

@@ -3,6 +3,13 @@ description: Uma etapa da Fundação (F0 a F5). Normalmente aberta pela IA.
 title: "F"
 labels: ["fundacao"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        **Documentação canônica por visibilidade:** públicos usam a Wiki; privados preservam os arquivos atuais.
+        Registre páginas, requisitos, testes e commits na matriz. A entrega, inclusive Flash, exige cobertura,
+        links válidos e publicação confirmada. Discussions recebe o primeiro post factual da IA; README apresenta
+        o sistema e os links da documentação, comunidade e painéis públicos auditados.
   - type: dropdown
     attributes:
       label: Etapa

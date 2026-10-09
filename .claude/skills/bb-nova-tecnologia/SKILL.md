@@ -2,7 +2,7 @@
 name: bb-nova-tecnologia
 description: Use antes de instalar qualquer dependência de execução ou tecnologia ausente da tabela de STACK.md. Compara alternativas e espera aprovação do dono para ADR e mudança da tabela.
 ---
-<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/skills/bb-nova-tecnologia/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/skills/bb-nova-tecnologia/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Nova tecnologia
 
@@ -11,6 +11,8 @@ description: Use antes de instalar qualquer dependência de execução ou tecnol
 Quando trabalho em projeto fundado exigir dependência de execução fora da tabela. Na Fundação, use `bb-escolher-stack`.
 
 ## Antes de começar
+
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
 
 Leia `AGENTS.md`, `STACK.md`, `.bigbang/processo/12-tecnologia-nova.md`, padrões de segurança e ADRs existentes.
 

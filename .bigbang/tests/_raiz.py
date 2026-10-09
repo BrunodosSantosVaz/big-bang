@@ -10,6 +10,11 @@ def caminho(*partes):
 
 
 def ler(*partes):
+    logical = '/'.join(partes)
+    if not os.path.exists(caminho(*partes)) and logical.startswith('.bigbang/docs/'):
+        importar_bb()
+        from bb import documentation
+        return documentation.read(RAIZ, logical)
     with open(caminho(*partes), encoding="utf-8") as arquivo:
         return arquivo.read()
 
@@ -40,6 +45,6 @@ def ignorar_para_copia(*nomes_na_raiz):
     def ignorar(pasta, nomes):
         sempre = {".git", "__pycache__", "big-bang-prompt.md"}
         if os.path.abspath(pasta) == os.path.abspath(RAIZ):
-            sempre |= set(nomes_na_raiz)
+            sempre |= set(nomes_na_raiz) | {'.bigbang-docs.json', '.bigbang-producao.json'}
         return [nome for nome in nomes if nome in sempre]
     return ignorar

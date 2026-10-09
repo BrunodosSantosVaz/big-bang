@@ -7,6 +7,7 @@ import tomllib
 import xml.etree.ElementTree as ElementTree
 
 from .paths import read_text, to_posix
+from . import documentation
 
 TABLE_START = "<!-- bb:dependencias:inicio -->"
 TABLE_END = "<!-- bb:dependencias:fim -->"
@@ -32,9 +33,9 @@ def normalize(ecosystem, name):
 def allowed(root):
     """{(ecosystem, name)} from the STACK.md table, or None when STACK.md (or its table) does not exist yet."""
     path = os.path.join(root, "STACK.md")
-    if not os.path.exists(path):
+    if not documentation.is_public(root) and not os.path.exists(path):
         return None
-    text = read_text(path)
+    text = documentation.read(root, "STACK.md")
     if TABLE_START not in text or TABLE_END not in text:
         return None
     table = text.split(TABLE_START, 1)[1].split(TABLE_END, 1)[0]

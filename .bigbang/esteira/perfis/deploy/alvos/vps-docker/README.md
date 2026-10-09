@@ -1,6 +1,6 @@
 # Alvo `vps-docker`
 
-Um servidor acessado por SSH que roda Docker Compose (seção 14.4 da [especificação](../../../../../docs/especificacao.md)).
+Um servidor acessado por SSH que roda Docker Compose (seção 14.4 da [especificação](https://github.com/BrunodosSantosVaz/big-bang/wiki/Especificacao)).
 O script [`scripts/alvo.sh`](scripts/alvo.sh) tem as operações `publicar`, `checar`, `migrar`, `saude` e `voltar`.
 
 ## O que o projeto fornece

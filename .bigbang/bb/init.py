@@ -5,7 +5,7 @@ import os
 import re
 import unicodedata
 
-from . import generator, github
+from . import documentation, generator, github
 from . import config as config_module
 from .errors import EXIT_INVALID_CONFIG, EXIT_INVALID_STATE, EXIT_USAGE, BbError
 from .paths import config_path, framework_dir, framework_version, read_text, write_text
@@ -140,15 +140,17 @@ def run(root, options, with_github=True, today=None):
         raise BbError("bigbang.toml já existe: este projeto já passou pelo bb init", EXIT_INVALID_STATE)
     config_text = build_config_text(root, options)
     license_text = _license_text(options, today or datetime.date.today()) if options["licenca"] else None
+    wiki = documentation.preflight(options["repositorio"]) if options["visibilidade"] == "publico" else None
     issue = _github_steps(options) if with_github else None
 
     for name in ("README.md", "LICENSE"):
         source, target = os.path.join(root, name), os.path.join(framework_dir(root), name)
         if os.path.exists(source) and not os.path.exists(target):
             os.replace(source, target)
-    readme = read_text(os.path.join(framework_dir(root), "modelos", "README-sistema.md"))
+    model = "README-publico.md" if wiki else "README-sistema.md"
+    readme = read_text(os.path.join(framework_dir(root), "modelos", model))
     write_text(os.path.join(root, "README.md"),
-               substitute(readme, {"projeto": options}, ".bigbang/modelos/README-sistema.md"))
+               substitute(readme, {"projeto": options}, ".bigbang/modelos/" + model))
     for name in ("CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "SECURITY.md"):  # the framework's own are replaced
         source = f".bigbang/modelos/comunidade/{name}"
         write_text(os.path.join(root, name), substitute(read_text(os.path.join(framework_dir(root), "modelos",
@@ -157,6 +159,21 @@ def run(root, options, with_github=True, today=None):
     if license_text:
         write_text(os.path.join(root, "LICENSE"), license_text)
     write_text(config_path(root), config_text)
+    manifest = os.path.join(root, documentation.MANIFEST)
+    if wiki:
+        try:
+            code_revision = documentation.git(root, 'rev-parse', 'HEAD')
+        except BbError:
+            code_revision = None  # F0 is incomplete; never present a Wiki SHA as a code revision.
+        data = {"schema": 1, "repositorio": options["repositorio"], "visibilidade": "publico",
+                "wiki": {"base": wiki["commit"], "commit": wiki["commit"], "branch": wiki["branch"]},
+                "paginas": {}, "categorias": {}, "codigo": {"commit": code_revision, "raizes": [], "excluir": []},
+                "funcionalidades": [], "arquivos_funcionais": []}
+        write_text(manifest, json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+    elif os.path.isfile(manifest):
+        inherited = json.loads(read_text(manifest))
+        if inherited.get("repositorio") == "BrunodosSantosVaz/big-bang":
+            os.remove(manifest)  # Private project created from the public framework template.
     generator.apply(generator.build_plan(root), root)
     return issue
 

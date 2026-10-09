@@ -63,6 +63,10 @@ bloqueios=$(gh api "repos/$R/issues?labels=bloqueia-producao&state=open&per_page
 if git rev-parse -q --verify "origin/$branch" >/dev/null; then
   release_dir=$(mktemp -d); git worktree add -q --detach "$release_dir" "origin/$branch"
   "${BB_CMD[@]}" checklist producao --dados "$release_dir" || falha "bb checklist producao reprovado (na $branch)"
+  "${BB_CMD[@]}" esteira documentacao --dados "$release_dir" --publicada --comunidade \
+    || falha "documentação ou publicação da Wiki da release reprovada"
+  "${BB_CMD[@]}" --raiz "$release_dir" documentacao ler CHANGELOG.md | grep -F "## [$v]" >/dev/null \
+    || falha "changelog da $branch sem a seção [$v]"
   git worktree remove --force "$release_dir" >/dev/null 2>&1 || true
 fi
 
@@ -87,7 +91,6 @@ if [ -z "$rc" ]; then falha "não há candidata $tag-rc.N"
 elif [ "$(git rev-parse "$rc^{commit}")" != "$(git rev-parse "origin/$branch")" ]; then
   falha "a $branch mudou depois da candidata $rc: gere uma candidata nova antes de publicar"
 fi
-git show "origin/$branch:CHANGELOG.md" 2>/dev/null | grep -F "## [$v]" >/dev/null || falha "CHANGELOG.md da $branch sem a seção [$v]"
 
 if [ "$falhas" -gt 0 ]; then echo "Publicação RECUSADA ($falhas problema(s)). Nada foi alterado."; exit 1; fi
 echo "Portão aprovado: $tag a partir de $rc (PR #$pr, ${head_sha:0:7})."

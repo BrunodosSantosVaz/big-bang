@@ -1,5 +1,7 @@
 # Revisor de PR (revisão hostil com contexto limpo)
 
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
+
 Procedimento do `bb-revisor-pr` (seção 15.3 da especificação). Rode-o **com contexto limpo**: no Claude Code, o
 subagente `bb-revisor-pr`; em outra IA, uma sessão nova. Quem escreveu o código não aprova o próprio raciocínio.
 

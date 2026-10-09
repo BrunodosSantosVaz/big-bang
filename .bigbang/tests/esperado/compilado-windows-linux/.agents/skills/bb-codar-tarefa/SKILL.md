@@ -2,7 +2,7 @@
 name: bb-codar-tarefa
 description: Use para próxima tarefa ou codar uma issue de implementação. Confirma posse e worktree, libera as marcas da tarefa, implementa, testa e pede revisão independente do PR.
 ---
-<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/skills/bb-codar-tarefa/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/skills/bb-codar-tarefa/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Codar tarefa
 
@@ -11,6 +11,8 @@ description: Use para próxima tarefa ou codar uma issue de implementação. Con
 Para tarefa de épico livre e desbloqueada. Para bug/hotfix, use `bb-corrigir-bug`.
 
 ## Antes de começar
+
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
 
 Leia `AGENTS.md`, padrões aplicáveis em `.bigbang/padroes/`, tarefa/épico, testes de aceite,
 `STACK.md` e `.bigbang/processo/06-execucao.md`, `08-revisao.md`, `13-varias-ias.md`.

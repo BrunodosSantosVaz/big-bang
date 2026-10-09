@@ -88,6 +88,14 @@ def field_value(item, name):
 
 def graphql(state, fields, jq):
     query = fields.get("query", "")
+    if 'hasDiscussionsEnabled' in query:
+        emit({'data': {'repository': {'id': 'R_test', 'hasDiscussionsEnabled': True,
+              'usesCustomOpenGraphImage': False, 'openGraphImageUrl': 'https://example.invalid/image',
+              'discussions': {'nodes': [{'body': '<!-- bigbang:discussions:welcome:v1 -->',
+                                        'url': 'https://github.com/dono/repo/discussions/1'}],
+                              'pageInfo': {'hasNextPage': False}},
+              'discussionCategories': {'nodes': []}}}}, jq)
+        return 0
     if "addProjectV2ItemById" in query:
         b = board_by_pid(state, fields["p"])
         issue = fields["c"][1:]
@@ -208,6 +216,8 @@ def new_issue(state, title, body, labels, milestone=None):
 def api(state, positional, fields, jq, method):
     from urllib.parse import unquote
     path = unquote(positional[0])
+    if method == 'GET' and re.fullmatch(r'repos/[^/]+/[^/?]+', path) and path not in state.get('api', {}):
+        return emit({'private': True, 'has_wiki': True}, jq)
     match = re.match(rf"^repos/{re.escape(REPO)}/releases/tags/(.+)$", path)
     if match and path not in state.get("api", {}):
         tag = match.group(1)

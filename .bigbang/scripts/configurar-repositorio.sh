@@ -34,6 +34,15 @@ perfil=$(config entrega.perfil)
 dono_id=$(gh api "users/$dono" --jq .id)
 echo "Configurando $REPO (dono $dono, perfil $perfil)$([ "$SIMULAR" = --simular ] && echo " [SIMULAÇÃO]")"
 
+echo "Comunidade: Discussions e primeiro post da IA"
+if [ "$SIMULAR" = --simular ]; then
+  echo "  [simulado] habilitar Discussions e publicar boas-vindas uma única vez"
+else
+  gh api -X PATCH "repos/$REPO" -F has_discussions=true >/dev/null
+  "${BB_CMD[@]}" comunidade primeiro-post --repositorio "$REPO" --nome "$(config projeto.nome)"
+fi
+echo "Social preview: prepare 1280×640; confirme o upload em Settings, sem registrar sucesso presumido."
+
 echo "3. Secret scanning e bloqueio de push"
 fazer "secret scanning e push protection ligados" gh api -X PATCH "repos/$REPO" \
   -f "security_and_analysis[secret_scanning][status]=enabled" \

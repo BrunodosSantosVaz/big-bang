@@ -318,7 +318,7 @@ def changelog_has_version(changelog, version):
 
 # --- paths: artifact and sensitive zones (spec 5.4, 11.8) -------------------------------------------------------------
 
-ALWAYS_SENSITIVE = (".github/**", "tests/aceite/**", "STACK.md", "DESIGN.md", "PRODUTO.md", "bigbang.toml",
+ALWAYS_SENSITIVE = (".github/**", "tests/aceite/**", ".bigbang-docs.json", ".bigbang-producao.json", "STACK.md", "DESIGN.md", "PRODUTO.md", "bigbang.toml",
                     "flags.toml")
 DEPENDENCY_FILES = ("package.json", "package-lock.json", "npm-shrinkwrap.json", "yarn.lock", "pnpm-lock.yaml",
                     "pyproject.toml", "requirements*.txt", "poetry.lock", "uv.lock", "Pipfile", "Pipfile.lock",

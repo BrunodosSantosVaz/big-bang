@@ -2,6 +2,20 @@ name: Documentação do épico
 description: A última issue de um épico. Normalmente criada pelo Iniciar sprint.
 labels: ["documentacao"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        **Documentação canônica por visibilidade:** públicos usam a Wiki; privados preservam os arquivos atuais.
+        Registre páginas, requisitos, testes e commits na matriz. A entrega, inclusive Flash, exige cobertura,
+        links válidos e publicação confirmada. Discussions recebe o primeiro post factual da IA; README apresenta
+        o sistema e os links da documentação, comunidade e painéis públicos auditados.
+  - type: markdown
+    attributes:
+      value: |
+        Público: documentação oficial na Wiki, README breve com Wiki/Discussions/painéis. Privado: arquivos locais.
+        A IA responsável publica o primeiro post de Discussions e prepara Social preview com a identidade do sistema.
+        Registre inventário funcional → requisito/RN → página → teste → commit, diff da Wiki e publicação confirmada.
+        Cobertura incompleta, links inválidos ou falha de publicação impedem a entrega, inclusive no Flash.
   - type: input
     attributes:
       label: Épico
@@ -12,7 +26,7 @@ body:
     attributes:
       label: Checklist
       options:
-        - label: Regras de negócio novas ou alteradas em docs/negocio/regras/
+        - label: Regras de negócio novas ou alteradas no destino correto pela visibilidade
         - label: Glossário com os termos novos
         - label: Diagramas C4 e arc42, se a arquitetura mudou
         - label: Contrato da API, se mudou
@@ -21,3 +35,6 @@ body:
         - label: Guia de quem usa, se a tela ou o fluxo mudou
         - label: ADR de cada decisão tomada no épico
         - label: Rascunho da entrada do CHANGELOG.md (a versão é preenchida na integração)
+        - label: Inventário funcional completo e matriz com requisitos, páginas, testes e commits
+        - label: Wiki revisada e publicação confirmada sem sobrescrever alterações concorrentes
+        - label: README, Discussions, painéis e Social preview conferidos

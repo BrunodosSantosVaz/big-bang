@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  discussions: read
 
 concurrency:
   group: bb-ci-${{ github.ref }}
@@ -48,4 +49,6 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       - name: Documentação (Markdown e links)
-        run: python .bigbang/bin/bb.py esteira documentacao
+        run: python .bigbang/bin/bb.py esteira documentacao --comunidade --visibilidade-remota
+        env:
+          GH_TOKEN: ${{ github.token }}
