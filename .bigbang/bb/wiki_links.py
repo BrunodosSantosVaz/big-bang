@@ -5,10 +5,66 @@ from pathlib import Path
 
 from .docs_check import anchors, outside_code
 
-LINK = re.compile(r'!?\[[^\]]*\]\(([^)\s]+)(?:\s+"[^\"]*")?\)')
-BADGE_LINK = re.compile(r'\[!\[[^\]]*\]\([^)]*\)\]\(([^)\s]+)(?:\s+"[^\"]*")?\)')
+LINK_START = re.compile(r'\[!\[(?:\\.|[^\]\\])*\]\(|!?\[(?:\\.|[^\]\\])*\]\(')
 WIKILINK = re.compile(r"\[\[([^\]]+)\]\]")
 HTML_LINK = re.compile(r'(?:src|href)=["\']([^"\']+)["\']', re.I)
+
+
+def _closing_parenthesis(text, start):
+    depth, quote, angle, escaped = 1, None, False, False
+    for index in range(start + 1, len(text)):
+        char = text[index]
+        if escaped:
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+        elif quote:
+            if char == quote:
+                quote = None
+        elif angle:
+            if char == ">":
+                angle = False
+        elif char == "<":
+            angle = True
+        elif char in ("'", '"') and text[index - 1].isspace():
+            quote = char
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth == 0:
+                return index
+    return None
+
+
+def _destination(text):
+    text = text.strip()
+    if text.startswith("<") and ">" in text:
+        target = text[1:text.index(">")]
+    else:
+        target = text.split()[0] if text else ""
+    return re.sub(r"\\([\\()\[\]])", r"\1", target)
+
+
+def markdown_targets(text):
+    """Read inline links/images and both badge destinations without evaluating prose."""
+    targets, cursor = [], 0
+    while match := LINK_START.search(text, cursor):
+        start = match.end() - 1
+        end = _closing_parenthesis(text, start)
+        if end is None:
+            cursor = match.end()
+            continue
+        targets.append(_destination(text[start + 1:end]))
+        cursor = end + 1
+        if match.group().startswith("[![") and text[cursor:cursor + 2] == "](":
+            start = cursor + 1
+            end = _closing_parenthesis(text, start)
+            if end is not None:
+                targets.append(_destination(text[start + 1:end]))
+                cursor = end + 1
+    return targets
 
 
 def _target(root, source, target, repository):
@@ -42,9 +98,7 @@ def problems(folder, repository=None):
         if not closed:
             found.append(f"{path.name}: bloco de código sem fechamento")
         text = "\n".join(lines)
-        # A badge has both an image URL and an outer destination. LINK finds the
-        # image; explicitly include the outer link so absent pages cannot pass.
-        targets = LINK.findall(text) + BADGE_LINK.findall(text) + HTML_LINK.findall(text)
+        targets = markdown_targets(text) + HTML_LINK.findall(text)
         targets += [link.split("|", 1)[-1].strip() for link in WIKILINK.findall(text)]
         for target in targets:
             if not _target(root, path, target, repository):
