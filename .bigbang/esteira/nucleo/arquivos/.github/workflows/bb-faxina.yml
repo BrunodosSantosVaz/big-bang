@@ -1,10 +1,8 @@
-# Automatic recovery complements cleanup already performed by publication and sprint closure.
+# Daily recovery complements cleanup already performed by real publication and sprint closure.
+# No workflow_run: simulated publications must never trigger a separate real cleanup.
 name: Faxina
 
 on:
-  workflow_run:
-    workflows: ['Publicar em produção', 'Publicar sem release', 'Encerrar']
-    types: [completed]
   schedule:
     - cron: '43 3 * * *'
   workflow_dispatch:

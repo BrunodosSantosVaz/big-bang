@@ -18,7 +18,8 @@ correção e a atualização de Snake3310 e ScreenFakeCam, sem novo deploy ou co
   main contida na develop, árvores iguais e última CI de push bem-sucedida nos dois SHAs exatos.
   Enquanto um portão normal estiver pendente, informa que aguarda e não apaga nada; falha de CI nunca prova
   sucesso. O próximo evento ou a agenda recupera a limpeza.
-- Nos consumidores, o workflow Faxina roda após publicação/encerramento e diariamente; checkout da main
+- Nos consumidores, a faxina existente roda ao final das publicações reais/encerramento. O workflow Faxina
+  recupera sobras diariamente e por botão, sem workflow_run que converteria uma simulação em limpeza real; checkout da main
   e token do próprio projeto. Conserva as regras existentes de branch incorporada, issue concluída e PR.
 - `FAXINA_EXIGIR_LIMPA=true` torna sobras uma falha explícita. Encerrar usa esse modo e propaga o resultado,
   sem anunciar sucesso da limpeza. O encerramento pode já ter registrado a data ou fechado o milestone;

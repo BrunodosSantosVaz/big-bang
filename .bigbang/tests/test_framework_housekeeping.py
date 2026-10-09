@@ -132,8 +132,12 @@ class StrictCleanup(ComGit):
         for draft, prerelease in ((True, False), (False, True), (False, False)):
             with self.subTest(draft=draft, prerelease=prerelease):
                 self.setUp()
-                self.branch("develop", "develop", "after-tag", "keep\n")
-                self.git("push", "-q", "origin", "origin/develop:release/0.1.0")
+                if not draft and not prerelease:
+                    self.branch("develop", "develop", "after-tag", "keep\n")
+                    source = "develop"
+                else:
+                    source = "main"
+                self.git("push", "-q", "origin", f"refs/heads/{source}:refs/heads/release/0.1.0")
                 self.estado["api"] = {"repos/dono/repo/releases/tags/v0.1.0": {
                     "tag_name": "v0.1.0", "draft": draft, "prerelease": prerelease}}
                 self.gravar_estado()
@@ -203,7 +207,7 @@ class HousekeepingWorkflowSecurity(unittest.TestCase):
         with open(path, encoding="utf-8") as handle:
             text = handle.read()
         self.assertIn("ref: main", text)
-        self.assertNotIn("workflow_run:", text)
+        self.assertNotRegex(text, r"(?m)^  workflow_run:")
         self.assertIn("schedule:", text)
         self.assertIn("workflow_dispatch:", text)
         self.assertIn("FAXINA_EXIGIR_LIMPA: 'true'", text)

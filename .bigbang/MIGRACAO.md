@@ -12,8 +12,9 @@ O próprio framework executa a faxina após CI/publicação e fechamento de issu
 A exclusão aguarda a tag da ponta da main, release estável com pacote/hash, conteúdo sincronizado e CI de
 push verde nos SHAs exatos de main/develop. O checkout privilegiado usa apenas main, nunca código de PR.
 
-Nos consumidores, `bb gerar` instala o botão Faxina: após Publicar em produção, Publicar sem release e
-Encerrar, com recuperação diária e simulação manual. Só branches incorporadas com trabalho concluído são
+Nos consumidores, `bb gerar` instala o botão Faxina com recuperação diária e simulação manual, complementando
+a limpeza feita ao final das publicações reais e do Encerrar. Simulações desses fluxos não disparam faxina real.
+Só branches incorporadas com trabalho concluído são
 apagadas; main/develop/tags, PRs abertos e commits exclusivos ficam preservados. Encerrar agora falha se
 a faxina apontar sobras, sem desfazer uma publicação já realizada. Resolva cada ponto e execute novamente.
 
