@@ -1,8 +1,11 @@
 """Automatic cleanup waits for a published, synchronized framework and exact successful CI."""
+import os
+import sys
 import unittest
 
 from _raiz import caminho, ler
 from test_integrar_publicar import ComGit
+from _scripts import GH_FALSO
 import test_faxina as faxina_tests
 
 REPO = "BrunodosSantosVaz/big-bang"
@@ -115,6 +118,62 @@ class FrameworkHousekeeping(ComGit):
 
 
 class StrictCleanup(ComGit):
+    def test_release_with_exclusive_commits_is_never_deleted(self):
+        self.branch("release/0.1.0", "main", "exclusive", "keep\n")
+        self.estado["api"] = {"repos/dono/repo/releases/tags/v0.1.0": {
+            "tag_name": "v0.1.0", "draft": False, "prerelease": False}}
+        self.gravar_estado()
+        result = self.script("faxina.sh", FAXINA_EXIGIR_LIMPA="true")
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(self.estado.get("apagadas"))
+        self.assertTrue(self.git_origin("rev-parse", "release/0.1.0"))
+
+    def test_release_requires_stable_publication_and_containment_in_tag(self):
+        for draft, prerelease in ((True, False), (False, True), (False, False)):
+            with self.subTest(draft=draft, prerelease=prerelease):
+                self.setUp()
+                self.branch("develop", "develop", "after-tag", "keep\n")
+                self.git("push", "-q", "origin", "origin/develop:release/0.1.0")
+                self.estado["api"] = {"repos/dono/repo/releases/tags/v0.1.0": {
+                    "tag_name": "v0.1.0", "draft": draft, "prerelease": prerelease}}
+                self.gravar_estado()
+                result = self.script("faxina.sh", FAXINA_EXIGIR_LIMPA="true")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse(self.estado.get("apagadas"))
+
+    def test_published_release_fully_incorporated_can_be_deleted(self):
+        self.git("push", "-q", "origin", "main:release/0.1.0")
+        self.estado["api"] = {"repos/dono/repo/releases/tags/v0.1.0": {
+            "tag_name": "v0.1.0", "draft": False, "prerelease": False}}
+        self.gravar_estado()
+        result = self.script("faxina.sh", FAXINA_EXIGIR_LIMPA="true")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.estado.get("apagadas"), ["release/0.1.0"])
+
+    def test_epic_with_open_pr_is_preserved_even_when_closed_and_merged(self):
+        self.git("push", "-q", "origin", "main:epico/8-closed")
+        self.issue(8, state="closed")
+        self.estado["prs"] = {"40": {"head": "epico/8-closed", "base": "develop", "state": "OPEN"}}
+        self.gravar_estado()
+        result = self.script("faxina.sh", FAXINA_EXIGIR_LIMPA="true")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(self.estado.get("apagadas"))
+
+    def test_api_read_failure_is_explicit_and_does_not_claim_clean(self):
+        for endpoint in ("issues?state=open", "issues/12", "--json number,createdAt,headRefName"):
+            with self.subTest(endpoint=endpoint):
+                self.setUp()
+                self.git("push", "-q", "origin", "main:feature/12-done")
+                self.issue(12, state="closed")
+                with open(os.path.join(self.bin, "gh"), "w", encoding="utf-8") as handle:
+                    handle.write(f'#!/usr/bin/env bash\nif [[ "$*" == *"{endpoint}"* ]]; then '
+                                 'echo "fixture: GitHub API unavailable" >&2; exit 42; fi\n'
+                                 f'exec "{sys.executable}" "{GH_FALSO}" "$@"\n')
+                result = self.script("faxina.sh", FAXINA_EXIGIR_LIMPA="true")
+                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertNotIn("nada sobrando", result.stdout)
+                self.assertIn("API unavailable", result.stderr)
+
     def test_strict_mode_reports_leftovers_as_failure(self):
         faxina_tests.Faxina.preparar(self)
         result = self.script("faxina.sh", FAXINA_EXIGIR_LIMPA="true")
@@ -139,13 +198,14 @@ class HousekeepingWorkflowSecurity(unittest.TestCase):
         self.assertIn("cancel-in-progress: false", text)
         self.assertIn("persist-credentials: false", text)
 
-    def test_consumer_recovery_uses_trusted_main_after_publications(self):
+    def test_consumer_recovery_cannot_turn_a_publication_simulation_into_real_cleanup(self):
         path = caminho(".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-faxina.yml")
         with open(path, encoding="utf-8") as handle:
             text = handle.read()
         self.assertIn("ref: main", text)
-        self.assertIn("Publicar sem release", text)
-        self.assertIn("Publicar em produção", text)
+        self.assertNotIn("workflow_run:", text)
+        self.assertIn("schedule:", text)
+        self.assertIn("workflow_dispatch:", text)
         self.assertIn("FAXINA_EXIGIR_LIMPA: 'true'", text)
         self.assertNotIn("workflow_run.head_sha", text)
 
