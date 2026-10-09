@@ -234,6 +234,8 @@ class HousekeepingWorkflowSecurity(unittest.TestCase):
         self.assertIn("schedule:", text)
         self.assertIn("workflow_dispatch:", text)
         self.assertIn("FAXINA_EXIGIR_LIMPA: 'true'", text)
+        self.assertLess(text.index("gh auth setup-git"), text.index("bash .bigbang/esteira/nucleo/scripts/faxina.sh"))
+        self.assertIn("GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}", text)
         self.assertNotIn("workflow_run.head_sha", text)
 
 
