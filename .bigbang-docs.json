@@ -3,10 +3,10 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "1054c8df969408d2d4fe9d81a4b99deeaf9323c2",
-    "commit": "b19883dc38964bc48e465d2999df03985300b2ba",
+    "base": "b19883dc38964bc48e465d2999df03985300b2ba",
+    "commit": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
     "branch": "master",
-    "proposta": "bigbang/proposta-208-identificacao-final"
+    "proposta": "bigbang/proposta-99-ensaio-externo"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -2055,11 +2055,11 @@
   },
   "revisao": {
     "codigo": "9c73feb3e357a1216011eaf64bf4b5d944827087",
-    "wiki_base": "1054c8df969408d2d4fe9d81a4b99deeaf9323c2",
+    "wiki_base": "b19883dc38964bc48e465d2999df03985300b2ba",
     "independente": "aprovada",
-    "issue": 208,
+    "issue": 99,
     "revisor": "revisar_wiki_208",
-    "wiki": "b19883dc38964bc48e465d2999df03985300b2ba",
+    "wiki": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
     "publicada": true
   },
   "social_preview": {
