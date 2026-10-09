@@ -1,0 +1,2054 @@
+{
+  "schema": 1,
+  "repositorio": "BrunodosSantosVaz/big-bang",
+  "visibilidade": "publico",
+  "wiki": {
+    "base": "a436ca94e7453c095332f5a76f83e5e45efc72e8",
+    "commit": "5ff08be8443407f1d8afc39509c018a44055b472",
+    "branch": "master",
+    "proposta": "bigbang/proposta-208-documentacao"
+  },
+  "paginas": {
+    ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
+    ".bigbang/docs/decisoes/ADR-0001-python-biblioteca-padrao.md": "ADR-0001-python-biblioteca-padrao",
+    ".bigbang/docs/decisoes/ADR-0002-configuracao-em-toml.md": "ADR-0002-configuracao-em-toml",
+    ".bigbang/docs/decisoes/ADR-0003-branch-de-epico.md": "ADR-0003-branch-de-epico",
+    ".bigbang/docs/decisoes/ADR-0004-release-por-epico-a-partir-da-main.md": "ADR-0004-release-por-epico-a-partir-da-main",
+    ".bigbang/docs/decisoes/ADR-0005-skills-em-agents-e-claude.md": "ADR-0005-skills-em-agents-e-claude",
+    ".bigbang/docs/decisoes/ADR-0006-ci-do-framework.md": "ADR-0006-ci-do-framework",
+    ".bigbang/docs/decisoes/ADR-0007-gerador-e-verificador.md": "ADR-0007-gerador-e-verificador",
+    ".bigbang/docs/decisoes/ADR-0008-esteira-bash-e-bb.md": "ADR-0008-esteira-bash-e-bb",
+    ".bigbang/docs/decisoes/ADR-0009-perfil-compilado.md": "ADR-0009-perfil-compilado",
+    ".bigbang/docs/decisoes/ADR-0010-portoes-de-teste-revisao-e-seguranca.md": "ADR-0010-portoes-de-teste-revisao-e-seguranca",
+    ".bigbang/docs/decisoes/ADR-0011-posses-e-concorrencia.md": "ADR-0011-posses-e-concorrencia",
+    ".bigbang/docs/decisoes/ADR-0012-skills-hooks-e-fundacao.md": "ADR-0012-skills-hooks-e-fundacao",
+    ".bigbang/docs/decisoes/ADR-0013-perfil-deploy.md": "ADR-0013-perfil-deploy",
+    ".bigbang/docs/decisoes/ADR-0014-pacote-e-atualizacao.md": "ADR-0014-pacote-e-atualizacao",
+    ".bigbang/docs/decisoes/ADR-0015-release-por-sprint.md": "ADR-0015-release-por-sprint",
+    ".bigbang/docs/decisoes/ADR-0016-deploy-multiplataforma.md": "ADR-0016-deploy-multiplataforma",
+    ".bigbang/docs/decisoes/ADR-0017-modo-flash.md": "ADR-0017-modo-flash",
+    ".bigbang/docs/decisoes/ADR-0018-alvo-tsuru.md": "ADR-0018-alvo-tsuru",
+    ".bigbang/docs/decisoes/ADR-0019-tsuru-migracao-na-inicializacao.md": "ADR-0019-tsuru-migracao-na-inicializacao",
+    ".bigbang/docs/decisoes/ADR-0020-faxina-automatica.md": "ADR-0020-faxina-automatica",
+    ".bigbang/docs/decisoes/README.md": "Decisoes",
+    ".bigbang/docs/deploy-tsuru.md": "Historico-bigbang-docs-deploy-tsuru",
+    ".bigbang/docs/especificacao.md": "Especificacao",
+    ".bigbang/docs/piloto-screenfakecam.md": "Historico-bigbang-docs-piloto-screenfakecam",
+    ".bigbang/docs/release-1.5.0.md": "Historico-bigbang-docs-release-1-5-0",
+    "CHANGELOG.md": "Changelog",
+    "README.md": "Guia-de-inicio",
+    "docs/relatorios/2026-10-07-entrega-flash-tsuru.md": "Historico-docs-relatorios-2026-10-07-entrega-flash-tsuru",
+    ".bigbang/docs/decisoes/ADR-0021-documentacao-publica-wiki.md": "ADR-0021-documentacao-publica-wiki"
+  },
+  "categorias": {
+    "produto": {
+      "pagina": "Produto"
+    },
+    "tecnologia": {
+      "pagina": "Tecnologia"
+    },
+    "arquitetura": {
+      "pagina": "Arquitetura"
+    },
+    "design": {
+      "pagina": "Design"
+    },
+    "requisitos": {
+      "pagina": "Requisitos"
+    },
+    "funcionalidades": {
+      "pagina": "Funcionalidades"
+    },
+    "uso": {
+      "pagina": "Guia-de-inicio"
+    },
+    "referencia": {
+      "pagina": "Referencia-CLI"
+    },
+    "seguranca": {
+      "pagina": "Seguranca"
+    },
+    "operacao": {
+      "pagina": "Operacao"
+    },
+    "historico": {
+      "pagina": "Historico"
+    }
+  },
+  "requisitos": {
+    "RF-BB-001": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-002": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-003": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-004": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-005": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-006": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-007": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-008": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-009": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-010": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-011": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-012": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-013": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-014": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-015": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-016": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-017": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-018": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-019": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-020": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-021": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-022": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-023": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-024": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-025": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-026": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-027": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-028": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-029": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-030": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-031": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-032": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-033": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-034": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-035": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-036": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-037": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-038": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-039": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-040": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-041": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-042": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-043": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-044": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-045": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-046": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-047": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-048": {
+      "pagina": "Requisitos"
+    }
+  },
+  "codigo": {
+    "commit": "7756aa9e355c3d6387a023fe38794f9299b0fdd1",
+    "versao": "2.0.0",
+    "raizes": [
+      ".bigbang/",
+      ".github/workflows/",
+      "AGENTS.md",
+      "CLAUDE.md"
+    ],
+    "excluir": [
+      ".bigbang/tests/",
+      ".bigbang/docs/",
+      ".bigbang/CHECKSUMS",
+      ".bigbang/README.md",
+      ".bigbang/LICENSE"
+    ],
+    "justificativas_exclusao": {
+      "tests": "testes e fixtures, sem funcionalidade de execução do framework",
+      "docs": "documentação original preservada até confirmar publicação; remoção no mesmo PR",
+      "CHECKSUMS": "inventário derivado validado por bb verificar; não incluir hash recursivo",
+      "README/LICENSE": "apresentação/licença do framework preservadas pelo init em instalações, sem lógica executável"
+    }
+  },
+  "funcionalidades": [
+    {
+      "id": "BB-F-001",
+      "requisitos": [
+        "RF-BB-001"
+      ],
+      "pagina": "Funcionalidade-acceptance",
+      "fontes": [
+        ".bigbang/bb/acceptance.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_aceite.py:test_libera_so_as_marcas_da_tarefa_e_o_diff_passa_na_trava",
+        ".bigbang/tests/test_aceite.py:test_marca_embutida_do_jest",
+        ".bigbang/tests/test_aceite.py:test_pendentes",
+        ".bigbang/tests/test_aceite.py:test_pr_de_teste_pode_acrescentar_mas_nao_alterar",
+        ".bigbang/tests/test_aceite.py:test_tarefa_nao_pode_enfraquecer_nem_mexer_em_marca_alheia",
+        ".bigbang/tests/test_aceite.py:test_bug_pode_acrescentar_regressao",
+        ".bigbang/tests/test_aceite.py:test_teste_alterado_aprovado_libera",
+        ".bigbang/tests/test_aceite.py:test_sem_mudanca_em_aceite"
+      ],
+      "hashes": {
+        ".bigbang/bb/acceptance.py": "7199352644e891fec620711e4c58e1701ba69d9c17a37f95990c948b3ef42336"
+      },
+      "descricao": "Liberar somente as marcas de pendência da tarefa e impedir alterações indevidas nos testes existentes."
+    },
+    {
+      "id": "BB-F-002",
+      "requisitos": [
+        "RF-BB-002"
+      ],
+      "pagina": "Funcionalidade-checklist",
+      "fontes": [
+        ".bigbang/bb/checklist.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_checklist.py:test_tudo_verificado",
+        ".bigbang/tests/test_checklist.py:test_recusa_cada_caso",
+        ".bigbang/tests/test_checklist.py:test_sem_arquivo",
+        ".bigbang/tests/test_checklist.py:test_public_wiki_commands_are_never_executed",
+        ".bigbang/tests/test_checklist.py:test_public_malformed_execution_contract_blocks_cleanly",
+        ".bigbang/tests/test_checklist.py:test_modelo_vem_com_itens_a_definir"
+      ],
+      "hashes": {
+        ".bigbang/bb/checklist.py": "c0f9febf77a84e3268a004067d19a661b006fc85c6b96e4efbfb1d5014d964f2"
+      },
+      "descricao": "Verificar os onze itens de produção e os controles obrigatórios de ambiente e segurança."
+    },
+    {
+      "id": "BB-F-003",
+      "requisitos": [
+        "RF-BB-003"
+      ],
+      "pagina": "Funcionalidade-checksums",
+      "fontes": [
+        ".bigbang/bb/checksums.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_bb_verificar.py:test_template_limpo_passa",
+        ".bigbang/tests/test_bb_verificar.py:test_editar_bloco_gerado_do_agents_md_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_editar_secao_do_projeto_no_agents_md_passa",
+        ".bigbang/tests/test_bb_verificar.py:test_editar_arquivo_gerado_da_esteira_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_apagar_ou_sobrar_gerado_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_editar_bloco_do_stack_md_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_stack_md_sem_tabela_de_dependencias_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_editar_framework_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_arquivo_a_mais_no_framework_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_readme_e_licenca_movidos_pelo_init_passam",
+        ".bigbang/tests/test_bb_verificar.py:test_crlf_do_windows_passa",
+        ".bigbang/tests/test_bb_verificar.py:test_bigbang_toml_invalido_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_workflow_fora_das_regras_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_codigos_de_saida_do_cli",
+        ".bigbang/tests/test_bb_verificar.py:test_aceita_workflow_certo",
+        ".bigbang/tests/test_bb_verificar.py:test_recusa_cada_erro",
+        ".bigbang/tests/test_bb_verificar.py:test_pull_request_target_sem_checkout_do_pr_passa"
+      ],
+      "hashes": {
+        ".bigbang/bb/checksums.py": "cb6a649eae500d1973e18306a2218d4e9ad6fd11a34a061bd09f91eed8d004f9"
+      },
+      "descricao": "Detectar alterações não autorizadas na camada .bigbang e gerar o inventário de integridade do pacote."
+    },
+    {
+      "id": "BB-F-004",
+      "requisitos": [
+        "RF-BB-004"
+      ],
+      "pagina": "Funcionalidade-cli",
+      "fontes": [
+        ".bigbang/bb/cli.py",
+        ".bigbang/bb/__init__.py",
+        ".bigbang/bin/bb.py",
+        ".bigbang/bin/bb"
+      ],
+      "testes": [
+        ".bigbang/tests/test_bb_config.py:test_exemplo_valido",
+        ".bigbang/tests/test_bb_config.py:test_compilado_valido_sem_secao_deploy",
+        ".bigbang/tests/test_bb_config.py:test_chaves_opcionais_do_deploy",
+        ".bigbang/tests/test_bb_config.py:test_recusa_chave_e_secao_desconhecidas",
+        ".bigbang/tests/test_bb_config.py:test_recusa_chave_obrigatoria_ausente",
+        ".bigbang/tests/test_bb_config.py:test_secao_do_perfil_ativo_e_obrigatoria",
+        ".bigbang/tests/test_bb_config.py:test_build_de_cada_sistema",
+        ".bigbang/tests/test_bb_config.py:test_alvo_conforme_o_perfil",
+        ".bigbang/tests/test_bb_config.py:test_esquema_de_alvos_e_extensivel_capacidades_sao_do_gerador",
+        ".bigbang/tests/test_bb_config.py:test_publico_exige_licenca",
+        ".bigbang/tests/test_bb_config.py:test_tipos",
+        ".bigbang/tests/test_bb_config.py:test_versao_igual_ao_framework",
+        ".bigbang/tests/test_bb_config.py:test_repositorio_do_dono",
+        ".bigbang/tests/test_bb_config.py:test_valores",
+        ".bigbang/tests/test_bb_config.py:test_codigos_de_saida",
+        ".bigbang/tests/test_bb_config.py:test_config_invalida",
+        ".bigbang/tests/test_bb_config.py:test_toml_quebrado"
+      ],
+      "hashes": {
+        ".bigbang/bb/cli.py": "8920d58ba31a2a8519efd7f4e79ac0d566b4c382ecb3c2366bfccd41b322b322",
+        ".bigbang/bb/__init__.py": "9eafc1c524def17452aeb77d49ee0aca1a8c40c7e69d52c3c6dba384e78732eb",
+        ".bigbang/bin/bb.py": "af864bf4452b5aad7c6e90ba6ed7f81cf9cb2fbb8c60f2a5e7e5e4e17372abb4",
+        ".bigbang/bin/bb": "04bf9a43393503416a9307e7272d697afcd9327a0a5b388a451873a70c45e112"
+      },
+      "descricao": "Disponibilizar os comandos bb com mensagens em português e retornos estáveis para pessoas e automações."
+    },
+    {
+      "id": "BB-F-005",
+      "requisitos": [
+        "RF-BB-005"
+      ],
+      "pagina": "Funcionalidade-community_public",
+      "fontes": [
+        ".bigbang/bb/community_public.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_community_public.py:test_first_post_is_created_in_real_repository_category",
+        ".bigbang/tests/test_community_public.py:test_existing_welcome_is_not_reposted",
+        ".bigbang/tests/test_community_public.py:test_disabled_discussions_is_diagnostic_not_silent_success",
+        ".bigbang/tests/test_community_public.py:test_anonymous_reader_cannot_edit_public_board",
+        ".bigbang/tests/test_community_public.py:test_anonymous_editor_or_login_redirect_blocks_validation",
+        ".bigbang/tests/test_community_public.py:test_new_empty_public_project_can_be_published",
+        ".bigbang/tests/test_community_public.py:test_draft_or_private_item_is_never_published",
+        ".bigbang/tests/test_community_public.py:test_existing_text_requires_reviewed_audit_before_becoming_public"
+      ],
+      "hashes": {
+        ".bigbang/bb/community_public.py": "053df666c12e68742858027ed63a1817e44b42ccff7246f41ec0253d7debfec0"
+      },
+      "descricao": "Publicar as boas-vindas da IA sem duplicação e tornar painéis públicos somente após auditoria do conteúdo."
+    },
+    {
+      "id": "BB-F-006",
+      "requisitos": [
+        "RF-BB-006"
+      ],
+      "pagina": "Funcionalidade-config",
+      "fontes": [
+        ".bigbang/bb/config.py",
+        ".bigbang/modelos/bigbang.toml.exemplo",
+        ".bigbang/modelos/flags.toml"
+      ],
+      "testes": [
+        ".bigbang/tests/test_bb_config.py:test_exemplo_valido",
+        ".bigbang/tests/test_bb_config.py:test_compilado_valido_sem_secao_deploy",
+        ".bigbang/tests/test_bb_config.py:test_chaves_opcionais_do_deploy",
+        ".bigbang/tests/test_bb_config.py:test_recusa_chave_e_secao_desconhecidas",
+        ".bigbang/tests/test_bb_config.py:test_recusa_chave_obrigatoria_ausente",
+        ".bigbang/tests/test_bb_config.py:test_secao_do_perfil_ativo_e_obrigatoria",
+        ".bigbang/tests/test_bb_config.py:test_build_de_cada_sistema",
+        ".bigbang/tests/test_bb_config.py:test_alvo_conforme_o_perfil",
+        ".bigbang/tests/test_bb_config.py:test_esquema_de_alvos_e_extensivel_capacidades_sao_do_gerador",
+        ".bigbang/tests/test_bb_config.py:test_publico_exige_licenca",
+        ".bigbang/tests/test_bb_config.py:test_tipos",
+        ".bigbang/tests/test_bb_config.py:test_versao_igual_ao_framework",
+        ".bigbang/tests/test_bb_config.py:test_repositorio_do_dono",
+        ".bigbang/tests/test_bb_config.py:test_valores",
+        ".bigbang/tests/test_bb_config.py:test_codigos_de_saida",
+        ".bigbang/tests/test_bb_config.py:test_config_invalida",
+        ".bigbang/tests/test_bb_config.py:test_toml_quebrado"
+      ],
+      "hashes": {
+        ".bigbang/bb/config.py": "93aa511d040ad4f866008129c0697f777c6e6cad291930c47a664f8a72222794",
+        ".bigbang/modelos/bigbang.toml.exemplo": "6fc8c5936e706000c225d3234b7ba2f5e438047cfdcbc8a0419cf84b4e33feec",
+        ".bigbang/modelos/flags.toml": "3f4bf065d88d1b4b344e2ec8d24e536ef7433333bacb2cf974fc4194703a47ba"
+      },
+      "descricao": "Ler bigbang.toml sem aceitar erros de digitação que silenciem controles do projeto."
+    },
+    {
+      "id": "BB-F-007",
+      "requisitos": [
+        "RF-BB-007"
+      ],
+      "pagina": "Funcionalidade-decisions",
+      "fontes": [
+        ".bigbang/bb/decisions.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_decisao_revisao.py:test_comenta_a_frase_e_depois_poe_a_label",
+        ".bigbang/tests/test_decisao_revisao.py:test_recusa_label_que_nao_e_decisao_e_frase_vazia",
+        ".bigbang/tests/test_decisao_revisao.py:test_large_review_uses_paginated_files_without_diff_endpoint",
+        ".bigbang/tests/test_decisao_revisao.py:test_renamed_sensitive_path_still_requires_owner",
+        ".bigbang/tests/test_decisao_revisao.py:test_missing_acceptance_patch_fails_before_approval",
+        ".bigbang/tests/test_decisao_revisao.py:test_aprova_pr_comum",
+        ".bigbang/tests/test_decisao_revisao.py:test_recusa_quando_a_revisao_e_do_dono",
+        ".bigbang/tests/test_decisao_revisao.py:test_dono_revisao_ia_prevalece",
+        ".bigbang/tests/test_decisao_revisao.py:test_local_flash_cannot_change_target_review_policy",
+        ".bigbang/tests/test_decisao_revisao.py:test_target_flash_is_used_even_when_local_config_is_standard",
+        ".bigbang/tests/test_decisao_revisao.py:test_destination_config_is_fetched_from_github",
+        ".bigbang/tests/test_decisao_revisao.py:test_testes_com_revisao_humana",
+        ".bigbang/tests/test_decisao_revisao.py:test_teste_primeiro_depois_a_correcao",
+        ".bigbang/tests/test_decisao_revisao.py:test_recusa_correcao_junto_com_o_teste",
+        ".bigbang/tests/test_decisao_revisao.py:test_recusa_teste_que_nao_falha",
+        ".bigbang/tests/test_decisao_revisao.py:test_teste_em_layout_gradle_conta_como_teste",
+        ".bigbang/tests/test_decisao_revisao.py:test_recusa_um_commit_so"
+      ],
+      "hashes": {
+        ".bigbang/bb/decisions.py": "bf37f1f6d177103dfbbb8ce7cde3fcd8e0a82b850cdb2bbb37c342eff7e3446c"
+      },
+      "descricao": "Registrar a decisão autorizada do dono e impedir aprovação automática de PR que exija revisão humana."
+    },
+    {
+      "id": "BB-F-008",
+      "requisitos": [
+        "RF-BB-008"
+      ],
+      "pagina": "Funcionalidade-deploy_catalog",
+      "fontes": [
+        ".bigbang/bb/deploy_catalog.py",
+        ".bigbang/esteira/perfis/deploy/artefatos/estatico/artefato.toml",
+        ".bigbang/esteira/perfis/deploy/artefatos/imagem/artefato.toml",
+        ".bigbang/esteira/perfis/deploy/artefatos/pacote/artefato.toml",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/alvo.toml",
+        ".bigbang/esteira/perfis/deploy/alvos/paas/alvo.toml",
+        ".bigbang/esteira/perfis/deploy/alvos/personalizado/alvo.toml",
+        ".bigbang/esteira/perfis/deploy/alvos/tsuru/alvo.toml",
+        ".bigbang/esteira/perfis/deploy/alvos/vps-docker/alvo.toml"
+      ],
+      "testes": [
+        ".bigbang/tests/test_deploy_catalog.py:test_configuracao_atual_resolve_imagem_sem_chave_nova",
+        ".bigbang/tests/test_deploy_catalog.py:test_novo_alvo_sem_editar_enum_ou_nucleo",
+        ".bigbang/tests/test_deploy_catalog.py:test_formato_tem_sua_camada_antes_do_alvo",
+        ".bigbang/tests/test_deploy_catalog.py:test_alvo_desconhecido_ou_reservado_nao_grava_nada",
+        ".bigbang/tests/test_deploy_catalog.py:test_adaptador_sem_script_e_recusado_antes_de_gerar",
+        ".bigbang/tests/test_deploy_catalog.py:test_artefato_reservado_ou_desconhecido_e_recusado",
+        ".bigbang/tests/test_deploy_catalog.py:test_capacidade_incompativel_e_recusada",
+        ".bigbang/tests/test_deploy_catalog.py:test_artefato_sem_script_de_promocao_e_recusado",
+        ".bigbang/tests/test_deploy_catalog.py:test_formato_por_hashes_nao_e_entregue_pela_esteira_de_imagens",
+        ".bigbang/tests/test_deploy_catalog.py:test_verificar_detecta_contrato_invalido_no_template",
+        ".bigbang/tests/test_deploy_catalog.py:test_contrato_invalido_e_recusado",
+        ".bigbang/tests/test_deploy_catalog.py:test_nao_le_script_por_link_fora_do_adaptador",
+        ".bigbang/tests/test_deploy_catalog.py:test_nome_nao_escapa_do_catalogo",
+        ".bigbang/tests/test_deploy_catalog.py:test_catalogo_funciona_antes_da_fundacao_e_nao_escreve",
+        ".bigbang/tests/test_deploy_catalog.py:test_catalogo_exibe_adaptador_quebrado_e_sai_com_falha",
+        ".bigbang/tests/test_deploy_catalog.py:test_troca_de_alvo_remove_arquivo_obsoleto",
+        ".bigbang/tests/test_deploy_catalog.py:test_compilado_nao_depende_de_catalogo_deploy",
+        ".bigbang/tests/test_deploy_catalog.py:test_esquema_recusa_injecao_em_seletores"
+      ],
+      "hashes": {
+        ".bigbang/bb/deploy_catalog.py": "a25067fd1b39dcce6be9373555bf0344d6f70637816bff4b26e0ab641c4140b8",
+        ".bigbang/esteira/perfis/deploy/artefatos/estatico/artefato.toml": "794471f2556475c697f1b81b50578edd97610533d832606240e6ba20c45ac562",
+        ".bigbang/esteira/perfis/deploy/artefatos/imagem/artefato.toml": "096ab8840b14d81c49bec85482cda461949113779613213c1936612a988ad095",
+        ".bigbang/esteira/perfis/deploy/artefatos/pacote/artefato.toml": "3cbfec3db58a9cd3e9338db6e97bb627a7bacb2dabeb4c958d131827f5721aab",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/alvo.toml": "b494b7c5d33e1434d9eff9288cb1261efcc1fb8601f352d409263a3f9b314f8a",
+        ".bigbang/esteira/perfis/deploy/alvos/paas/alvo.toml": "93f8e059f9ef5fce60c5f659724df326993380b06f53dd3dcc8c9daabedfaa6d",
+        ".bigbang/esteira/perfis/deploy/alvos/personalizado/alvo.toml": "573d3ee1b81516ede6f4ce079ec2127a89734354162cf971622e195f355b7def",
+        ".bigbang/esteira/perfis/deploy/alvos/tsuru/alvo.toml": "ecc8f97463f4fe5b9b6cbff63419c1fb6f5152709b2f53a280ef22c825e59273",
+        ".bigbang/esteira/perfis/deploy/alvos/vps-docker/alvo.toml": "95d1cbda6f0dd85c0f0953a2b409b23b49862ead7c5734f71227698fb7237279"
+      },
+      "descricao": "Resolver entregas por contratos instalados, distinguindo suporte implementado de integração reservada."
+    },
+    {
+      "id": "BB-F-009",
+      "requisitos": [
+        "RF-BB-009"
+      ],
+      "pagina": "Funcionalidade-docs_check",
+      "fontes": [
+        ".bigbang/bb/docs_check.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_readme_sistema.py:test_antes_da_primeira_release_nao_cobra",
+        ".bigbang/tests/test_readme_sistema.py:test_completo_passa",
+        ".bigbang/tests/test_readme_sistema.py:test_ainda_na_fundacao_ou_a_preencher_reprova",
+        ".bigbang/tests/test_readme_sistema.py:test_falta_secao_e_selo",
+        ".bigbang/tests/test_readme_sistema.py:test_comentario_do_modelo_nao_conta",
+        ".bigbang/tests/test_readme_sistema.py:test_modelo_tem_todas_as_secoes",
+        ".bigbang/tests/test_readme_sistema.py:test_sem_bigbang_toml_nao_se_aplica",
+        ".bigbang/tests/test_readme_sistema.py:test_cobra_os_arquivos_de_comunidade",
+        ".bigbang/tests/test_readme_sistema.py:test_icone_depois_do_design_ou_da_release",
+        ".bigbang/tests/test_readme_sistema.py:test_modelos_existem"
+      ],
+      "hashes": {
+        ".bigbang/bb/docs_check.py": "876271c62a5bf5bcd59474dc8fc7a5739f2e15b157286c5d346de66afc850905"
+      },
+      "descricao": "Detectar cercas abertas, links locais inválidos e ausência da apresentação, comunidade ou ícone necessários ao sistema."
+    },
+    {
+      "id": "BB-F-010",
+      "requisitos": [
+        "RF-BB-010"
+      ],
+      "pagina": "Funcionalidade-documentation",
+      "fontes": [
+        ".bigbang/bb/documentation.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_wiki.py:test_public_reads_pinned_wiki_without_legacy_file",
+        ".bigbang/tests/test_wiki.py:test_cli_proposal_review_and_publication_preserve_original_until_confirmed",
+        ".bigbang/tests/test_wiki.py:test_private_reads_existing_file_and_does_not_access_github",
+        ".bigbang/tests/test_wiki.py:test_public_repository_cannot_bypass_policy_with_private_config",
+        ".bigbang/tests/test_wiki.py:test_private_repository_visibility_keeps_current_policy",
+        ".bigbang/tests/test_wiki.py:test_complete_inventory_passes",
+        ".bigbang/tests/test_wiki.py:test_invented_code_commit_is_rejected",
+        ".bigbang/tests/test_wiki.py:test_absolute_links_to_own_wiki_are_checked",
+        ".bigbang/tests/test_wiki.py:test_unlisted_manual_at_root_is_rejected",
+        ".bigbang/tests/test_wiki.py:test_new_implemented_module_without_documentation_blocks_delivery",
+        ".bigbang/tests/test_wiki.py:test_requirement_must_exist_in_actual_documentation",
+        ".bigbang/tests/test_wiki.py:test_empty_functional_sections_do_not_prove_coverage",
+        ".bigbang/tests/test_wiki.py:test_published_head_must_match_exact_reviewed_commit",
+        ".bigbang/tests/test_wiki.py:test_public_stack_guard_uses_approved_table_from_wiki",
+        ".bigbang/tests/test_wiki.py:test_business_rules_survive_migration_without_changing_acceptance_tests",
+        ".bigbang/tests/test_wiki.py:test_changed_behavior_without_doc_refresh_blocks_delivery",
+        ".bigbang/tests/test_wiki.py:test_missing_test_symbol_or_functional_flow_blocks",
+        ".bigbang/tests/test_wiki.py:test_broken_image_wikilink_and_anchor_are_detected",
+        ".bigbang/tests/test_wiki.py:test_local_system_docs_block_but_functional_contracts_remain",
+        ".bigbang/tests/test_wiki.py:test_public_missing_manifest_fails_clearly",
+        ".bigbang/tests/test_wiki.py:test_traversal_manifest_cannot_read_outside_wiki",
+        ".bigbang/tests/test_wiki.py:test_uninitialized_wiki_does_not_modify_local_documents",
+        ".bigbang/tests/test_wiki.py:test_publish_fast_forwards_and_rerun_is_idempotent",
+        ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected"
+      ],
+      "hashes": {
+        ".bigbang/bb/documentation.py": "efaa4a6c4099f66968cb347a7a443431dbd0f67cda2cfa1fb98684c6ff8aeda1"
+      },
+      "descricao": "Resolver identificadores documentais conforme a visibilidade e publicar somente o snapshot revisado sem perder alterações concorrentes."
+    },
+    {
+      "id": "BB-F-011",
+      "requisitos": [
+        "RF-BB-011"
+      ],
+      "pagina": "Funcionalidade-documentation_cli",
+      "fontes": [
+        ".bigbang/bb/documentation_cli.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_wiki.py:test_public_reads_pinned_wiki_without_legacy_file",
+        ".bigbang/tests/test_wiki.py:test_cli_proposal_review_and_publication_preserve_original_until_confirmed",
+        ".bigbang/tests/test_wiki.py:test_private_reads_existing_file_and_does_not_access_github",
+        ".bigbang/tests/test_wiki.py:test_public_repository_cannot_bypass_policy_with_private_config",
+        ".bigbang/tests/test_wiki.py:test_private_repository_visibility_keeps_current_policy",
+        ".bigbang/tests/test_wiki.py:test_complete_inventory_passes",
+        ".bigbang/tests/test_wiki.py:test_invented_code_commit_is_rejected",
+        ".bigbang/tests/test_wiki.py:test_absolute_links_to_own_wiki_are_checked",
+        ".bigbang/tests/test_wiki.py:test_unlisted_manual_at_root_is_rejected",
+        ".bigbang/tests/test_wiki.py:test_new_implemented_module_without_documentation_blocks_delivery",
+        ".bigbang/tests/test_wiki.py:test_requirement_must_exist_in_actual_documentation",
+        ".bigbang/tests/test_wiki.py:test_empty_functional_sections_do_not_prove_coverage",
+        ".bigbang/tests/test_wiki.py:test_published_head_must_match_exact_reviewed_commit",
+        ".bigbang/tests/test_wiki.py:test_public_stack_guard_uses_approved_table_from_wiki",
+        ".bigbang/tests/test_wiki.py:test_business_rules_survive_migration_without_changing_acceptance_tests",
+        ".bigbang/tests/test_wiki.py:test_changed_behavior_without_doc_refresh_blocks_delivery",
+        ".bigbang/tests/test_wiki.py:test_missing_test_symbol_or_functional_flow_blocks",
+        ".bigbang/tests/test_wiki.py:test_broken_image_wikilink_and_anchor_are_detected",
+        ".bigbang/tests/test_wiki.py:test_local_system_docs_block_but_functional_contracts_remain",
+        ".bigbang/tests/test_wiki.py:test_public_missing_manifest_fails_clearly",
+        ".bigbang/tests/test_wiki.py:test_traversal_manifest_cannot_read_outside_wiki",
+        ".bigbang/tests/test_wiki.py:test_uninitialized_wiki_does_not_modify_local_documents",
+        ".bigbang/tests/test_wiki.py:test_publish_fast_forwards_and_rerun_is_idempotent",
+        ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected"
+      ],
+      "hashes": {
+        ".bigbang/bb/documentation_cli.py": "83cbb9a0269f3bec7ae90c107ceffdddc20e841dbea8412d7d84840c76b42619"
+      },
+      "descricao": "Preparar, ler, propor, validar e publicar documentação; orientar Discussions, auditoria de painéis e Social preview."
+    },
+    {
+      "id": "BB-F-012",
+      "requisitos": [
+        "RF-BB-012"
+      ],
+      "pagina": "Funcionalidade-errors",
+      "fontes": [
+        ".bigbang/bb/errors.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_bb_config.py:test_exemplo_valido",
+        ".bigbang/tests/test_bb_config.py:test_compilado_valido_sem_secao_deploy",
+        ".bigbang/tests/test_bb_config.py:test_chaves_opcionais_do_deploy",
+        ".bigbang/tests/test_bb_config.py:test_recusa_chave_e_secao_desconhecidas",
+        ".bigbang/tests/test_bb_config.py:test_recusa_chave_obrigatoria_ausente",
+        ".bigbang/tests/test_bb_config.py:test_secao_do_perfil_ativo_e_obrigatoria",
+        ".bigbang/tests/test_bb_config.py:test_build_de_cada_sistema",
+        ".bigbang/tests/test_bb_config.py:test_alvo_conforme_o_perfil",
+        ".bigbang/tests/test_bb_config.py:test_esquema_de_alvos_e_extensivel_capacidades_sao_do_gerador",
+        ".bigbang/tests/test_bb_config.py:test_publico_exige_licenca",
+        ".bigbang/tests/test_bb_config.py:test_tipos",
+        ".bigbang/tests/test_bb_config.py:test_versao_igual_ao_framework",
+        ".bigbang/tests/test_bb_config.py:test_repositorio_do_dono",
+        ".bigbang/tests/test_bb_config.py:test_valores",
+        ".bigbang/tests/test_bb_config.py:test_codigos_de_saida",
+        ".bigbang/tests/test_bb_config.py:test_config_invalida",
+        ".bigbang/tests/test_bb_config.py:test_toml_quebrado"
+      ],
+      "hashes": {
+        ".bigbang/bb/errors.py": "48d7320767845d7a2f1c1ef8af3d34c7a31e51c6ab26d1ce17ff812e862f567b"
+      },
+      "descricao": "Diferenciar sucesso, uso incorreto, configuração inválida e falhas externas para que scripts não interpretem erro como entrega."
+    },
+    {
+      "id": "BB-F-013",
+      "requisitos": [
+        "RF-BB-013"
+      ],
+      "pagina": "Funcionalidade-generator",
+      "fontes": [
+        ".bigbang/bb/generator.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_bb_gerar.py:test_antes_da_fundacao",
+        ".bigbang/tests/test_bb_gerar.py:test_esteira_exige_fundacao",
+        ".bigbang/tests/test_bb_gerar.py:test_skills_em_duas_copias_iguais_com_aviso_depois_do_cabecalho",
+        ".bigbang/tests/test_bb_gerar.py:test_composicao_deploy_vps_docker",
+        ".bigbang/tests/test_bb_gerar.py:test_composicao_compilado_sem_alvo",
+        ".bigbang/tests/test_bb_gerar.py:test_troca_de_alvo_remove_e_cria",
+        ".bigbang/tests/test_bb_gerar.py:test_segunda_geracao_nao_muda_nada",
+        ".bigbang/tests/test_bb_gerar.py:test_remove_ci_do_framework_ao_instalar_a_esteira",
+        ".bigbang/tests/test_bb_gerar.py:test_nao_toca_arquivos_do_projeto",
+        ".bigbang/tests/test_bb_gerar.py:test_bloco_inserido_em_agents_md_existente",
+        ".bigbang/tests/test_bb_gerar.py:test_dois_blocos_no_agents_md",
+        ".bigbang/tests/test_bb_gerar.py:test_bloco_do_stack_md",
+        ".bigbang/tests/test_bb_gerar.py:test_camada_sempre_nao_escreve_em_github",
+        ".bigbang/tests/test_bb_gerar.py:test_skill_sem_prefixo_bb",
+        ".bigbang/tests/test_bb_gerar.py:test_simular_nao_grava",
+        ".bigbang/tests/test_bb_gerar.py:test_marcadores",
+        ".bigbang/tests/test_bb_gerar.py:test_expressao_do_github_actions_nao_e_marcador",
+        ".bigbang/tests/test_bb_gerar.py:test_marcador_sem_valor",
+        ".bigbang/tests/test_bb_gerar.py:test_aviso_por_tipo",
+        ".bigbang/tests/test_bb_gerar.py:test_reconhece_aviso",
+        ".bigbang/tests/test_bb_gerar.py:test_template_em_dia"
+      ],
+      "hashes": {
+        ".bigbang/bb/generator.py": "0c40e0a8dad1347595bf69aaf6e8bbd9f85b041db7f5b56f9a923ebe6ac6ace3"
+      },
+      "descricao": "Gerar instruções e Actions a partir da configuração, preservando a camada do projeto e removendo saídas obsoletas."
+    },
+    {
+      "id": "BB-F-014",
+      "requisitos": [
+        "RF-BB-014"
+      ],
+      "pagina": "Funcionalidade-github",
+      "fontes": [
+        ".bigbang/bb/github.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_posse.py:test_assume_libera_e_preserva_historico",
+        ".bigbang/tests/test_posse.py:test_recusa_nome_issue_fechada_e_posse_existente",
+        ".bigbang/tests/test_posse.py:test_limite_e_comentario_sem_label_ainda_bloqueiam",
+        ".bigbang/tests/test_posse.py:test_recusa_bloqueio_mas_aceita_pr_de_teste_mesclado",
+        ".bigbang/tests/test_posse.py:test_outra_sessao_nao_libera",
+        ".bigbang/tests/test_posse.py:test_falha_na_confirmacao_remove_so_a_propria_marca",
+        ".bigbang/tests/test_posse.py:test_desempate_e_rollback_nao_apagam_label_do_mesmo_nome",
+        ".bigbang/tests/test_posse.py:test_comentario_de_terceiro_nao_e_posse",
+        ".bigbang/tests/test_posse.py:test_recusa_espera_zero",
+        ".bigbang/tests/test_posse.py:test_resposta_perdida_do_post_reconcilia_por_uuid",
+        ".bigbang/tests/test_posse.py:test_dois_processos_so_um_dono_e_uma_pasta",
+        ".bigbang/tests/test_posse.py:test_bug_ganha_a_branch_a_partir_da_main",
+        ".bigbang/tests/test_posse.py:test_falha_no_worktree_desfaz_a_posse",
+        ".bigbang/tests/test_posse.py:test_worktree_usa_avanco_remoto_e_recusa_divergencia"
+      ],
+      "hashes": {
+        ".bigbang/bb/github.py": "b9611141d06732e3bbad89e43270346f6f3b946c082c0f2e4da127ceb398edab"
+      },
+      "descricao": "Executar operações GitHub por argumentos separados, permitindo substituição por gh falso nos testes."
+    },
+    {
+      "id": "BB-F-015",
+      "requisitos": [
+        "RF-BB-015"
+      ],
+      "pagina": "Funcionalidade-init",
+      "fontes": [
+        ".bigbang/bb/init.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_bb_init.py:test_privado",
+        ".bigbang/tests/test_bb_init.py:test_publico_cria_licenca_do_sistema",
+        ".bigbang/tests/test_bb_init.py:test_publico_sem_licenca",
+        ".bigbang/tests/test_bb_init.py:test_nao_roda_duas_vezes",
+        ".bigbang/tests/test_bb_init.py:test_issue_de_f0_existente_nao_duplica",
+        ".bigbang/tests/test_bb_init.py:test_falha_no_github_nao_altera_arquivos",
+        ".bigbang/tests/test_bb_init.py:test_simular_nao_faz_nada",
+        ".bigbang/tests/test_bb_init.py:test_sem_github",
+        ".bigbang/tests/test_bb_init.py:test_slug",
+        ".bigbang/tests/test_bb_init.py:test_set_value_mantem_comentario_e_secao",
+        ".bigbang/tests/test_bb_init.py:test_set_value_mantem_a_coluna_do_comentario",
+        ".bigbang/tests/test_bb_init.py:test_sem_python",
+        ".bigbang/tests/test_bb_init.py:test_python_antigo",
+        ".bigbang/tests/test_bb_init.py:test_python_certo"
+      ],
+      "hashes": {
+        ".bigbang/bb/init.py": "0d87a32cba35f99046651c0be984238f26db5f10647585f6507faf13cce1e974"
+      },
+      "descricao": "Preparar F0 com identidade, modo padrão ou Flash, configuração e arquivos comunitários sem destruir conteúdo do projeto."
+    },
+    {
+      "id": "BB-F-016",
+      "requisitos": [
+        "RF-BB-016"
+      ],
+      "pagina": "Funcionalidade-ownership",
+      "fontes": [
+        ".bigbang/bb/ownership.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_posse.py:test_assume_libera_e_preserva_historico",
+        ".bigbang/tests/test_posse.py:test_recusa_nome_issue_fechada_e_posse_existente",
+        ".bigbang/tests/test_posse.py:test_limite_e_comentario_sem_label_ainda_bloqueiam",
+        ".bigbang/tests/test_posse.py:test_recusa_bloqueio_mas_aceita_pr_de_teste_mesclado",
+        ".bigbang/tests/test_posse.py:test_outra_sessao_nao_libera",
+        ".bigbang/tests/test_posse.py:test_falha_na_confirmacao_remove_so_a_propria_marca",
+        ".bigbang/tests/test_posse.py:test_desempate_e_rollback_nao_apagam_label_do_mesmo_nome",
+        ".bigbang/tests/test_posse.py:test_comentario_de_terceiro_nao_e_posse",
+        ".bigbang/tests/test_posse.py:test_recusa_espera_zero",
+        ".bigbang/tests/test_posse.py:test_resposta_perdida_do_post_reconcilia_por_uuid",
+        ".bigbang/tests/test_posse.py:test_dois_processos_so_um_dono_e_uma_pasta",
+        ".bigbang/tests/test_posse.py:test_bug_ganha_a_branch_a_partir_da_main",
+        ".bigbang/tests/test_posse.py:test_falha_no_worktree_desfaz_a_posse",
+        ".bigbang/tests/test_posse.py:test_worktree_usa_avanco_remoto_e_recusa_divergencia"
+      ],
+      "hashes": {
+        ".bigbang/bb/ownership.py": "9bd6f3afedcfabff95dd9f85a68aadadb5686ba14875b3537317e14e527db04d"
+      },
+      "descricao": "Evitar que duas IAs implementem a mesma tarefa usando sessões rastreáveis e timestamps do servidor."
+    },
+    {
+      "id": "BB-F-017",
+      "requisitos": [
+        "RF-BB-017"
+      ],
+      "pagina": "Funcionalidade-package",
+      "fontes": [
+        ".bigbang/bb/package.py",
+        ".bigbang/MIGRACAO.md",
+        ".bigbang/VERSION"
+      ],
+      "testes": [
+        ".bigbang/tests/test_pacote.py:test_reprodutivel",
+        ".bigbang/tests/test_pacote.py:test_conteudo_so_dentro_de_bigbang",
+        ".bigbang/tests/test_pacote.py:test_recusa_framework_alterado",
+        ".bigbang/tests/test_pacote.py:test_recusa_entrada_suspeita",
+        ".bigbang/tests/test_pacote.py:test_secoes_entre_versoes",
+        ".bigbang/tests/test_pacote.py:test_migracao_do_framework_tem_a_versao_atual",
+        ".bigbang/tests/test_pacote.py:test_versoes_publicadas_sem_passo_manual",
+        ".bigbang/tests/test_pacote.py:test_toda_secao_tem_as_duas_partes"
+      ],
+      "hashes": {
+        ".bigbang/bb/package.py": "277954b69c243354a4d726708463293e874b13470081be68054aa8948fc98eff",
+        ".bigbang/MIGRACAO.md": "d3c3c49c312f6c9d6c377ecef65861723536619a062648ec488ad5b8e15cd987",
+        ".bigbang/VERSION": "c28fcca53637bc88e124af1725df13cb98c69dedefd62fb3cdbe1cdb6b760624"
+      },
+      "descricao": "Empacotar .bigbang com integridade e notas de migração que permitem atualização oficial verificável."
+    },
+    {
+      "id": "BB-F-018",
+      "requisitos": [
+        "RF-BB-018"
+      ],
+      "pagina": "Funcionalidade-paths",
+      "fontes": [
+        ".bigbang/bb/paths.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_bb_config.py:test_exemplo_valido",
+        ".bigbang/tests/test_bb_config.py:test_compilado_valido_sem_secao_deploy",
+        ".bigbang/tests/test_bb_config.py:test_chaves_opcionais_do_deploy",
+        ".bigbang/tests/test_bb_config.py:test_recusa_chave_e_secao_desconhecidas",
+        ".bigbang/tests/test_bb_config.py:test_recusa_chave_obrigatoria_ausente",
+        ".bigbang/tests/test_bb_config.py:test_secao_do_perfil_ativo_e_obrigatoria",
+        ".bigbang/tests/test_bb_config.py:test_build_de_cada_sistema",
+        ".bigbang/tests/test_bb_config.py:test_alvo_conforme_o_perfil",
+        ".bigbang/tests/test_bb_config.py:test_esquema_de_alvos_e_extensivel_capacidades_sao_do_gerador",
+        ".bigbang/tests/test_bb_config.py:test_publico_exige_licenca",
+        ".bigbang/tests/test_bb_config.py:test_tipos",
+        ".bigbang/tests/test_bb_config.py:test_versao_igual_ao_framework",
+        ".bigbang/tests/test_bb_config.py:test_repositorio_do_dono",
+        ".bigbang/tests/test_bb_config.py:test_valores",
+        ".bigbang/tests/test_bb_config.py:test_codigos_de_saida",
+        ".bigbang/tests/test_bb_config.py:test_config_invalida",
+        ".bigbang/tests/test_bb_config.py:test_toml_quebrado"
+      ],
+      "hashes": {
+        ".bigbang/bb/paths.py": "2c81c9f6763dd184a0066a79e20cb344d018475689bebcd7134097b102576f53"
+      },
+      "descricao": "Localizar raiz, configuração e versão e tratar texto de forma consistente nos sistemas suportados."
+    },
+    {
+      "id": "BB-F-019",
+      "requisitos": [
+        "RF-BB-019"
+      ],
+      "pagina": "Funcionalidade-pipeline",
+      "fontes": [
+        ".bigbang/bb/pipeline.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_bb_esteira.py:test_respostas_viram_labels",
+        ".bigbang/tests/test_bb_esteira.py:test_padroes_da_especificacao",
+        ".bigbang/tests/test_bb_esteira.py:test_edicao_so_aplica_o_que_mudou",
+        ".bigbang/tests/test_bb_esteira.py:test_dependencia_nao_cria_label_por_numero",
+        ".bigbang/tests/test_bb_esteira.py:test_severidade",
+        ".bigbang/tests/test_bb_esteira.py:test_epico_pronto",
+        ".bigbang/tests/test_bb_esteira.py:test_recusa_cada_falta",
+        ".bigbang/tests/test_bb_esteira.py:test_sensivel_com_stride_passa",
+        ".bigbang/tests/test_bb_esteira.py:test_tarefas_e_dependencias",
+        ".bigbang/tests/test_bb_esteira.py:test_slug",
+        ".bigbang/tests/test_bb_esteira.py:test_modelo_de_branches",
+        ".bigbang/tests/test_bb_esteira.py:test_issue_da_branch",
+        ".bigbang/tests/test_bb_esteira.py:test_titulo_conventional",
+        ".bigbang/tests/test_bb_esteira.py:test_classificacao",
+        ".bigbang/tests/test_bb_esteira.py:test_versao_informada_confere",
+        ".bigbang/tests/test_bb_esteira.py:test_arquivo_de_versao",
+        ".bigbang/tests/test_bb_esteira.py:test_secao_nova_com_rascunho",
+        ".bigbang/tests/test_bb_esteira.py:test_idempotente_e_arquivo_novo",
+        ".bigbang/tests/test_bb_esteira.py:test_so_manutencao",
+        ".bigbang/tests/test_bb_esteira.py:test_artefato",
+        ".bigbang/tests/test_bb_esteira.py:test_zonas_sensiveis",
+        ".bigbang/tests/test_bb_esteira.py:test_retirada_do_decorador_da_propria_tarefa",
+        ".bigbang/tests/test_bb_esteira.py:test_test_failing_vira_test",
+        ".bigbang/tests/test_bb_esteira.py:test_qualquer_outra_mudanca_e_sensivel",
+        ".bigbang/tests/test_bb_esteira.py:test_matriz_com_runner_fixo",
+        ".bigbang/tests/test_bb_esteira.py:test_nomes_da_candidata_e_de_producao",
+        ".bigbang/tests/test_bb_esteira.py:test_android",
+        ".bigbang/tests/test_bb_esteira.py:test_osv_so_alta_e_critica",
+        ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls"
+      ],
+      "hashes": {
+        ".bigbang/bb/pipeline.py": "0ba569bc0425496bdb778e4610ba6d4b80d3c9772540484cde98e0e61c111f07"
+      },
+      "descricao": "Calcular prontidão, branches, revisão, SemVer, changelog, matriz e nomes de artefatos sem executar deploy."
+    },
+    {
+      "id": "BB-F-020",
+      "requisitos": [
+        "RF-BB-020"
+      ],
+      "pagina": "Funcionalidade-pipeline_cli",
+      "fontes": [
+        ".bigbang/bb/pipeline_cli.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_bb_esteira.py:test_respostas_viram_labels",
+        ".bigbang/tests/test_bb_esteira.py:test_padroes_da_especificacao",
+        ".bigbang/tests/test_bb_esteira.py:test_edicao_so_aplica_o_que_mudou",
+        ".bigbang/tests/test_bb_esteira.py:test_dependencia_nao_cria_label_por_numero",
+        ".bigbang/tests/test_bb_esteira.py:test_severidade",
+        ".bigbang/tests/test_bb_esteira.py:test_epico_pronto",
+        ".bigbang/tests/test_bb_esteira.py:test_recusa_cada_falta",
+        ".bigbang/tests/test_bb_esteira.py:test_sensivel_com_stride_passa",
+        ".bigbang/tests/test_bb_esteira.py:test_tarefas_e_dependencias",
+        ".bigbang/tests/test_bb_esteira.py:test_slug",
+        ".bigbang/tests/test_bb_esteira.py:test_modelo_de_branches",
+        ".bigbang/tests/test_bb_esteira.py:test_issue_da_branch",
+        ".bigbang/tests/test_bb_esteira.py:test_titulo_conventional",
+        ".bigbang/tests/test_bb_esteira.py:test_classificacao",
+        ".bigbang/tests/test_bb_esteira.py:test_versao_informada_confere",
+        ".bigbang/tests/test_bb_esteira.py:test_arquivo_de_versao",
+        ".bigbang/tests/test_bb_esteira.py:test_secao_nova_com_rascunho",
+        ".bigbang/tests/test_bb_esteira.py:test_idempotente_e_arquivo_novo",
+        ".bigbang/tests/test_bb_esteira.py:test_so_manutencao",
+        ".bigbang/tests/test_bb_esteira.py:test_artefato",
+        ".bigbang/tests/test_bb_esteira.py:test_zonas_sensiveis",
+        ".bigbang/tests/test_bb_esteira.py:test_retirada_do_decorador_da_propria_tarefa",
+        ".bigbang/tests/test_bb_esteira.py:test_test_failing_vira_test",
+        ".bigbang/tests/test_bb_esteira.py:test_qualquer_outra_mudanca_e_sensivel",
+        ".bigbang/tests/test_bb_esteira.py:test_matriz_com_runner_fixo",
+        ".bigbang/tests/test_bb_esteira.py:test_nomes_da_candidata_e_de_producao",
+        ".bigbang/tests/test_bb_esteira.py:test_android",
+        ".bigbang/tests/test_bb_esteira.py:test_osv_so_alta_e_critica",
+        ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls"
+      ],
+      "hashes": {
+        ".bigbang/bb/pipeline_cli.py": "b71ed18e8fe639d81a46bec98d6d6d1326526cf245e8c171b1c2b3a456a804fd"
+      },
+      "descricao": "Expor regras verificáveis a scripts sem duplicar lógica de negócio entre Bash e Python."
+    },
+    {
+      "id": "BB-F-021",
+      "requisitos": [
+        "RF-BB-021"
+      ],
+      "pagina": "Funcionalidade-render",
+      "fontes": [
+        ".bigbang/bb/render.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_bb_gerar.py:test_antes_da_fundacao",
+        ".bigbang/tests/test_bb_gerar.py:test_esteira_exige_fundacao",
+        ".bigbang/tests/test_bb_gerar.py:test_skills_em_duas_copias_iguais_com_aviso_depois_do_cabecalho",
+        ".bigbang/tests/test_bb_gerar.py:test_composicao_deploy_vps_docker",
+        ".bigbang/tests/test_bb_gerar.py:test_composicao_compilado_sem_alvo",
+        ".bigbang/tests/test_bb_gerar.py:test_troca_de_alvo_remove_e_cria",
+        ".bigbang/tests/test_bb_gerar.py:test_segunda_geracao_nao_muda_nada",
+        ".bigbang/tests/test_bb_gerar.py:test_remove_ci_do_framework_ao_instalar_a_esteira",
+        ".bigbang/tests/test_bb_gerar.py:test_nao_toca_arquivos_do_projeto",
+        ".bigbang/tests/test_bb_gerar.py:test_bloco_inserido_em_agents_md_existente",
+        ".bigbang/tests/test_bb_gerar.py:test_dois_blocos_no_agents_md",
+        ".bigbang/tests/test_bb_gerar.py:test_bloco_do_stack_md",
+        ".bigbang/tests/test_bb_gerar.py:test_camada_sempre_nao_escreve_em_github",
+        ".bigbang/tests/test_bb_gerar.py:test_skill_sem_prefixo_bb",
+        ".bigbang/tests/test_bb_gerar.py:test_simular_nao_grava",
+        ".bigbang/tests/test_bb_gerar.py:test_marcadores",
+        ".bigbang/tests/test_bb_gerar.py:test_expressao_do_github_actions_nao_e_marcador",
+        ".bigbang/tests/test_bb_gerar.py:test_marcador_sem_valor",
+        ".bigbang/tests/test_bb_gerar.py:test_aviso_por_tipo",
+        ".bigbang/tests/test_bb_gerar.py:test_reconhece_aviso",
+        ".bigbang/tests/test_bb_gerar.py:test_template_em_dia"
+      ],
+      "hashes": {
+        ".bigbang/bb/render.py": "ac68665b4fe1d3faee51d25088fbb41dc40b730c5efd40da447b86ebec11c956"
+      },
+      "descricao": "Substituir marcadores conhecidos e inserir avisos de geração no formato do arquivo de destino."
+    },
+    {
+      "id": "BB-F-022",
+      "requisitos": [
+        "RF-BB-022"
+      ],
+      "pagina": "Funcionalidade-stack_guard",
+      "fontes": [
+        ".bigbang/bb/stack_guard.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_rastreio_guarda.py:test_tudo_rastreado",
+        ".bigbang/tests/test_rastreio_guarda.py:test_recusa_cada_falha",
+        ".bigbang/tests/test_rastreio_guarda.py:test_projeto_sem_regras_nem_testes",
+        ".bigbang/tests/test_rastreio_guarda.py:test_citacao_nao_confunde_palavras",
+        ".bigbang/tests/test_rastreio_guarda.py:test_dependencias_aprovadas_em_cada_ecossistema",
+        ".bigbang/tests/test_rastreio_guarda.py:test_recusa_dependencia_nova",
+        ".bigbang/tests/test_rastreio_guarda.py:test_ecossistema_nao_suportado_falha_explicitamente",
+        ".bigbang/tests/test_rastreio_guarda.py:test_antes_da_stack",
+        ".bigbang/tests/test_rastreio_guarda.py:test_nomes_python_normalizados",
+        ".bigbang/tests/test_rastreio_guarda.py:test_catalogo_bundle_e_bom_aprovados",
+        ".bigbang/tests/test_rastreio_guarda.py:test_dependencia_do_catalogo_fora_da_tabela",
+        ".bigbang/tests/test_rastreio_guarda.py:test_linha_que_a_guarda_nao_entende_falha_explicitamente",
+        ".bigbang/tests/test_rastreio_guarda.py:test_catalogo_sem_arquivo_falha_explicitamente",
+        ".bigbang/tests/test_rastreio_guarda.py:test_groovy_com_aspas_simples"
+      ],
+      "hashes": {
+        ".bigbang/bb/stack_guard.py": "da4952a77d272fd878057e5484b42fa7ea241b57efec0766b0fc21f5de67a89b"
+      },
+      "descricao": "Impedir dependências diretas de execução que não estejam na tabela aprovada da stack."
+    },
+    {
+      "id": "BB-F-023",
+      "requisitos": [
+        "RF-BB-023"
+      ],
+      "pagina": "Funcionalidade-status",
+      "fontes": [
+        ".bigbang/bb/status.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_status_posses.py:test_status_le_so_e_marcacao_e_idempotente",
+        ".bigbang/tests/test_status_posses.py:test_push_renova_mesmo_quando_commit_foi_escrito_antes",
+        ".bigbang/tests/test_status_posses.py:test_push_concorrente_com_liberacao_nao_reabre_sessao",
+        ".bigbang/tests/test_status_posses.py:test_push_entre_conferencia_e_marcacao_nao_deixa_label_parada",
+        ".bigbang/tests/test_status_posses.py:test_push_durante_retomada_preserva_a_sessao_renovada",
+        ".bigbang/tests/test_status_posses.py:test_forcar_exige_ordem_e_posse_vencida",
+        ".bigbang/tests/test_status_posses.py:test_sem_nome_valido_nao_deve_revogar_a_posse",
+        ".bigbang/tests/test_status_posses.py:test_bb_status_e_somente_leitura",
+        ".bigbang/tests/test_status_posses.py:test_vencida_producao_antiga_e_ativa",
+        ".bigbang/tests/test_status_posses.py:test_flag_invalida_nao_desaparece_do_relatorio",
+        ".bigbang/tests/test_status_posses.py:test_merge_libera_label_e_preserva_comentario"
+      ],
+      "hashes": {
+        ".bigbang/bb/status.py": "08a8afc5219e27dab5427ae1a2d551f98251760739a9ff639e35292a0681e34c"
+      },
+      "descricao": "Mostrar posses e flags de leitura e sinalizar tarefas abandonadas somente pela automação específica."
+    },
+    {
+      "id": "BB-F-024",
+      "requisitos": [
+        "RF-BB-024"
+      ],
+      "pagina": "Funcionalidade-test_runs",
+      "fontes": [
+        ".bigbang/bb/test_runs.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_flash.py:test_old_projects_default_to_standard",
+        ".bigbang/tests/test_flash.py:test_invalid_mode_is_refused",
+        ".bigbang/tests/test_flash.py:test_init_can_select_flash",
+        ".bigbang/tests/test_flash.py:test_generated_policy_keeps_test_first",
+        ".bigbang/tests/test_flash.py:test_ordinary_change_selects_affected_tests",
+        ".bigbang/tests/test_flash.py:test_standard_always_runs_complete_suite",
+        ".bigbang/tests/test_flash.py:test_structural_changes_run_complete_suite",
+        ".bigbang/tests/test_flash.py:test_nested_structural_paths_also_require_complete_suite",
+        ".bigbang/tests/test_flash.py:test_production_and_minor_major_versions_run_complete_suite",
+        ".bigbang/tests/test_flash.py:test_patch_selects_affected_tests",
+        ".bigbang/tests/test_flash.py:test_unknown_base_or_missing_selector_never_silently_passes",
+        ".bigbang/tests/test_flash.py:test_uncertain_release_baseline_runs_full",
+        ".bigbang/tests/test_flash.py:test_custom_structural_paths_extend_defaults",
+        ".bigbang/tests/test_flash.py:test_flash_uses_ai_review_but_respects_explicit_human_review",
+        ".bigbang/tests/test_flash.py:test_manifest_includes_deleted_renamed_and_untracked_paths_as_data",
+        ".bigbang/tests/test_flash.py:test_selector_failure_does_not_pass",
+        ".bigbang/tests/test_flash.py:test_option_injection_cannot_be_a_git_base"
+      ],
+      "hashes": {
+        ".bigbang/bb/test_runs.py": "5cc1a11f4a29e3136189b17bb8ced473f5bb61ab12a214ce23bcb26fa4b97d4b"
+      },
+      "descricao": "Concentrar execução depois do código e selecionar testes afetados com fallback conservador, mantendo autoria antes da implementação."
+    },
+    {
+      "id": "BB-F-025",
+      "requisitos": [
+        "RF-BB-025"
+      ],
+      "pagina": "Funcionalidade-traceability",
+      "fontes": [
+        ".bigbang/bb/traceability.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_rastreio_guarda.py:test_tudo_rastreado",
+        ".bigbang/tests/test_rastreio_guarda.py:test_recusa_cada_falha",
+        ".bigbang/tests/test_rastreio_guarda.py:test_projeto_sem_regras_nem_testes",
+        ".bigbang/tests/test_rastreio_guarda.py:test_citacao_nao_confunde_palavras",
+        ".bigbang/tests/test_rastreio_guarda.py:test_dependencias_aprovadas_em_cada_ecossistema",
+        ".bigbang/tests/test_rastreio_guarda.py:test_recusa_dependencia_nova",
+        ".bigbang/tests/test_rastreio_guarda.py:test_ecossistema_nao_suportado_falha_explicitamente",
+        ".bigbang/tests/test_rastreio_guarda.py:test_antes_da_stack",
+        ".bigbang/tests/test_rastreio_guarda.py:test_nomes_python_normalizados",
+        ".bigbang/tests/test_rastreio_guarda.py:test_catalogo_bundle_e_bom_aprovados",
+        ".bigbang/tests/test_rastreio_guarda.py:test_dependencia_do_catalogo_fora_da_tabela",
+        ".bigbang/tests/test_rastreio_guarda.py:test_linha_que_a_guarda_nao_entende_falha_explicitamente",
+        ".bigbang/tests/test_rastreio_guarda.py:test_catalogo_sem_arquivo_falha_explicitamente",
+        ".bigbang/tests/test_rastreio_guarda.py:test_groovy_com_aspas_simples"
+      ],
+      "hashes": {
+        ".bigbang/bb/traceability.py": "0e719f202ef7a1f30ceff399638a823220fa7630ed711a745d3bf3867ba69566"
+      },
+      "descricao": "Relacionar RNs vigentes aos testes de aceite sem perder a regra durante a migração dos arquivos locais."
+    },
+    {
+      "id": "BB-F-026",
+      "requisitos": [
+        "RF-BB-026"
+      ],
+      "pagina": "Funcionalidade-update",
+      "fontes": [
+        ".bigbang/bb/update.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_atualizar.py:test_atualiza_sem_tocar_a_camada_do_projeto",
+        ".bigbang/tests/test_atualizar.py:test_hash_errado_recusa_sem_mexer",
+        ".bigbang/tests/test_atualizar.py:test_flash_updates_with_independent_ai_review",
+        ".bigbang/tests/test_atualizar.py:test_atestacao_que_nao_confere_recusa",
+        ".bigbang/tests/test_atualizar.py:test_passo_manual_exige_confirmacao_do_dono",
+        ".bigbang/tests/test_atualizar.py:test_simular_nao_grava",
+        ".bigbang/tests/test_atualizar.py:test_mesma_versao_nao_faz_nada",
+        ".bigbang/tests/test_atualizar.py:test_arvore_suja_recusa"
+      ],
+      "hashes": {
+        ".bigbang/bb/update.py": "568608c3a7d450ce21ccd99cd4b094f10e96c8a5c2aacd6a0ddbd9874b4cd0c9"
+      },
+      "descricao": "Instalar release do framework com SHA-256 e atestação de origem, preservando configurações e abrindo PR específico."
+    },
+    {
+      "id": "BB-F-027",
+      "requisitos": [
+        "RF-BB-027"
+      ],
+      "pagina": "Funcionalidade-verify",
+      "fontes": [
+        ".bigbang/bb/verify.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_bb_verificar.py:test_template_limpo_passa",
+        ".bigbang/tests/test_bb_verificar.py:test_editar_bloco_gerado_do_agents_md_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_editar_secao_do_projeto_no_agents_md_passa",
+        ".bigbang/tests/test_bb_verificar.py:test_editar_arquivo_gerado_da_esteira_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_apagar_ou_sobrar_gerado_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_editar_bloco_do_stack_md_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_stack_md_sem_tabela_de_dependencias_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_editar_framework_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_arquivo_a_mais_no_framework_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_readme_e_licenca_movidos_pelo_init_passam",
+        ".bigbang/tests/test_bb_verificar.py:test_crlf_do_windows_passa",
+        ".bigbang/tests/test_bb_verificar.py:test_bigbang_toml_invalido_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_workflow_fora_das_regras_reprova",
+        ".bigbang/tests/test_bb_verificar.py:test_codigos_de_saida_do_cli",
+        ".bigbang/tests/test_bb_verificar.py:test_aceita_workflow_certo",
+        ".bigbang/tests/test_bb_verificar.py:test_recusa_cada_erro",
+        ".bigbang/tests/test_bb_verificar.py:test_pull_request_target_sem_checkout_do_pr_passa"
+      ],
+      "hashes": {
+        ".bigbang/bb/verify.py": "9e21a8c8f4884025d3b78c9fe6f3125c814a1861923d79254b87c42cb756fa7e"
+      },
+      "descricao": "Detectar adulteração, geração fora de sincronia e workflows que violam as regras do framework."
+    },
+    {
+      "id": "BB-F-028",
+      "requisitos": [
+        "RF-BB-028"
+      ],
+      "pagina": "Funcionalidade-wiki_links",
+      "fontes": [
+        ".bigbang/bb/wiki_links.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_wiki.py:test_public_reads_pinned_wiki_without_legacy_file",
+        ".bigbang/tests/test_wiki.py:test_cli_proposal_review_and_publication_preserve_original_until_confirmed",
+        ".bigbang/tests/test_wiki.py:test_private_reads_existing_file_and_does_not_access_github",
+        ".bigbang/tests/test_wiki.py:test_public_repository_cannot_bypass_policy_with_private_config",
+        ".bigbang/tests/test_wiki.py:test_private_repository_visibility_keeps_current_policy",
+        ".bigbang/tests/test_wiki.py:test_complete_inventory_passes",
+        ".bigbang/tests/test_wiki.py:test_invented_code_commit_is_rejected",
+        ".bigbang/tests/test_wiki.py:test_absolute_links_to_own_wiki_are_checked",
+        ".bigbang/tests/test_wiki.py:test_unlisted_manual_at_root_is_rejected",
+        ".bigbang/tests/test_wiki.py:test_new_implemented_module_without_documentation_blocks_delivery",
+        ".bigbang/tests/test_wiki.py:test_requirement_must_exist_in_actual_documentation",
+        ".bigbang/tests/test_wiki.py:test_empty_functional_sections_do_not_prove_coverage",
+        ".bigbang/tests/test_wiki.py:test_published_head_must_match_exact_reviewed_commit",
+        ".bigbang/tests/test_wiki.py:test_public_stack_guard_uses_approved_table_from_wiki",
+        ".bigbang/tests/test_wiki.py:test_business_rules_survive_migration_without_changing_acceptance_tests",
+        ".bigbang/tests/test_wiki.py:test_changed_behavior_without_doc_refresh_blocks_delivery",
+        ".bigbang/tests/test_wiki.py:test_missing_test_symbol_or_functional_flow_blocks",
+        ".bigbang/tests/test_wiki.py:test_broken_image_wikilink_and_anchor_are_detected",
+        ".bigbang/tests/test_wiki.py:test_local_system_docs_block_but_functional_contracts_remain",
+        ".bigbang/tests/test_wiki.py:test_public_missing_manifest_fails_clearly",
+        ".bigbang/tests/test_wiki.py:test_traversal_manifest_cannot_read_outside_wiki",
+        ".bigbang/tests/test_wiki.py:test_uninitialized_wiki_does_not_modify_local_documents",
+        ".bigbang/tests/test_wiki.py:test_publish_fast_forwards_and_rerun_is_idempotent",
+        ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected"
+      ],
+      "hashes": {
+        ".bigbang/bb/wiki_links.py": "52bc6d0aacb56c2d9e2b6fdd56d5fcdd14cf267968fa1be97d08af3724e56637"
+      },
+      "descricao": "Garantir Home, navegação, páginas, imagens e âncoras internas válidas antes de concluir documentação."
+    },
+    {
+      "id": "BB-F-029",
+      "requisitos": [
+        "RF-BB-029"
+      ],
+      "pagina": "Funcionalidade-workflow_rules",
+      "fontes": [
+        ".bigbang/bb/workflow_rules.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_workflows.py:test_existe_a_ci_do_framework",
+        ".bigbang/tests/test_workflows.py:test_nome_com_prefixo_bb",
+        ".bigbang/tests/test_workflows.py:test_actions_fixadas_por_sha_com_versao_em_comentario",
+        ".bigbang/tests/test_workflows.py:test_runner_em_versao_fixa",
+        ".bigbang/tests/test_workflows.py:test_permissoes_minimas_no_topo",
+        ".bigbang/tests/test_workflows.py:test_regras_do_bb_verificar",
+        ".bigbang/tests/test_workflows.py:test_sem_pull_request_target",
+        ".bigbang/tests/test_workflows.py:test_concorrencia_sem_cancelar",
+        ".bigbang/tests/test_workflows.py:test_jobs_do_framework_so_rodam_no_repositorio_do_big_bang",
+        ".bigbang/tests/test_workflows.py:test_kanban_nao_descarta_eventos_diferentes",
+        ".bigbang/tests/test_workflows.py:test_regras_julga_com_a_ponta_atual_do_destino",
+        ".bigbang/tests/test_workflows.py:test_recusa_tag_e_aceita_sha",
+        ".bigbang/tests/test_workflows.py:test_comentario_de_versao",
+        ".bigbang/tests/test_workflows.py:test_separa_jobs",
+        ".bigbang/tests/test_workflows.py:test_nenhum_grep_q_no_fim_de_pipeline"
+      ],
+      "hashes": {
+        ".bigbang/bb/workflow_rules.py": "e99af6a4c03d01956e92983db3b2ae1948e72ee3bc11aee5636c5fd36fb9c4b1"
+      },
+      "descricao": "Verificar permissões mínimas, versões imutáveis e restrições contra execução insegura em workflows."
+    },
+    {
+      "id": "BB-F-030",
+      "requisitos": [
+        "RF-BB-030"
+      ],
+      "pagina": "Funcionalidade-workspaces",
+      "fontes": [
+        ".bigbang/bb/workspaces.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_status_posses.py:test_status_le_so_e_marcacao_e_idempotente",
+        ".bigbang/tests/test_status_posses.py:test_push_renova_mesmo_quando_commit_foi_escrito_antes",
+        ".bigbang/tests/test_status_posses.py:test_push_concorrente_com_liberacao_nao_reabre_sessao",
+        ".bigbang/tests/test_status_posses.py:test_push_entre_conferencia_e_marcacao_nao_deixa_label_parada",
+        ".bigbang/tests/test_status_posses.py:test_push_durante_retomada_preserva_a_sessao_renovada",
+        ".bigbang/tests/test_status_posses.py:test_forcar_exige_ordem_e_posse_vencida",
+        ".bigbang/tests/test_status_posses.py:test_sem_nome_valido_nao_deve_revogar_a_posse",
+        ".bigbang/tests/test_status_posses.py:test_bb_status_e_somente_leitura",
+        ".bigbang/tests/test_status_posses.py:test_vencida_producao_antiga_e_ativa",
+        ".bigbang/tests/test_status_posses.py:test_flag_invalida_nao_desaparece_do_relatorio",
+        ".bigbang/tests/test_status_posses.py:test_merge_libera_label_e_preserva_comentario"
+      ],
+      "hashes": {
+        ".bigbang/bb/workspaces.py": "22f2c10bd6c9a765e8f10a88965fd214220052f178fb413867a00baa2a88f3f7"
+      },
+      "descricao": "Criar worktree próprio somente depois de confirmar posse da tarefa e guardar recibos em metadados Git."
+    },
+    {
+      "id": "BB-F-031",
+      "requisitos": [
+        "RF-BB-031"
+      ],
+      "pagina": "Funcionalidade-fundacao-github",
+      "fontes": [
+        ".bigbang/scripts/configurar-repositorio.sh",
+        ".bigbang/scripts/criar-labels.sh",
+        ".bigbang/scripts/criar-paineis.sh",
+        ".bigbang/scripts/colunas.sh"
+      ],
+      "testes": [
+        ".bigbang/tests/test_configurar_repositorio.py:test_simular_nao_muda_nada",
+        ".bigbang/tests/test_configurar_repositorio.py:test_aplica_protecoes",
+        ".bigbang/tests/test_configurar_repositorio.py:test_checks_so_depois_da_esteira",
+        ".bigbang/tests/test_configurar_repositorio.py:test_scripts_de_montagem_recusam_repositorio_sem_dono",
+        ".bigbang/tests/test_configurar_repositorio.py:test_lista_so_os_segredos_que_faltam",
+        ".bigbang/tests/test_configurar_repositorio.py:test_compilado_pede_os_segredos_de_assinatura",
+        ".bigbang/tests/test_configurar_repositorio.py:test_avisa_quando_o_plano_nao_aplica_a_aprovacao"
+      ],
+      "hashes": {
+        ".bigbang/scripts/configurar-repositorio.sh": "bc6f5ecc530337d08b6129d156c6937667f78c72b110435477b20a75d5978d59",
+        ".bigbang/scripts/criar-labels.sh": "475cf085e8510fb75d764b39b1ac4b98c37bd525e6a83d1aca0f8d55a8d4bfc0",
+        ".bigbang/scripts/criar-paineis.sh": "db07a24175de1d4fc6f3f75c4c0935ae26c01d80cfbc00e240630da94e58c065",
+        ".bigbang/scripts/colunas.sh": "ce4444ad5994098aebd1d6d60b07141a2d00b114d6a5c73222790a9a9ebfb6be"
+      },
+      "descricao": "Instalar labels, proteções, ambientes, variáveis e painéis coerentes com a configuração do projeto."
+    },
+    {
+      "id": "BB-F-032",
+      "requisitos": [
+        "RF-BB-032"
+      ],
+      "pagina": "Funcionalidade-kanban",
+      "fontes": [
+        ".bigbang/esteira/nucleo/scripts/kanban.sh",
+        ".bigbang/esteira/nucleo/scripts/projeto.sh",
+        ".bigbang/esteira/nucleo/scripts/ver-paineis.sh"
+      ],
+      "testes": [
+        ".bigbang/tests/test_kanban_mesclar.py:test_epico_novo_vai_para_brainstorm_com_labels_do_formulario",
+        ".bigbang/tests/test_kanban_mesclar.py:test_edicao_so_muda_o_que_mudou",
+        ".bigbang/tests/test_kanban_mesclar.py:test_edicao_sem_mudanca_no_formulario_nao_falha",
+        ".bigbang/tests/test_kanban_mesclar.py:test_decisoes_do_dono_movem_o_epico",
+        ".bigbang/tests/test_kanban_mesclar.py:test_sem_prototipo_vai_direto_para_proxima_sprint",
+        ".bigbang/tests/test_kanban_mesclar.py:test_bug_com_severidade",
+        ".bigbang/tests/test_kanban_mesclar.py:test_ciclo_de_uma_tarefa",
+        ".bigbang/tests/test_kanban_mesclar.py:test_ci_verde_com_revisao_humana_vai_para_validar_pr",
+        ".bigbang/tests/test_kanban_mesclar.py:test_ci_verde_com_revisao_ia_fica",
+        ".bigbang/tests/test_kanban_mesclar.py:test_workflow_fornece_variaveis_publicas_dos_paineis",
+        ".bigbang/tests/test_kanban_mesclar.py:test_merge_de_testes_cria_proxima_tarefa_com_env_real_do_workflow",
+        ".bigbang/tests/test_kanban_mesclar.py:test_merge_final_integra_com_env_real_do_workflow",
+        ".bigbang/tests/test_kanban_mesclar.py:test_aprovado_e_verde_mescla",
+        ".bigbang/tests/test_kanban_mesclar.py:test_espera_sem_aprovacao_ou_checks",
+        ".bigbang/tests/test_kanban_mesclar.py:test_so_a_execucao_mais_recente_do_check_conta",
+        ".bigbang/tests/test_kanban_mesclar.py:test_nunca_na_main",
+        ".bigbang/tests/test_kanban_mesclar.py:test_develop_so_recebe_fundacao_framework_e_actions",
+        ".bigbang/tests/test_kanban_mesclar.py:test_teste_com_revisao_humana_exige_testes_aprovados",
+        ".bigbang/tests/test_kanban_mesclar.py:test_ultimo_merge_dispara_integrar_release",
+        ".bigbang/tests/test_kanban_mesclar.py:test_simular"
+      ],
+      "hashes": {
+        ".bigbang/esteira/nucleo/scripts/kanban.sh": "4125814d25815ca700f53a453ca3d608bc60b7a5abed85c242869c39db56b84f",
+        ".bigbang/esteira/nucleo/scripts/projeto.sh": "c8bcfa558ef80276f092f311cc393f1d25174aee6c7fc869092251f3e30d3ca6",
+        ".bigbang/esteira/nucleo/scripts/ver-paineis.sh": "fe01663be2c3e695f52781b196c5e75e7d84558ea5e965785d26dcb532fe8ff1"
+      },
+      "descricao": "Manter os cards coerentes com issues, labels, branches, PRs e CI sem transformar arrastar coluna em decisão do dono."
+    },
+    {
+      "id": "BB-F-033",
+      "requisitos": [
+        "RF-BB-033"
+      ],
+      "pagina": "Funcionalidade-sprint",
+      "fontes": [
+        ".bigbang/esteira/nucleo/scripts/iniciar-sprint.sh",
+        ".bigbang/esteira/nucleo/scripts/criar-branches.sh"
+      ],
+      "testes": [
+        ".bigbang/tests/test_sprint_branches.py:test_monta_o_epico",
+        ".bigbang/tests/test_sprint_branches.py:test_rodar_de_novo_nao_duplica",
+        ".bigbang/tests/test_sprint_branches.py:test_proxima_sprint_numera",
+        ".bigbang/tests/test_sprint_branches.py:test_recusa_epico_fora_da_definition_of_ready",
+        ".bigbang/tests/test_sprint_branches.py:test_sem_epicos",
+        ".bigbang/tests/test_sprint_branches.py:test_simular_nao_cria",
+        ".bigbang/tests/test_sprint_branches.py:test_ordem_teste_tarefas_documentacao"
+      ],
+      "hashes": {
+        ".bigbang/esteira/nucleo/scripts/iniciar-sprint.sh": "9f417f4f0dd26dff8dcdabd69638a36d9e1796a176a9063dac4c18b8c37ee196",
+        ".bigbang/esteira/nucleo/scripts/criar-branches.sh": "100f18922ac6ed6ca6f459e82a8076c5b55f8089c9b9f078a5ab39f1e656564c"
+      },
+      "descricao": "Abrir sprint e tarefas dependentes somente quando o épico satisfaz a Definition of Ready."
+    },
+    {
+      "id": "BB-F-034",
+      "requisitos": [
+        "RF-BB-034"
+      ],
+      "pagina": "Funcionalidade-revisao-pr",
+      "fontes": [
+        ".bigbang/esteira/nucleo/scripts/regras-pr.sh",
+        ".bigbang/esteira/nucleo/scripts/regressao.sh",
+        ".bigbang/esteira/nucleo/scripts/mesclar-pr.sh",
+        ".bigbang/esteira/nucleo/scripts/git-mesclar.sh"
+      ],
+      "testes": [
+        ".bigbang/tests/test_regras_pr.py:test_pr_com_mais_de_300_arquivos_pela_api",
+        ".bigbang/tests/test_regras_pr.py:test_aceite_sem_patch_falha_fechado",
+        ".bigbang/tests/test_regras_pr.py:test_aceite_pela_api_aplica_a_trava",
+        ".bigbang/tests/test_regras_pr.py:test_pr_certo",
+        ".bigbang/tests/test_regras_pr.py:test_recusa_nome_destino_titulo_e_refs",
+        ".bigbang/tests/test_regras_pr.py:test_zona_sensivel_troca_para_revisao_humana",
+        ".bigbang/tests/test_regras_pr.py:test_dono_revisao_ia_prevalece",
+        ".bigbang/tests/test_regras_pr.py:test_pr_de_teste_pode_tocar_tests_aceite",
+        ".bigbang/tests/test_regras_pr.py:test_tarefa_que_so_libera_as_proprias_marcas_continua_com_a_ia",
+        ".bigbang/tests/test_regras_pr.py:test_sem_release_sincronizado",
+        ".bigbang/tests/test_regras_pr.py:test_epico_sem_release_com_artefato_reprova",
+        ".bigbang/tests/test_regras_pr.py:test_trava_reprova_e_teste_alterado_aprovado_libera",
+        ".bigbang/tests/test_regras_pr.py:test_pendente_de_tarefa_ja_mesclada_reprova",
+        ".bigbang/tests/test_regras_pr.py:test_trava_de_aceite_nao_se_aplica",
+        ".bigbang/tests/test_regras_pr.py:test_rastreabilidade_com_o_padrao_que_vem_na_release",
+        ".bigbang/tests/test_regras_pr.py:test_dependencia_nova_sem_stack_reprova_e_com_a_linha_passa",
+        ".bigbang/tests/test_regras_pr.py:test_aceita_sem_artefato",
+        ".bigbang/tests/test_regras_pr.py:test_recusa_artefato_nao_publicado",
+        ".bigbang/tests/test_regras_pr.py:test_roda_pula_e_falha",
+        ".bigbang/tests/test_regras_pr.py:test_comandos_da_stack_so_pelo_comando_sh"
+      ],
+      "hashes": {
+        ".bigbang/esteira/nucleo/scripts/regras-pr.sh": "44acfeab87864ff107b15b128d60976268e202628a1b1f4cae889de94b9b1180",
+        ".bigbang/esteira/nucleo/scripts/regressao.sh": "1d07b475a8ae22846983e1905bff8524b56361813a00ec10b125631ecf3c3d33",
+        ".bigbang/esteira/nucleo/scripts/mesclar-pr.sh": "35d1246e19b070608fe8517a61d0f06ab849edb294e9d4910e94cd4c8705cf9c",
+        ".bigbang/esteira/nucleo/scripts/git-mesclar.sh": "c728b3d4ad28e70486f0c2a8872ef8958eb632a432053c97a31fe5ff64fa238e"
+      },
+      "descricao": "Aceitar PRs somente no modelo de branches com revisão correspondente e testes de regressão anteriores à correção."
+    },
+    {
+      "id": "BB-F-035",
+      "requisitos": [
+        "RF-BB-035"
+      ],
+      "pagina": "Funcionalidade-testes-actions",
+      "fontes": [
+        ".bigbang/esteira/nucleo/scripts/comando.sh",
+        ".bigbang/esteira/nucleo/scripts/testes.sh",
+        ".bigbang/esteira/nucleo/scripts/testes-candidata.sh",
+        ".bigbang/esteira/nucleo/scripts/testes-producao.sh"
+      ],
+      "testes": [
+        ".bigbang/tests/test_flash_scripts.py:test_green_same_sha_reuses_tests",
+        ".bigbang/tests/test_flash_scripts.py:test_failed_same_sha_is_refused",
+        ".bigbang/tests/test_flash_scripts.py:test_success_another_sha_is_not_reused",
+        ".bigbang/tests/test_flash_scripts.py:test_workflows_force_complete_suite_before_production",
+        ".bigbang/tests/test_flash_scripts.py:test_completed_release_can_resume_without_deleted_release_branch"
+      ],
+      "hashes": {
+        ".bigbang/esteira/nucleo/scripts/comando.sh": "793695df1d80a4cf27d4f725ad711c260618088b8b1d7e887a5e2e2507ce281c",
+        ".bigbang/esteira/nucleo/scripts/testes.sh": "b4433371062a53965bd55a7a705dc5ee9f8a628bc52dbf9f5141a09e6a7f4d45",
+        ".bigbang/esteira/nucleo/scripts/testes-candidata.sh": "84428668e22f7b1375c55e0e5ecbd0730602327133d45d781c7567b1e8eb7eba",
+        ".bigbang/esteira/nucleo/scripts/testes-producao.sh": "ad3f1d39a848ee5d9c1e51e8574d907ea07a5e7e14c765f94e2ca44c2ea42ea6"
+      },
+      "descricao": "Executar comandos da stack e testes conforme a fase, preservando o comportamento padrão e a evidência exata do modo Flash."
+    },
+    {
+      "id": "BB-F-036",
+      "requisitos": [
+        "RF-BB-036"
+      ],
+      "pagina": "Funcionalidade-seguranca-actions",
+      "fontes": [
+        ".bigbang/esteira/nucleo/scripts/seguranca.sh",
+        ".bigbang/esteira/perfis/deploy/scripts/.shellcheckrc",
+        ".bigbang/esteira/perfis/compilado/scripts/.shellcheckrc",
+        ".bigbang/esteira/nucleo/scripts/.shellcheckrc",
+        ".bigbang/scripts/.shellcheckrc"
+      ],
+      "testes": [
+        ".bigbang/tests/test_bb_esteira.py:test_respostas_viram_labels",
+        ".bigbang/tests/test_bb_esteira.py:test_padroes_da_especificacao",
+        ".bigbang/tests/test_bb_esteira.py:test_edicao_so_aplica_o_que_mudou",
+        ".bigbang/tests/test_bb_esteira.py:test_dependencia_nao_cria_label_por_numero",
+        ".bigbang/tests/test_bb_esteira.py:test_severidade",
+        ".bigbang/tests/test_bb_esteira.py:test_epico_pronto",
+        ".bigbang/tests/test_bb_esteira.py:test_recusa_cada_falta",
+        ".bigbang/tests/test_bb_esteira.py:test_sensivel_com_stride_passa",
+        ".bigbang/tests/test_bb_esteira.py:test_tarefas_e_dependencias",
+        ".bigbang/tests/test_bb_esteira.py:test_slug",
+        ".bigbang/tests/test_bb_esteira.py:test_modelo_de_branches",
+        ".bigbang/tests/test_bb_esteira.py:test_issue_da_branch",
+        ".bigbang/tests/test_bb_esteira.py:test_titulo_conventional",
+        ".bigbang/tests/test_bb_esteira.py:test_classificacao",
+        ".bigbang/tests/test_bb_esteira.py:test_versao_informada_confere",
+        ".bigbang/tests/test_bb_esteira.py:test_arquivo_de_versao",
+        ".bigbang/tests/test_bb_esteira.py:test_secao_nova_com_rascunho",
+        ".bigbang/tests/test_bb_esteira.py:test_idempotente_e_arquivo_novo",
+        ".bigbang/tests/test_bb_esteira.py:test_so_manutencao",
+        ".bigbang/tests/test_bb_esteira.py:test_artefato",
+        ".bigbang/tests/test_bb_esteira.py:test_zonas_sensiveis",
+        ".bigbang/tests/test_bb_esteira.py:test_retirada_do_decorador_da_propria_tarefa",
+        ".bigbang/tests/test_bb_esteira.py:test_test_failing_vira_test",
+        ".bigbang/tests/test_bb_esteira.py:test_qualquer_outra_mudanca_e_sensivel",
+        ".bigbang/tests/test_bb_esteira.py:test_matriz_com_runner_fixo",
+        ".bigbang/tests/test_bb_esteira.py:test_nomes_da_candidata_e_de_producao",
+        ".bigbang/tests/test_bb_esteira.py:test_android",
+        ".bigbang/tests/test_bb_esteira.py:test_osv_so_alta_e_critica",
+        ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls"
+      ],
+      "hashes": {
+        ".bigbang/esteira/nucleo/scripts/seguranca.sh": "5e0bcd245148733704fda1a9ceb58d62085af21cfceaf3a7a9f21e34da32247d",
+        ".bigbang/esteira/perfis/deploy/scripts/.shellcheckrc": "6397ef01cc9b15e9175598e22fe5f6fee2c787df686b07b7bb6e8459d8382554",
+        ".bigbang/esteira/perfis/compilado/scripts/.shellcheckrc": "6397ef01cc9b15e9175598e22fe5f6fee2c787df686b07b7bb6e8459d8382554",
+        ".bigbang/esteira/nucleo/scripts/.shellcheckrc": "35d15e247a027d93b298e8dfa76a80a5a5127acdd91cf6a0c2bbc01c7d7d80eb",
+        ".bigbang/scripts/.shellcheckrc": "35d15e247a027d93b298e8dfa76a80a5a5127acdd91cf6a0c2bbc01c7d7d80eb"
+      },
+      "descricao": "Manter scanners de segredos, código, dependências e banco ativos e bloquear vulnerabilidade alta ou crítica."
+    },
+    {
+      "id": "BB-F-037",
+      "requisitos": [
+        "RF-BB-037"
+      ],
+      "pagina": "Funcionalidade-integracao",
+      "fontes": [
+        ".bigbang/esteira/nucleo/scripts/integrar-release.sh",
+        ".bigbang/esteira/nucleo/scripts/candidata-preparar.sh"
+      ],
+      "testes": [
+        ".bigbang/tests/test_integrar_publicar.py:test_epico_vira_release_a_partir_da_main",
+        ".bigbang/tests/test_integrar_publicar.py:test_primeira_release_sem_nenhuma_tag",
+        ".bigbang/tests/test_integrar_publicar.py:test_versao_informada_diferente_exige_confirmacao",
+        ".bigbang/tests/test_integrar_publicar.py:test_epico_incompleto",
+        ".bigbang/tests/test_integrar_publicar.py:test_dependencia_nao_publicada",
+        ".bigbang/tests/test_integrar_publicar.py:test_varios_epicos_numa_release_mesmo_dependentes",
+        ".bigbang/tests/test_integrar_publicar.py:test_sprint_pega_os_epicos_em_andamento",
+        ".bigbang/tests/test_integrar_publicar.py:test_sem_release_nao_entra_numa_release_de_varios",
+        ".bigbang/tests/test_integrar_publicar.py:test_epico_sem_release_vai_para_a_develop",
+        ".bigbang/tests/test_integrar_publicar.py:test_sem_release_que_muda_o_artefato_e_recusado",
+        ".bigbang/tests/test_integrar_publicar.py:test_conflito_marca_o_epico",
+        ".bigbang/tests/test_integrar_publicar.py:test_bug_sobe_o_ultimo_numero",
+        ".bigbang/tests/test_integrar_publicar.py:test_varios_bugs_numa_release",
+        ".bigbang/tests/test_integrar_publicar.py:test_simular_nao_envia",
+        ".bigbang/tests/test_integrar_publicar.py:test_devolve_para_develop_e_epicos_e_marca_conflito",
+        ".bigbang/tests/test_integrar_publicar.py:test_branch_apagada_depois_do_ultimo_fetch_e_ignorada",
+        ".bigbang/tests/test_integrar_publicar.py:test_avanca_a_main_e_conclui_o_epico",
+        ".bigbang/tests/test_integrar_publicar.py:test_recusa_com_artefato_ou_ci_vermelha",
+        ".bigbang/tests/test_integrar_publicar.py:test_simular",
+        ".bigbang/tests/test_integrar_publicar.py:test_encerrar_sprint_mantem_os_cartoes",
+        ".bigbang/tests/test_integrar_publicar.py:test_encerrar_versao_exige_publicacao",
+        ".bigbang/tests/test_integrar_publicar.py:test_encerrar_versao_limpa_com_travas",
+        ".bigbang/tests/test_integrar_publicar.py:test_ver_paineis"
+      ],
+      "hashes": {
+        ".bigbang/esteira/nucleo/scripts/integrar-release.sh": "867dda576be8db7040820c27f5406abab733f6b18be115417ff39649f38f26b4",
+        ".bigbang/esteira/nucleo/scripts/candidata-preparar.sh": "25d3ede148eb6a8ae13033e4a4de30658a1a3dd139af6d1877032247dcd3abad"
+      },
+      "descricao": "Integrar épicos, bugs ou dependências em uma release coerente com SemVer e registrar changelog versionado."
+    },
+    {
+      "id": "BB-F-038",
+      "requisitos": [
+        "RF-BB-038"
+      ],
+      "pagina": "Funcionalidade-homologacao",
+      "fontes": [
+        ".bigbang/esteira/nucleo/scripts/homologar.sh",
+        ".bigbang/esteira/nucleo/scripts/tarefa-de-correcao.sh"
+      ],
+      "testes": [
+        ".bigbang/tests/test_candidata.py:test_preparar_numera_as_candidatas",
+        ".bigbang/tests/test_candidata.py:test_preparar_pula_ou_recusa",
+        ".bigbang/tests/test_candidata.py:test_build_renomeia_e_soma",
+        ".bigbang/tests/test_candidata.py:test_build_com_dois_arquivos_falha",
+        ".bigbang/tests/test_candidata.py:test_publicar_cria_pre_release",
+        ".bigbang/tests/test_candidata.py:test_epico_em_homologacao_e_pr_da_release"
+      ],
+      "hashes": {
+        ".bigbang/esteira/nucleo/scripts/homologar.sh": "d11d2889de1a6a606d6dcbe8171934771a570aa4e175dfac4df9e86f6e443d75",
+        ".bigbang/esteira/nucleo/scripts/tarefa-de-correcao.sh": "8fa275c18264a56e888c40daf01b4c1f1819496b1774e0578ce0ffca4c4d899b"
+      },
+      "descricao": "Apresentar candidata e critérios ao dono, registrar reprovação e criar uma tarefa de correção no mesmo épico."
+    },
+    {
+      "id": "BB-F-039",
+      "requisitos": [
+        "RF-BB-039"
+      ],
+      "pagina": "Funcionalidade-publicacao",
+      "fontes": [
+        ".bigbang/esteira/nucleo/scripts/publicar-producao.sh",
+        ".bigbang/esteira/nucleo/scripts/publicar-sem-release.sh",
+        ".bigbang/esteira/nucleo/scripts/devolver-main.sh",
+        ".bigbang/esteira/nucleo/scripts/link-aprovacao.sh"
+      ],
+      "testes": [
+        ".bigbang/tests/test_publicar_producao.py:test_publica_os_mesmos_bytes",
+        ".bigbang/tests/test_publicar_producao.py:test_mesmo_sha256_da_candidata",
+        ".bigbang/tests/test_publicar_producao.py:test_simular_nao_muda_nada",
+        ".bigbang/tests/test_publicar_producao.py:test_portao_recusa_cada_caso",
+        ".bigbang/tests/test_publicar_producao.py:test_release_mudou_depois_da_candidata",
+        ".bigbang/tests/test_publicar_producao.py:test_retomada_quando_ja_publicada",
+        ".bigbang/tests/test_publicar_producao.py:test_production_refuses_candidate_changed_after_complete_tests",
+        ".bigbang/tests/test_publicar_producao.py:test_cria_a_tarefa_no_epico_reprovado",
+        ".bigbang/tests/test_publicar_producao.py:test_motivo_longo_vira_titulo_cortado_em_palavra_inteira",
+        ".bigbang/tests/test_publicar_producao.py:test_recusa_epico_nao_reprovado"
+      ],
+      "hashes": {
+        ".bigbang/esteira/nucleo/scripts/publicar-producao.sh": "52c5daf462f36d4373a4fc1ba988ffc9f6f68eab15a624bb4dd0a7ef08f8c0a3",
+        ".bigbang/esteira/nucleo/scripts/publicar-sem-release.sh": "7d6fd3c11df4db708bf2f3c031a046f64838a3abef0659c0fcca4f5e17d2b74f",
+        ".bigbang/esteira/nucleo/scripts/devolver-main.sh": "4131c6fa6fabca68495e238a8d54775841c6782cba48b956af08cf7ddc54e625",
+        ".bigbang/esteira/nucleo/scripts/link-aprovacao.sh": "bf1303005e3cfed1139355d46e55c1d0c6d5436c045e5845df7a9a33acbbe880"
+      },
+      "descricao": "Publicar somente unidade homologada, aprovada e com documentação publicada; entregar configuração ou manutenção sem reconstruir artefato."
+    },
+    {
+      "id": "BB-F-040",
+      "requisitos": [
+        "RF-BB-040"
+      ],
+      "pagina": "Funcionalidade-encerramento",
+      "fontes": [
+        ".bigbang/esteira/nucleo/scripts/encerrar.sh",
+        ".bigbang/esteira/nucleo/scripts/faxina.sh",
+        ".bigbang/esteira/nucleo/scripts/faxina-framework.sh"
+      ],
+      "testes": [
+        ".bigbang/tests/test_faxina.py:test_apaga_o_que_terminou_e_avisa_o_resto",
+        ".bigbang/tests/test_faxina.py:test_simular_nao_apaga"
+      ],
+      "hashes": {
+        ".bigbang/esteira/nucleo/scripts/encerrar.sh": "3ea76dffe1eda650b65473f7d8e2d418f7ab2025115c041ae9ef1f8520759cf3",
+        ".bigbang/esteira/nucleo/scripts/faxina.sh": "3212c37599ead7c8b3af85a9dd9a0c848f23b4ad84ced871c0849c8a7da64239",
+        ".bigbang/esteira/nucleo/scripts/faxina-framework.sh": "1f9466f05387a3268ed06821457b0f20bc9a68a674bdaeba0e15d23ca6d5b3a8"
+      },
+      "descricao": "Encerrar sprints e releases sem abandonar branches e sem apagar trabalho ainda não integrado."
+    },
+    {
+      "id": "BB-F-041",
+      "requisitos": [
+        "RF-BB-041"
+      ],
+      "pagina": "Funcionalidade-compilados",
+      "fontes": [
+        ".bigbang/esteira/perfis/compilado/scripts/candidata-build.sh",
+        ".bigbang/esteira/perfis/compilado/scripts/candidata-publicar.sh",
+        ".bigbang/esteira/perfis/compilado/scripts/promover.sh"
+      ],
+      "testes": [
+        ".bigbang/tests/test_candidata.py:test_preparar_numera_as_candidatas",
+        ".bigbang/tests/test_candidata.py:test_preparar_pula_ou_recusa",
+        ".bigbang/tests/test_candidata.py:test_build_renomeia_e_soma",
+        ".bigbang/tests/test_candidata.py:test_build_com_dois_arquivos_falha",
+        ".bigbang/tests/test_candidata.py:test_publicar_cria_pre_release",
+        ".bigbang/tests/test_candidata.py:test_epico_em_homologacao_e_pr_da_release"
+      ],
+      "hashes": {
+        ".bigbang/esteira/perfis/compilado/scripts/candidata-build.sh": "2b51df20a4ec837e27cd9209fe4eb376e25d299dbbe12c5d6e23d43bbd5d637e",
+        ".bigbang/esteira/perfis/compilado/scripts/candidata-publicar.sh": "b65a3a840738f50806fe55dd9403d65c49245e4bd96bf2c9ae329ce445830195",
+        ".bigbang/esteira/perfis/compilado/scripts/promover.sh": "0423c4bb3c56cf247a8972d20cc6eb15ee15c903bac3ac6ecd6dbfdadf48a081"
+      },
+      "descricao": "Compilar cada sistema uma vez e promover os mesmos bytes após homologação."
+    },
+    {
+      "id": "BB-F-042",
+      "requisitos": [
+        "RF-BB-042"
+      ],
+      "pagina": "Funcionalidade-deploy-imagens",
+      "fontes": [
+        ".bigbang/esteira/perfis/deploy/scripts/candidata-imagem.sh",
+        ".bigbang/esteira/perfis/deploy/scripts/candidata-publicar.sh",
+        ".bigbang/esteira/perfis/deploy/scripts/candidata-sbom.sh",
+        ".bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh",
+        ".bigbang/esteira/perfis/deploy/scripts/promover.sh",
+        ".bigbang/esteira/perfis/deploy/scripts/staging.sh",
+        ".bigbang/esteira/perfis/deploy/scripts/trivy.sh"
+      ],
+      "testes": [
+        ".bigbang/tests/test_deploy.py:test_pre_release_registra_o_digest",
+        ".bigbang/tests/test_deploy.py:test_pre_release_recusa_tag_sem_digest",
+        ".bigbang/tests/test_deploy.py:test_promove_o_mesmo_digest_migrando_antes",
+        ".bigbang/tests/test_deploy.py:test_candidata_sem_digest_nao_publica"
+      ],
+      "hashes": {
+        ".bigbang/esteira/perfis/deploy/scripts/candidata-imagem.sh": "a869e5ffa9b60b2047a98478452191be2934f5c0c5d871a077dde5553e490cfe",
+        ".bigbang/esteira/perfis/deploy/scripts/candidata-publicar.sh": "134d3f1ab09ffc9482913d3ce2e0db2265e7ca7da2affa482b8259e4091f7cad",
+        ".bigbang/esteira/perfis/deploy/scripts/candidata-sbom.sh": "91bad05a969a5e4137b524ac98f109285c757ee5eed8442bae57ef526cea6ae0",
+        ".bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh": "813b3574ad2e25f2960c53731bd2bc4e9e6777afc2805e72f2e4c154a47be7d4",
+        ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "6a8dd6f24c0b25fa6b930dae1901af536aaf10fe12764ab554313be69063a308",
+        ".bigbang/esteira/perfis/deploy/scripts/staging.sh": "dc9ad69036e27b53cb86ecf00b9eeca131436a97f60b26835ef9506359b6c75e",
+        ".bigbang/esteira/perfis/deploy/scripts/trivy.sh": "ca28f9fe415d8475933b7ba2b9d4a49877d603ad284e731672bbd9951bbe6eb2"
+      },
+      "descricao": "Construir imagens por plataforma e entregar exatamente os digests homologados, com SBOM e scanners."
+    },
+    {
+      "id": "BB-F-043",
+      "requisitos": [
+        "RF-BB-043"
+      ],
+      "pagina": "Funcionalidade-vps-docker",
+      "fontes": [
+        ".bigbang/esteira/perfis/deploy/alvos/vps-docker/scripts/alvo.sh",
+        ".bigbang/modelos/compose.yaml"
+      ],
+      "testes": [
+        ".bigbang/tests/test_alvo_vps.py:test_publicar_por_digest",
+        ".bigbang/tests/test_alvo_vps.py:test_sudo_e_env_do_servidor",
+        ".bigbang/tests/test_alvo_vps.py:test_recusa_tag_e_servidor_sem_chave_conhecida",
+        ".bigbang/tests/test_alvo_vps.py:test_migrar_antes_com_a_imagem_nova",
+        ".bigbang/tests/test_alvo_vps.py:test_ambiente_invalido",
+        ".bigbang/tests/test_alvo_vps.py:test_publicar_por_digest",
+        ".bigbang/tests/test_alvo_vps.py:test_sudo_e_env_do_servidor",
+        ".bigbang/tests/test_alvo_vps.py:test_conjunto_incompleto_ou_por_tag",
+        ".bigbang/tests/test_alvo_vps.py:test_recusa_tag_e_servidor_sem_chave_conhecida",
+        ".bigbang/tests/test_alvo_vps.py:test_migrar_antes_com_a_imagem_nova",
+        ".bigbang/tests/test_alvo_vps.py:test_pre_checagem_que_falha_nao_troca_a_versao",
+        ".bigbang/tests/test_alvo_vps.py:test_saude_no_caminho_configurado",
+        ".bigbang/tests/test_alvo_vps.py:test_voltar_restaura_o_conjunto_da_release",
+        ".bigbang/tests/test_alvo_vps.py:test_ambiente_invalido",
+        ".bigbang/tests/test_alvo_vps.py:test_ciclo_completo"
+      ],
+      "hashes": {
+        ".bigbang/esteira/perfis/deploy/alvos/vps-docker/scripts/alvo.sh": "bf2af470f4e0f9c31717e35b401be0bc0a76c40885d82da3cd33ec353c5259d8",
+        ".bigbang/modelos/compose.yaml": "521b49e0ead60f9c752b819a482f224f59eb93c7bd6e7af98607628529aaddba"
+      },
+      "descricao": "Atualizar serviços publicados em servidor existente por SSH, preservando serviços não publicados e permitindo voltar."
+    },
+    {
+      "id": "BB-F-044",
+      "requisitos": [
+        "RF-BB-044"
+      ],
+      "pagina": "Funcionalidade-tsuru",
+      "fontes": [
+        ".bigbang/esteira/perfis/deploy/alvos/tsuru/scripts/alvo.sh",
+        ".bigbang/esteira/perfis/deploy/alvos/tsuru/scripts/tsuru.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_tsuru_scripts.py:test_staging_failure_does_not_publish_or_scan",
+        ".bigbang/tests/test_tsuru_scripts.py:test_staging_success_keeps_migration_publication_health_scanner_order",
+        ".bigbang/tests/test_tsuru_scripts.py:test_rollback_reimports_release_without_migration",
+        ".bigbang/tests/test_tsuru_scripts.py:test_health_failure_is_bounded"
+      ],
+      "hashes": {
+        ".bigbang/esteira/perfis/deploy/alvos/tsuru/scripts/alvo.sh": "e55f9237b976bbb560a9c700665d3e0d96f039dbe38d2d244f81119adc27d4ed",
+        ".bigbang/esteira/perfis/deploy/alvos/tsuru/scripts/tsuru.py": "c5aa4c5d63ba3ff0852e595539bceae7f930de9b3cfcc28d347e3fc9bd400bac"
+      },
+      "descricao": "Entregar sistemas em apps existentes do Tsuru sem criar outro servidor e com imagem imutável e saúde por ambiente."
+    },
+    {
+      "id": "BB-F-045",
+      "requisitos": [
+        "RF-BB-045"
+      ],
+      "pagina": "Funcionalidade-hooks",
+      "fontes": [
+        ".bigbang/hooks/_common.py",
+        ".bigbang/hooks/proteger_arquivos.py",
+        ".bigbang/hooks/proteger_comandos.py",
+        ".bigbang/esteira/sempre/arquivos/.claude/settings.json"
+      ],
+      "testes": [
+        ".bigbang/tests/test_hooks.py:test_nega_framework_aceite_e_gerados_inclusive_arquivo_novo",
+        ".bigbang/tests/test_hooks.py:test_documentos_de_decisao_pedem_confirmacao",
+        ".bigbang/tests/test_hooks.py:test_codigo_e_skill_propria_seguem_permissoes_normais",
+        ".bigbang/tests/test_hooks.py:test_alias_e_caminho_com_separadores_windows_nao_contornam",
+        ".bigbang/tests/test_hooks.py:test_aviso_de_gerado_e_protegido_sem_prefixo",
+        ".bigbang/tests/test_hooks.py:test_edicao_na_secao_do_projeto_preserva_bloco_agents",
+        ".bigbang/tests/test_hooks.py:test_stack_nega_bloco_mas_pede_confirmacao_fora_dele",
+        ".bigbang/tests/test_hooks.py:test_alias_de_documento_preserva_classificacao_lexical",
+        ".bigbang/tests/test_hooks.py:test_falha_de_entrada_bloqueia_sem_vazar_evento",
+        ".bigbang/tests/test_hooks.py:test_push_direto_e_force_sao_negados",
+        ".bigbang/tests/test_hooks.py:test_branch_propria_e_leituras_nao_sao_aprovadas_automaticamente",
+        ".bigbang/tests/test_hooks.py:test_reset_e_tags_negados",
+        ".bigbang/tests/test_hooks.py:test_labels_de_decisao_negadas_em_cli_e_api",
+        ".bigbang/tests/test_hooks.py:test_composto_nao_e_isentado_por_bb",
+        ".bigbang/tests/test_hooks.py:test_formas_dinamicas_pedem_conferencia",
+        ".bigbang/tests/test_hooks.py:test_opcoes_globais_do_gh_nao_isentam_decisoes",
+        ".bigbang/tests/test_hooks.py:test_pontuacao_agrupada_nao_esconde_comando_seguinte",
+        ".bigbang/tests/test_hooks.py:test_powershell_tambem_aciona_os_bloqueios",
+        ".bigbang/tests/test_hooks.py:test_settings_gerado_registra_scripts_executaveis_e_verificacao"
+      ],
+      "hashes": {
+        ".bigbang/hooks/_common.py": "3f7ac4fa2517566df674c4c79b5727b17760b50c6051cef397365825dbef00b4",
+        ".bigbang/hooks/proteger_arquivos.py": "abb2d5dbabd8ba2608bd7e027095b747e46206a2e9290bfca41f041da2c60e5b",
+        ".bigbang/hooks/proteger_comandos.py": "09d3b367eea71de92619fb061b8505d943574a944363ed1162b42c1b2459a4c2",
+        ".bigbang/esteira/sempre/arquivos/.claude/settings.json": "24ef26bf42154bed9edf3be6cde9f25af4cf2adb2bf7a176d365d96f47e7a630"
+      },
+      "descricao": "Bloquear comandos e edições proibidos pelo contrato da sessão antes que alterem trabalho ou arquivos sensíveis."
+    },
+    {
+      "id": "BB-F-046",
+      "requisitos": [
+        "RF-BB-046"
+      ],
+      "pagina": "Funcionalidade-workflows-gerados",
+      "fontes": [
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-bug.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-documentacao.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-epico.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-fundacao.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-tarefa.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-teste-aceite.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/config.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-codeql.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-criar-branches.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-encerrar.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-faxina.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-iniciar-sprint.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-integrar-release.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-kanban.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-mesclar-pr.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-posses.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-sem-release.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-regras-pr.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-seguranca.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-tarefa-de-correcao.yml",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ver-paineis.yml",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl",
+        ".bigbang/esteira/perfis/compilado/arquivos/.github/workflows/bb-candidata.yml.tmpl",
+        ".bigbang/esteira/nucleo/arquivos/.github/dependabot.yml.tmpl",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl"
+      ],
+      "testes": [
+        ".bigbang/tests/test_workflows.py:test_existe_a_ci_do_framework",
+        ".bigbang/tests/test_workflows.py:test_nome_com_prefixo_bb",
+        ".bigbang/tests/test_workflows.py:test_actions_fixadas_por_sha_com_versao_em_comentario",
+        ".bigbang/tests/test_workflows.py:test_runner_em_versao_fixa",
+        ".bigbang/tests/test_workflows.py:test_permissoes_minimas_no_topo",
+        ".bigbang/tests/test_workflows.py:test_regras_do_bb_verificar",
+        ".bigbang/tests/test_workflows.py:test_sem_pull_request_target",
+        ".bigbang/tests/test_workflows.py:test_concorrencia_sem_cancelar",
+        ".bigbang/tests/test_workflows.py:test_jobs_do_framework_so_rodam_no_repositorio_do_big_bang",
+        ".bigbang/tests/test_workflows.py:test_kanban_nao_descarta_eventos_diferentes",
+        ".bigbang/tests/test_workflows.py:test_regras_julga_com_a_ponta_atual_do_destino",
+        ".bigbang/tests/test_workflows.py:test_recusa_tag_e_aceita_sha",
+        ".bigbang/tests/test_workflows.py:test_comentario_de_versao",
+        ".bigbang/tests/test_workflows.py:test_separa_jobs",
+        ".bigbang/tests/test_workflows.py:test_nenhum_grep_q_no_fim_de_pipeline"
+      ],
+      "hashes": {
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-bug.yml": "df62f171534cbb343030a7aaa18422e15b34ff969b0a43c3fb2d6e0eaa7513e4",
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-documentacao.yml": "409c80e0dfbf72c4d08365bf5e2009d99049e889705852e35e62fa586bfb1c73",
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-epico.yml": "392db5757136b283909687dda83e1acd118b82b03fa630e3cb82c06f20f1f3aa",
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-fundacao.yml": "a81c6fafb554ec156fd9d3bff32d7e9a88810162801ee803476a31b0b35d48b8",
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-tarefa.yml": "11773e894d5b28d700e665cba660129fcca6a2b29f2e30f240b58b70ac6aa00c",
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/bb-teste-aceite.yml": "9cceeae40ff1497106691f8704e866a9cfb2e5499981f602652ec7cfa076f356",
+        ".bigbang/esteira/nucleo/arquivos/.github/ISSUE_TEMPLATE/config.yml": "1f103c6a9dd07cd13a9a6f17ace6b813f47747eb9cb7e00488cb2073caaf91bb",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ci.yml": "2b782ea752e0515ca7f7291ecd9bccb73bd47a18cc623cac702358dd61aa7f6e",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-codeql.yml": "164a28eaba2a75d0ba7f9b736b2341af46c56ff1331b460da201483f5ae467f6",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-criar-branches.yml": "145fc51f32cad180296ac1b4f2d92c87e3af2930c5ff59f540df54eab70428c9",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-encerrar.yml": "c9a0f798cc76e95f186cc7b5137597fba4ce39a752bfaa3ef24a182a184b7480",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-faxina.yml": "1bfad57ea5b4fcbd50ab764d9e1b8fa784504309f20fad32bd6be76f3cbc89f1",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-iniciar-sprint.yml": "e89d9feb88ee4eee480a09ab363d7a1dfc656ed5cdb0bc4398cf746233774b7b",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-integrar-release.yml": "52e004d9903aa37987954bfdd7b2881632659f2ae445bdae7c2cbc1534191ff9",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-kanban.yml": "60e8d7a56c60b795d0986542651c7bae07f4810f5ef59cacf65b8995da9ef5ec",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-mesclar-pr.yml": "41545b9fecf9615f11702594515049bc4e883b617111df3723bd48f096e16307",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-posses.yml": "5df3f21f3c431ce593483a18d0c5d8ff8213facee56bb3d30c1fe2d5324d433f",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-sem-release.yml": "a4c43185350a4d978458acbc6001f498579b952eff56390b19f9e212abe1ebda",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-regras-pr.yml": "3ea59563913360131b934089e6addbe49d2d60eff2e21aa867003c7a408f2e25",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-seguranca.yml": "ab00b640465dc092612b1529e875a9200ef5719372bc21b13f9b61743eab5a02",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-tarefa-de-correcao.yml": "8b61c73349cbc13d8be55f90e2ccb73e2bbd265d661eaf57a6d75a7af35c74b5",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ver-paineis.yml": "eb6faaea3867d3b7aa36c26bc04f678aeccfd32e09cc7210a74098fa1b45ce7c",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl": "3698792c7ce206352747c6d065f5b86bda10bb4099d2e73e99118386a920ccb7",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "9870e9b6a91e660d28608115378c3a38c0b9402c531ef2612d7740ea1c1d17ca",
+        ".bigbang/esteira/perfis/compilado/arquivos/.github/workflows/bb-candidata.yml.tmpl": "b39b1e75fc9cceea0ece94f584fca49761f71a7d2e525a27d71d072b64cecd7e",
+        ".bigbang/esteira/nucleo/arquivos/.github/dependabot.yml.tmpl": "34ab41c900e502b5e964c35d01fb97ca64f29b11c4c3c29e2bff3a6d718f2470",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl": "47a5876339a5fca7718cebc2ed32c19b5e6d7aaa1f0ddb358a3b20d5f5b86fcd"
+      },
+      "descricao": "Orquestrar eventos de CI, sprint, kanban, revisão, entrega, posse e recuperação pelos contratos do framework."
+    },
+    {
+      "id": "BB-F-047",
+      "requisitos": [
+        "RF-BB-047"
+      ],
+      "pagina": "Funcionalidade-release-framework",
+      "fontes": [
+        ".github/workflows/bb-framework-ci.yml",
+        ".github/workflows/bb-framework-faxina.yml",
+        ".github/workflows/bb-framework-release.yml"
+      ],
+      "testes": [
+        ".bigbang/tests/test_release_framework.py:test_uses_checkout_refs_with_git_remote_unavailable",
+        ".bigbang/tests/test_release_framework.py:test_refuses_tag_version_different_from_framework",
+        ".bigbang/tests/test_release_framework.py:test_refuses_commit_outside_main"
+      ],
+      "hashes": {
+        ".github/workflows/bb-framework-ci.yml": "c492a05ce2e19e54e0ab6350cc0e7b2891ebab8c8758b991480e050f9ba121fd",
+        ".github/workflows/bb-framework-faxina.yml": "8b9ae98415e336cb9e5b3e87bd779e3c45c53f80ee93968bd18c446bfe9d1638",
+        ".github/workflows/bb-framework-release.yml": "8a5261f1e0d3237795de7c2d094f198b1ee1c0a080b2081dea1e48a537a53b92"
+      },
+      "descricao": "Validar a fonte e distribuir pacote oficial com origem verificável e limpeza após sincronização."
+    },
+    {
+      "id": "BB-F-048",
+      "requisitos": [
+        "RF-BB-048"
+      ],
+      "pagina": "Funcionalidade-instrucoes-e-modelos",
+      "fontes": [
+        ".bigbang/AGENTS.base.md",
+        ".bigbang/AGENTS.inicial.md",
+        ".bigbang/agents/README.md",
+        ".bigbang/agents/pesquisador.md",
+        ".bigbang/agents/revisor-pr.md",
+        ".bigbang/hooks/README.md",
+        ".bigbang/modelos/ADR.md",
+        ".bigbang/modelos/AGENTS.projeto.md",
+        ".bigbang/modelos/DESIGN.md",
+        ".bigbang/modelos/PRODUTO.md",
+        ".bigbang/modelos/README-sistema.md",
+        ".bigbang/modelos/README.md",
+        ".bigbang/modelos/RN.md",
+        ".bigbang/modelos/STACK.md",
+        ".bigbang/modelos/arc42.md",
+        ".bigbang/modelos/c4-conteineres.md",
+        ".bigbang/modelos/c4-contexto.md",
+        ".bigbang/modelos/checklist-producao.md",
+        ".bigbang/modelos/runbook-deploy.md",
+        ".bigbang/modelos/runbook-voltar-versao.md",
+        ".bigbang/modelos/README-publico.md",
+        ".bigbang/padroes/README.md",
+        ".bigbang/padroes/api.md",
+        ".bigbang/padroes/arquitetura.md",
+        ".bigbang/padroes/codigo.md",
+        ".bigbang/padroes/dados.md",
+        ".bigbang/padroes/documentacao.md",
+        ".bigbang/padroes/frontend.md",
+        ".bigbang/padroes/observabilidade.md",
+        ".bigbang/padroes/seguranca.md",
+        ".bigbang/padroes/testes.md",
+        ".bigbang/processo/01-visao.md",
+        ".bigbang/processo/02-fundacao.md",
+        ".bigbang/processo/03-planejamento.md",
+        ".bigbang/processo/04-paineis.md",
+        ".bigbang/processo/05-sprint.md",
+        ".bigbang/processo/06-execucao.md",
+        ".bigbang/processo/07-branches-e-commits.md",
+        ".bigbang/processo/08-revisao.md",
+        ".bigbang/processo/09-entrega.md",
+        ".bigbang/processo/10-bugs-e-hotfix.md",
+        ".bigbang/processo/11-seguranca-operacional.md",
+        ".bigbang/processo/12-tecnologia-nova.md",
+        ".bigbang/processo/13-varias-ias.md",
+        ".bigbang/processo/14-automacoes.md",
+        ".bigbang/processo/15-atualizacao-do-framework.md",
+        ".bigbang/processo/16-conversas.md",
+        ".bigbang/processo/17-flash.md",
+        ".bigbang/processo/README.md",
+        ".bigbang/processo/18-documentacao.md",
+        ".bigbang/skills/README.md",
+        ".bigbang/skills/bb-atualizar/SKILL.md",
+        ".bigbang/skills/bb-auditar-seguranca/SKILL.md",
+        ".bigbang/skills/bb-codar-tarefa/SKILL.md",
+        ".bigbang/skills/bb-corrigir-bug/SKILL.md",
+        ".bigbang/skills/bb-design-kit/SKILL.md",
+        ".bigbang/skills/bb-documentar-epico/SKILL.md",
+        ".bigbang/skills/bb-entregar-epico/SKILL.md",
+        ".bigbang/skills/bb-entrevista-produto/SKILL.md",
+        ".bigbang/skills/bb-escolher-stack/SKILL.md",
+        ".bigbang/skills/bb-escrever-testes-aceite/SKILL.md",
+        ".bigbang/skills/bb-gerar/SKILL.md",
+        ".bigbang/skills/bb-iniciar-projeto/SKILL.md",
+        ".bigbang/skills/bb-montar-github/SKILL.md",
+        ".bigbang/skills/bb-nova-tecnologia/SKILL.md",
+        ".bigbang/skills/bb-prototipar/SKILL.md",
+        ".bigbang/skills/bb-refinar-backlog/SKILL.md",
+        ".bigbang/skills/bb-retrospectiva/SKILL.md",
+        ".bigbang/skills/bb-rodar-sprint/SKILL.md",
+        ".bigbang/skills/bb-status/SKILL.md",
+        ".bigbang/skills/bb-triar-issue/SKILL.md",
+        ".bigbang/modelos/comunidade/CODE_OF_CONDUCT.md",
+        ".bigbang/modelos/comunidade/CONTRIBUTING.md",
+        ".bigbang/modelos/comunidade/SECURITY.md",
+        ".bigbang/esteira/nucleo/README.md",
+        ".bigbang/esteira/sempre/arquivos/.claude/agents/bb-pesquisador.md",
+        ".bigbang/esteira/sempre/arquivos/.claude/agents/bb-revisor-pr.md",
+        ".bigbang/esteira/perfis/compilado/README.md",
+        ".bigbang/esteira/perfis/deploy/README.md",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/README.md",
+        ".bigbang/esteira/perfis/deploy/alvos/paas/README.md",
+        ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md",
+        ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md",
+        "AGENTS.md",
+        "CLAUDE.md"
+      ],
+      "testes": [
+        ".bigbang/tests/test_skills.py:test_catalogo_e_formato_agent_skills",
+        ".bigbang/tests/test_skills.py:test_skills_descobertas_antes_do_init_sem_esteira",
+        ".bigbang/tests/test_skills.py:test_edicao_de_uma_copia_reprova_e_gerador_repara",
+        ".bigbang/tests/test_skills.py:test_skill_do_projeto_e_preservada"
+      ],
+      "hashes": {
+        ".bigbang/AGENTS.base.md": "9d909eb509ba772c9a08550746476ea7c006adbe15cf6bb49e956679c26a1d40",
+        ".bigbang/AGENTS.inicial.md": "8f085f52aab03c299371a72f411a01a5d40c28dbfb5fc50609b2311fa140cf07",
+        ".bigbang/agents/README.md": "d7ff0ea8f09b2bf85832c1b1f2aaff2edb440c8f309f8bcfa294b6f891dbf3e6",
+        ".bigbang/agents/pesquisador.md": "b35269cb4102ef340604728d6576f99cbb4d1bcde25e5c4695758ef9bec11da4",
+        ".bigbang/agents/revisor-pr.md": "c59794131f53554adf1d9f54639708f26478302768a1eb308ec445756ce3201f",
+        ".bigbang/hooks/README.md": "984afef0d86e5719bcbf474c9d3f850e1b5561988e44f302171c0dd981ce1651",
+        ".bigbang/modelos/ADR.md": "e6db529e5686cd008f5c1424f041b10c2d969432281675c4002ac466fe0c58ce",
+        ".bigbang/modelos/AGENTS.projeto.md": "4b410236488a78c0e3e62f5418db9d927f296ba6197d0b1124fb9b379f555814",
+        ".bigbang/modelos/DESIGN.md": "9eec9a643d4b2ee71654c5ce2c81e20b1d88a476fd1a0a16e3853c6e79853aa2",
+        ".bigbang/modelos/PRODUTO.md": "2374df4cad6ecd93085255af2cb4befbebad9c32c19f8e812f135d00bb43fd5f",
+        ".bigbang/modelos/README-sistema.md": "97cf395edba249d74384891ba35e4ef4a42205a4f12c2efa709b92013c461c06",
+        ".bigbang/modelos/README.md": "0b41f64cd78e4327e28f195310b9ec22844385e6ed58802a9a6a7156d3761bdc",
+        ".bigbang/modelos/RN.md": "1ac27a277dd755868eaf113e46e40b37db21532a1ea4a065b1ae1829ca5ec52b",
+        ".bigbang/modelos/STACK.md": "5b547298718f6dfd32f56dcfacb83ce8fa4d3021bc006a51176ecf8d45983d50",
+        ".bigbang/modelos/arc42.md": "c30d304c1fbcba2e37828f1a9d890721754dd8d2e7607e0c992d90718a0b2a46",
+        ".bigbang/modelos/c4-conteineres.md": "ce12f7a4ace33be41b37efcbb4d21b8cfc597cce2a3223e11265ab53d90c1d12",
+        ".bigbang/modelos/c4-contexto.md": "c21302cdfad82ee3e1f2a8e39c74bc7f7afa97bf0e4052ab04480b47facf9470",
+        ".bigbang/modelos/checklist-producao.md": "ad58a5218fc445696f3a9fbbd7def8ce784bff04354d6da74cbb4a592c914753",
+        ".bigbang/modelos/runbook-deploy.md": "3067b6b1e731e7d5300c5c70e4bcf981862938bfebccbbeff3a0c12fcd484c20",
+        ".bigbang/modelos/runbook-voltar-versao.md": "58cc2f37fd25ce43a0e4b637a053cb5e511810de4574f08beea3ee356a35ad59",
+        ".bigbang/modelos/README-publico.md": "9d893c3f3e35e55735a9bf492f098bdf2201e1d57da5b34768cc85edb44ba90e",
+        ".bigbang/padroes/README.md": "6b3af58fb5e42c3e59cabd4f02ab863efa6ae5368e5de9b9322eaaa0275ead99",
+        ".bigbang/padroes/api.md": "9da14281f3ba04f08ae4422431f9a1711253a52e172be2905d143eb366400fa3",
+        ".bigbang/padroes/arquitetura.md": "8343b7e6e0b35abff8c361b915e447b979e86d39f444e869c167a3fcbb833647",
+        ".bigbang/padroes/codigo.md": "3774bed8ef673e4c029bed17bef8c01c8a6c1e3353fb2dd292b639f75f4706e6",
+        ".bigbang/padroes/dados.md": "69687d7b8c5f04f70722c95710d1cde3c74bb7c34756334da4be8544b77fca8f",
+        ".bigbang/padroes/documentacao.md": "42dcb450c7bec6a00b99dcceee4c1b929200075f0bbdfd1fd264fa280823fab0",
+        ".bigbang/padroes/frontend.md": "80ad12069710076351d554face3ac5bdcb3440c9d4211997f6b11b34512dad97",
+        ".bigbang/padroes/observabilidade.md": "f4efdf875ea09a96f0d21fcc9b884aabf9ee5c3145041b85d4d9e444ebc32915",
+        ".bigbang/padroes/seguranca.md": "4d8a2ba8b02e851ad34c94b5a33ae084ec91b94daa5e1b26a23089b88d36c821",
+        ".bigbang/padroes/testes.md": "1895ed661988faf228aba1dccf78ed4cf18dddd2fac121169a2cb5f7c5c027d3",
+        ".bigbang/processo/01-visao.md": "f186b078af383821787c32fbd4368fb936b0bdd19135cb5ab3fac421f771dc07",
+        ".bigbang/processo/02-fundacao.md": "86b621dbb6632b57c2ff27c5c42551042b7188524b74032817f13912027da027",
+        ".bigbang/processo/03-planejamento.md": "2816b4fb319cc7a7d220f06f9aba22e2dfca52d3e7517c6242efc0380aceaa75",
+        ".bigbang/processo/04-paineis.md": "1e7eb088e7fbbb021fd61f97c48352dd878d69a5f62302cfbb95fb28dea01b25",
+        ".bigbang/processo/05-sprint.md": "d90c86641eaa56c26e222e003a40caa894af60827d34aa0f6fd1e6a940357c42",
+        ".bigbang/processo/06-execucao.md": "248ce0af760504c4f3bfe36f5e52d32f0643b6113d0c6b0b5c7f651892c5ee81",
+        ".bigbang/processo/07-branches-e-commits.md": "571ba79a24859e63140e41fb3c2c8beec59b55da58473979bb4e49bf8898e70b",
+        ".bigbang/processo/08-revisao.md": "81b1dcafa698dc4c9d94d5c9d9f637c5f4ab289c7b0df1acc01a35be984aaab5",
+        ".bigbang/processo/09-entrega.md": "9d37ace7c9c943889c358865cc68ec4de42c7254a992816418a3fc4c02b1d266",
+        ".bigbang/processo/10-bugs-e-hotfix.md": "47e92b99ed3e307c1bdb6c6fb124493b6c9402ecb980d9252baac344631671f8",
+        ".bigbang/processo/11-seguranca-operacional.md": "951182c7d18ee3c248a7808f03e5a80a2b07bda6ed620a90032569a28dc07371",
+        ".bigbang/processo/12-tecnologia-nova.md": "37693918ef18e16947b874d6cf66a976a9a1513fb266249c5966dd73413e60a2",
+        ".bigbang/processo/13-varias-ias.md": "e265736f7227b86678c7688f5d739579510600ef5d09ed51e8bf27cbe094025e",
+        ".bigbang/processo/14-automacoes.md": "76913aece6a868c9282a273170e56d10e2c47b5ce6364a37da645fdcad1d7686",
+        ".bigbang/processo/15-atualizacao-do-framework.md": "62ea8bfbf0ef9173779be764f220e2a7c662b96be4020745cad9b9869f7082df",
+        ".bigbang/processo/16-conversas.md": "cc93cbfbe4c8d5c9f5ab396641d3859e357eef3511c7a3fb28a6f7574b0dbb94",
+        ".bigbang/processo/17-flash.md": "32925b2db64c18cc76973e53464ad054fd3c842a9ef42c6b90f8d81e48425cce",
+        ".bigbang/processo/README.md": "bbdd88a75546f006f841bb80c1e76be9374d211a4bedd49efe767ee3f56601c3",
+        ".bigbang/processo/18-documentacao.md": "8888ffab4184e2d5b747f47ffdd6ef900d7e8bd20bdad4026beb455d993dddef",
+        ".bigbang/skills/README.md": "54bd926098535f1c5a3f61340668b65696f50936e8f15ca4ffd15c59aac030ac",
+        ".bigbang/skills/bb-atualizar/SKILL.md": "8ed414b75f9a302bdae54e7e4879e66a0dd1948b33d158c67e5477b4f1c8714e",
+        ".bigbang/skills/bb-auditar-seguranca/SKILL.md": "5fa9479334ef5b2b7218a5aa91ced11662449ba86d792a7768bc44243c0dffdb",
+        ".bigbang/skills/bb-codar-tarefa/SKILL.md": "c295ee6b4d1cbf7a7dfad0bd2b17ea76d5b36c3b9ed08a9f3bbc5af24c0c0dff",
+        ".bigbang/skills/bb-corrigir-bug/SKILL.md": "fdf0d9f830a42831b7168aa2a0ac40c4d0b00f4f936aa1fa217655538426e4d4",
+        ".bigbang/skills/bb-design-kit/SKILL.md": "e7a62847d6b299b33d5b2a86ca52ffa597b77be467ee0e7e36f32d91956a8861",
+        ".bigbang/skills/bb-documentar-epico/SKILL.md": "8fb2310e806605c8f9c520ebe4a46385b9fd0793d7f43180d393bb3991d03f78",
+        ".bigbang/skills/bb-entregar-epico/SKILL.md": "41d7a7f99b8debc1067fd9976ef49fd3b9e8828bfac3e1a6c0d3d13abc966cbd",
+        ".bigbang/skills/bb-entrevista-produto/SKILL.md": "bdd9d88b89c0e27c321301e39e540019048fc814d9299db17cccf685271e5e6f",
+        ".bigbang/skills/bb-escolher-stack/SKILL.md": "00ffe8d4207559da63cb72bd6a9eed2981b59a7fc0df1cf81a7f654b7b4a1b81",
+        ".bigbang/skills/bb-escrever-testes-aceite/SKILL.md": "8c4f119baf0eaaf33af42f7c8521f5da937a64c1112e0cd4fdaa189c6809b42a",
+        ".bigbang/skills/bb-gerar/SKILL.md": "3e99e724ad04c5152809fb921ae9fa9bcef036063baf49c72f938e842cad62e4",
+        ".bigbang/skills/bb-iniciar-projeto/SKILL.md": "cbad336a5a9f456e19cf1803e4647881cc34f2b1b6994d358fb5ea8e9e55f2d5",
+        ".bigbang/skills/bb-montar-github/SKILL.md": "c669329ed5e41a1aeafac4810269c97b7c107137781f31253651e8b114af600b",
+        ".bigbang/skills/bb-nova-tecnologia/SKILL.md": "73682d4d87b419e33eec257bd912728c64fbaf0fd3f7fe3385c284853d8cea0a",
+        ".bigbang/skills/bb-prototipar/SKILL.md": "96d7454e3b291bea2ee8c6cfc248a46062127e0809ae190e496d6ce90e0e9100",
+        ".bigbang/skills/bb-refinar-backlog/SKILL.md": "b8afd44540382d2b50176a90d7043b225c6fbeecbcef9d3805af296b5678fdd1",
+        ".bigbang/skills/bb-retrospectiva/SKILL.md": "fec905b84ad0f6d16f79653ec37a0e2f839a6de969caafd795530f25865fa895",
+        ".bigbang/skills/bb-rodar-sprint/SKILL.md": "53b45fbc3afbfc1fc3e40ae382f29b5b1ae15671dea0ecc0ec9704b18d448bad",
+        ".bigbang/skills/bb-status/SKILL.md": "48d4ab0efe18a3d2697cf84d90f1f01613aac552106ff39085228e05776a0a7f",
+        ".bigbang/skills/bb-triar-issue/SKILL.md": "7fe6057c784c5e18df279d43e12bbfb23a03cd2605da191b0e326315709da117",
+        ".bigbang/modelos/comunidade/CODE_OF_CONDUCT.md": "50f725ee6b9cac1c59dffae41f0cd78cdbc8cf837d97d51d30a49e5ee4ae0a07",
+        ".bigbang/modelos/comunidade/CONTRIBUTING.md": "bfc35a487bf6dfbfac4744e17d6771f77d76891ac4b41f028ba8936b4643fd63",
+        ".bigbang/modelos/comunidade/SECURITY.md": "fdfb86e5f044336f3a423392e8c8aa17d52177ddc54718d1f6b1e7fdb0bca9c8",
+        ".bigbang/esteira/nucleo/README.md": "1ef9feb07a3d7df36206eb95ac13c6e9d5876748ffe9706ba70a9b2126a23a5c",
+        ".bigbang/esteira/sempre/arquivos/.claude/agents/bb-pesquisador.md": "2e7e58aadf1f41cf66b932d7c3ecfd01f4c6867b7e7dbb744122951d0ec2ea95",
+        ".bigbang/esteira/sempre/arquivos/.claude/agents/bb-revisor-pr.md": "4ad53a97e8b6a498f00c82fd14261d58cee90daa454f6e9edef03461bb210f36",
+        ".bigbang/esteira/perfis/compilado/README.md": "7bd7e77fdb33687200a12bb5f5ed24d3f02f7334a2cbbe6382e8420d57921da8",
+        ".bigbang/esteira/perfis/deploy/README.md": "0c1bf811111207e80d5b602baa34546937acdcce8ad17b77c66b1a8518eb9e0e",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/README.md": "73a1db0c5cac7cb1ed371961042d7b1c9c51d6c399ed12bef3723d9c42c1cf52",
+        ".bigbang/esteira/perfis/deploy/alvos/paas/README.md": "d8b52c4956fab996c303edcfbda6e162874b8311a23def757877de0aa272ad20",
+        ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md": "bb04007d9e8e6977492685e35299a7801fdbd87b5fbeb4d5f78132d2cfc57411",
+        ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md": "48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
+        "AGENTS.md": "8bab0ab0eb9832f3762c6824c35c7593a5442ce846ad90fc8c9c7dd98a761bd3",
+        "CLAUDE.md": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49"
+      },
+      "descricao": "Orientar Fundação, planejamento, execução, revisão, entrega e manutenção com contratos compartilhados entre as IAs."
+    }
+  ],
+  "arquivos_funcionais": [
+    {
+      "caminho": ".bigbang/MIGRACAO.md",
+      "motivo": "Contrato lido pelo atualizador oficial antes de instalar pacote."
+    }
+  ],
+  "configuracao_comunidade": {
+    "projeto": {
+      "repositorio": "BrunodosSantosVaz/big-bang",
+      "nome": "Big Bang",
+      "visibilidade": "publico"
+    },
+    "paineis": {
+      "owner": "BrunodosSantosVaz",
+      "planejamento": 28,
+      "execucao": 29,
+      "bugs": 30
+    }
+  },
+  "revisao": {
+    "codigo": "7756aa9e355c3d6387a023fe38794f9299b0fdd1",
+    "wiki_base": "a436ca94e7453c095332f5a76f83e5e45efc72e8",
+    "independente": "pendente",
+    "pr": null
+  },
+  "social_preview": {
+    "arquivo_wiki": "assets/social-preview.png",
+    "largura": 1280,
+    "altura": 640,
+    "upload_confirmado": false
+  }
+}
