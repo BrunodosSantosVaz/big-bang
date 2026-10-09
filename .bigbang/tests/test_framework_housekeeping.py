@@ -7,6 +7,7 @@ from _raiz import caminho, ler
 from test_integrar_publicar import ComGit
 from _scripts import GH_FALSO
 import test_faxina as faxina_tests
+import test_integrar_publicar as publication_tests
 
 REPO = "BrunodosSantosVaz/big-bang"
 
@@ -160,8 +161,30 @@ class StrictCleanup(ComGit):
         self.estado["prs"] = {"40": {"head": "epico/8-closed", "base": "develop", "state": "OPEN"}}
         self.gravar_estado()
         result = self.script("faxina.sh", FAXINA_EXIGIR_LIMPA="true")
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertFalse(self.estado.get("apagadas"))
+
+    def test_end_version_preserves_branch_with_open_pr_before_cleanup(self):
+        self.git("push", "-q", "origin", "main:feature/12-done")
+        self.issue(12, milestone="v0.1.0")
+        self.estado.update({"refs": {"tags/v0.1.0": "tag", "heads/feature/12-done": "head"},
+                            "releases": ["v0.1.0"],
+                            "milestones": [{"number": 1, "title": "v0.1.0", "state": "open"}],
+                            "api": {"repos/dono/repo/releases/tags/v0.1.0": {
+                                "tag_name": "v0.1.0", "draft": False, "prerelease": False}},
+                            "prs": {"40": {"head": "feature/12-done", "base": "develop", "state": "OPEN"}}})
+        self.gravar_estado()
+        result = self.script("encerrar.sh", VERSAO="0.1.0")
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("feature/12-done", self.estado.get("apagadas", []))
+
+    def test_publish_without_release_preserves_epic_with_open_pr(self):
+        publication_tests.PublicarSemRelease.preparar(self)
+        self.estado["prs"]["40"] = {"head": "epico/7-estoque", "base": "develop", "state": "OPEN"}
+        self.gravar_estado()
+        result = self.script("publicar-sem-release.sh")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("epico/7-estoque", self.estado.get("apagadas", []))
 
     def test_api_read_failure_is_explicit_and_does_not_claim_clean(self):
         for endpoint in ("issues?state=open", "issues/12", "--json number,createdAt,headRefName"):
