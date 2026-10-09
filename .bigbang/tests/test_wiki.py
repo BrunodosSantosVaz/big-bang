@@ -96,7 +96,8 @@ class Wiki(unittest.TestCase):
                 return 'https://github.com/owner/game.wiki.git'
             return real_git(folder, *args)
         with contextlib.redirect_stdout(io.StringIO()), \
-                patch.object(documentation, 'prepare', return_value=(self.wiki, {})), \
+                patch.object(documentation, 'prepare', side_effect=lambda *a: (
+                    self.wiki, {'commit': git(self.remote, 'rev-parse', 'master')})), \
                 patch.object(documentation, 'checkout', return_value=self.wiki), \
                 patch.object(documentation, 'repository_state', return_value={'private': False, 'has_wiki': True}), \
                 patch.object(documentation, 'git', side_effect=canonical_remote):
@@ -114,6 +115,16 @@ class Wiki(unittest.TestCase):
             self.assertTrue(any('duplicada' in p for p in self.problems()))
             original.unlink()
             self.assertEqual(cli.main(['--raiz', str(self.root), 'documentacao', 'validar', '--publicada']), 0)
+            first = proposal['wiki']['commit']
+            draft.write_text('# Produto\n\nRF-001: mover a cobra, revisão subsequente sem concorrência.\n')
+            self.assertEqual(cli.main(['--raiz', str(self.root), 'documentacao', 'gravar',
+                                      'PRODUTO.md', '--arquivo', str(draft)]), 0)
+            self.assertEqual(cli.main(['--raiz', str(self.root), 'documentacao', 'propor',
+                                      '--wiki', str(self.wiki), '--branch', 'bigbang/proposta-2-docs']), 0)
+            self.assertEqual(cli.main(['--raiz', str(self.root), 'documentacao', 'publicar']), 0)
+            second = json.loads(self.root.joinpath(documentation.MANIFEST).read_text())
+            self.assertEqual(second['wiki']['base'], first)
+            self.assertEqual(git(self.remote, 'rev-parse', 'master'), second['wiki']['commit'])
 
     def test_private_reads_existing_file_and_does_not_access_github(self):
         self.root.joinpath(documentation.MANIFEST).unlink()

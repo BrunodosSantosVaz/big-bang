@@ -88,6 +88,15 @@ class Projects(unittest.TestCase):
             with self.assertRaisesRegex(BbError, "auditoria"):
                 community_public.ensure_public_project("owner/game", "owner", 1, publish=True)
 
+    def test_empty_existing_board_with_sensitive_custom_field_needs_audit(self):
+        board = {'id': 'P_empty', 'public': False, 'title': 'Jogo', 'readme': '', 'shortDescription': '',
+                 'items': {'nodes': []}, 'fields': {'nodes': [{'name': 'Cliente privado',
+                 'options': [{'name': 'CPF interno', 'description': 'Nota confidencial'}]}]}}
+        with patch.object(community_public, 'project_state', return_value=board), \
+                patch.object(community_public.github, 'run', side_effect=AssertionError('mutation')):
+            with self.assertRaisesRegex(BbError, 'auditoria'):
+                community_public.ensure_public_project('owner/game', 'owner', 1, publish=True)
+
 
 if __name__ == "__main__":
     unittest.main()
