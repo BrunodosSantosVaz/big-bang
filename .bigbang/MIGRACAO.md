@@ -4,6 +4,28 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [1.5.5] - 2026-10-09
+
+### O que muda
+
+O próprio framework executa a faxina após CI/publicação e fechamento de issues, além da recuperação diária.
+A exclusão aguarda a tag da ponta da main, release estável com pacote/hash, conteúdo sincronizado e CI de
+push verde nos SHAs exatos de main/develop. O checkout privilegiado usa apenas main, nunca código de PR.
+
+Nos consumidores, `bb gerar` instala o botão Faxina com recuperação diária e simulação manual, complementando
+a limpeza feita ao final das publicações reais e do Encerrar. Simulações desses fluxos não disparam faxina real.
+Só branches incorporadas com trabalho concluído são
+apagadas; main/develop/tags, PRs abertos e commits exclusivos ficam preservados. Encerrar agora falha se
+a faxina apontar sobras, sem desfazer uma publicação já realizada. Resolva cada ponto e execute novamente.
+
+Essa atualização da esteira não altera os caminhos do artefato nem exige versão nova do aplicativo.
+Use `bb atualizar 1.5.5` e Publicar sem release após CI/revisão; o pacote do framework tem versão própria,
+hash e atestação, sem substituir as releases anteriores.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [1.5.4] - 2026-10-08
 
 ### O que muda

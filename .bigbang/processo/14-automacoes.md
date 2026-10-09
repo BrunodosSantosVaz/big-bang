@@ -39,6 +39,7 @@ Todos os workflows gerados pelo Big Bang, os botões, os segredos e as variávei
 | Publicar sem release | `bb-publicar-sem-release.yml` | botão + ambiente `producao` | avança a `main` até a `develop` |
 | Encerrar | `bb-encerrar.yml` | botão | completa a limpeza pós-produção; encerra a sprint; roda a faxina |
 | Faxina | `faxina.sh` (no *Encerrar*, no *Publicar em produção* e no *Publicar sem release*) | automático | apaga branches mescladas cujo trabalho acabou; lista issues, PRs e posses que sobraram |
+| Faxina (recuperação) | `bb-faxina.yml` | diário e botão | complementa a faxina das publicações reais; scripts apenas da main; simula ou limpa branches concluídas; falha se houver sobras |
 | Ver painéis | `bb-ver-paineis.yml` | botão | somente leitura: colunas, posses paradas, flags vencidas, pendências do dono |
 | Tarefa de correção | `bb-tarefa-de-correcao.yml` | botão (`epico`, `motivo`) | tarefa nova no épico reprovado na homologação (decisão 16) |
 | Dependabot | `.github/dependabot.yml` | mensal | actions → `develop` (`sem-release`); pacotes da stack → `main`, via release de manutenção |

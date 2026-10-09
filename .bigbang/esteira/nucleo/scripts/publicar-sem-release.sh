@@ -66,11 +66,7 @@ for item in "${finalizar[@]}"; do
       subIssues(first:100){ nodes{ number state } } } } }' --jq '.data.repository.issue.subIssues.nodes[] | "\(.number)\t\(.state)"')
   gh issue close "$n" --repo "$R" --reason completed --comment "Épico concluído sem release." >/dev/null
   projeto mover "$PLAN" "$n" "Concluída" >/dev/null || true
-  for branch in $(gh pr list --repo "$R" --base "$ref" --state merged --limit 200 --json headRefName --jq '.[].headRefName') "$ref"; do
-    if git merge-base --is-ancestor "origin/$branch" origin/main 2>/dev/null; then
-      gh api -X DELETE "repos/$R/git/refs/heads/$branch" >/dev/null 2>&1 && echo "branch apagada: $branch"
-    fi
-  done
+  # Deletion is centralized in faxina.sh below, including its open-PR and ancestry protections.
   echo "Épico #$n concluído."
 done
 echo "Publicar sem release concluído."

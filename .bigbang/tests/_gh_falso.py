@@ -208,6 +208,15 @@ def new_issue(state, title, body, labels, milestone=None):
 def api(state, positional, fields, jq, method):
     from urllib.parse import unquote
     path = unquote(positional[0])
+    match = re.match(rf"^repos/{re.escape(REPO)}/releases/tags/(.+)$", path)
+    if match and path not in state.get("api", {}):
+        tag = match.group(1)
+        if tag not in state.get("releases", []):
+            sys.stderr.write("HTTP 404: release not found\n")
+            sys.exit(1)
+        info = state.get("release_info", {}).get(tag, {})
+        return emit({"tag_name": tag, "draft": False, "prerelease": info.get("prerelease", False),
+                     "assets": [{"name": name} for name in state.get("release_assets", {}).get(tag, [])]}, jq)
     if "per_page=100" in path and "/issues?" not in path:
         path = path.split("?", 1)[0]
     if path == f'repos/{REPO}/contents/bigbang.toml':
