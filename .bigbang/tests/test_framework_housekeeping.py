@@ -1,10 +1,9 @@
 """Automatic cleanup waits for a published, synchronized framework and exact successful CI."""
-import os
 import unittest
 
 from _raiz import caminho, ler
 from test_integrar_publicar import ComGit
-from test_faxina import Faxina
+import test_faxina as faxina_tests
 
 REPO = "BrunodosSantosVaz/big-bang"
 
@@ -12,6 +11,7 @@ REPO = "BrunodosSantosVaz/big-bang"
 class FrameworkHousekeeping(ComGit):
     def prepare(self):
         self.escrever(".bigbang/VERSION", "1.5.4\n")
+        self.escrever("release-fixture", "published framework\n")
         self.commit("chore: framework release fixture")
         self.git("tag", "v1.5.4")
         self.git("push", "-q", "origin", "main", "main:develop", "--tags")
@@ -54,6 +54,7 @@ class FrameworkHousekeeping(ComGit):
     def test_waits_for_stable_release_and_both_package_assets(self):
         for field, value in (("draft", True), ("prerelease", True), ("tag_name", "v1.5.3"), ("assets", [])):
             with self.subTest(field=field):
+                self.setUp()
                 self.prepare()
                 self.estado["api"][self.release_path][field] = value
                 self.gravar_estado()
@@ -61,14 +62,13 @@ class FrameworkHousekeeping(ComGit):
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 self.assertIn("aguardando", result.stdout)
                 self.assertFalse(self.estado.get("apagadas"))
-                self.tearDown()
-                self.setUp()
 
     def test_waits_for_exact_latest_successful_push_ci_on_both_branches(self):
         for branch in ("main", "develop"):
             for field, value in (("status", "in_progress"), ("conclusion", "failure"),
                                  ("head_sha", "f" * 40), ("event", "pull_request")):
                 with self.subTest(branch=branch, field=field):
+                    self.setUp()
                     self.prepare()
                     self.estado["api"][self.ci_path(branch)]["workflow_runs"][0][field] = value
                     self.gravar_estado()
@@ -76,8 +76,6 @@ class FrameworkHousekeeping(ComGit):
                     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                     self.assertIn("aguardando", result.stdout)
                     self.assertFalse(self.estado.get("apagadas"))
-                    self.tearDown()
-                    self.setUp()
 
     def test_waits_when_develop_has_different_content(self):
         self.prepare()
@@ -118,7 +116,7 @@ class FrameworkHousekeeping(ComGit):
 
 class StrictCleanup(ComGit):
     def test_strict_mode_reports_leftovers_as_failure(self):
-        Faxina.preparar(self)
+        faxina_tests.Faxina.preparar(self)
         result = self.script("faxina.sh", FAXINA_EXIGIR_LIMPA="true")
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("ponto(s) para revisar", result.stdout)

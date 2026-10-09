@@ -37,7 +37,7 @@ Estável desde a **1.0.0**, validada num sistema real feito do zero até produç
 homologação registrada em emulador Android 15 ([relatório atual](docs/relatorios/2026-10-07-entrega-flash-tsuru.md)). A versão atual está
 nas [Releases](https://github.com/BrunodosSantosVaz/big-bang/releases/latest).
 
-O código desta versão é **1.5.4**: inclui modo Flash, catálogo extensível, Actions conforme o alvo e adaptador
+O código desta versão é **1.5.5**: inclui modo Flash, catálogo extensível, Actions conforme o alvo e adaptador
 para o Tsuru existente, além de VPS/Docker e entrega compilada. Tsuru entrega um serviço OCI por aplicação,
 com `TSURU_MIGRACAO=job` por padrão ou `inicializacao` para SQLite em volume persistente. O [runbook](.bigbang/docs/deploy-tsuru.md) separa os testes do adaptador
 da comprovação de uma entrega real no consumidor. AWS, alvo personalizado e formatos de deploy por pacotes ou
@@ -54,6 +54,12 @@ os portões de segurança permanecem iguais. Veja [a migração](.bigbang/MIGRAC
 A versão 1.5.3 fornece ao workflow **Mesclar PR** as variáveis públicas dos painéis (`PROJETO_OWNER`,
 `PROJETO_PLANEJAMENTO` e `PROJETO_EXECUCAO`). Depois de mesclar um PR aprovado, a esteira pode criar a próxima
 branch e, no último PR do épico, disparar a integração. Revisão, checks do SHA exato e portões continuam exigidos.
+
+A versão 1.5.5 automatiza a **faxina** após publicação e sincronização do próprio framework, com CI verde
+nos SHAs exatos e release estável disponível. Nos sistemas, o botão Faxina recupera a limpeza após publicação
+ou encerramento e diariamente. Encerrar falha se houver sobras: branches com commits exclusivos, PRs abertos
+e tags continuam protegidos. Atualizar o framework e as Actions pode usar Publicar sem release quando os
+caminhos do artefato permanecem iguais; a versão e os binários/imagens dos aplicativos não mudam.
 
 O [relatório da entrega Flash/Tsuru](docs/relatorios/2026-10-07-entrega-flash-tsuru.md) registra a distribuição,
 os testes completos no SHA exato e as evidências dos consumidores. A produção do framework é o pacote

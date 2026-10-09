@@ -63,5 +63,5 @@ if [ "${SPRINT:-false}" = true ]; then
   fi
 fi
 
-# Housekeeping (DOC/processo 05): merged branches, loose issues, old PRs and open claims; reports, never fails.
-SIMULAR="$SIMULAR" bash "$AQUI/faxina.sh" || echo "::warning::faxina não concluída: rode-a de novo pelo Encerrar"
+# Closing is incomplete until reported leftovers are resolved; publication itself is not rolled back.
+SIMULAR="$SIMULAR" FAXINA_EXIGIR_LIMPA=true bash "$AQUI/faxina.sh"

@@ -9,7 +9,8 @@
 #   REPORTS: branches outside the naming rules, unmerged branches without an open PR, open issues in a closed
 #   (published) milestone, PRs open for more than FAXINA_DIAS days (14), and open ownership claims (ia:<nome>).
 # Main, develop and dependabot/* are never touched; tags are never deleted.
-# Environment: SIMULAR, FAXINA_DIAS, GITHUB_REPOSITORY, GH_TOKEN.
+# FAXINA_EXIGIR_LIMPA=true makes unresolved leftovers fail closure instead of silently succeeding.
+# Environment: SIMULAR, FAXINA_DIAS, FAXINA_EXIGIR_LIMPA, GITHUB_REPOSITORY, GH_TOKEN.
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
@@ -81,6 +82,7 @@ posses=$(gh api --paginate "repos/$R/issues?state=open&per_page=100" \
 
 if [ "$avisos" -gt 0 ]; then
   echo "Faxina: $avisos ponto(s) para revisar (acima). Resolva ou explique ao dono."
+  [ "${FAXINA_EXIGIR_LIMPA:-false}" != true ] || exit 1
 else
   echo "Faxina: nada sobrando."
 fi

@@ -36,6 +36,8 @@ O dono diz **"vamos encerrar a sprint"**. A IA:
    mescladas cujo trabalho acabou (épico, tarefas, `framework/*`, `fundacao/*`, releases publicadas) e lista o que
    sobrou — branch fora do padrão ou sem PR, issue aberta num milestone já publicado, PR parado, posse aberta.
    A IA resolve cada ponto ou explica ao dono; nada fica para trás.
+   Sobras fazem Encerrar falhar; resolva-as e repita o botão. O workflow Faxina também recupera a limpeza
+   após publicação/encerramento e diariamente, sem apagar commits exclusivos ou branches com PR aberto.
 3. Confere a documentação: o `README.md` descreve a versão em produção (DOC-15) e cada épico publicado teve a sua
    tarefa de documentação; o que faltar vira tarefa da próxima sprint.
 4. Revisa os repositórios auxiliares do dono ligados ao sistema (testes, sandbox, protótipos): os sem uso são
