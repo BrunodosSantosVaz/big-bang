@@ -1,6 +1,7 @@
 """Community defaults must be idempotent and must not expose existing private cards."""
 import json
 import unittest
+from io import BytesIO
 from unittest.mock import patch
 
 from _raiz import importar_bb
@@ -37,6 +38,28 @@ class Discussions(unittest.TestCase):
 
 
 class Projects(unittest.TestCase):
+    def test_anonymous_reader_cannot_edit_public_board(self):
+        page = ('<script type="application/json" id="memex-data">'
+                '{"number":1,"public":true}</script>'
+                '<script type="application/json" id="memex-viewer-privileges">'
+                '{"role":"read","canChangeProjectVisibility":false}</script>')
+        response = BytesIO(page.encode())
+        response.geturl = lambda: "https://github.com/users/owner/projects/1"
+        with patch.object(community_public, "urlopen", return_value=response):
+            self.assertEqual(community_public.anonymous_project("owner", 1)["role"], "read")
+
+    def test_anonymous_editor_or_login_redirect_blocks_validation(self):
+        page = ('<script type="application/json" id="memex-data">'
+                '{"number":1,"public":true}</script>'
+                '<script type="application/json" id="memex-viewer-privileges">'
+                '{"role":"write","canChangeProjectVisibility":true}</script>')
+        for url in ("https://github.com/users/owner/projects/1", "https://github.com/login"):
+            response = BytesIO(page.encode())
+            response.geturl = lambda: url
+            with patch.object(community_public, "urlopen", return_value=response):
+                with self.assertRaises(BbError):
+                    community_public.anonymous_project("owner", 1)
+
     def test_new_empty_public_project_can_be_published(self):
         board = {"id": "P_empty", "public": False, "title": "Jogo", "shortDescription": "", "readme": "",
                  "items": {"nodes": [], "pageInfo": {"hasNextPage": False}},
