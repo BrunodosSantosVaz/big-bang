@@ -3,8 +3,8 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "f6d5b3b123e7f3a1da6172a5cc42bf539ca12caa",
-    "commit": "3cc469d4d48e2ff516d4470b4b19a7d3e23a6adb",
+    "base": "3cc469d4d48e2ff516d4470b4b19a7d3e23a6adb",
+    "commit": "7ae9039ef9b23e8c82a703d52f485ae3e683f97e",
     "branch": "master",
     "proposta": "bigbang/proposta-213-badges"
   },
@@ -222,7 +222,7 @@
     }
   },
   "codigo": {
-    "commit": "40dbac7236dafdc0453a8c427fff5666a7f55da4",
+    "commit": "e1f90ccbb55aa88045f3e26690f44540a7ced763",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -423,7 +423,7 @@
       ],
       "hashes": {
         ".bigbang/bb/config.py": "sha256:93aa511d040ad4f866008129c0697f777c6e6cad291930c47a664f8a72222794",
-        ".bigbang/modelos/bigbang.toml.exemplo": "sha256:6fc8c5936e706000c225d3234b7ba2f5e438047cfdcbc8a0419cf84b4e33feec",
+        ".bigbang/modelos/bigbang.toml.exemplo": "sha256:778ba08e5498600441fc495f8aa4f60d6df3fb995022aec32c6c75221cf8a702",
         ".bigbang/modelos/flags.toml": "sha256:3f4bf065d88d1b4b344e2ec8d24e536ef7433333bacb2cf974fc4194703a47ba"
       },
       "descricao": "Ler bigbang.toml sem aceitar erros de digitação que silenciem controles do projeto."
@@ -2054,12 +2054,12 @@
     }
   },
   "revisao": {
-    "codigo": "40dbac7236dafdc0453a8c427fff5666a7f55da4",
-    "wiki_base": "f6d5b3b123e7f3a1da6172a5cc42bf539ca12caa",
+    "codigo": "e1f90ccbb55aa88045f3e26690f44540a7ced763",
+    "wiki_base": "3cc469d4d48e2ff516d4470b4b19a7d3e23a6adb",
     "independente": "aprovada",
     "issue": 213,
     "revisor": "revisar_wiki_208",
-    "wiki": "3cc469d4d48e2ff516d4470b4b19a7d3e23a6adb",
+    "wiki": "7ae9039ef9b23e8c82a703d52f485ae3e683f97e",
     "publicada": true
   },
   "social_preview": {
