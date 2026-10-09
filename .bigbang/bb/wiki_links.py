@@ -6,6 +6,7 @@ from pathlib import Path
 from .docs_check import anchors, outside_code
 
 LINK = re.compile(r'!?\[[^\]]*\]\(([^)\s]+)(?:\s+"[^\"]*")?\)')
+BADGE_LINK = re.compile(r'\[!\[[^\]]*\]\([^)]*\)\]\(([^)\s]+)(?:\s+"[^\"]*")?\)')
 WIKILINK = re.compile(r"\[\[([^\]]+)\]\]")
 HTML_LINK = re.compile(r'(?:src|href)=["\']([^"\']+)["\']', re.I)
 
@@ -41,7 +42,9 @@ def problems(folder, repository=None):
         if not closed:
             found.append(f"{path.name}: bloco de código sem fechamento")
         text = "\n".join(lines)
-        targets = LINK.findall(text) + HTML_LINK.findall(text)
+        # A badge has both an image URL and an outer destination. LINK finds the
+        # image; explicitly include the outer link so absent pages cannot pass.
+        targets = LINK.findall(text) + BADGE_LINK.findall(text) + HTML_LINK.findall(text)
         targets += [link.split("|", 1)[-1].strip() for link in WIKILINK.findall(text)]
         for target in targets:
             if not _target(root, path, target, repository):

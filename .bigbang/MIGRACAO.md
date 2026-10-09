@@ -4,6 +4,22 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [2.0.1] - 2026-10-09
+
+### O que muda
+
+O validador da Wiki confere também o destino externo dos badges Markdown aninhados, além da imagem.
+Página ou âncora ausente bloqueia entrega; badges válidos e validação da imagem são preservados.
+Não adiciona dependências, não executa prosa e não altera os procedimentos privados.
+
+### O que o projeto precisa fazer
+
+Nada para projetos já migrados: atualize pelo pacote oficial e gere os arquivos conforme o procedimento.
+Se está migrando de antes da 2.0.0, o validador confiado da branch de destino pode ainda ler STACK.md e RNs
+locais. Preserve somente esses contratos efetivamente consumidos, classifique a exceção transitória no manifesto,
+atualize a branch confiada e então retire os contratos por outro PR com CI e revisão. Não desligue portões,
+não altere aceites e não declare migração concluída enquanto a ponte existir. A Wiki é a fonte documental oficial.
+
 ## [2.0.0] - 2026-10-09
 
 ### O que muda
