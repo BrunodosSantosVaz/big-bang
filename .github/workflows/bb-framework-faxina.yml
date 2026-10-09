@@ -1,0 +1,46 @@
+# Own-framework cleanup only executes trusted main, never code or artifacts from a triggering PR.
+name: Faxina do Big Bang
+
+on:
+  workflow_run:
+    workflows: ['CI do Big Bang', 'Release do Big Bang']
+    types: [completed]
+  issues:
+    types: [closed]
+  schedule:
+    - cron: '23 3 * * *'
+  workflow_dispatch:
+    inputs:
+      simular:
+        description: 'Só mostrar o plano'
+        type: boolean
+        required: true
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-framework-faxina
+  cancel-in-progress: false
+
+jobs:
+  faxina:
+    if: github.repository == 'BrunodosSantosVaz/big-bang' && (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'))
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      issues: read
+      pull-requests: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Conferir publicação e sincronização antes da faxina
+        run: bash .bigbang/esteira/nucleo/scripts/faxina-framework.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SIMULAR: ${{ github.event_name == 'workflow_dispatch' && inputs.simular || false }}

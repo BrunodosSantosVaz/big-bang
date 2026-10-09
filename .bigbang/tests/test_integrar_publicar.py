@@ -329,13 +329,13 @@ class PublicarSemRelease(ComGit):
         self.assertNotEqual(self.git_origin("rev-parse", "main"), self.git_origin("rev-parse", "develop"))
 
 
-class EncerrarEVerPaineis(CasoDeScript):
+class EncerrarEVerPaineis(ComGit):
     def test_encerrar_sprint_mantem_os_cartoes(self):
         self.issue(5, "Tarefa")
         self.rodar("projeto.sh", "sprint-criar", "2", "Sprint 1 · 2026-10-05")
         self.rodar("projeto.sh", "sprint-criar", "1", "Sprint 1 · 2026-10-05")
         self.rodar("projeto.sh", "sprint", "2", "5", "Sprint 1 · 2026-10-05")
-        r = self.rodar("encerrar.sh", env={"SPRINT": "true", "HOJE": "2026-10-19"})
+        r = self.script("encerrar.sh", SPRINT="true", HOJE="2026-10-19")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(self.rodar("projeto.sh", "sprint-de", "2", "5").stdout.strip(),
                          "Sprint 1 · 2026-10-05 → 2026-10-19")
@@ -351,11 +351,16 @@ class EncerrarEVerPaineis(CasoDeScript):
         self.estado["releases"] = ["v1.0.0"]
         self.estado["milestones"] = [{"number": 1, "title": "v1.0.0", "state": "open"}]
         self.estado["compare"] = {"v1.0.0...epico/7-estoque": 2}  # a commit outside the tag: kept
+        self.estado["api"] = {"repos/dono/repo/releases/tags/v1.0.0": {
+            "tag_name": "v1.0.0", "draft": False, "prerelease": False}}
         self.gravar_estado()
+        self.git("tag", "v1.0.0")
+        self.git("push", "-q", "origin", "--tags", "main:release/1.0.0", "main:feature/12-regra")
+        self.branch("epico/7-estoque", "main", "exclusive", "keep\n")
         self.issue(7, "Estoque", labels=["epic"], milestone="v1.0.0")
         self.issue(12, "Regra", labels=["task"], milestone="v1.0.0")
-        r = self.rodar("encerrar.sh", env={"VERSAO": "1.0.0"})
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        r = self.script("encerrar.sh", VERSAO="1.0.0")
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)  # strict closure requires resolving leftovers
         self.assertEqual(self.estado["issues"]["12"]["state"], "closed")
         self.assertEqual(self.status(1, 7), "Concluída")
         self.assertEqual(self.estado["milestones"][0]["state"], "closed")

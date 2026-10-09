@@ -16,6 +16,9 @@ Obrigado pelo interesse! O Big Bang é um framework para uma pessoa e suas IAs c
 - No próprio framework, use uma branch isolada a partir da `main`, confirme a posse da issue e abra PR para
   `main`. Depois da CI, revisão independente e release oficial, sincronize `main` em `develop` por outro PR.
   A [decisão do modo Flash](.bigbang/docs/decisoes/ADR-0017-modo-flash.md) dispensa a Fundação deste repositório.
+  A [faxina automática](.bigbang/docs/decisoes/ADR-0020-faxina-automatica.md) aguarda a release estável,
+  as duas CIs completas e a sincronização; só apaga branches incorporadas e com trabalho concluído.
+  Confira o run Faxina do Big Bang e libere as posses antes de declarar a entrega encerrada.
   Use commits em inglês
   ([Conventional Commits](https://www.conventionalcommits.org/pt-br/)), textos e documentação em português do Brasil.
 - Só biblioteca padrão do Python 3.11+ na CLI `bb`; scripts da esteira em Bash, aprovados pelo `shellcheck`.
