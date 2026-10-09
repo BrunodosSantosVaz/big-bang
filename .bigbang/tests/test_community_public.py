@@ -1,5 +1,7 @@
 """Community defaults must be idempotent and must not expose existing private cards."""
 import json
+import tempfile
+from pathlib import Path
 import unittest
 from io import BytesIO
 from unittest.mock import patch
@@ -63,11 +65,38 @@ class Projects(unittest.TestCase):
     def test_new_empty_public_project_can_be_published(self):
         board = {"id": "P_empty", "public": False, "title": "Jogo", "shortDescription": "", "readme": "",
                  "items": {"nodes": [], "pageInfo": {"hasNextPage": False}},
-                 "fields": {"nodes": []}}
-        with patch.object(community_public, "project_state", return_value=board), \
+                 "fields": {"nodes": []}, "views": {"nodes": []}}
+        with tempfile.TemporaryDirectory() as temp, \
+                patch.object(community_public, "project_state", return_value=board), \
                 patch.object(community_public.github, "run", return_value='{}') as run:
-            community_public.ensure_public_project("owner/game", "owner", 1, publish=True)
+            receipt = community_public.audit_created_project("owner/game", "owner", 1, "Jogo")
+            path = Path(temp, 'receipt.json')
+            path.write_text(json.dumps(receipt))
+            community_public.ensure_public_project("owner/game", "owner", 1, publish=True, audit=path)
             self.assertTrue(any("updateProjectV2" in arg for arg in run.call_args.args))
+
+    def test_unknown_field_value_stops_audit_without_mutation(self):
+        board = {"id": "P", "items": {"nodes": [{"fieldValues": {"nodes": [
+            {"__typename": "ProjectV2ItemFieldIterationValue"}], "pageInfo": {"hasNextPage": False}}}],
+            "pageInfo": {"hasNextPage": False}}, "fields": {"nodes": [], "pageInfo": {"hasNextPage": False}},
+            "views": {"nodes": [], "pageInfo": {"hasNextPage": False}}}
+        with patch.object(community_public.github, 'run', return_value=json.dumps(
+                {'data': {'user': {'projectV2': board}}})) as run:
+            with self.assertRaisesRegex(BbError, 'inventário completo'):
+                community_public.project_state('owner', 1)
+            self.assertEqual(run.call_count, 1)
+
+    def test_creation_audit_rejects_nondefault_options_and_title(self):
+        board = {'id': 'P', 'title': 'Segredo', 'shortDescription': '', 'readme': '',
+                 'items': {'nodes': []}, 'fields': {'nodes': []}, 'views': {'nodes': []}}
+        with patch.object(community_public, 'project_state', return_value=board):
+            with self.assertRaisesRegex(BbError, 'fora do padrão'):
+                community_public.audit_created_project('owner/game', 'owner', 1, 'Jogo')
+            board['title'] = 'Jogo'
+            board['fields']['nodes'] = [{'__typename': 'ProjectV2SingleSelectField', 'name': 'Status',
+                                        'options': [{'name': 'Confidencial'}]}]
+            with self.assertRaisesRegex(BbError, 'fora do padrão'):
+                community_public.audit_created_project('owner/game', 'owner', 1, 'Jogo')
 
     def test_draft_or_private_item_is_never_published(self):
         for content in ({"__typename": "DraftIssue", "title": "Privado"},

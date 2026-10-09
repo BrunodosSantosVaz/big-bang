@@ -211,6 +211,14 @@ class Wiki(unittest.TestCase):
         self.root.joinpath("src/game.py").write_text("def move():\n    return 2\n")
         self.assertTrue(any("desatualizada" in p for p in self.problems()))
 
+    def test_algorithm_tagged_source_hash_is_validated_and_tampering_blocks(self):
+        hashes = self.manifest['funcionalidades'][0]['hashes']
+        hashes['src/game.py'] = 'sha256:' + hashes['src/game.py']
+        self.save()
+        self.assertEqual(self.problems(), [])
+        self.root.joinpath('src/game.py').write_text('def move():\n    return 99\n')
+        self.assertTrue(any('desatualizada' in p for p in self.problems()))
+
     def test_missing_test_symbol_or_functional_flow_blocks(self):
         self.manifest["funcionalidades"][0]["testes"] = ["tests/test_game.py:test_missing"]
         self.save()
