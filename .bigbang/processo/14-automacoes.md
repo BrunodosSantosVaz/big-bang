@@ -1,5 +1,7 @@
 # 14 · Automações
 
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
+
 O [modo Flash](17-flash.md) muda a execução dos testes no job `check`: após o build, usa `bb testes` com a base do PR/push; mudanças estruturais e releases major/minor forçam suíte completa. A candidata espera o `check` verde do SHA exato, e produção executa suíte completa antes da aprovação do ambiente.
 
 ## Coordenação de IAs
@@ -72,7 +74,7 @@ das reservas. Hoje a entrega disponível é `vps-docker` + `imagem`; `aws`, `paa
 Cada alvo implementado declara as operações `publicar <ambiente> <digest>`, `voltar <ambiente> <tag>`,
 `migrar <ambiente> <digest>` e `saude <ambiente>`, podendo oferecer `checar`. Os contratos instalados são validados
 antes de gerar arquivos. A composição passa pelo formato do artefato antes do alvo. Veja o
-[contrato de extensão](../esteira/perfis/deploy/README.md) e o [ADR-0016](../docs/decisoes/ADR-0016-deploy-multiplataforma.md).
+[contrato de extensão](../esteira/perfis/deploy/README.md) e o [ADR-0016](https://github.com/BrunodosSantosVaz/big-bang/wiki/ADR-0016-deploy-multiplataforma).
 
 ## Segredos e variáveis
 

@@ -4,6 +4,38 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [2.0.0] - 2026-10-09
+
+### O que muda
+
+Documentação de sistemas públicos passa a usar a GitHub Wiki como fonte oficial. Privados mantêm os arquivos
+locais e procedimentos anteriores. O README público é breve e dá acesso à Wiki, Discussions e painéis públicos.
+CLI, guarda da stack, regras de negócio, checklist, geração e changelog resolvem o destino pela visibilidade.
+O manifesto funcional `.bigbang-docs.json` fixa os commits da Wiki, o inventário de módulos e a matriz de
+rastreabilidade. Propostas documentais são revisadas com o PR; publicação não usa force e rejeita HEAD concorrente.
+Produção e Publicar sem release não concluem sem cobertura, links e publicação confirmada, também no Flash.
+
+Discussions é padrão da comunidade; a IA responsável publica o primeiro post de modo idempotente. Painéis
+públicos são conferidos separadamente, e painéis existentes exigem auditoria antes da mudança de visibilidade.
+A automação não muda permissões de edição. Social preview é preparado no design kit e o upload é registrado
+como confirmado ou pendente conforme a capacidade real da sessão.
+
+### O que o projeto precisa fazer
+
+Em público: confirme Wiki habilitada, Home criada e acesso de escrita; inventarie documentos e funcionalidades
+antes de migrar. Preserve configurações e documentos antigos. Prepare `.bigbang-docs.json`, propostas da Wiki,
+conteúdo funcional completo, navegação, imagens, requisitos e testes reais. No checklist, mova autorizações de
+comandos para `.bigbang-producao.json`; comandos vindos da Wiki nunca são executados. Registre a referência
+de ambiente na Wiki. Revise, publique por fast-forward e valide o HEAD; somente após confirmação retire os
+documentos anteriores e corrija referências no PR. Atualize README, Discussions, painéis e Social preview.
+
+Em privado: não migre documentos nem publique painéis. Preserve o padrão atual; adote Discussions no escopo
+autorizado e mantenha a primeira publicação factual. `bb atualizar 2.0.0 --confirmo-migracao` exige a confirmação
+dos passos acima; autorização já concedida na conversa vale para a execução, sem outro pedido redundante.
+
+Framework e Actions não alteram automaticamente os caminhos do artefato. Se apenas estes componentes e a
+documentação mudaram, conclua por Publicar sem release, sem recompilar nem versionar o aplicativo.
+
 ## [1.5.5] - 2026-10-09
 
 ### O que muda
@@ -115,7 +147,7 @@ Use `bb atualizar 1.5.1` para obter a correção oficial e regenerar os arquivos
   `migration=pending`, e o inicializador da imagem migra antes de abrir a porta. Saúde/readiness consulta o banco
   e os testes posteriores comprovam a entrega. Uma réplica permanente pode ter sobreposição transitória no
   rollout do mesmo volume, exigindo transações e compatibilidade do esquema. Rollback reimporta o digest
-  estável sem desfazer migrações. Veja o [runbook](docs/deploy-tsuru.md).
+  estável sem desfazer migrações. Veja o [runbook](https://github.com/BrunodosSantosVaz/big-bang/wiki/Historico-bigbang-docs-deploy-tsuru).
 - **Modo Flash:** `projeto.modo` é opcional (`padrao` por omissão), escolhido em `bb init --modo flash` ou depois
   por ADR e `bb gerar`. Testes continuam escritos antes do código; `bb testes` executa os afetados por
   dependências após concluir as alterações, ou tudo para estrutura, primeira entrega, major/minor e produção.

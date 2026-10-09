@@ -2,7 +2,7 @@
 name: bb-refinar-backlog
 description: Use para Ideia, vamos refinar o backlog ou refinar uma issue. Conduz um épico por vez até a Definition of Ready e registra refinamento-aprovado somente após decisão do dono.
 ---
-<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/skills/bb-refinar-backlog/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v2.0.0 a partir de .bigbang/skills/bb-refinar-backlog/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Refinar backlog
 
@@ -11,6 +11,8 @@ description: Use para Ideia, vamos refinar o backlog ou refinar uma issue. Condu
 Ao registrar ideia ou refinar épico. Não inicia implementação.
 
 ## Antes de começar
+
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
 
 Leia `AGENTS.md`, `PRODUTO.md`, RNs existentes, `.bigbang/processo/03-planejamento.md` e os painéis com `bb status`.
 

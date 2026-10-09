@@ -1,7 +1,7 @@
 # Núcleo da esteira
 
 O que todo sistema recebe, qualquer que seja o perfil de entrega (seções 14.1, 14.2 e 14.5 da
-[especificação](../../docs/especificacao.md)). Decisões: [ADR-0008](../../docs/decisoes/ADR-0008-esteira-bash-e-bb.md).
+[especificação](https://github.com/BrunodosSantosVaz/big-bang/wiki/Especificacao)). Decisões: [ADR-0008](https://github.com/BrunodosSantosVaz/big-bang/wiki/ADR-0008-esteira-bash-e-bb).
 
 - `arquivos/`: o que o `bb gerar --esteira` copia para o projeto (workflows `bb-*.yml`, formulários de issue, modelo
   de PR, `dependabot.yml`).

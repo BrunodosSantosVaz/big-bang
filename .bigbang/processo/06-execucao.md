@@ -1,5 +1,7 @@
 # 06 · Execução de um épico
 
+Os caminhos de documentação do sistema citados aqui são identificadores lógicos: leia com `bb documentacao ler <caminho>`. Em públicos, escreva e revise a proposta na Wiki; em privados, mantenha os arquivos locais. Aplique `.bigbang/processo/18-documentacao.md`, incluindo inventário, matriz, links e publicação confirmada também no Flash. README público é uma apresentação breve com Wiki, Discussions e painéis; conteúdo completo e screenshots ficam na Wiki.
+
 No [modo Flash](17-flash.md), a ordem teste → tarefas permanece. Escreva os testes antes, conclua o código e execute uma rodada dos testes afetados (`bb testes --base <base>`). Não repita a suíte completa por hábito; a CI do mesmo commit serve como evidência. Mudanças estruturais, major/minor e produção exigem tudo.
 
 Ordem fixa: **teste do épico → tarefas → documentação**. Painel: **Execução**.
@@ -46,7 +48,7 @@ estão em *Pronto*. Checklist:
 - [ ] Guia de quem usa, se a tela ou o fluxo mudou
 - [ ] ADR de cada decisão tomada no épico
 - [ ] Rascunho da entrada do `CHANGELOG.md` (a versão é preenchida na integração)
-- [ ] `README.md` completo e atual: estado atual, recursos, instalação, uso e uma imagem real do sistema (DOC-15)
+- [ ] `README.md` atual no formato da visibilidade: público breve com Wiki/Discussions/painéis; privado completo (DOC-15)
 - [ ] `docs/operacao/checklist-producao.md` com a verificação de cada item, se o épico mudou algum deles (o
   *Publicar em produção* recusa sem ele; app sem servidor marca os itens de backend como `nao-se-aplica`)
 

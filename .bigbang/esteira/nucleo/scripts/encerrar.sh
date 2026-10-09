@@ -21,6 +21,10 @@ sobras=0
 projeto() { bash "$AQUI/projeto.sh" "$@"; }
 run() { if [ "$SIMULAR" = true ]; then echo "[simulado] $*"; else "$@" >/dev/null; fi; }
 
+read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
+# A sprint/release cannot be reported as finished while its canonical documentation is unpublished.
+documentacao() { "${BB_CMD[@]}" esteira documentacao --publicada --comunidade --visibilidade-remota; }
+
 apagar_se_seguro() { # <branch> <tag>
   local branch="$1" tag="$2" fora
   [[ " $branches_existentes " == *" $branch "* ]] || return 0
@@ -40,6 +44,7 @@ if [ -n "${VERSAO:-}" ]; then
   [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::versão '$v' inválida"; exit 2; }
   gh api "repos/$R/git/ref/tags/$tag" >/dev/null 2>&1 || { echo "::error::a tag $tag não existe: a versão não foi publicada"; exit 1; }
   gh release view "$tag" --repo "$R" >/dev/null 2>&1 || { echo "::error::a Release $tag não existe"; exit 1; }
+  documentacao
   release=$(gh api "repos/$R/releases/tags/$tag")
   jq -e --arg tag "$tag" '.tag_name == $tag and .draft == false and .prerelease == false' <<< "$release" >/dev/null \
     || { echo "::error::a Release $tag não é estável"; exit 1; }
@@ -65,6 +70,7 @@ if [ -n "${VERSAO:-}" ]; then
 fi
 
 if [ "${SPRINT:-false}" = true ]; then
+  [ -n "${VERSAO:-}" ] || documentacao
   atual=$(projeto sprints "$EXEC" | grep -E '^Sprint [0-9]+ · [0-9-]+$' | tail -n 1 || true)
   if [ -z "$atual" ]; then echo "Nenhuma sprint aberta."; else
     for painel in "$PLAN" "$EXEC"; do projeto sprint-renomear "$painel" "$atual" "$atual → $HOJE"; done

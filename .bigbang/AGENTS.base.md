@@ -4,6 +4,13 @@ Este sistema é construído com o **Big Bang v{{bigbang.versao}}**. Estas instru
 Leia nesta ordem, no início de toda sessão: `PRODUTO.md`, `STACK.md`, `DESIGN.md` (se houver interface),
 `bigbang.toml`, `docs/memoria.md` e a seção "Projeto" no fim deste arquivo.
 
+Os nomes documentais acima são identificadores lógicos. Em repositório público, leia-os com
+`bb documentacao ler <nome>` na Wiki fixada pelo manifesto; nunca recrie documentos de sistema na raiz ou `docs/`.
+Em privado, mantenha os arquivos e procedimentos atuais. Aplique `.bigbang/processo/18-documentacao.md` em toda
+etapa. A IA responsável publica o primeiro post em Discussions (`bb comunidade primeiro-post`, idempotente),
+mantém README breve com Wiki/Discussions/painéis públicos e prepara Social preview no design kit.
+Cobertura documental, links, revisão e publicação confirmada da Wiki também são obrigatórios no modo Flash.
+
 ## Como reconhecer o que o dono pede
 
 | O dono diz (ou algo parecido) | Use a skill |

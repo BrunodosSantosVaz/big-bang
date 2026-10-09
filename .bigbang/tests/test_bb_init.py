@@ -9,6 +9,7 @@ import sys
 import tempfile
 import tomllib
 import unittest
+from unittest.mock import patch
 
 from _raiz import RAIZ, ignorar_para_copia, importar_bb
 
@@ -107,11 +108,15 @@ class Init(unittest.TestCase):
         self.assertIn(init.F0_TITLE, chamadas[-1])
 
     def test_publico_cria_licenca_do_sistema(self):
-        codigo, saida = self.rodar("--nome", "X", "--visibilidade", "publico", "--licenca", "MIT")
+        with patch.object(init.documentation, "preflight", return_value={"commit": "a" * 40, "branch": "master"}):
+            codigo, saida = self.rodar("--nome", "X", "--visibilidade", "publico", "--licenca", "MIT")
         self.assertEqual(codigo, EXIT_OK, saida)
         ano = datetime.date.today().year
         self.assertEqual(self.ler("LICENSE"), f"MIT License\n\nCopyright (c) {ano} Pessoa Fictícia\n")
         self.assertIn(["api", "licenses/mit", "--jq", ".body"], self.chamadas())
+        self.assertIn("/wiki", self.ler("README.md"))
+        self.assertIn("/discussions", self.ler("README.md"))
+        self.assertTrue(os.path.isfile(os.path.join(self.raiz, ".bigbang-docs.json")))
 
     def test_publico_sem_licenca(self):
         self.assertEqual(self.rodar("--nome", "X", "--visibilidade", "publico")[0], EXIT_USAGE)

@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+      discussions: read
       id-token: write
       attestations: write
     steps:
@@ -40,7 +41,10 @@ jobs:
           versao=$(tr -d '[:space:]' < .bigbang/VERSION)
           [ "v$versao" = "$TAG" ] || { echo "::error::$TAG nao bate com .bigbang/VERSION ($versao)"; exit 1; }
       - name: bb verificar e pacote reprodutivel
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          python .bigbang/bin/bb.py esteira documentacao --publicada --comunidade --visibilidade-remota
           python .bigbang/bin/bb.py verificar
           python .bigbang/bin/bb.py pacote --saida dist --notas "$RUNNER_TEMP/notas.md"
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2

@@ -32,7 +32,7 @@ e arquivos (#179) e serviço AWS concreto (#180) continuam reservados. A presen�
 intenção, sem prometer funcionalidade. Entrega de deploy por hashes permanece recusada enquanto o perfil
 implementar somente imagens; o perfil compilado conserva sua própria promoção de binários por hashes.
 
-O [runbook do Tsuru](../../../docs/deploy-tsuru.md) documenta API, apps/jobs por ambiente, importação por
+O [runbook do Tsuru](https://github.com/BrunodosSantosVaz/big-bang/wiki/Historico-bigbang-docs-deploy-tsuru) documenta API, apps/jobs por ambiente, importação por
 digest, `TSURU_MIGRACAO=job` (padrão) ou `inicializacao` e limites dessa implementação. Neste último modo,
 a pré-checagem registra `migration=pending`; a imagem migra antes de ouvir a porta e saúde/readiness consulta
 o banco. Exige uma réplica permanente, com possível sobreposição transitória no rollout do mesmo volume.

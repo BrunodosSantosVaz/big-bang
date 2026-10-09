@@ -8,7 +8,7 @@ import sys
 import tomllib
 
 from . import config as config_module
-from . import acceptance, docs_check, ownership, pipeline, stack_guard, status, traceability
+from . import acceptance, community_public, documentation, docs_check, ownership, pipeline, stack_guard, status, traceability
 from .errors import EXIT_OK, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 from .paths import CONFIG_FILE, read_text, write_text
 
@@ -66,6 +66,10 @@ def register(commands, parser_class):
 
     p = sub.add_parser("documentacao", help="Markdown válido, links relativos (DOC-14), README do sistema (DOC-15), "
                                             "arquivos de comunidade (DOC-16) e ícone global (DOC-17)")
+    p.add_argument("--dados", help="pasta com o conteúdo revisado a conferir")
+    p.add_argument("--publicada", action="store_true")
+    p.add_argument("--comunidade", action="store_true")
+    p.add_argument('--visibilidade-remota', action='store_true')
     p.set_defaults(handler=_docs)
 
     p = sub.add_parser("comunidade", help="cria os arquivos de comunidade que faltam (DOC-16) a partir dos modelos")
@@ -212,10 +216,24 @@ def _changelog(args):
     for line in _lines():
         number, title, labels = (line.split("\t") + ["", ""])[:3]
         items.append((number, title, [label for label in labels.split(",") if label]))
+    public = documentation.is_public(args.raiz)
     path = os.path.join(args.raiz, args.arquivo)
-    current = read_text(path) if os.path.exists(path) else None
+    current = documentation.read(args.raiz, args.arquivo) if public else read_text(path) if os.path.exists(path) else None
     date = args.data or datetime.date.today().isoformat()
-    write_text(path, pipeline.changelog_with_release(current, args.versao, date, items))
+    text = pipeline.changelog_with_release(current, args.versao, date, items)
+    if public:
+        from . import documentation_cli
+        import argparse
+        import tempfile
+        with tempfile.TemporaryDirectory(prefix="bb-changelog-") as temporary:
+            draft = os.path.join(temporary, "changelog.md")
+            write_text(draft, text)
+            documentation_cli._write(argparse.Namespace(raiz=args.raiz, documento=args.arquivo, arquivo=draft))
+        folder, _ = documentation.prepare(args.raiz)
+        documentation_cli._propose(argparse.Namespace(raiz=args.raiz, wiki=str(folder),
+                                                       branch="bigbang/proposta-release-" + args.versao))
+    else:
+        write_text(path, text)
     print(f"{args.arquivo}: seção {args.versao} gravada")
     return EXIT_OK
 
@@ -304,7 +322,25 @@ def _rls(args):
 
 
 def _docs(args):
-    problems = docs_check.problems(args.raiz)
+    root = args.dados or args.raiz
+    if args.visibilidade_remota:
+        visibility = documentation.visibility_problems(root)
+        if visibility:
+            return _report(visibility, '')
+    if args.publicada and not documentation.is_public(root):
+        print("Projeto privado: publicação documental local preservada")
+        return EXIT_OK
+    problems = docs_check.problems(root)
+    if documentation.is_public(root):
+        if args.publicada:
+            problems += documentation.validate(root, published=True)
+        if args.comunidade:
+            config = config_module.load(root, required=False)
+            config = config or documentation.load(root).get("configuracao_comunidade")
+            if config:
+                problems += community_public.verify(root, config)
+            else:
+                problems.append("configuração dos três painéis obrigatórios ausente")
     for problem in problems:
         print(problem)
     if not problems:

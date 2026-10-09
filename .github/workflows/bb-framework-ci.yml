@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  discussions: read
 
 concurrency:
   group: bb-framework-ci-${{ github.ref }}
@@ -26,10 +27,15 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python }}
+      - name: Wiki proposta, rastreabilidade e comunidade pública
+        run: python .bigbang/bin/bb.py esteira documentacao --comunidade --visibilidade-remota
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Testes do framework (estrutura, workflows, Markdown e links)
         run: python -m unittest discover -s .bigbang/tests -v
       - name: bb verificar (CHECKSUMS, camada gerada e workflows)

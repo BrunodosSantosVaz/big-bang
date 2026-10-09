@@ -15,6 +15,9 @@ REPO="${1:?Uso: $0 OWNER/REPO \"Nome do Produto\"}"
   || { echo "::error::informe o repositório como dono/repo (recebi '$REPO')" >&2; exit 2; }
 PRODUTO="${2:?Uso: $0 OWNER/REPO \"Nome do Produto\"}"
 OWNER="${REPO%%/*}"
+read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
+PUBLICO=$(gh api "repos/$REPO" --jq 'if .private then "false" else "true" end')
+[[ "$PUBLICO" = true || "$PUBLICO" = false ]] || { echo "::error::visibilidade do repositório não conferida"; exit 1; }
 
 # shellcheck source-path=SCRIPTDIR source=colunas.sh
 source "$(dirname "$0")/colunas.sh"
@@ -25,15 +28,30 @@ numero_do_painel() { # existing board with this exact title, or empty
 }
 
 criar_painel() {
-  local titulo="$1" numero
+  local titulo="$1" numero criado=false recibo=""
   numero=$(numero_do_painel "$titulo")
   if [ -z "$numero" ]; then
     numero=$(gh project create --owner "$OWNER" --title "$titulo" --format json --jq '.number')
+    criado=true
     echo "  painel criado: #$numero $titulo" >&2
   else
     echo "  painel existente: #$numero $titulo" >&2
   fi
-  gh project link "$numero" --owner "$OWNER" --repo "$REPO" >/dev/null 2>&1 || true
+  gh project link "$numero" --owner "$OWNER" --repo "$REPO" >/dev/null
+  if [ "$PUBLICO" = true ]; then
+    local auditoria=()
+    if [ "$criado" = true ]; then
+      recibo=$(mktemp)
+      if ! "${BB_CMD[@]}" comunidade painel auditar-criacao "$numero" --repositorio "$REPO" --owner "$OWNER" \
+          --titulo-criado "$titulo" >"$recibo"; then rm -f "$recibo"; return 1; fi
+      auditoria=(--auditoria "$recibo")
+    elif [ -n "${BB_AUDITORIA_PAINEL:-}" ]; then auditoria=(--auditoria "$BB_AUDITORIA_PAINEL"); fi
+    local resultado=0
+    "${BB_CMD[@]}" comunidade painel publicar "$numero" --repositorio "$REPO" --owner "$OWNER" \
+      "${auditoria[@]}" >&2 || resultado=$?
+    if [ -n "$recibo" ]; then rm -f "$recibo"; fi
+    if [ "$resultado" -ne 0 ]; then return "$resultado"; fi
+  fi
   echo "$numero"
 }
 

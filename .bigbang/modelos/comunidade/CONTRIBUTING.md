@@ -15,7 +15,7 @@ uma pessoa decide e IAs executam, e toda mudança passa por uma esteira com test
 
 ## Enviar código
 
-- Leia o [README](README.md) (seção *Para desenvolvedores*) e o [`AGENTS.md`](AGENTS.md), que valem para pessoas e IAs.
+- Leia o [README](README.md), a documentação no destino canônico por visibilidade e o [`AGENTS.md`](AGENTS.md), que valem para pessoas e IAs.
 - Trabalhe numa branch a partir da `develop` (bug: a partir da `main`), no padrão de
   [`.bigbang/processo/07-branches-e-commits.md`](.bigbang/processo/07-branches-e-commits.md).
 - Commits e código em inglês ([Conventional Commits](https://www.conventionalcommits.org/pt-br/)); issues, PRs e
