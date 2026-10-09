@@ -14,7 +14,11 @@ Não adiciona dependências, não executa prosa e não altera os procedimentos p
 
 ### O que o projeto precisa fazer
 
-Nada para projetos já migrados: atualize pelo pacote oficial e gere os arquivos conforme o procedimento.
+Nada.
+
+### Compatibilidade com a migração anterior
+
+Projetos já migrados atualizam pelo pacote oficial e geram os arquivos conforme o procedimento habitual.
 Se está migrando de antes da 2.0.0, o validador confiado da branch de destino pode ainda ler STACK.md e RNs
 locais. Preserve somente esses contratos efetivamente consumidos, classifique a exceção transitória no manifesto,
 atualize a branch confiada e então retire os contratos por outro PR com CI e revisão. Não desligue portões,
