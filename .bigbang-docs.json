@@ -2053,10 +2053,10 @@
   "revisao": {
     "codigo": "89d2c98fbeaa721f4e2ed5acf2c0d65f8b3de9f9",
     "wiki_base": "a436ca94e7453c095332f5a76f83e5e45efc72e8",
-    "independente": "aprovado para publicacao documental; revisao final do PR apos CI",
+    "independente": "publicacao documental e complemento aprovados; revisao final do PR apos CI",
     "pr": 211,
     "codigo_revisado": "fd8ab6b11adb8c66caa029c0fda6e401fd3dadbf",
-    "wiki_revisada": "d8924c3703d8e38551e410bafca4f4d4dd8c4dd3"
+    "wiki_revisada": "f6d5b3b123e7f3a1da6172a5cc42bf539ca12caa"
   },
   "social_preview": {
     "arquivo_wiki": "assets/social-preview.png",

@@ -12,7 +12,7 @@ Obrigado pelo interesse! O Big Bang é um framework para uma pessoa e suas IAs c
 ## Enviar uma mudança
 
 - Leia a [especificação](https://github.com/BrunodosSantosVaz/big-bang/wiki/Especificacao): ela é a fonte da verdade, e cada decisão de projeto vira
-  um ADR em [`.bigbang/docs/decisoes/`](.bigbang/docs/decisoes/).
+  um ADR na [Wiki — Decisões](https://github.com/BrunodosSantosVaz/big-bang/wiki/Decisoes).
 - No próprio framework, use uma branch isolada a partir da `main`, confirme a posse da issue e abra PR para
   `main`. Depois da CI, revisão independente e release oficial, sincronize `main` em `develop` por outro PR.
   A [decisão do modo Flash](https://github.com/BrunodosSantosVaz/big-bang/wiki/ADR-0017-modo-flash) dispensa a Fundação deste repositório.
