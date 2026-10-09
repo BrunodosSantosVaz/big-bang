@@ -1,0 +1,42 @@
+# Gerado pelo Big Bang v1.5.5 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-faxina.yml. Não edite: personalize em bigbang.toml.
+# Daily recovery complements cleanup already performed by real publication and sprint closure.
+# No workflow_run: simulated publications must never trigger a separate real cleanup.
+name: Faxina
+
+on:
+  schedule:
+    - cron: '43 3 * * *'
+  workflow_dispatch:
+    inputs:
+      simular:
+        description: 'Só mostrar o plano'
+        type: boolean
+        required: true
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-faxina
+  cancel-in-progress: false
+
+jobs:
+  faxina:
+    if: ${{ vars.PROJETO_OWNER != '' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.PROJETO_TOKEN }}
+          persist-credentials: false
+      - name: Apagar branches concluídas e conferir sobras
+        run: |
+          gh auth setup-git
+          bash .bigbang/esteira/nucleo/scripts/faxina.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          SIMULAR: ${{ github.event_name == 'workflow_dispatch' && inputs.simular || false }}
+          FAXINA_EXIGIR_LIMPA: 'true'

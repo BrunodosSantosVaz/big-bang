@@ -2,7 +2,7 @@
 name: bb-codar-tarefa
 description: Use para próxima tarefa ou codar uma issue de implementação. Confirma posse e worktree, libera as marcas da tarefa, implementa, testa e pede revisão independente do PR.
 ---
-<!-- Gerado pelo Big Bang v1.5.4 a partir de .bigbang/skills/bb-codar-tarefa/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v1.5.5 a partir de .bigbang/skills/bb-codar-tarefa/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Codar tarefa
 
