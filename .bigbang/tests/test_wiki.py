@@ -92,6 +92,21 @@ class Wiki(unittest.TestCase):
     def test_complete_inventory_passes(self):
         self.assertEqual(self.problems(), [])
 
+    def test_invented_code_commit_is_rejected(self):
+        self.manifest['codigo']['commit'] = 'f' * 40
+        self.save()
+        self.assertTrue(any('commit do código' in p for p in self.problems()))
+
+    def test_absolute_links_to_own_wiki_are_checked(self):
+        self.wiki.joinpath('Home.md').write_text(
+            '# Jogo\n\n[ausente](https://github.com/owner/game/wiki/Inexistente)\n')
+        self.commit_wiki()
+        self.assertTrue(any('Inexistente' in p for p in self.problems()))
+
+    def test_unlisted_manual_at_root_is_rejected(self):
+        self.root.joinpath('MANUAL.md').write_text('# Manual duplicado\n')
+        self.assertTrue(any('MANUAL.md' in p for p in self.problems()))
+
     def test_new_implemented_module_without_documentation_blocks_delivery(self):
         self.root.joinpath("src/ranking.py").write_text("def ranking():\n    return []\n")
         git(self.root, "add", ".")
