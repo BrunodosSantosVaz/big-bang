@@ -6,6 +6,7 @@ import tempfile
 import unittest
 import contextlib
 import io
+import os
 from pathlib import Path
 from unittest.mock import patch
 
@@ -136,14 +137,23 @@ class Wiki(unittest.TestCase):
     def test_public_repository_cannot_bypass_policy_with_private_config(self):
         self.root.joinpath('bigbang.toml').write_text(
             '[projeto]\nvisibilidade="privado"\nrepositorio="owner/game"\n')
-        with patch.object(documentation, 'repository_state', return_value={'private': False}):
-            self.assertTrue(documentation.visibility_problems(self.root))
+        with patch.dict(os.environ, {'GITHUB_REPOSITORY': 'owner/game'}), \
+                patch.object(documentation, 'repository_state', return_value={'private': False}):
+            self.assertTrue(any('visibilidade real diverge' in problem
+                                for problem in documentation.visibility_problems(self.root)))
 
     def test_private_repository_visibility_keeps_current_policy(self):
         self.root.joinpath('bigbang.toml').write_text(
             '[projeto]\nvisibilidade="privado"\nrepositorio="owner/game"\n')
-        with patch.object(documentation, 'repository_state', return_value={'private': True}):
+        with patch.dict(os.environ, {'GITHUB_REPOSITORY': 'owner/game'}), \
+                patch.object(documentation, 'repository_state', return_value={'private': True}):
             self.assertEqual(documentation.visibility_problems(self.root), [])
+
+    def test_ci_repository_mismatch_blocks_before_network_access(self):
+        with patch.dict(os.environ, {'GITHUB_REPOSITORY': 'owner/another'}), \
+                patch.object(documentation, 'repository_state', side_effect=AssertionError('network')):
+            self.assertTrue(any('repositório da esteira diverge' in problem
+                                for problem in documentation.visibility_problems(self.root)))
 
     def test_complete_inventory_passes(self):
         self.assertEqual(self.problems(), [])
