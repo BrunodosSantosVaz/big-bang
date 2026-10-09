@@ -6,7 +6,7 @@ Framework para desenvolver e entregar sistemas com IAs, GitHub e uma esteira ver
 
 O modo **Flash** concentra a execução dos testes depois do lote de código e seleciona os testes afetados. Testes continuam escritos antes; mudanças estruturais e novas versões de produção exigem validação completa. Segurança, documentação e revisão permanecem obrigatórias.
 
-A documentação oficial deste repositório público está na **[Wiki](https://github.com/BrunodosSantosVaz/big-bang/wiki)**. Repositórios privados conservam a documentação local.
+A documentação oficial deste repositório público está na **[Wiki](https://github.com/BrunodosSantosVaz/big-bang/wiki)**. Repositórios privados conservam a documentação local. A validação inclui links, imagens e destinos de badges.
 
 - [Começar a usar](https://github.com/BrunodosSantosVaz/big-bang/wiki/Guia-de-inicio)
 - [Referência da CLI](https://github.com/BrunodosSantosVaz/big-bang/wiki/Referencia-CLI)
