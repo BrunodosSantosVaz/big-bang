@@ -41,7 +41,7 @@ class Wiki(unittest.TestCase):
             "## " + heading + "\n\nTexto verificável da partida, com resultado esperado e cenário real do sistema."
             for heading in documentation.FEATURE_SECTIONS)
         self.wiki.joinpath("Partida.md").write_text(body)
-        self.wiki.joinpath("Produto.md").write_text("# Produto\n\nObjetivo e escopo do jogo.\n")
+        self.wiki.joinpath("Produto.md").write_text("# Produto\n\nObjetivo e escopo do jogo. RF-001: mover a cobra.\n")
         self.wiki.joinpath("Home.md").write_text("# Jogo\n\n[Partida](Partida) [Produto](Produto)\n")
         self.wiki.joinpath("_Sidebar.md").write_text("# Navegação\n\n[Início](Home) [Partida](Partida)\n")
         git(self.wiki, "add", ".")
@@ -55,6 +55,7 @@ class Wiki(unittest.TestCase):
             "wiki": {"base": self.base_sha, "commit": self.base_sha, "branch": "master"},
             "paginas": {"PRODUTO.md": "Produto", "docs/guias/partida.md": "Partida"},
             "categorias": {category: {"pagina": "Produto"} for category in documentation.CATEGORIES},
+            "requisitos": {"RF-001": {"pagina": "Produto"}},
             "codigo": {"commit": self.code_sha, "raizes": ["src/"], "excluir": []},
             "funcionalidades": [{"id": "F-001", "requisitos": ["RF-001"], "pagina": "Partida",
                                   "fontes": ["src/game.py"], "testes": ["tests/test_game.py:test_move"],
@@ -95,6 +96,45 @@ class Wiki(unittest.TestCase):
         self.root.joinpath("src/ranking.py").write_text("def ranking():\n    return []\n")
         git(self.root, "add", ".")
         self.assertTrue(any("src/ranking.py" in p for p in self.problems()))
+
+    def test_requirement_must_exist_in_actual_documentation(self):
+        self.wiki.joinpath("Produto.md").write_text("# Produto\n\nObjetivo sem requisito identificável.\n")
+        self.commit_wiki()
+        self.assertTrue(any("RF-001" in p for p in self.problems()))
+
+    def test_empty_functional_sections_do_not_prove_coverage(self):
+        self.wiki.joinpath("Partida.md").write_text("# Partida\n\n" + "\n\n".join(
+            "## " + heading for heading in documentation.FEATURE_SECTIONS))
+        self.commit_wiki()
+        self.assertTrue(any("conteúdo" in p for p in self.problems()))
+
+    def test_published_head_must_match_exact_reviewed_commit(self):
+        self.wiki.joinpath("Home.md").write_text("# Proposta\n\n[Partida](Partida)\n")
+        self.commit_wiki()
+        self.assertTrue(any("publicação" in p for p in documentation.validate(
+            self.root, self.wiki, published=True, check_repository=False)))
+
+    def test_public_stack_guard_uses_approved_table_from_wiki(self):
+        from bb import stack_guard
+        self.wiki.joinpath("Stack.md").write_text(
+            '# Stack\n\n<!-- bb:dependencias:inicio -->\n| Pacote | Ecossistema |\n'
+            '| fastify | npm |\n<!-- bb:dependencias:fim -->\n')
+        self.manifest["paginas"]["STACK.md"] = "Stack"
+        self.commit_wiki()
+        with patch.object(documentation, "checkout", return_value=self.wiki):
+            self.assertEqual(stack_guard.allowed(self.root), {("npm", "fastify")})
+        self.assertFalse(self.root.joinpath("STACK.md").exists())
+
+    def test_business_rules_survive_migration_without_changing_acceptance_tests(self):
+        from bb import traceability
+        self.wiki.joinpath("RN-0001-partida.md").write_text('id: RN-0001\nsituacao: vigente\n\n## Regra\n\nMover.\n')
+        name = "docs/negocio/regras/RN-0001-partida.md"
+        self.manifest["paginas"][name] = "RN-0001-partida"
+        self.root.joinpath("tests/aceite").mkdir()
+        self.root.joinpath("tests/aceite/test_partida.py").write_text('def test_rn0001_move():\n    assert True\n')
+        self.commit_wiki()
+        with patch.object(documentation, "checkout", return_value=self.wiki):
+            self.assertEqual(traceability.problems(self.root, r"def test_", [name]), [])
 
     def test_changed_behavior_without_doc_refresh_blocks_delivery(self):
         self.root.joinpath("src/game.py").write_text("def move():\n    return 2\n")
@@ -143,7 +183,8 @@ class Wiki(unittest.TestCase):
 
     def test_uninitialized_wiki_does_not_modify_local_documents(self):
         self.root.joinpath("PRODUTO.md").write_text("Preservar")
-        with patch.object(documentation, "git", side_effect=BbError("Wiki sem HEAD")):
+        with patch.object(documentation, "repository_state", return_value={"has_wiki": True}), \
+                patch.object(documentation, "git", side_effect=BbError("Wiki sem HEAD")):
             with self.assertRaises(BbError):
                 documentation.preflight("owner/game")
         self.assertEqual(self.root.joinpath("PRODUTO.md").read_text(), "Preservar")

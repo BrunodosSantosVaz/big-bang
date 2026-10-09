@@ -44,7 +44,7 @@ class Projects(unittest.TestCase):
         with patch.object(community_public, "project_state", return_value=board), \
                 patch.object(community_public.github, "run", return_value='{}') as run:
             community_public.ensure_public_project("owner/game", "owner", 1, publish=True)
-            self.assertIn("updateProjectV2", run.call_args.args[2])
+            self.assertTrue(any("updateProjectV2" in arg for arg in run.call_args.args))
 
     def test_draft_or_private_item_is_never_published(self):
         for content in ({"__typename": "DraftIssue", "title": "Privado"},
