@@ -75,7 +75,7 @@ aaafae614dd3a116bdff48ac967db92a9be1b82bcc2f6210ea4bed6471320ba4  esteira/nucleo
 164a28eaba2a75d0ba7f9b736b2341af46c56ff1331b460da201483f5ae467f6  esteira/nucleo/arquivos/.github/workflows/bb-codeql.yml
 145fc51f32cad180296ac1b4f2d92c87e3af2930c5ff59f540df54eab70428c9  esteira/nucleo/arquivos/.github/workflows/bb-criar-branches.yml
 c9a0f798cc76e95f186cc7b5137597fba4ce39a752bfaa3ef24a182a184b7480  esteira/nucleo/arquivos/.github/workflows/bb-encerrar.yml
-f9907e3efe516b6fc26fb3a54ac85ee776bb2d3a206b894aa45299ca48c7814f  esteira/nucleo/arquivos/.github/workflows/bb-faxina.yml
+1bfad57ea5b4fcbd50ab764d9e1b8fa784504309f20fad32bd6be76f3cbc89f1  esteira/nucleo/arquivos/.github/workflows/bb-faxina.yml
 e89d9feb88ee4eee480a09ab363d7a1dfc656ed5cdb0bc4398cf746233774b7b  esteira/nucleo/arquivos/.github/workflows/bb-iniciar-sprint.yml
 52e004d9903aa37987954bfdd7b2881632659f2ae445bdae7c2cbc1534191ff9  esteira/nucleo/arquivos/.github/workflows/bb-integrar-release.yml
 60e8d7a56c60b795d0986542651c7bae07f4810f5ef59cacf65b8995da9ef5ec  esteira/nucleo/arquivos/.github/workflows/bb-kanban.yml
@@ -253,7 +253,7 @@ e3e99352a9be989759b4b41ea9a5d0c466e2cabd9e044f7d46f6b1ef0d4ca19b  tests/test_est
 820efab571c960d3bfd75a0566a618c2dd71f099e1dd628f50a7ed768f77995b  tests/test_flash.py
 adb0ecd78d9f9a10031ec71121b6f8c04e84885852416754040a5258b0641782  tests/test_flash_scripts.py
 c11a9cbb1a8cf36d8c5666a813e0611caa06f0cb9987f0fc01112a1691275858  tests/test_formularios.py
-0ddc011a0418705327099dd3036fd3540e09324f6f4ae4261653b8fabb43faa7  tests/test_framework_housekeeping.py
+c5b43e4b7d52b06a1cedd660f3a5da318417ea2cf3189d69d3439659d5c2a235  tests/test_framework_housekeeping.py
 17f5e24bb76d63a823fe23d5eca05a088f185ab32864510323474e6c593cd13b  tests/test_hooks.py
 909168849af712df83918555a5b042bb5b4dfd7cbecee9987d090c7dbf260ddf  tests/test_integrar_publicar.py
 00effae2c913821c7c963e92fd3b25d91f89f59f6d9db653daef3c84f3c356c4  tests/test_kanban_mesclar.py
@@ -334,7 +334,7 @@ aadfb8d8b1a4a5bf10d9a859c6e37bdb5377a1189a6a168620bb9d651c364b7a  tests/esperado
 08fc7e7128fc484cf0ce1c8e9820b76391bf0ea9d89ac72d4b4de395058c7754  tests/esperado/compilado-windows-linux/.github/workflows/bb-codeql.yml
 0d2944b56bc7a283c81d7baa5ce3a8b7023928b54718b5259af799573c1295b9  tests/esperado/compilado-windows-linux/.github/workflows/bb-criar-branches.yml
 45928901b956c87c9e20fb910ee5016fb6e3725e379d10c96a5a8a8bfbee88de  tests/esperado/compilado-windows-linux/.github/workflows/bb-encerrar.yml
-27746307eed1dffd12183424e87814875013bb63030799d2de293b1e927e7b6f  tests/esperado/compilado-windows-linux/.github/workflows/bb-faxina.yml
+1901ccbb01afaf08384ea3960d5de7d8cf5b7622f49b0930498a701c71f002a9  tests/esperado/compilado-windows-linux/.github/workflows/bb-faxina.yml
 d779a45b09adc9844d931800844a0b086112d81527a1b44ae0e2c89592536b30  tests/esperado/compilado-windows-linux/.github/workflows/bb-iniciar-sprint.yml
 f4b2ab7722d34e1f004e2b941aacc5932a9ea768dc42d8c739009a38ee443a81  tests/esperado/compilado-windows-linux/.github/workflows/bb-integrar-release.yml
 2661cb18c0ae5526a529c5a31166c457a3abdd99932c0c37522ad4a82c4df8ff  tests/esperado/compilado-windows-linux/.github/workflows/bb-kanban.yml
@@ -405,7 +405,7 @@ c990348783faafc94e17755505d1c3ff341a230c6d24a9a5f271a88b05b07164  tests/esperado
 08fc7e7128fc484cf0ce1c8e9820b76391bf0ea9d89ac72d4b4de395058c7754  tests/esperado/deploy-vps-docker/.github/workflows/bb-codeql.yml
 0d2944b56bc7a283c81d7baa5ce3a8b7023928b54718b5259af799573c1295b9  tests/esperado/deploy-vps-docker/.github/workflows/bb-criar-branches.yml
 45928901b956c87c9e20fb910ee5016fb6e3725e379d10c96a5a8a8bfbee88de  tests/esperado/deploy-vps-docker/.github/workflows/bb-encerrar.yml
-27746307eed1dffd12183424e87814875013bb63030799d2de293b1e927e7b6f  tests/esperado/deploy-vps-docker/.github/workflows/bb-faxina.yml
+1901ccbb01afaf08384ea3960d5de7d8cf5b7622f49b0930498a701c71f002a9  tests/esperado/deploy-vps-docker/.github/workflows/bb-faxina.yml
 d779a45b09adc9844d931800844a0b086112d81527a1b44ae0e2c89592536b30  tests/esperado/deploy-vps-docker/.github/workflows/bb-iniciar-sprint.yml
 f4b2ab7722d34e1f004e2b941aacc5932a9ea768dc42d8c739009a38ee443a81  tests/esperado/deploy-vps-docker/.github/workflows/bb-integrar-release.yml
 2661cb18c0ae5526a529c5a31166c457a3abdd99932c0c37522ad4a82c4df8ff  tests/esperado/deploy-vps-docker/.github/workflows/bb-kanban.yml

@@ -32,7 +32,9 @@ jobs:
           token: ${{ secrets.PROJETO_TOKEN }}
           persist-credentials: false
       - name: Apagar branches concluídas e conferir sobras
-        run: bash .bigbang/esteira/nucleo/scripts/faxina.sh
+        run: |
+          gh auth setup-git
+          bash .bigbang/esteira/nucleo/scripts/faxina.sh
         env:
           GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
           SIMULAR: ${{ github.event_name == 'workflow_dispatch' && inputs.simular || false }}
