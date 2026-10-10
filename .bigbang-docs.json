@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "597c2063e0abef301ee78f0c8807ab656b2dabf0",
+    "commit": "1cae0da0cc7196592de4ba3eb12cdf7cbc8ab981",
     "branch": "master",
     "proposta": "bigbang/proposta-220-v3"
   },
@@ -236,7 +236,7 @@
     }
   },
   "codigo": {
-    "commit": "4041f1c749e2fcd26da459f60b91a33f56bd15f6",
+    "commit": "24f19ac8ad23e0307ce8797a264012fc0832bb2b",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -374,7 +374,7 @@
         ".bigbang/tests/test_names_config.py:test_pipeline_subcommands_by_either_name"
       ],
       "hashes": {
-        ".bigbang/bb/cli.py": "sha256:49a4498e7a9c3099d7be1eda6f34fb6959c5dd39c03c38aa0a249b8bc9503679",
+        ".bigbang/bb/cli.py": "sha256:41ac36fba57507edee884e39414c37bf712c96fd851f5b5604b74b8a580fff37",
         ".bigbang/bb/__init__.py": "sha256:9eafc1c524def17452aeb77d49ee0aca1a8c40c7e69d52c3c6dba384e78732eb",
         ".bigbang/bin/bb.py": "sha256:af864bf4452b5aad7c6e90ba6ed7f81cf9cb2fbb8c60f2a5e7e5e4e17372abb4",
         ".bigbang/bin/bb": "sha256:04bf9a43393503416a9307e7272d697afcd9327a0a5b388a451873a70c45e112"
@@ -2203,6 +2203,8 @@
         ".bigbang/tests/test_core_v3.py:test_resource_names",
         ".bigbang/tests/test_core_v3.py:test_one_winner_and_the_loser_learns_the_holder",
         ".bigbang/tests/test_core_v3.py:test_expired_lock_is_taken_over_only_on_request",
+        ".bigbang/tests/test_core_v3.py:test_take_over_needs_the_same_mark_for_an_expired_lock",
+        ".bigbang/tests/test_core_v3.py:test_listing_only_the_requested_locks",
         ".bigbang/tests/test_core_v3.py:test_take_over_refuses_a_live_lock",
         ".bigbang/tests/test_core_v3.py:test_release_keeps_a_tombstone_so_a_late_release_cannot_delete_another_lock",
         ".bigbang/tests/test_core_v3.py:test_expired_lock_cannot_be_renewed",
@@ -2235,11 +2237,11 @@
         ".bigbang/tests/test_claims_v3.py:test_v3_when_the_workflow_or_labels_are_v3"
       ],
       "hashes": {
-        ".bigbang/bb/states.py": "sha256:555cf0695af5769463fe0d9da73fe923af68d587f3070a5132db98e2b5a5d77a",
-        ".bigbang/bb/policy.py": "sha256:fcce4a8668b96eac095f2f31e9d89d6a5968b3336a9694495641d810e357fd34",
+        ".bigbang/bb/states.py": "sha256:65297972af3b618fd06593501db44da229367bc018a3cb80444be6a98eeca35e",
+        ".bigbang/bb/policy.py": "sha256:c56cdf3a4aa2d99431f53a85fafa72ae667482a1a3ff34d135a63e4b3d912206",
         ".bigbang/bb/receipts.py": "sha256:fc0ca5d774e4a2cadaf1036002a399e175d4af8806e5a79ee920a175e330b33a",
-        ".bigbang/bb/locks.py": "sha256:7f0d553ed03fb86b1b736b9af49a59ac06e642c4ee490b6ddce4f704ec6bb97a",
-        ".bigbang/bb/claims.py": "sha256:94b8b3cb3cf8228f030b7375fda0759dbb61e1afe86a0da010a3145554dbb5ef",
+        ".bigbang/bb/locks.py": "sha256:90b249a7fe0678f7b1369f3d9bb20090ec5dba75907a8864f710a77d46293e1d",
+        ".bigbang/bb/claims.py": "sha256:02a63e64a0eecfb51ddf91bdc8219080183d9f594f066cf18aedb3d48d9fb84e",
         ".bigbang/bb/gh.py": "sha256:9d48b4ff0f8c80ba2f4e67e89832699ab375b60db99372a20a062be52ae8fd8a"
       },
       "descricao": "Máquina de estados do quadro único, política dos modos, recibos estruturados e travas atômicas em refs Git."
@@ -2265,6 +2267,8 @@
         ".bigbang/tests/test_board_v3.py:test_claiming_to_be_the_owner_is_not_an_approval",
         ".bigbang/tests/test_board_v3.py:test_flash_sensitive_refinement_goes_to_the_owner",
         ".bigbang/tests/test_board_v3.py:test_qa_rejection_and_epic_cancellation_need_the_owner_decision",
+        ".bigbang/tests/test_board_v3.py:test_a_rejection_withdraws_the_decisions_from_the_return_stage_on",
+        ".bigbang/tests/test_board_v3.py:test_qa_and_publish_risk_come_from_the_changed_paths",
         ".bigbang/tests/test_board_v3.py:test_effects_happen_before_the_receipt",
         ".bigbang/tests/test_board_v3.py:test_attempts_come_from_receipts_and_the_limit_blocks",
         ".bigbang/tests/test_board_v3.py:test_agent_passes_common_gates_in_flash",
@@ -2280,6 +2284,7 @@
         ".bigbang/tests/test_board_v3.py:test_foreign_branches_and_events_are_ignored",
         ".bigbang/tests/test_board_v3.py:test_backlog_and_selection_decisions_advance_the_epic",
         ".bigbang/tests/test_board_v3.py:test_merge_refused_keeps_the_claim",
+        ".bigbang/tests/test_board_v3.py:test_retried_merge_event_releases_a_claim_left_behind",
         ".bigbang/tests/test_board_v3.py:test_late_closed_event_of_a_reopened_pr_is_ignored",
         ".bigbang/tests/test_board_v3.py:test_decision_label_advances_the_epic",
         ".bigbang/tests/test_board_v3.py:test_schedule_reconciles_the_board_and_marks_stale_claims",
@@ -2288,8 +2293,8 @@
         ".bigbang/tests/test_board_v3.py:test_items_of_other_repositories_are_ignored"
       ],
       "hashes": {
-        ".bigbang/bb/board.py": "sha256:7b7733b73c4fdda389280275579a75102fb5bf27e87a65a07c2a8489d932724a",
-        ".bigbang/bb/controller.py": "sha256:3c4cb58ba12b34615ddda70618f690439368ddced11b55a22e1e86ea2f156656",
+        ".bigbang/bb/board.py": "sha256:f50f85a7ca47723288da2242f11475db9368bb6898ba57d6f97098d1a4a33c23",
+        ".bigbang/bb/controller.py": "sha256:ff451f5c93fd09fbac7e6a615f0727468777bb44a05e3c46131bd69ba92867f8",
         ".bigbang/bb/flow_cli.py": "sha256:3417b8956c7f669e14b5450efdc65f8f4176575462fa2d8e2eda43b95fc87c7c"
       },
       "descricao": "Catálogo de labels v3, Project com 15 estados e campos, bb move validado, reconciliação e controlador de eventos."
