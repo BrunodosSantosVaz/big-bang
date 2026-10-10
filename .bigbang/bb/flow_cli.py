@@ -51,6 +51,25 @@ def register(commands, pipeline_sub):
     p.add_argument("--epic", type=int, action="append", required=True)
     p.set_defaults(handler=_release_gate)
 
+    p = release_sub.add_parser("publish", help="portão e publicação da release (merge na main, épicos, sync)")
+    p.add_argument("--version", required=True)
+    p.add_argument("--dry-run", dest="dry_run", action="store_true", help="só confere o portão")
+    p.set_defaults(handler=_release_publish)
+    p = release_sub.add_parser("maintenance", help="publica um PR maintenance/* na main (sem mudar o artefato)")
+    p.add_argument("--pr", type=int, required=True)
+    p.set_defaults(handler=_release_maintenance)
+
+    qa = commands.add_parser("qa", help="v3: homologação")
+    qa_sub = qa.add_subparsers(dest="qa_command", metavar="<subcomando>")
+    p = qa_sub.add_parser("reject", help="reprovação registrada: épico de volta e tarefa de correção na release")
+    p.add_argument("epic", type=int)
+    p.add_argument("--reason", required=True, help="motivo nas palavras do dono")
+    p.set_defaults(handler=_qa_reject)
+
+    p = commands.add_parser("cleanup", help="v3: faxina de branches concluídas e travas antigas")
+    p.add_argument("--apply", action="store_true", help="apaga de verdade (padrão: só mostra o plano)")
+    p.set_defaults(handler=_cleanup)
+
     flag = commands.add_parser("flag", help="v3: liga, desliga ou lista feature flags (flags.toml)")
     flag_sub = flag.add_subparsers(dest="flag_command", metavar="<subcomando>")
     flag_sub.add_parser("list", help="lista as flags e seus estados").set_defaults(handler=_flag_list)
@@ -59,6 +78,11 @@ def register(commands, pipeline_sub):
         p.add_argument("name")
         p.add_argument("--env", choices=("staging", "production"), default="production")
         p.set_defaults(handler=_flag_switch, value=action == "on")
+
+    p = pipeline_sub.add_parser("candidate-ready", help="v3: épicos da candidata em QA e PR da release")
+    p.add_argument("--branch", required=True)
+    p.add_argument("--rc-tag", dest="rc_tag", required=True)
+    p.set_defaults(handler=_candidate_ready)
 
     p = pipeline_sub.add_parser("pr-rules", help="v3: regras do PR (branch, título, Refs, aceite, flag, zona sensível)")
     p.add_argument("--pr", type=int, required=True)
@@ -275,6 +299,73 @@ def _content_problems(client, config, content, paths, head):
     found += [f"rastreabilidade: {problem}" for problem in traceability.problems(content, pattern, paths)]
     found += [f"guarda da stack: {problem}" for problem in stack_guard.problems(content)]
     return found
+
+
+def _actor(client):
+    return client.api("GET", "user")[1]["login"]  # recorded only; never an approval
+
+
+def _candidate_ready(args):
+    from . import delivery
+    config, client, project = _context(args.raiz)
+    result = delivery.candidate_ready(client, project, config, args.branch, args.rc_tag)
+    print(f"Candidata {args.rc_tag}: épicos " + ", ".join(f"#{n}" for n in result["epics"]) +
+          f"; PR da release #{result['pr']}.")
+    return EXIT_OK
+
+
+def _release_publish(args):
+    from . import delivery, flows
+    config, client, project = _context(args.raiz)
+    if args.dry_run:
+        milestone = client.milestone_number(f"v{args.version}")
+        epics = [i["number"] for i in client.milestone_issues(milestone)
+                 if board.states.kind(set(i["labels"])) == "epic"] if milestone else []
+        problems = flows.release_gate(client, config, args.raiz, epics, today=_today())
+        for problem in problems:
+            print(problem)
+        print("Portão: " + ("recusado." if problems else "em ordem."))
+        return EXIT_USAGE if problems else EXIT_OK
+    result = delivery.publish(client, project, config, args.version, args.raiz, today=_today())
+    print(f"Release {args.version} publicada (PR #{result['pr']}); concluídos: "
+          + (", ".join(f"#{n}" for n in result["done"]) or "nenhum")
+          + "; com a flag desligada: " + (", ".join(f"#{n}" for n in result["dark"]) or "nenhum") + ".")
+    return EXIT_OK
+
+
+def _release_maintenance(args):
+    from . import delivery
+    config = config_module.load(args.raiz)
+    client = gh.GitHub(config_module.get(config, "project.repository"))
+    paths = []
+    for file in client.pull_files(args.pr):
+        paths.extend({file.get("previous_filename", file["filename"]), file["filename"]})
+    result = delivery.publish_maintenance(client, config, args.pr, changed_paths=paths)
+    print(f"Manutenção #{args.pr} publicada na main; devolução para a develop: {result}.")
+    return EXIT_OK
+
+
+def _qa_reject(args):
+    from . import delivery
+    config, client, project = _context(args.raiz)
+    task = delivery.correction_task(client, project, config, args.epic, args.reason, actor=_actor(client))
+    print(f"Épico #{args.epic} reprovado; tarefa de correção #{task} criada a partir da release.")
+    return EXIT_OK
+
+
+def _cleanup(args):
+    from . import delivery
+    config = config_module.load(args.raiz)
+    report = delivery.cleanup(gh.GitHub(config_module.get(config, "project.repository")), config,
+                              dry_run=not args.apply)
+    verb = "apagada" if args.apply else "seria apagada"
+    for branch in report["deleted"]:
+        print(f"branch {verb}: {branch}")
+    for resource in report["locks"]:
+        print(f"trava antiga {verb}: {resource}")
+    for branch in report["outside"]:
+        print(f"::warning::branch fora do padrão: {branch}")
+    return EXIT_OK
 
 
 def _controller(args):

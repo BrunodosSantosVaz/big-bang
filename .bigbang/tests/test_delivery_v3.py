@@ -24,8 +24,9 @@ class Base(unittest.TestCase):
         self.client = gh.GitHub("dono/repo", api=self.fake)
         self.project = FakeProject()
         board.ensure_fields(self.project)
-        for ref in ("develop", "main", "release/1.3.0"):
+        for ref in ("develop", "main"):
             self.fake.refs[f"refs/heads/{ref}"] = ref[0] * 40
+        self.fake.refs["refs/heads/release/1.3.0"] = "r" * 40
         self.fake.milestones[1] = {"number": 1, "title": "v1.3.0", "state": "open"}
         self.fake.add_issue(10, "Login", labels=["type:epic", "qa:human", "flag:required"])
         self.fake.add_issue(11, "Esteira", labels=["type:epic", "qa:not-applicable", "flag:waived"])
@@ -80,10 +81,37 @@ class Publish(Base):
         with open(os.path.join(self.root, "flags.toml"), "w", encoding="utf-8") as handle:
             handle.write(FLAGS_V3)
         self.fake.refs["refs/tags/v1.3.0-rc.1"] = "r" * 40
+        self.promoted = []
+
+    def promote(self, rc_tag, tag, target_sha):
+        self.promoted.append((rc_tag, tag, target_sha))
 
     def publish(self):
         return delivery.publish(self.client, self.project, cfg(), "1.3.0", self.root, today=TODAY, now=NOW,
-                                pending={})
+                                pending={}, promote=self.promote)
+
+    def test_the_same_candidate_is_promoted_after_the_merge(self):
+        self.fake.refs["refs/tags/v1.3.0-rc.2"] = "r" * 40
+        self.publish()
+        self.assertEqual(self.promoted, [("v1.3.0-rc.2", "v1.3.0", "m" * 40)])
+
+    def test_failed_promotion_concludes_nothing(self):
+        def broken(*args):
+            raise BbError("promoção falhou")
+        with self.assertRaises(BbError):
+            delivery.publish(self.client, self.project, cfg(), "1.3.0", self.root, today=TODAY, now=NOW,
+                             pending={}, promote=broken)
+        self.assertEqual(self.state(11), "Releasing")
+
+    def test_open_blocking_issue_refuses(self):
+        self.fake.add_issue(99, "Falha grave", labels=["type:bug", "blocks-production"])
+        with self.assertRaises(BbError):
+            self.publish()
+
+    def test_release_changed_after_the_candidate_refuses(self):
+        self.fake.refs["refs/heads/release/1.3.0"] = "x" * 40
+        with self.assertRaises(BbError):
+            self.publish()
 
     def test_dark_epic_ships_but_stays_in_qa_until_approved(self):
         result = self.publish()
