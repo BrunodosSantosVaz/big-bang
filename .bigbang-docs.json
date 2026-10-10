@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "f3caa6c42b5dc2fe6a441bb5d51cef709bcb1e48",
+    "commit": "a2939455d11e2e255ab9ad4e34bde565ffbb19af",
     "branch": "master",
     "proposta": "bigbang/proposta-220-v3"
   },
@@ -229,7 +229,7 @@
     }
   },
   "codigo": {
-    "commit": "0248cf3a71cd71ff02ef1c143a5fcaf307ba5d1d",
+    "commit": "7d7bd0cff62d5a12d897999b613b55a7cda21d38",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -447,13 +447,23 @@
         ".bigbang/tests/test_names_config.py:test_single_board_needs_its_number_and_fills_the_legacy_view",
         ".bigbang/tests/test_names_config.py:test_workflow_model_values",
         ".bigbang/tests/test_names_config.py:test_already_v3_text_is_not_translated_again",
+        ".bigbang/tests/test_names_config.py:test_missing_legacy_key_reports_the_key_that_was_asked",
+        ".bigbang/tests/test_names_config.py:test_mixed_language_keys_and_internal_keys_are_refused",
+        ".bigbang/tests/test_names_config.py:test_consistent_keys_answer_in_both_languages",
+        ".bigbang/tests/test_names_config.py:test_documentation_reads_a_v3_public_file",
+        ".bigbang/tests/test_names_config.py:test_target_mode_reads_both_dialects",
+        ".bigbang/tests/test_names_config.py:test_review_blockers_see_v3_labels",
+        ".bigbang/tests/test_names_config.py:test_set_config_value_in_each_dialect",
+        ".bigbang/tests/test_names_config.py:test_legacy_workflow_needs_legacy_labels",
+        ".bigbang/tests/test_names_config.py:test_approval_label_follows_the_target_dialect",
+        ".bigbang/tests/test_names_config.py:test_v3_errors_do_not_hide_structural_ones",
         ".bigbang/tests/test_names_config.py:test_config_get_in_both_languages_and_both_option_spellings",
         ".bigbang/tests/test_names_config.py:test_generate_and_verify_by_either_name",
         ".bigbang/tests/test_names_config.py:test_pipeline_subcommands_by_either_name",
         ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect"
       ],
       "hashes": {
-        ".bigbang/bb/config.py": "sha256:ffca6fd85d1a92fbf5fd837534d3b880bdde8f5f3b8a980ad0cf9928f60ee6ab",
+        ".bigbang/bb/config.py": "sha256:3e2b32495eb1ea95912259b82b42de5d5a1e802423041395e334400bf0520f31",
         ".bigbang/modelos/bigbang.toml.exemplo": "sha256:778ba08e5498600441fc495f8aa4f60d6df3fb995022aec32c6c75221cf8a702",
         ".bigbang/modelos/flags.toml": "sha256:3f4bf065d88d1b4b344e2ec8d24e536ef7433333bacb2cf974fc4194703a47ba"
       },
@@ -470,6 +480,7 @@
       ],
       "testes": [
         ".bigbang/tests/test_decisao_revisao.py:test_comenta_a_frase_e_depois_poe_a_label",
+        ".bigbang/tests/test_decisao_revisao.py:test_decisao_em_ingles_gravada_no_idioma_do_projeto",
         ".bigbang/tests/test_decisao_revisao.py:test_recusa_label_que_nao_e_decisao_e_frase_vazia",
         ".bigbang/tests/test_decisao_revisao.py:test_large_review_uses_paginated_files_without_diff_endpoint",
         ".bigbang/tests/test_decisao_revisao.py:test_renamed_sensitive_path_still_requires_owner",
@@ -480,15 +491,19 @@
         ".bigbang/tests/test_decisao_revisao.py:test_local_flash_cannot_change_target_review_policy",
         ".bigbang/tests/test_decisao_revisao.py:test_target_flash_is_used_even_when_local_config_is_standard",
         ".bigbang/tests/test_decisao_revisao.py:test_destination_config_is_fetched_from_github",
+        ".bigbang/tests/test_decisao_revisao.py:test_v3_destination_and_english_labels",
         ".bigbang/tests/test_decisao_revisao.py:test_testes_com_revisao_humana",
         ".bigbang/tests/test_decisao_revisao.py:test_teste_primeiro_depois_a_correcao",
         ".bigbang/tests/test_decisao_revisao.py:test_recusa_correcao_junto_com_o_teste",
         ".bigbang/tests/test_decisao_revisao.py:test_recusa_teste_que_nao_falha",
         ".bigbang/tests/test_decisao_revisao.py:test_teste_em_layout_gradle_conta_como_teste",
-        ".bigbang/tests/test_decisao_revisao.py:test_recusa_um_commit_so"
+        ".bigbang/tests/test_decisao_revisao.py:test_recusa_um_commit_so",
+        ".bigbang/tests/test_names_config.py:test_review_blockers_see_v3_labels",
+        ".bigbang/tests/test_names_config.py:test_target_mode_reads_both_dialects",
+        ".bigbang/tests/test_names_config.py:test_approval_label_follows_the_target_dialect"
       ],
       "hashes": {
-        ".bigbang/bb/decisions.py": "sha256:cbb954e1be7c393eaeb54de3b5de9c59dbe554e2ada1be9e139716952e1a1dd3"
+        ".bigbang/bb/decisions.py": "sha256:6e49d7208e5b0f3500ae9d2a5962d3cf53ddce088c61a6e64c5cffedcdcc2f86"
       },
       "descricao": "Registrar a decisão autorizada do dono e impedir aprovação automática de PR que exija revisão humana."
     },
@@ -605,7 +620,7 @@
         ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected"
       ],
       "hashes": {
-        ".bigbang/bb/documentation.py": "sha256:bdd76dd73b77c9552ce66fc0ee6e67707c51c5133aa4fbc6181abc0c9021fdea"
+        ".bigbang/bb/documentation.py": "sha256:5397646c856c301675d7b5aa8f9f3f68db0f5049d36b1816ebbebd72c418a1d5"
       },
       "descricao": "Resolver identificadores documentais conforme a visibilidade e publicar somente o snapshot revisado sem perder alterações concorrentes."
     },
@@ -923,7 +938,7 @@
         ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls"
       ],
       "hashes": {
-        ".bigbang/bb/pipeline.py": "sha256:0ba569bc0425496bdb778e4610ba6d4b80d3c9772540484cde98e0e61c111f07"
+        ".bigbang/bb/pipeline.py": "sha256:9a075e60666a043bc1641fcc7f5427fce44e423d87f8f119d63f7fd4cf48bc13"
       },
       "descricao": "Calcular prontidão, branches, revisão, SemVer, changelog, matriz e nomes de artefatos sem executar deploy."
     },
@@ -968,7 +983,7 @@
         ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls"
       ],
       "hashes": {
-        ".bigbang/bb/pipeline_cli.py": "sha256:9d5559d6401d62e7927c5f7418ad5e1ecd27bd9a73d72ee5a428096d8b2230a2"
+        ".bigbang/bb/pipeline_cli.py": "sha256:fe54617837973b8b7cf4fba97bb313a91cabcbeacdaa6116282a8a9e41a26ad8"
       },
       "descricao": "Expor regras verificáveis a scripts sem duplicar lógica de negócio entre Bash e Python."
     },
@@ -1776,7 +1791,7 @@
       "hashes": {
         ".bigbang/hooks/_common.py": "sha256:3f7ac4fa2517566df674c4c79b5727b17760b50c6051cef397365825dbef00b4",
         ".bigbang/hooks/proteger_arquivos.py": "sha256:abb2d5dbabd8ba2608bd7e027095b747e46206a2e9290bfca41f041da2c60e5b",
-        ".bigbang/hooks/proteger_comandos.py": "sha256:5a63afe8aaaef5ab04bbf28a09eb1c63e6e2607bd28b8ac6fde5d93556127765",
+        ".bigbang/hooks/proteger_comandos.py": "sha256:c3db9efd5ce24e0be441759d6e737fa4f86e3a3662e7fcc70d16f183bd7e5d42",
         ".bigbang/esteira/sempre/arquivos/.claude/settings.json": "sha256:24ef26bf42154bed9edf3be6cde9f25af4cf2adb2bf7a176d365d96f47e7a630"
       },
       "descricao": "Bloquear comandos e edições proibidos pelo contrato da sessão antes que alterem trabalho ou arquivos sensíveis."
@@ -2103,13 +2118,23 @@
         ".bigbang/tests/test_names_config.py:test_single_board_needs_its_number_and_fills_the_legacy_view",
         ".bigbang/tests/test_names_config.py:test_workflow_model_values",
         ".bigbang/tests/test_names_config.py:test_already_v3_text_is_not_translated_again",
+        ".bigbang/tests/test_names_config.py:test_missing_legacy_key_reports_the_key_that_was_asked",
+        ".bigbang/tests/test_names_config.py:test_mixed_language_keys_and_internal_keys_are_refused",
+        ".bigbang/tests/test_names_config.py:test_consistent_keys_answer_in_both_languages",
+        ".bigbang/tests/test_names_config.py:test_documentation_reads_a_v3_public_file",
+        ".bigbang/tests/test_names_config.py:test_target_mode_reads_both_dialects",
+        ".bigbang/tests/test_names_config.py:test_review_blockers_see_v3_labels",
+        ".bigbang/tests/test_names_config.py:test_set_config_value_in_each_dialect",
+        ".bigbang/tests/test_names_config.py:test_legacy_workflow_needs_legacy_labels",
+        ".bigbang/tests/test_names_config.py:test_approval_label_follows_the_target_dialect",
+        ".bigbang/tests/test_names_config.py:test_v3_errors_do_not_hide_structural_ones",
         ".bigbang/tests/test_names_config.py:test_config_get_in_both_languages_and_both_option_spellings",
         ".bigbang/tests/test_names_config.py:test_generate_and_verify_by_either_name",
         ".bigbang/tests/test_names_config.py:test_pipeline_subcommands_by_either_name",
         ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect"
       ],
       "hashes": {
-        ".bigbang/bb/names.py": "sha256:5009be0d628c77bf5127a20626162d7644390c702869a1b987b89df6aaec2b60"
+        ".bigbang/bb/names.py": "sha256:cd32fa3e90400978134c14dea4bf5e2fda4f803ea04e80dd39c06cd3898a1ee5"
       },
       "descricao": "Tabela única de nomes v2 ↔ v3 (configuração, valores, CLI, labels, branches, workflows, checks, ambiente, segredos)."
     }
