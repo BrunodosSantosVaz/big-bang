@@ -29,7 +29,10 @@ GUARD_PREFIX = re.compile(rf"^    if: github\.repository == '{re.escape(FRAMEWOR
 
 
 def narrowing_only(rest):
-    """True when `rest` is empty or ` && (<one balanced group>)`, nothing after it."""
+    """True when `rest` is empty or ` && (<one balanced group>)`, nothing after it.
+
+    Limit: parentheses inside quoted strings are counted too, so a crafted `&& (a == '(') || (b)` would pass. The
+    framework's own workflows never quote parentheses in a guard; the review covers that residual case."""
     rest = rest.rstrip()
     if not rest:
         return True
@@ -58,7 +61,7 @@ ROOT_ENTRIES = {
     ".github": "kept: bb-framework-* removed by F5",
     ".gitignore": "kept",
     ".gitleaksignore": "kept: fingerprints of framework commits, which a template-born history never contains",
-    "AGENTS.md": "kept: generated block refreshed; the framework's own project section replaced by the model",
+    "AGENTS.md": "kept: generated block refreshed; the marked bigbang:framework segment removed by bb init",
     "CLAUDE.md": "kept",
     "CODE_OF_CONDUCT.md": "replaced by the system's (DOC-16)",
     "CONTRIBUTING.md": "replaced by the system's (DOC-16)",

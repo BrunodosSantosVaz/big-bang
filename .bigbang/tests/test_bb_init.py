@@ -121,6 +121,11 @@ class Init(unittest.TestCase):
         self.assertIn("Esta seção pertence ao projeto", depois)
         self.assertIn(proprio.strip(), depois)  # the project's own text survives, even citing the origin
 
+    def test_simulacao_mostra_a_retirada_do_trecho_do_framework(self):
+        codigo, saida = self.rodar("--nome", "Sistema X", "--simular")
+        self.assertEqual(codigo, EXIT_OK, saida)
+        self.assertIn("retirar do AGENTS.md as instruções exclusivas do framework", saida)
+
     def test_sem_marcador_a_secao_do_projeto_fica_intacta(self):
         projeto = "## Projeto\n\nTexto do projeto que cita BrunodosSantosVaz/big-bang e fica.\n"
         caminho = os.path.join(self.raiz, "AGENTS.md")
