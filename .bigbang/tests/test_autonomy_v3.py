@@ -95,6 +95,11 @@ class Gates(unittest.TestCase):
             self.move("Backlog", config())
         self.assertIn("bloqueado", error.exception.message)
 
+    def test_outside_the_contract_only_the_owner_decision_unblocks(self):
+        self.fake.issues[10]["labels"] += [{"name": "area:auth"}, {"name": "approved:backlog"}]
+        receipt = self.move("Backlog", config(), actor="claude-1")
+        self.assertEqual(receipt["approval"]["by"], "owner:dona")
+
     def test_owner_decision_is_recorded_as_the_owner(self):
         self.fake.issues[10]["labels"].append({"name": "approved:backlog"})
         receipt = self.move("Backlog", config(mode="normal"), actor="dona")
