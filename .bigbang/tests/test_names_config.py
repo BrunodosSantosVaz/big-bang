@@ -1,4 +1,4 @@
-"""Names table and bilingual bigbang.toml (epic #223, ADR-0023): a v3 file in English must behave exactly like the
+"""Names table and bilingual bigbang.toml (epic #223, ADR-0024): a v3 file in English must behave exactly like the
 legacy Portuguese file, and legacy code must keep reading both."""
 import os
 import shutil
@@ -146,6 +146,82 @@ class BilingualConfig(unittest.TestCase):
     def test_already_v3_text_is_not_translated_again(self):
         with self.assertRaises(BbError):
             config.text_to_v3(config.text_to_v3(scenario_text("compilado-windows-linux")))
+
+
+class ReviewFindings(unittest.TestCase):
+    """Regressions found in the review of #242: legacy outputs preserved and every reader understands a v3 file."""
+
+    def legacy(self):
+        return config.views(config.parse(scenario_text("deploy-vps-docker")))
+
+    def v3_public_text(self):
+        text = config.text_to_v3(scenario_text("deploy-vps-docker"))
+        return text.replace('visibility = "private"', 'visibility = "public"').replace(
+            'license = ""', 'license = "MIT"')
+
+    def test_missing_legacy_key_reports_the_key_that_was_asked(self):
+        for key in ("projeto.inexistente", "compilado.build_linux", "deploy.imagemx"):
+            with self.subTest(key=key), self.assertRaises(BbError) as error:
+                config.get(self.legacy(), key)
+            self.assertIn(key, error.exception.message)
+        with self.assertRaises(BbError) as error:
+            config.get(self.legacy(), "projeto")
+        self.assertIn("projeto é uma seção", error.exception.message)
+
+    def test_mixed_language_keys_and_internal_keys_are_refused(self):
+        for key in ("projeto.mode", "project.modo", "paineis.model", "_dialect", "_dialect.x"):
+            with self.subTest(key=key), self.assertRaises(BbError):
+                config.get(self.legacy(), key)
+
+    def test_consistent_keys_answer_in_both_languages(self):
+        loaded = self.legacy()
+        self.assertEqual(config.get(loaded, "deploy.image"), config.get(loaded, "deploy.imagem"))
+        self.assertEqual(config.get(loaded, "project.mode"), "normal")
+
+    def test_documentation_reads_a_v3_public_file(self):
+        from bb import documentation
+        with tempfile.TemporaryDirectory() as root:
+            with open(os.path.join(root, "bigbang.toml"), "w", encoding="utf-8") as handle:
+                handle.write(self.v3_public_text())
+            self.assertTrue(documentation.is_public(root))
+            from unittest.mock import patch
+            with patch.object(documentation, "repository_state", return_value={"private": False}), \
+                    patch.dict(os.environ, {"GITHUB_REPOSITORY": "BrunodosSantosVaz/meu-sistema"}):
+                self.assertEqual(documentation.visibility_problems(root), [])
+
+    def test_target_mode_reads_both_dialects(self):
+        from bb import decisions
+        for text, expected in (('[projeto]\nmodo="flash"\n', "flash"), ('[project]\nmode="flash"\n', "flash"),
+                               ('[project]\nmode="normal"\n', "padrao"), ('[project]\nmode="autonomous"\n', "flash"),
+                               ('[projeto]\nmodo="padrao"\n', "padrao")):
+            with self.subTest(text=text):
+                self.assertEqual(decisions.mode_from_text(text), expected)
+        with self.assertRaises(BbError):
+            decisions.mode_from_text('[project]\nmode="turbo"\n')
+
+    def test_review_blockers_see_v3_labels(self):
+        from bb import decisions
+        blockers = decisions.review_blockers({"review:human"}, set(), "feature/12-x", [], "", [], "x")
+        self.assertTrue(blockers)
+        self.assertEqual(decisions.review_blockers({"review:human"}, {"owner:ai-review"}, "feature/12-x", [], "",
+                                                   [], "x"), [])
+        self.assertTrue(decisions.review_blockers(set(), {"tests-review:human"}, "test/11-testes", [], "", [], "x"))
+
+    def test_set_config_value_in_each_dialect(self):
+        from bb import init
+        legacy = scenario_text("compilado-windows-linux")
+        v3 = config.text_to_v3(legacy)
+        self.assertIn('version = "9.9.9"', init.set_config_value(v3, "bigbang.versao", "9.9.9"))
+        self.assertIn('name = "Outro"', init.set_config_value(v3, "projeto.nome", "Outro"))
+        updated = init.set_config_value(legacy, "bigbang.versao", "9.9.9")
+        self.assertEqual(updated, init.set_value(legacy, "bigbang", "versao", "9.9.9"))
+
+    def test_v3_errors_do_not_hide_structural_ones(self):
+        raw = config.parse(config.text_to_v3(scenario_text("deploy-vps-docker")))
+        del raw["board"]
+        del raw["commands"]
+        errors = config.validate(raw)
+        self.assertTrue(any("[commands]" in error for error in errors), errors)
 
 
 class EnglishCli(unittest.TestCase):
