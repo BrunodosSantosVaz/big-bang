@@ -216,23 +216,31 @@ def _gate(card_kind, current, target):
     return GATE_OF.get((current, target))
 
 
-def _epic_paths(client, number):
-    """Files changed by the merged PRs of an epic's sub-issues (the evidence of a QA or publication risk)."""
+def _epic_paths(client, number, since=None):
+    """Files changed by the merged PRs of an epic's sub-issues (the evidence of a QA or publication risk). Only the
+    PRs updated since the card was first selected are read: its work cannot be older than that."""
     children = {child["number"] for child in client.sub_issues(number)} | {number}
     paths = set()
-    for raw in client.paginate("pulls?state=closed"):
-        if not raw.get("merged_at") and not raw.get("merged"):
-            continue
-        _, issue = pipeline.branch_issue(raw["head"]["ref"])
-        if issue in children:
-            for file in client.paginate(f"pulls/{raw['number']}/files"):
-                paths.add(file["filename"])
-                if file.get("previous_filename"):
-                    paths.add(file["previous_filename"])
-    return sorted(paths)
+    page = 1
+    while True:
+        _, items = client.call("GET", f"pulls?state=closed&sort=updated&direction=desc&per_page=100&page={page}")
+        for raw in items or []:
+            if since and raw.get("updated_at") and raw["updated_at"] < since:
+                return sorted(paths)
+            if not raw.get("merged_at") and not raw.get("merged"):
+                continue
+            _, issue = pipeline.branch_issue(raw["head"]["ref"])
+            if issue in children:
+                for file in client.paginate(f"pulls/{raw['number']}/files"):
+                    paths.add(file["filename"])
+                    if file.get("previous_filename"):
+                        paths.add(file["previous_filename"])
+        if len(items or []) < 100:
+            return sorted(paths)
+        page += 1
 
 
-def _gate_decision(config, client, number, card_kind, current, target, labels):
+def _gate_decision(config, client, number, card_kind, current, target, labels, since=None):
     """(gate, approver, risk) of a move, or (None, None, None) when no gate applies."""
     gate = _gate(card_kind, current, target)
     if gate is None:
@@ -240,7 +248,7 @@ def _gate_decision(config, client, number, card_kind, current, target, labels):
     if gate in PLANNING_GATES:
         risk = policy.planning_risk(labels)
     else:
-        risk = policy.delivery_risk(labels, _epic_paths(client, number),
+        risk = policy.delivery_risk(labels, _epic_paths(client, number, since),
                                     config_module.get(config, "security.sensitive_paths"))
     who = policy.approver(policy.mode(config), gate, risk)
     if gate == "qa" and who == "agent" and "qa:human" in labels:
@@ -287,7 +295,9 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
     gathered = globals()["facts"](client, config, number, now=now)
     gathered.update(facts or {})
     gathered["accepted"] = gathered["selected"] = True  # the approval check below is their evidence
-    decision = _gate_decision(config, client, number, card_kind, current, target, gathered["labels"])
+    selected = [r["at"] for r in moves if r.get("to") == "Selected"]
+    decision = _gate_decision(config, client, number, card_kind, current, target, gathered["labels"],
+                              since=selected[0] if selected else None)
     gathered["gate_delegated"] = decision[1] == "agent"
     if decision[0] == "qa" and decision[1] == "agent" and _independent_qa(client, number, receipts_now, actor,
                                                                           trusted, project.get(number, "Candidate")):
