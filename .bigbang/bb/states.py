@@ -167,8 +167,8 @@ PRECONDITIONS = {
         + _need(f.get("qa") == "not-applicable", "QA se aplica: passe por QA")
         + _need(f.get("merged_permanent"), "falta integrar na branch permanente com CI verde")),
     ("epic", "QA", "Releasing"): lambda f: _need(
-        _has(f, "qa:approved") or f.get("qa_decision") in ("approved", "automatic") or f.get("gate_delegated"),
-        "QA ainda não aprovado"),
+        _has(f, "qa:approved") or f.get("qa_decision") in ("approved", "automatic"),
+        "QA ainda não aprovado (decisão do dono ou, se delegado, recibo de QA de um agente independente)"),
     ("epic", "Releasing", "Done"): lambda f: (
         _need(f.get("delivered"), "entrega efetiva ainda não comprovada")
         + _need(f.get("flag") != "required" or f.get("flag_on"), "a feature flag do épico ainda está desligada")),

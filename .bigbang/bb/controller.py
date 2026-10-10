@@ -9,7 +9,7 @@ from . import board, claims, config as config_module, names
 from .errors import EXIT_INVALID_STATE, BbError
 from .locks import expired
 
-TASK_BRANCH = re.compile(r"^(test|feature|docs|fix|hotfix)/(\d+)-[a-z0-9]+(?:-[a-z0-9]+)*$")
+TASK_BRANCH = re.compile(r"^(test|feature|docs|fix|bugfix|hotfix)/(\d+)-[a-z0-9]+(?:-[a-z0-9]+)*$")
 CONTROLLER = "controller"
 AUTO_ADVANCE = {"Brainstorm": ("Backlog",), "Refinement": ("Prototyping", "Ready"), "Prototyping": ("Ready",),
                 "Ready": ("Selected",), "QA": ("Releasing",)}
@@ -39,11 +39,19 @@ def _issue_of(branch):
     return int(match.group(2)) if match else None
 
 
-def release_on_merge(client, number, *, now=None):
-    """The merge concludes the claim: release the lock with its own record and drop the projection labels."""
+def _parse_time(text):
+    return datetime.datetime.fromisoformat(text.replace("Z", "+00:00")) if text else None
+
+
+def release_on_merge(client, number, *, merged_at=None, now=None):
+    """The merge concludes the claim: release the lock with its own record and drop the projection labels. A claim
+    taken after the merge (a bug picked up again in QA, say) belongs to new work and is kept."""
     now = _now(now)
     lock_api = client.locks()
     current = lock_api.current(f"issue-{number}")
+    merged = _parse_time(merged_at)
+    if current and merged and _parse_time(current.get("acquired")) > merged:
+        return
     if current:
         lock_api.release(f"issue-{number}", current["session"], current["generation"], now=now)
     for label in client.issue(number)["labels"]:
@@ -93,13 +101,14 @@ def handle(client, project, config, event, payload, *, now=None):
             advance(number, "In Review", facts={"pr_open": True})
         elif action == "closed" and pull.get("merged"):
             if state in ("Done", "QA", "Releasing"):  # a retried event after the move: finish the release only
-                release_on_merge(client, number, now=now)
+                release_on_merge(client, number, merged_at=pull.get("merged_at"), now=now)
                 return done
             if state == "Coding":
                 advance(number, "In Review", facts={"pr_open": True})
             for target in ("Done", "QA", "Releasing"):
                 if advance(number, target, facts={"pr_merged": True}):
-                    release_on_merge(client, number, now=now)  # only once the card really left In Review
+                    release_on_merge(client, number, merged_at=pull.get("merged_at"),
+                                     now=now)  # only once the card really left In Review
                     break
         elif action == "closed":
             current = client.pull(pull["number"]) if pull.get("number") else None

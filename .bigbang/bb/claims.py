@@ -69,10 +69,9 @@ def _blockers(client, number):
 
 
 def _held_by(client, owner, now):
-    """Open issues whose live lock belongs to `owner`; only the issues carrying the projection label are read, so the
-    cost does not grow with every tombstone ever written."""
-    label = f"person:{owner[len('person:'):]}" if owner.startswith("person:") else f"agent:{owner}"
-    candidates = [f"issue-{issue['number']}" for issue in client.issues("open", labels=[label])]
+    """Open issues whose live lock belongs to `owner`. The locks are the truth (a projection label removed by hand or
+    never written still counts); only the open issues are read, so tombstones of closed work cost nothing."""
+    candidates = {f"issue-{issue['number']}" for issue in client.issues("open")}
     if not candidates:
         return []
     return sorted(int(resource.split("-", 1)[1]) for resource, record in client.locks().all(candidates).items()

@@ -173,7 +173,11 @@ class Moves(Base):
         self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
         with self.assertRaises(BbError) as error:
             self.move(10, "Releasing", actor="claude-1", mode="flash")
-        self.assertIn("qa:approved", error.exception.message)
+        self.assertIn("dono", error.exception.message)
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="codex-1", now=NOW)
+        with self.assertRaises(BbError):  # an agent's verdict never replaces the owner's homologation
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
         self.approve(10, "qa:approved")
         self.move(10, "Releasing", actor="claude-1", mode="flash")
 
@@ -202,6 +206,7 @@ class Moves(Base):
     def test_going_back_without_rejection_also_withdraws_the_decisions(self):
         self.approve(10, "approved:backlog")
         self.move(10, "Backlog")
+        claims.claim(self.client, config(), 10, "dona", person=True, now=NOW)
         self.move(10, "Refinement")
         self.fake.issues[10]["labels"] += [{"name": "prototype:waived"}, {"name": "flag:waived"}]
         self.approve(10, "approved:refinement")

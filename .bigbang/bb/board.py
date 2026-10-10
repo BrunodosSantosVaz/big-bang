@@ -164,13 +164,45 @@ def attempts(client, number, trusted):
     return sum(1 for receipt in history(client, number, trusted) if receipt["kind"] == "rejection")
 
 
-# Decisions withdrawn when a card is sent back: a decision of a past cycle never approves the next one.
+# Decisions withdrawn when a card goes back (rejected or not): a decision of a past cycle never approves the next one.
 WITHDRAWN_ON_RETURN = {
     "Refinement": ("approved:refinement", "approved:prototype", "approved:selection", "qa:approved", "qa:rejected"),
     "Prototyping": ("approved:prototype", "approved:selection", "qa:approved", "qa:rejected"),
+    "Ready": ("approved:selection", "qa:approved", "qa:rejected"),
     "In Progress": ("qa:approved", "qa:rejected"),
     "Selected": ("qa:approved", "qa:rejected"),
 }
+BACKWARD = {("Ready", "Refinement"), ("Selected", "Ready")}
+
+
+def record_qa(client, config, number, *, candidate, digest, verdict, approver, now=None):
+    """Record the QA verdict of an independent agent on a candidate (the evidence of a delegated QA gate)."""
+    now = now or datetime.datetime.now(datetime.timezone.utc)
+    if verdict not in ("approved", "rejected"):
+        raise BbError("veredito de QA deve ser approved ou rejected", EXIT_USAGE)
+    receipt = {"kind": "qa", "event_id": f"qa-{number}-{candidate}-{approver}-{_iso(now)}", "issue": number,
+               "actor": approver, "at": _iso(now), "candidate": candidate, "digest": digest, "verdict": verdict,
+               "approver": approver}
+    found = receipts.problems(receipt)
+    if found:
+        raise BbError("; ".join(found), EXIT_USAGE)
+    client.comment(number, receipts.render(receipt))
+    return receipt
+
+
+def _independent_qa(client, number, receipts_now, actor, trusted):
+    """True when the last QA receipt after the card entered QA approves it and comes from an agent that neither
+    moves the card nor held any claim on the epic or its sub-issues (who delivers never homologates)."""
+    entered = max((i for i, r in enumerate(receipts_now) if r["kind"] in ("transition", "rejection")
+                   and r.get("to") == "QA"), default=None)
+    verdicts = [r for r in receipts_now[entered + 1:] if r["kind"] == "qa"] if entered is not None else []
+    if not verdicts or verdicts[-1]["verdict"] != "approved":
+        return False
+    delivered_by = {actor.casefold()}
+    for issue in [number] + [child["number"] for child in client.sub_issues(number)]:
+        found = receipts_now if issue == number else receipts.parse(client.comments(issue), trusted)
+        delivered_by |= {r["actor"].casefold() for r in found if r["kind"] == "claim"}
+    return verdicts[-1]["approver"].casefold() not in delivered_by
 
 
 def _gate(card_kind, current, target):
@@ -205,7 +237,10 @@ def _gate_decision(config, client, number, card_kind, current, target, labels):
     else:
         risk = policy.delivery_risk(labels, _epic_paths(client, number),
                                     config_module.get(config, "security.sensitive_paths"))
-    return gate, policy.approver(policy.mode(config), gate, risk), risk
+    who = policy.approver(policy.mode(config), gate, risk)
+    if gate == "qa" and who == "agent" and "qa:human" in labels:
+        who = "owner"  # the card asks for the owner's homologation: no mode or risk delegates it
+    return gate, who, risk
 
 
 def _approval_problems(config, card_kind, current, target, gathered, decision):
@@ -249,6 +284,9 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
     gathered["accepted"] = gathered["selected"] = True  # the approval check below is their evidence
     decision = _gate_decision(config, client, number, card_kind, current, target, gathered["labels"])
     gathered["gate_delegated"] = decision[1] == "agent"
+    if decision[0] == "qa" and decision[1] == "agent" and _independent_qa(client, number, receipts_now, actor,
+                                                                          trusted):
+        gathered["qa_decision"] = "automatic"
     found = states.problems(card_kind, current, target, gathered, reason=reason,
                             return_to=recorded_return if current == "Rejected" else return_to)
     found += [] if found else _approval_problems(config, card_kind, current, target, gathered, decision)
@@ -282,12 +320,14 @@ def _effects(client, project, number, issue, card_kind, current, target, receipt
         client.update_issue(number, state="closed", state_reason="not_planned")
     project.add(number)
     project.set(number, "Status", target)
+    returning_to = receipt.get("return_to") if target == "Rejected" else \
+        (target if (current, target) in BACKWARD else None)
+    for label in WITHDRAWN_ON_RETURN.get(returning_to, ()):
+        for spelling in {label, names.label(label, "legacy")}:
+            if spelling in issue["labels"]:
+                client.remove_label(number, spelling)
     if target == "Rejected":
         client.add_labels(number, [f"reason:{receipt['reason']}"])
-        for label in WITHDRAWN_ON_RETURN.get(receipt["return_to"], ()):
-            for spelling in {label, names.label(label, "legacy")}:
-                if spelling in issue["labels"]:
-                    client.remove_label(number, spelling)
         project.set(number, "Rejected from", current)
         project.set(number, "Return to", receipt["return_to"])
     if current == "Rejected" or target == "Rejected":
