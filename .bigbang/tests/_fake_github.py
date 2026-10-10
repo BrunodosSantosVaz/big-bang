@@ -14,6 +14,7 @@ class FakeGitHub:
         self.pulls, self.checks, self.milestones, self.compares = {}, {}, {}, {}
         self.failures = set()  # (method, tail) answered with HTTP 500, to test partial failures
         self.author = "dona"  # login that authors new comments
+        self.merges, self.contained, self.conflicts = [], set(), set()
         self.calls = []
         self.next_comment = 1000
 
@@ -84,6 +85,9 @@ class FakeGitHub:
         (r"commits/([0-9a-f]+)/check-runs", ("GET", "_check_runs")),
         (r"compare/(.+)\.\.\.(.+)", ("GET", "_compare")),
         (r"milestones", ("GET", "_list_milestones")), (r"milestones", ("POST", "_create_milestone")),
+        (r"milestones/(\d+)", ("PATCH", "_patch_milestone")),
+         (r"pulls", ("POST", "_create_pull")),
+        (r"merges", ("POST", "_merge_branches")),
     ]
 
     def _page(self, items, params):
@@ -94,6 +98,12 @@ class FakeGitHub:
         state = params.get("state", "open")
         from urllib.parse import unquote
         wanted = set(filter(None, unquote(params.get("labels", "")).split(",")))
+        if "milestone" in params:
+            items = [issue for _, issue in sorted(self.issues.items())
+                     if issue.get("milestone") == int(params["milestone"]) and
+                     (state == "all" or issue["state"] == state)]
+            return 200, self._page(items, params)
+        wanted = set(filter(None, params.get("labels", "").replace("%2C", ",").split(",")))
         items = [issue for _, issue in sorted(self.issues.items())
                  if (state == "all" or issue["state"] == state) and
                  wanted <= {label["name"] for label in issue["labels"]}]
@@ -198,6 +208,7 @@ class FakeGitHub:
         return 200, {"ref": ref, "object": {"sha": payload["sha"]}}
 
     def _delete_ref(self, params, payload, name):
+        self.deleted = getattr(self, "deleted", []) + ["refs/" + name]
         self.refs.pop("refs/" + name, None)
         return 204, None
 
@@ -231,7 +242,8 @@ class FakeGitHub:
     def _compare(self, params, payload, base, head):
         commits = self.compares.get((base, head), [])
         return 200, {"commits": [{"sha": f"{i:040x}", "commit": {"message": message}} for i, message in
-                                 enumerate(commits, start=1)], "total_commits": len(commits)}
+                                 enumerate(commits, start=1)], "total_commits": len(commits),
+                     "ahead_by": len(commits), "status": "ahead" if commits else "identical"}
 
     def _list_milestones(self, params, payload):
         return 200, self._page(list(self.milestones.values()), params)
@@ -242,6 +254,28 @@ class FakeGitHub:
         number = len(self.milestones) + 1
         self.milestones[number] = {"number": number, "title": payload["title"], "state": "open"}
         return 201, self.milestones[number]
+
+    def _patch_milestone(self, params, payload, number):
+        self.milestones[int(number)].update(payload)
+        return 200, self.milestones[int(number)]
+
+    def _create_pull(self, params, payload):
+        if any(p["head"]["ref"] == payload["head"] and p["base"]["ref"] == payload["base"] and p["state"] == "open"
+               for p in self.pulls.values()):
+            return 422, {"message": "A pull request already exists"}
+        number = max(list(self.pulls) + list(self.issues), default=0) + 1
+        self.add_pull(number, payload["head"], payload["base"], title=payload["title"], body=payload.get("body", ""))
+        return 201, self.pulls[number]
+
+    def _merge_branches(self, params, payload):
+        key = (payload["base"], payload["head"])
+        if key in self.conflicts:
+            return 409, {"message": "Merge conflict"}
+        if key in self.contained:
+            return 204, None
+        self.merges.append(key)
+        self.contained.add(key)  # merging again finds nothing to merge (HTTP 204), as on GitHub
+        return 201, {"sha": "c" * 40}
 
     def _create_tree(self, params, payload):
         return 201, {"sha": "4b825dc642cb6eb9a060e54bf8d69288fbee4904"}

@@ -1,0 +1,195 @@
+"""Delivery of the v3 grouping workflow (epics #230/#231, ADR-0022/0023): candidate ready, publish with the release
+gate, maintenance publish, correction task after a QA rejection and cleanup. In-memory GitHub."""
+import datetime
+import os
+import tempfile
+import unittest
+
+from _fake_github import FakeGitHub, FakeProject
+from _raiz import importar_bb
+from test_grouping_v3 import FLAGS_V3, cfg
+
+importar_bb()
+from bb import board, delivery, gh, locks, receipts  # noqa: E402
+from bb.errors import BbError  # noqa: E402
+
+UTC = datetime.timezone.utc
+NOW = datetime.datetime(2026, 10, 10, 12, 0, tzinfo=UTC)
+TODAY = NOW.date()
+
+
+class Base(unittest.TestCase):
+    def setUp(self):
+        self.fake = FakeGitHub()
+        self.client = gh.GitHub("dono/repo", api=self.fake)
+        self.project = FakeProject()
+        board.ensure_fields(self.project)
+        for ref in ("develop", "main", "release/1.3.0"):
+            self.fake.refs[f"refs/heads/{ref}"] = ref[0] * 40
+        self.fake.milestones[1] = {"number": 1, "title": "v1.3.0", "state": "open"}
+        self.fake.add_issue(10, "Login", labels=["type:epic", "qa:human", "flag:required"])
+        self.fake.add_issue(11, "Guia", labels=["type:epic", "qa:not-applicable", "flag:waived", "no-release"])
+        self.fake.add_issue(20, "API", labels=["type:task"], parent=10, state="closed")
+        self.fake.add_issue(21, "Página", labels=["type:docs"], parent=11, state="closed")
+        for number in (10, 11, 20, 21):
+            self.fake.issues[number]["milestone"] = 1
+        for number in (10, 11):
+            self.seed(number, ["Backlog", "Refinement", "Ready", "Selected", "In Progress"])
+
+    def seed(self, number, targets):
+        previous = board.current_state(self.client, number, {"dona"})
+        for target in targets:
+            self.client.comment(number, receipts.render({
+                "kind": "transition", "event_id": f"seed-{number}-{target}", "issue": number, "actor": "dona",
+                "at": "2026-10-10T11:00:00Z", "from": previous, "to": target, "sha": "0" * 40, "policy": "seed"}))
+            previous = target
+
+    def state(self, number):
+        return board.current_state(self.client, number, {"dona"})
+
+
+class CandidateReady(Base):
+    def test_epics_go_to_qa_or_releasing_and_the_release_pr_opens_once(self):
+        result = delivery.candidate_ready(self.client, self.project, cfg(), "release/1.3.0", "v1.3.0-rc.1", now=NOW)
+        self.assertEqual(self.state(10), "QA")
+        self.assertEqual(self.state(11), "Releasing")
+        self.assertEqual(self.project.value(10, "Candidate"), "v1.3.0-rc.1")
+        pulls = [p for p in self.fake.pulls.values() if p["head"]["ref"] == "release/1.3.0"]
+        self.assertEqual(len(pulls), 1)
+        self.assertEqual(pulls[0]["base"]["ref"], "main")
+        self.assertTrue(any("v1.3.0-rc.1" in body for body in self.fake.comment_bodies(10)))
+        delivery.candidate_ready(self.client, self.project, cfg(), "release/1.3.0", "v1.3.0-rc.2", now=NOW)
+        self.assertEqual(len([p for p in self.fake.pulls.values() if p["head"]["ref"] == "release/1.3.0"]), 1)
+        self.assertEqual(result["epics"], [10, 11])
+
+    def test_an_epic_with_open_tasks_does_not_enter_qa(self):
+        self.fake.add_issue(22, "Tela", labels=["type:task"], parent=10)
+        self.fake.issues[22]["milestone"] = 1
+        delivery.candidate_ready(self.client, self.project, cfg(), "release/1.3.0", "v1.3.0-rc.1", now=NOW)
+        self.assertEqual(self.state(10), "In Progress")
+
+
+class Publish(Base):
+    def setUp(self):
+        super().setUp()
+        delivery.candidate_ready(self.client, self.project, cfg(), "release/1.3.0", "v1.3.0-rc.1", now=NOW)
+        self.pr = next(p["number"] for p in self.fake.pulls.values() if p["head"]["ref"] == "release/1.3.0")
+        self.fake.checks[self.fake.pulls[self.pr]["head"]["sha"]] = [
+            {"name": "gate", "status": "completed", "conclusion": "success"}]
+        self.root = tempfile.mkdtemp()
+        with open(os.path.join(self.root, "flags.toml"), "w", encoding="utf-8") as handle:
+            handle.write(FLAGS_V3)
+        self.fake.refs["refs/tags/v1.3.0-rc.1"] = "r" * 40
+
+    def publish(self):
+        return delivery.publish(self.client, self.project, cfg(), "1.3.0", self.root, today=TODAY, now=NOW,
+                                pending={})
+
+    def test_dark_epic_ships_but_stays_in_qa_until_approved(self):
+        result = self.publish()
+        self.assertTrue(self.fake.pulls[self.pr]["merged"])
+        self.assertEqual(self.state(11), "Done")  # docs epic, flag waived
+        self.assertEqual(self.state(10), "QA")  # shipped dark: flag off in production, homologation pending
+        self.assertIn(("develop", "main"), self.fake.merges)  # main returns to develop
+        self.assertEqual(self.fake.milestones[1]["state"], "closed")
+        self.assertEqual(result["dark"], [10])
+
+    def test_approved_epic_with_flag_on_is_done(self):
+        self.fake.issues[10]["labels"].append({"name": "qa:approved"})
+        from bb import flags
+        with open(os.path.join(self.root, "flags.toml"), "w", encoding="utf-8") as handle:
+            handle.write(flags.switch(FLAGS_V3, "novo-login", "production", True, TODAY))
+        self.publish()
+        self.assertEqual(self.state(10), "Done")
+        self.assertEqual(self.fake.issues[10]["state"], "closed")
+
+    def test_gate_refuses_flag_on_without_approval(self):
+        from bb import flags
+        with open(os.path.join(self.root, "flags.toml"), "w", encoding="utf-8") as handle:
+            handle.write(flags.switch(FLAGS_V3, "novo-login", "production", True, TODAY))
+        with self.assertRaises(BbError):
+            self.publish()
+        self.assertFalse(self.fake.pulls[self.pr]["merged"])
+
+    def test_gate_refuses_a_red_release_pr(self):
+        self.fake.checks[self.fake.pulls[self.pr]["head"]["sha"]][0]["conclusion"] = "failure"
+        with self.assertRaises(BbError):
+            self.publish()
+
+    def test_conflict_returning_main_opens_a_sync_pr(self):
+        self.fake.conflicts.add(("develop", "main"))
+        self.publish()
+        self.assertTrue(any(p["head"]["ref"].startswith("sync/") and p["base"]["ref"] == "develop"
+                            for p in self.fake.pulls.values()))
+
+    def test_publishing_twice_is_harmless(self):
+        self.publish()
+        self.publish()
+        self.assertEqual(self.fake.merges.count(("develop", "main")), 1)
+
+
+class Maintenance(Base):
+    def test_maintenance_merges_into_main_without_artifact_changes(self):
+        self.fake.add_issue(30, "Ajuste do README", labels=["type:task"])
+        self.fake.add_pull(80, "maintenance/30-readme", "main", title="docs: readme", labels=["pr:approved"])
+        self.fake.checks[self.fake.pulls[80]["head"]["sha"]] = [
+            {"name": "gate", "status": "completed", "conclusion": "success"}]
+        delivery.publish_maintenance(self.client, cfg(), 80, changed_paths=["README.md"])
+        self.assertTrue(self.fake.pulls[80]["merged"])
+        self.assertIn(("develop", "main"), self.fake.merges)
+
+    def test_artifact_change_needs_a_release(self):
+        self.fake.add_pull(81, "maintenance/31-x", "main", labels=["pr:approved"])
+        self.fake.checks[self.fake.pulls[81]["head"]["sha"]] = [
+            {"name": "gate", "status": "completed", "conclusion": "success"}]
+        with self.assertRaises(BbError):
+            delivery.publish_maintenance(self.client, cfg(), 81, changed_paths=["src/app.py"])
+
+
+class Correction(Base):
+    def test_qa_rejection_creates_a_correction_task_on_the_release_branch(self):
+        delivery.candidate_ready(self.client, self.project, cfg(), "release/1.3.0", "v1.3.0-rc.1", now=NOW)
+        task = delivery.correction_task(self.client, self.project, cfg(), 10, "O botão some no celular",
+                                        actor="dona", now=NOW)
+        self.assertEqual(self.state(10), "In Progress")
+        history = board.history(self.client, 10, {"dona"})
+        self.assertEqual([m["to"] for m in history][-2:], ["Rejected", "In Progress"])
+        self.assertIn("reason:qa", self.fake.label_names(10))
+        issue = self.fake.issues[task]
+        self.assertIn("type:task", self.fake.label_names(task))
+        self.assertEqual(self.client.parent(task)["number"], 10)
+        self.assertIn(f"refs/heads/fix/{task}-correcao-o-botao-some-no-celular", self.fake.refs)
+        self.assertEqual(self.fake.refs[f"refs/heads/fix/{task}-correcao-o-botao-some-no-celular"], "r" * 40)
+        self.assertEqual(issue["milestone"], 1)
+
+
+class Cleanup(Base):
+    def test_deletes_only_merged_branches_of_closed_issues_and_expired_locks(self):
+        self.fake.refs["refs/heads/feature/20-api"] = "a" * 40            # closed issue, merged
+        self.fake.add_issue(23, "Aberta", labels=["type:task"], parent=10)
+        self.fake.refs["refs/heads/feature/23-aberta"] = "b" * 40         # open issue: kept
+        self.fake.refs["refs/heads/docs/21-pagina"] = "c" * 40            # closed but not merged: kept
+        self.fake.compares[("develop", "docs/21-pagina")] = ["docs: draft"]
+        self.fake.refs["refs/heads/qualquer-coisa"] = "d" * 40            # outside the model: reported
+        lock_api = self.client.locks()
+        lock_api.acquire("issue-23", "claude-1", "s1", hours=1, now=NOW)
+        report = delivery.cleanup(self.client, cfg(), now=NOW + datetime.timedelta(days=8), dry_run=False)
+        self.assertEqual(report["deleted"], ["feature/20-api"])
+        self.assertIn("refs/heads/feature/23-aberta", self.fake.refs)
+        self.assertIn("refs/heads/docs/21-pagina", self.fake.refs)
+        self.assertIn("qualquer-coisa", report["outside"])
+        self.assertEqual(report["locks"], ["issue-23"])
+        self.assertNotIn("refs/bigbang/locks/issue-23", self.fake.refs)
+        for protected in ("main", "develop", "release/1.3.0"):
+            self.assertIn(f"refs/heads/{protected}", self.fake.refs)
+
+    def test_dry_run_changes_nothing(self):
+        self.fake.refs["refs/heads/feature/20-api"] = "a" * 40
+        before = dict(self.fake.refs)
+        report = delivery.cleanup(self.client, cfg(), now=NOW, dry_run=True)
+        self.assertEqual(report["deleted"], ["feature/20-api"])
+        self.assertEqual(self.fake.refs, before)
+
+
+if __name__ == "__main__":
+    unittest.main()
