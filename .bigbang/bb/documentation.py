@@ -38,10 +38,19 @@ def git(folder, *args):
     return result.stdout.strip()
 
 
+def _project_value(raw, legacy_key):
+    """A [projeto] value of a parsed bigbang.toml in either language (ADR-0024), in its legacy spelling."""
+    from . import config as config_module
+    try:
+        return config_module.get(raw, f"projeto.{legacy_key}")
+    except BbError:
+        return None
+
+
 def is_public(root):
     config = Path(root) / "bigbang.toml"
     if config.exists():
-        return tomllib.loads(config.read_text(encoding="utf-8")).get("projeto", {}).get("visibilidade") == "publico"
+        return _project_value(tomllib.loads(config.read_text(encoding="utf-8")), "visibilidade") == "publico"
     manifest = Path(root) / MANIFEST
     if manifest.exists():
         return json.loads(manifest.read_text(encoding="utf-8")).get("visibilidade") == "publico"
@@ -98,8 +107,11 @@ def visibility_problems(root):
     try:
         path = Path(root) / 'bigbang.toml'
         if path.exists():
-            data = tomllib.loads(path.read_text(encoding='utf-8'))['projeto']
+            raw = tomllib.loads(path.read_text(encoding='utf-8'))
+            data = {'visibilidade': _project_value(raw, 'visibilidade'), 'repositorio': _project_value(raw, 'repositorio')}
             repository = data['repositorio']
+            if not repository:
+                raise KeyError('projeto.repositorio')
         elif (Path(root) / MANIFEST).exists():
             data = load(root)
             repository = data['repositorio']

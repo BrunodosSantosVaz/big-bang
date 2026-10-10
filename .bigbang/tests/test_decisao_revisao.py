@@ -64,6 +64,13 @@ class Decisao(ComCli):
             return next(i for i, c in enumerate(chamadas) if c[3].endswith(sufixo))
         self.assertLess(posicao("/comments"), posicao("/labels"))  # the phrase comes before the label
 
+    def test_decisao_em_ingles_gravada_no_idioma_do_projeto(self):
+        self.issue(7, "Épico", labels=["epic"])
+        codigo, saida = self.bb("decision", "qa:approved", "7", "--quote", "Pode publicar.", "--agent", "claude-1")
+        self.assertEqual(codigo, EXIT_OK, saida)
+        self.assertIn("homologado", self.estado["issues"]["7"]["labels"])  # legacy project: Portuguese label
+        self.assertIn("`homologado`", self.estado["comments"]["7"][0])
+
     def test_recusa_label_que_nao_e_decisao_e_frase_vazia(self):
         self.issue(7, "Épico")
         with contextlib.redirect_stderr(io.StringIO()):
@@ -169,6 +176,15 @@ class RevisaoAprovar(ComCli):
         self.estado['repository_files']['epico/7-x']['bigbang.toml'] = '[projeto]\nmodo="padrao"\n'
         self.pr(diff=DIFF_AUTH)
         self.assertEqual(self.bb('revisao', 'aprovar', '30')[0], EXIT_VERIFICATION_FAILED)
+
+    def test_v3_destination_and_english_labels(self):
+        self.estado['repository_files'] = {'epico/7-x': {'bigbang.toml': '[project]\nmode="flash"\n'}}
+        self.issue(12, 'Tarefa', labels=['type:task'])
+        self.pr(diff=DIFF_AUTH, labels=['review:human'])
+        codigo, saida = self.bb('revisao', 'aprovar', '30')
+        self.assertEqual(codigo, EXIT_VERIFICATION_FAILED, saida)
+        self.assertNotIn('pr:approved', self.estado['prs']['30']['labels'])
+        self.assertNotIn('pr-aprovado', self.estado['prs']['30']['labels'])
 
     def test_testes_com_revisao_humana(self):
         self.issue(11, "Testes", labels=["teste-aceite", "testes-revisao-humana"])

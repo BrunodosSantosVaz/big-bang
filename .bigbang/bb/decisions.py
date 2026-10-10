@@ -7,13 +7,15 @@ import datetime
 import base64
 import json
 
-from . import github, pipeline
+from . import github, names, pipeline
 from . import config as config_module
 from .errors import EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 
 DECISIONS = ("refinamento-aprovado", "prototipo-aprovado", "testes-aprovados", "teste-alterado-aprovado",
              "homologado", "reprovado", "dono:revisao-ia", "pr-aprovado")
-OPPOSITES = {"homologado": ("reprovado",), "reprovado": ("homologado",), "dono:revisao-ia": ("revisao-humana",)}
+OPPOSITES = {"homologado": ("reprovado",), "reprovado": ("homologado",), "dono:revisao-ia": ("revisao-humana",),
+             "qa:approved": ("qa:rejected",), "qa:rejected": ("qa:approved",), "owner:ai-review": ("review:human",)}
+ALL_DECISIONS = DECISIONS + names.DECISIONS  # legacy Portuguese and v3 English spellings (ADR-0024)
 
 
 def _now():
@@ -43,8 +45,8 @@ def _remove_label(repository, number, label):
 
 def record_decision(repository, label, number, phrase, ai_name):
     """Comment the owner's phrase, then put the decision label (and drop its opposite)."""
-    if label not in DECISIONS:
-        raise BbError(f"{label} não é uma decisão do dono; use uma de: {', '.join(DECISIONS)}", EXIT_USAGE)
+    if label not in ALL_DECISIONS:
+        raise BbError(f"{label} não é uma decisão do dono; use uma de: {', '.join(ALL_DECISIONS)}", EXIT_USAGE)
     if not phrase or not phrase.strip():
         raise BbError("informe a frase do dono (--frase), com as palavras dele", EXIT_USAGE)
     quoted = "\n".join(f"> {line}" for line in phrase.strip().splitlines())
@@ -55,11 +57,18 @@ def record_decision(repository, label, number, phrase, ai_name):
         _remove_label(repository, number, opposite)
 
 
+def _both_spellings(labels):
+    """Labels in both languages, so every rule below sees a v3 label as its legacy counterpart (ADR-0024)."""
+    labels = set(labels)
+    return labels | {names.label(label, "legacy") for label in labels} | {names.label(label, "v3") for label in labels}
+
+
 def review_blockers(pr_labels, issue_labels, head, changed_paths, diff_text, zones, marker, mode="padrao"):
     """Reasons why the AI may NOT approve this PR (empty = the AI review is enough)."""
+    pr_labels, issue_labels = _both_spellings(pr_labels), _both_spellings(issue_labels)
     owner_says_ai = "dono:revisao-ia" in pr_labels or "dono:revisao-ia" in issue_labels
     kind, issue = pipeline.branch_issue(head)
-    if kind == "teste":
+    if kind in ("teste", "test"):
         if "testes-revisao-humana" in issue_labels and not owner_says_ai:
             return ["os testes de aceite deste épico são revisados pelo dono (testes-revisao-humana): ele põe "
                     "testes-aprovados"]
@@ -77,20 +86,49 @@ def review_blockers(pr_labels, issue_labels, head, changed_paths, diff_text, zon
     return []
 
 
-def _target_mode(repository, base):
-    """The PR cannot authorize its own review by changing a local or head config."""
+def _target_text(repository, base):
+    """bigbang.toml of the target branch (None when it has none, as in the framework itself)."""
     try:
         encoded = github.run("api", f"repos/{repository}/contents/bigbang.toml", "-X", "GET",
                              "-f", f"ref={base}", "--jq", ".content")
     except BbError as exc:
         if "404" in exc.message:
-            return "padrao"  # the framework itself has no project TOML; explicit owner labels still apply
+            return None
         raise
     try:
-        text = base64.b64decode(encoded).decode('utf-8')
-        mode = config_module.parse(text)['projeto'].get('modo', 'padrao')
-    except (ValueError, KeyError, TypeError, UnicodeError) as exc:
+        return base64.b64decode(encoded).decode('utf-8')
+    except (ValueError, TypeError, UnicodeError) as exc:
         raise BbError('configuração da branch de destino não pôde ser conferida', EXIT_VERIFICATION_FAILED) from exc
+
+
+def _target_mode(repository, base):
+    """The PR cannot authorize its own review by changing a local or head config."""
+    text = _target_text(repository, base)
+    return "padrao" if text is None else mode_from_text(text)  # framework: explicit owner labels still apply
+
+
+def label_dialect_from_text(text):
+    """Language of the project's labels in a (possibly partial) target bigbang.toml: 'v3' or 'legacy'."""
+    try:
+        raw = config_module.parse(text)
+    except BbError:
+        return "legacy"
+    board = raw.get("board") if isinstance(raw.get("board"), dict) else {}
+    default = "v3" if isinstance(raw.get("project"), dict) else "legacy"
+    return board.get("labels", default) if board.get("labels") in ("v3", "legacy") else default
+
+
+def mode_from_text(text):
+    """Review policy of a (possibly partial) target bigbang.toml in either language: 'padrao' or 'flash'.
+    The autonomous mode delegates routine review like Flash; any other value is refused."""
+    try:
+        raw = config_module.parse(text)
+    except BbError as exc:
+        raise BbError('configuração da branch de destino não pôde ser conferida', EXIT_VERIFICATION_FAILED) from exc
+    if isinstance(raw.get('project'), dict):
+        mode = {'normal': 'padrao', 'flash': 'flash', 'autonomous': 'flash'}.get(raw['project'].get('mode', 'normal'))
+    else:
+        mode = (raw.get('projeto') or {}).get('modo', 'padrao') if isinstance(raw.get('projeto') or {}, dict) else None
     if mode not in ('padrao', 'flash'):
         raise BbError('modo inválido na branch de destino', EXIT_VERIFICATION_FAILED)
     return mode
@@ -131,4 +169,5 @@ def approve_review(repository, number, ai_name, zones, marker, report=""):
     if report.strip():
         body += "\n\n" + report.strip()
     _comment(repository, number, body)
-    _add_label(repository, number, "pr-aprovado")
+    text = _target_text(repository, data.get('baseRefOid') or data['baseRefName'])
+    _add_label(repository, number, names.label("pr-aprovado", label_dialect_from_text(text) if text else "legacy"))

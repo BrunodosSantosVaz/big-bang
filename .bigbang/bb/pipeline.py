@@ -155,7 +155,8 @@ def readiness_problems(body, labels):
 SLUG_MAX = 40
 CONVENTIONAL = re.compile(r"^(feat|fix|docs|test|refactor|build|ci|chore|perf|style|revert)(\(([\w./-]+)\))?(!)?: (\S.*)$")
 SEMVER = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
-ISSUE_BRANCH = re.compile(r"^(feature|teste|docs|bugfix|hotfix|epico|fundacao)/(\d+)-[a-z0-9]+(?:-[a-z0-9]+)*$")
+ISSUE_BRANCH = re.compile(r"^(feature|teste|test|docs|bugfix|fix|hotfix|epico|fundacao|foundation|maintenance)/"
+                          r"(\d+)-[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
 def slug(text):
