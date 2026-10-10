@@ -192,3 +192,50 @@ class FakeGitHub:
         commit = self.commits[sha]
         return 200, {"sha": sha, "message": commit["message"],
                      "parents": [{"sha": parent} for parent in commit["parents"]]}
+
+
+class FakeProject:
+    """In-memory GitHub Project (v2) with the same interface as board.ProjectGraphQL."""
+
+    def __init__(self):
+        self.field_specs, self.values = {}, {}
+
+    def fields(self):
+        return {name: {"type": spec["type"], "options": list(spec.get("options", []))}
+                for name, spec in self.field_specs.items()}
+
+    def ensure_field(self, name, field_type, options=None):
+        spec = self.field_specs.setdefault(name, {"type": field_type, "options": []})
+        if options is not None:
+            spec["options"] = list(options)
+
+    def add(self, number):
+        self.values.setdefault(number, {})
+
+    def set(self, number, field, value):
+        if field not in self.field_specs:
+            raise AssertionError(f"campo inexistente: {field}")
+        spec = self.field_specs[field]
+        if value is not None and spec["type"] == "SINGLE_SELECT" and value not in spec["options"]:
+            raise AssertionError(f"opção inexistente em {field}: {value}")
+        self.add(number)
+        if value is None:
+            self.values[number].pop(field, None)
+        else:
+            self.values[number][field] = value
+
+    def get(self, number, field):
+        return self.values.get(number, {}).get(field)
+
+    def items(self):
+        return {number: dict(values) for number, values in self.values.items()}
+
+    # shortcuts for the tests
+    def status(self, number):
+        return self.get(number, "Status")
+
+    def value(self, number, field):
+        return self.get(number, field)
+
+    def set_status(self, number, state):
+        self.set(number, "Status", state)
