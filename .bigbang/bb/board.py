@@ -7,7 +7,7 @@ import datetime
 import json
 
 from . import config as config_module
-from . import names, policy, receipts, states
+from . import names, pipeline, policy, receipts, states
 from .errors import EXIT_INVALID_STATE, EXIT_USAGE, BbError
 from .locks import expired
 
@@ -82,7 +82,7 @@ FIELDS = (
 # Which gate (policy.GATES) a forward move passes; moves not listed need no approval beyond their facts.
 GATE_OF = {("Brainstorm", "Backlog"): "backlog", ("Refinement", "Ready"): "refinement",
            ("Refinement", "Prototyping"): "refinement", ("Prototyping", "Ready"): "prototype",
-           ("Ready", "Selected"): "selection", ("Backlog", "Ready"): "backlog", ("QA", "Releasing"): "qa",
+           ("Ready", "Selected"): "selection", ("QA", "Releasing"): "qa",
            ("QA", "Rejected"): "qa", ("Releasing", "Done"): "publish"}
 PLANNING_GATES = ("backlog", "refinement", "prototype", "selection", "cancel")
 # The decision label that records the owner's approval of a gate (bb decision writes it with his words). The
@@ -164,20 +164,56 @@ def attempts(client, number, trusted):
     return sum(1 for receipt in history(client, number, trusted) if receipt["kind"] == "rejection")
 
 
+# Decisions withdrawn when a card is sent back: a decision of a past cycle never approves the next one.
+WITHDRAWN_ON_RETURN = {
+    "Refinement": ("approved:refinement", "approved:prototype", "approved:selection", "qa:approved", "qa:rejected"),
+    "Prototyping": ("approved:prototype", "approved:selection", "qa:approved", "qa:rejected"),
+    "In Progress": ("qa:approved", "qa:rejected"),
+    "Selected": ("qa:approved", "qa:rejected"),
+}
+
+
 def _gate(card_kind, current, target):
-    if target == "Cancelled" and card_kind == "epic":
+    if target == "Cancelled" and card_kind in ("epic", "bug"):
         return "cancel"
     return GATE_OF.get((current, target))
 
 
-def _approval_problems(config, card_kind, current, target, gathered):
+def _epic_paths(client, number):
+    """Files changed by the merged PRs of an epic's sub-issues (the evidence of a QA or publication risk)."""
+    children = {child["number"] for child in client.sub_issues(number)} | {number}
+    paths = set()
+    for raw in client.paginate("pulls?state=closed"):
+        if not raw.get("merged_at") and not raw.get("merged"):
+            continue
+        _, issue = pipeline.branch_issue(raw["head"]["ref"])
+        if issue in children:
+            for file in client.paginate(f"pulls/{raw['number']}/files"):
+                paths.add(file["filename"])
+                if file.get("previous_filename"):
+                    paths.add(file["previous_filename"])
+    return sorted(paths)
+
+
+def _gate_decision(config, client, number, card_kind, current, target, labels):
+    """(gate, approver, risk) of a move, or (None, None, None) when no gate applies."""
     gate = _gate(card_kind, current, target)
+    if gate is None:
+        return None, None, None
+    if gate in PLANNING_GATES:
+        risk = policy.planning_risk(labels)
+    else:
+        risk = policy.delivery_risk(labels, _epic_paths(client, number),
+                                    config_module.get(config, "security.sensitive_paths"))
+    return gate, policy.approver(policy.mode(config), gate, risk), risk
+
+
+def _approval_problems(config, card_kind, current, target, gathered, decision):
+    gate, who, risk = decision
     if gate is None:
         return []
     mode = policy.mode(config)
     labels = gathered["labels"]
-    risk = policy.planning_risk(labels) if gate in PLANNING_GATES else policy.delivery_risk(labels)
-    who = policy.approver(mode, gate, risk)
     if who == "blocked":
         return [f"portão {gate} fora do contrato do modo {mode} (risco {risk}): bloqueado"]
     if who == "agent":
@@ -211,9 +247,11 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
     gathered = globals()["facts"](client, config, number, now=now)
     gathered.update(facts or {})
     gathered["accepted"] = gathered["selected"] = True  # the approval check below is their evidence
+    decision = _gate_decision(config, client, number, card_kind, current, target, gathered["labels"])
+    gathered["gate_delegated"] = decision[1] == "agent"
     found = states.problems(card_kind, current, target, gathered, reason=reason,
                             return_to=recorded_return if current == "Rejected" else return_to)
-    found += [] if found else _approval_problems(config, card_kind, current, target, gathered)
+    found += [] if found else _approval_problems(config, card_kind, current, target, gathered, decision)
     if found:
         raise BbError(f"#{number}: {current} → {target} recusado:\n" + "\n".join(f"  - {p}" for p in found),
                       EXIT_INVALID_STATE)
@@ -246,6 +284,10 @@ def _effects(client, project, number, issue, card_kind, current, target, receipt
     project.set(number, "Status", target)
     if target == "Rejected":
         client.add_labels(number, [f"reason:{receipt['reason']}"])
+        for label in WITHDRAWN_ON_RETURN.get(receipt["return_to"], ()):
+            for spelling in {label, names.label(label, "legacy")}:
+                if spelling in issue["labels"]:
+                    client.remove_label(number, spelling)
         project.set(number, "Rejected from", current)
         project.set(number, "Return to", receipt["return_to"])
     if current == "Rejected" or target == "Rejected":

@@ -254,6 +254,9 @@ def _liberar(args):
     config = config_module.load(args.raiz)
     if claims.is_v3(config):
         claims.unclaim(_v3_client(config), config, acquired)
+        epic_path = _epic_receipt_path(args.raiz, args.issue)
+        if os.path.exists(epic_path):
+            os.remove(epic_path)
         print(f"#{args.issue}: posse liberada. A pasta de trabalho foi preservada.")
         return EXIT_OK
     ownership.release(config, args.issue, acquired["name"], acquired["session"])

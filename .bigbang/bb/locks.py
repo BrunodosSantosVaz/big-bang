@@ -138,14 +138,14 @@ class Locks:
                           EXIT_EXTERNAL_COMMAND)
         if current.get("state") == "held" and (not expired(current, now) or not take_expired):
             raise LockHeld(current)
-        return self.take_over(resource, head, owner, session, hours=hours, now=now)
+        return self.take_over(resource, head, owner, session, hours=hours, now=now, take_expired=take_expired)
 
-    def take_over(self, resource, expected_head, owner, session, *, hours, now):
-        """Replace an expired or released lock whose head is `expected_head`; fails if anyone moved it first and
-        never replaces a live lock."""
+    def take_over(self, resource, expected_head, owner, session, *, hours, now, take_expired=False):
+        """Replace a released lock (or an expired one, with take_expired) whose head is `expected_head`; fails if
+        anyone moved it first and never replaces a live lock."""
         self._check(resource)
         head, current = self._head(resource)
-        if current and current.get("state") == "held" and not expired(current, now):
+        if current and current.get("state") == "held" and (not expired(current, now) or not take_expired):
             raise LockHeld(current)
         generation = (current or {}).get("generation", 0) + 1
         record = self._record(resource, owner, session, generation, hours, now)
@@ -179,14 +179,17 @@ class Locks:
                                {"sha": self._commit(tombstone, parent=head), "force": False}, accept=(200, 422))
         if status == 422:
             raise LockLost(f"a trava {resource} mudou durante a liberação")
-        # The tombstone stays: deleting here could remove a lock taken right after (old tombstones go in cleanup).
+        # The tombstone stays for good: deleting it could remove a lock taken right after, and keeping it keeps the
+        # generations monotonic. A released lock counts as free (current() returns None).
 
-    def all(self):
-        """{resource: record} of every lock ref (held, expired or tombstone)."""
+    def all(self, resources=None):
+        """{resource: record} of the lock refs (held, expired or tombstone), all or only the given resources."""
         _, refs = self._call("GET", "git/matching-refs/bigbang/locks/")
         result = {}
         for ref in refs or []:
             resource = ref["ref"][len(PREFIX):]
+            if resources is not None and resource not in resources:
+                continue
             _, commit = self._call("GET", f"git/commits/{ref['object']['sha']}")
             record = decode(commit.get("message"))
             if record:

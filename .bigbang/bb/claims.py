@@ -69,8 +69,14 @@ def _blockers(client, number):
 
 
 def _held_by(client, owner, now):
-    return sorted(int(resource.split("-", 1)[1]) for resource, record in client.locks().all().items()
-                  if resource.startswith("issue-") and record.get("owner") == owner and not expired(record, now))
+    """Open issues whose live lock belongs to `owner`; only the issues carrying the projection label are read, so the
+    cost does not grow with every tombstone ever written."""
+    label = f"person:{owner[len('person:'):]}" if owner.startswith("person:") else f"agent:{owner}"
+    candidates = [f"issue-{issue['number']}" for issue in client.issues("open", labels=[label])]
+    if not candidates:
+        return []
+    return sorted(int(resource.split("-", 1)[1]) for resource, record in client.locks().all(candidates).items()
+                  if record.get("owner") == owner and record.get("state") == "held" and not expired(record, now))
 
 
 def _record(client, number, receipt):
@@ -157,11 +163,13 @@ def force(client, config, number, name, quote, *, person=False, now=None):
 def stale(client, *, now=None):
     """Held claims whose lease expired: the controller projects them as `stale`; nobody's work is touched."""
     now = _now(now)
+    open_issues = [f"issue-{issue['number']}" for issue in client.issues("open")]
+    if not open_issues:
+        return []
     return [{"issue": int(resource.split("-", 1)[1]), "owner": record["owner"].removeprefix("person:"),
-             "expires": record["expires"],
-             "generation": record["generation"]}
-            for resource, record in sorted(client.locks().all().items())
-            if resource.startswith("issue-") and record.get("state") == "held" and expired(record, now)]
+             "expires": record["expires"], "generation": record["generation"]}
+            for resource, record in sorted(client.locks().all(open_issues).items())
+            if record.get("state") == "held" and expired(record, now)]
 
 
 __all__ = ["LockLost", "claim", "force", "is_v3", "renew", "stale", "unclaim"]

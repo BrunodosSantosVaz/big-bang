@@ -92,6 +92,9 @@ def handle(client, project, config, event, payload, *, now=None):
                 advance(number, "Coding")
             advance(number, "In Review", facts={"pr_open": True})
         elif action == "closed" and pull.get("merged"):
+            if state in ("Done", "QA", "Releasing"):  # a retried event after the move: finish the release only
+                release_on_merge(client, number, now=now)
+                return done
             if state == "Coding":
                 advance(number, "In Review", facts={"pr_open": True})
             for target in ("Done", "QA", "Releasing"):

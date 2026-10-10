@@ -142,14 +142,14 @@ PRECONDITIONS = {
     ("epic", "Brainstorm", "Backlog"): lambda f: _need(f.get("accepted"), "a demanda precisa ser aceita"),
     ("epic", "Backlog", "Refinement"): lambda f: _need(f.get("claimed"), "o refinamento precisa de posse"),
     ("epic", "Refinement", "Prototyping"): lambda f: (
-        _need(_has(f, "approved:refinement"), "refinamento ainda não aprovado")
+        _need(_has(f, "approved:refinement") or f.get("gate_delegated"), "refinamento ainda não aprovado")
         + _need(f.get("prototype") == "required", "protótipo não marcado como necessário")),
     ("epic", "Refinement", "Ready"): lambda f: (
-        _need(_has(f, "approved:refinement"), "refinamento ainda não aprovado")
+        _need(_has(f, "approved:refinement") or f.get("gate_delegated"), "refinamento ainda não aprovado")
         + _need(f.get("prototype") == "waived", "protótipo necessário ou sem decisão: passe por Prototyping")
         + _flag_decided(f) + list(f.get("ready_problems", []))),
     ("epic", "Prototyping", "Ready"): lambda f: (
-        _need(_has(f, "approved:prototype"), "protótipo ainda não aprovado") + _flag_decided(f)
+        _need(_has(f, "approved:prototype") or f.get("gate_delegated"), "protótipo ainda não aprovado") + _flag_decided(f)
         + list(f.get("ready_problems", []))),
     ("epic", "Ready", "Selected"): lambda f: (
         _need(f.get("selected"), "seleção explícita para a sprint ausente")
@@ -167,7 +167,8 @@ PRECONDITIONS = {
         + _need(f.get("qa") == "not-applicable", "QA se aplica: passe por QA")
         + _need(f.get("merged_permanent"), "falta integrar na branch permanente com CI verde")),
     ("epic", "QA", "Releasing"): lambda f: _need(
-        _has(f, "qa:approved") or f.get("qa_decision") in ("approved", "automatic"), "QA ainda não aprovado"),
+        _has(f, "qa:approved") or f.get("qa_decision") in ("approved", "automatic") or f.get("gate_delegated"),
+        "QA ainda não aprovado"),
     ("epic", "Releasing", "Done"): lambda f: (
         _need(f.get("delivered"), "entrega efetiva ainda não comprovada")
         + _need(f.get("flag") != "required" or f.get("flag_on"), "a feature flag do épico ainda está desligada")),

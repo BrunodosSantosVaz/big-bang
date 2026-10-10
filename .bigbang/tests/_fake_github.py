@@ -88,7 +88,8 @@ class FakeGitHub:
 
     def _list_issues(self, params, payload):
         state = params.get("state", "open")
-        wanted = set(filter(None, params.get("labels", "").replace("%2C", ",").split(",")))
+        from urllib.parse import unquote
+        wanted = set(filter(None, unquote(params.get("labels", "")).split(",")))
         items = [issue for _, issue in sorted(self.issues.items())
                  if (state == "all" or issue["state"] == state) and
                  wanted <= {label["name"] for label in issue["labels"]}]

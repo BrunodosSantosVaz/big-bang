@@ -92,9 +92,12 @@ def planning_risk(labels):
 
 
 def delivery_risk(labels, paths=(), sensitive_paths=()):
-    """Risk of a QA or publication gate: the changed paths when known; without them, the areas, and high when
-    nothing is declared (fail closed)."""
-    floor = risk_floor(paths, sensitive_paths) if paths else _area_risk(labels, "high")
+    """Risk of a QA or publication gate: the changed paths when known; without them it never goes below high (an
+    area label only raises it)."""
+    if paths:
+        floor = max(risk_floor(paths, sensitive_paths), _area_risk(labels, "low"), key=_rank)
+    else:
+        floor = max("high", _area_risk(labels, "high"), key=_rank)
     return effective_risk(labels, floor)
 
 
