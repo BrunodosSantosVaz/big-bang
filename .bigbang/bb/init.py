@@ -126,6 +126,7 @@ def plan_steps(options, with_github):
     steps += [f"adotar o modo {options.get('modo', 'padrao')} (testes continuam escritos antes do código)",
               "criar bigbang.toml a partir de .bigbang/modelos/bigbang.toml.exemplo",
               "mover README.md e LICENSE do framework para .bigbang/",
+              "retirar do AGENTS.md as instruções exclusivas do framework (trecho bigbang:framework)",
               "criar o README.md do sistema",
               "criar CODE_OF_CONDUCT.md, CONTRIBUTING.md e SECURITY.md do sistema (DOC-16)"]
     if options["visibilidade"] == "publico":
@@ -174,8 +175,24 @@ def run(root, options, with_github=True, today=None):
         inherited = json.loads(read_text(manifest))
         if inherited.get("repositorio") == "BrunodosSantosVaz/big-bang":
             os.remove(manifest)  # Private project created from the public framework template.
+    _drop_framework_project_section(root)
     generator.apply(generator.build_plan(root), root)
     return issue
+
+
+FRAMEWORK_SECTION = re.compile(r"\n*<!-- bigbang:framework:inicio -->\n.*?<!-- bigbang:framework:fim -->\n?", re.S)
+
+
+def _drop_framework_project_section(root):
+    """A system born from the template inherits the framework's own instructions in the AGENTS.md project section
+    (its mode, its priorities), marked between bigbang:framework comments. Remove exactly that marked segment, so
+    a new system never follows the framework's instructions; the rest of the project section is kept."""
+    path = os.path.join(root, generator.AGENTS_FILE)
+    if os.path.isfile(path):
+        current = read_text(path)
+        cleaned = FRAMEWORK_SECTION.sub("\n", current)
+        if cleaned != current:
+            write_text(path, cleaned)
 
 
 def _license_text(options, today):

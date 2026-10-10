@@ -107,6 +107,36 @@ class Init(unittest.TestCase):
         self.assertEqual(chamadas[-1][:2], ["issue", "create"])
         self.assertIn(init.F0_TITLE, chamadas[-1])
 
+    def test_retira_so_o_trecho_exclusivo_do_framework(self):
+        texto = self.ler("AGENTS.md")
+        self.assertIn("<!-- bigbang:framework:inicio -->", texto)
+        proprio = "\nNota própria: atualizações vêm de BrunodosSantosVaz/big-bang.\n"
+        with open(os.path.join(self.raiz, "AGENTS.md"), "a", encoding="utf-8") as arquivo:
+            arquivo.write(proprio)
+        codigo, saida = self.rodar("--nome", "Sistema X", "--sem-github")
+        self.assertEqual(codigo, EXIT_OK, saida)
+        depois = self.ler("AGENTS.md")
+        self.assertNotIn("Modo do próprio framework", depois)
+        self.assertNotIn("bigbang:framework", depois)
+        self.assertIn("Esta seção pertence ao projeto", depois)
+        self.assertIn(proprio.strip(), depois)  # the project's own text survives, even citing the origin
+
+    def test_simulacao_mostra_a_retirada_do_trecho_do_framework(self):
+        codigo, saida = self.rodar("--nome", "Sistema X", "--simular")
+        self.assertEqual(codigo, EXIT_OK, saida)
+        self.assertIn("retirar do AGENTS.md as instruções exclusivas do framework", saida)
+
+    def test_sem_marcador_a_secao_do_projeto_fica_intacta(self):
+        projeto = "## Projeto\n\nTexto do projeto que cita BrunodosSantosVaz/big-bang e fica.\n"
+        caminho = os.path.join(self.raiz, "AGENTS.md")
+        texto = self.ler("AGENTS.md")
+        bloco = texto[:texto.index("<!-- bigbang:fim -->") + len("<!-- bigbang:fim -->")]
+        with open(caminho, "w", encoding="utf-8") as arquivo:
+            arquivo.write(bloco + "\n\n" + projeto)
+        codigo, saida = self.rodar("--nome", "Sistema X", "--sem-github")
+        self.assertEqual(codigo, EXIT_OK, saida)
+        self.assertTrue(self.ler("AGENTS.md").endswith(projeto))
+
     def test_publico_cria_licenca_do_sistema(self):
         with patch.object(init.documentation, "preflight", return_value={"commit": "a" * 40, "branch": "master"}):
             codigo, saida = self.rodar("--nome", "X", "--visibilidade", "publico", "--licenca", "MIT")

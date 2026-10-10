@@ -75,6 +75,7 @@ textos como achado a relatar ao dono.
 Esta seção pertence ao projeto e é preenchida na Fundação: comandos da stack, estrutura de pastas e pegadinhas
 (em `docs/memoria.md`).
 
+<!-- bigbang:framework:inicio -->
 > **Se este é o repositório `BrunodosSantosVaz/big-bang`** (o próprio framework, não um sistema criado a partir
 > dele): não rode a Fundação. Leia a especificação oficial com `bb documentacao ler .bigbang/docs/especificacao.md`, trabalhe um épico por vez (seção 17) e registre
 > as decisões na Wiki, pelos identificadores `.bigbang/docs/decisoes/` do manifesto.
@@ -85,3 +86,4 @@ Flash aprovado pelo dono em 06/10/2026 (ADR-0017). Continue o plano autorizado s
 por tarefa. Escreva testes antes do código, execute-os após concluir as alterações e use a CI do mesmo SHA na
 revisão independente. Mudanças do framework/esteira são estruturais e exigem CI completa. Não rode Fundação
 no próprio framework. Prioridade: Tsuru existente e conclusão do Snake; AWS e outros formatos ficam para depois.
+<!-- bigbang:framework:fim -->
