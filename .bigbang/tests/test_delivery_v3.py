@@ -225,3 +225,31 @@ class Cleanup(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class QaVerdict(Base):
+    def run_cli(self, *argv):
+        import argparse
+        from unittest import mock
+        from bb import flow_cli
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--raiz", default=".")
+        commands = parser.add_subparsers(dest="command")
+        pipeline_sub = commands.add_parser("pipeline").add_subparsers(dest="pipeline_command")
+        flow_cli.register(commands, pipeline_sub)
+        args = parser.parse_args(list(argv))
+        config = cfg()
+        config["agents"]["names"] = ["claude-1", "codex-1"]
+        with mock.patch.object(flow_cli, "_context", return_value=(config, self.client, self.project)):
+            return args.handler(args)
+
+    def test_independent_agent_records_the_verdict_of_a_candidate(self):
+        self.run_cli("qa", "verdict", "10", "--candidate", "v1.3.0-rc.1", "--digest", "sha256:aa",
+                     "--verdict", "approved", "--agent", "codex-1")
+        found = [r for r in receipts.parse(self.fake.comments.get(10, []), {"dona"}) if r["kind"] == "qa"]
+        self.assertEqual([(r["approver"], r["verdict"]) for r in found], [("codex-1", "approved")])
+
+    def test_unknown_agent_cannot_record_a_verdict(self):
+        with self.assertRaises(BbError):
+            self.run_cli("qa", "verdict", "10", "--candidate", "v1.3.0-rc.1", "--digest", "sha256:aa",
+                         "--verdict", "approved", "--agent", "intruso")
