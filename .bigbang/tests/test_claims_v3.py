@@ -72,6 +72,13 @@ class Claims(unittest.TestCase):
             self.claim(13)
         self.assertIn("limite", error.exception.message)
 
+    def test_capacity_counts_the_locks_even_without_the_projection_label(self):
+        self.claim(11)
+        self.fake.issues[11]["labels"] = [label for label in self.fake.issues[11]["labels"]
+                                          if label["name"] != "agent:claude-1"]  # removed by hand
+        with self.assertRaises(BbError):
+            self.claim(13)
+
     def test_epic_stages_can_be_claimed(self):  # refinement and prototyping use the same protocol
         receipt = self.claim(10, name="dona", person=True)
         self.assertEqual(receipt["issue"], 10)

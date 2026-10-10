@@ -155,6 +155,68 @@ class Moves(Base):
         with self.assertRaises(BbError):  # migrations make the QA critical: the owner homologates
             self.move(10, "Releasing", actor="claude-1", mode="flash")
 
+    def _epic_in_progress(self, labels, path):
+        from bb import receipts as r
+        self.fake.issues[10]["labels"] += [{"name": label} for label in labels]
+        self.fake.issues[11]["state"] = "closed"
+        self.fake.issues[12]["state"] = "closed"
+        self.fake.add_pull(71, "feature/12-tela", "develop", state="closed", merged=True)
+        self.fake.pulls[71]["files"] = [{"filename": path}]
+        for target in ("Backlog", "Refinement", "Ready", "Selected", "In Progress"):
+            previous = self.state(10)
+            self.client.comment(10, r.render({"kind": "transition", "event_id": f"s-{target}", "issue": 10,
+                                              "actor": "dona", "at": "2026-10-10T11:00:00Z", "from": previous,
+                                              "to": target, "policy": "x"}))
+
+    def test_flash_qa_human_stays_with_the_owner_at_any_risk(self):
+        self._epic_in_progress(["qa:human"], "src/app.py")  # medium risk: delegable, but the card asks the owner
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        with self.assertRaises(BbError) as error:
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
+        self.assertIn("qa:approved", error.exception.message)
+        self.approve(10, "qa:approved")
+        self.move(10, "Releasing", actor="claude-1", mode="flash")
+
+    def test_flash_delegated_qa_needs_an_independent_qa_receipt(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="claude-1", now=NOW)  # before QA: an old cycle
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        with self.assertRaises(BbError):  # no evidence of this cycle
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="rejected", approver="codex-1", now=NOW)
+        with self.assertRaises(BbError):  # a rejected verdict is not an approval
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="claude-1", now=NOW)
+        with self.assertRaises(BbError):  # the agent that delivers never homologates its own work
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="codex-1", now=NOW)
+        self.move(10, "Releasing", actor="claude-1", mode="flash")
+        with self.assertRaises(BbError):
+            board.record_qa(self.client, config("flash"), 10, candidate="", digest="sha256:aa",
+                            verdict="approved", approver="codex-1", now=NOW)
+
+    def test_going_back_without_rejection_also_withdraws_the_decisions(self):
+        self.approve(10, "approved:backlog")
+        self.move(10, "Backlog")
+        self.move(10, "Refinement")
+        self.fake.issues[10]["labels"] += [{"name": "prototype:waived"}, {"name": "flag:waived"}]
+        self.approve(10, "approved:refinement")
+        self.move(10, "Ready")
+        self.approve(10, "approved:selection")
+        self.move(10, "Selected")
+        self.move(10, "Ready", actor="claude-1")
+        self.assertNotIn("approved:selection", self.fake.label_names(10))
+        with self.assertRaises(BbError):  # the old selection does not select the epic again
+            self.move(10, "Selected", actor="claude-1")
+        self.move(10, "Refinement", actor="claude-1")
+        self.assertNotIn("approved:refinement", self.fake.label_names(10))
+        with self.assertRaises(BbError):
+            self.move(10, "Ready", actor="claude-1")
+
     def test_effects_happen_before_the_receipt(self):
         self.fake.failures.add(("PATCH", "issues/11"))
         with self.assertRaises(BbError):
@@ -302,12 +364,32 @@ class Controller(Base):
     def test_retried_merge_event_releases_a_claim_left_behind(self):
         claims.claim(self.client, config(), 11, "claude-1", now=NOW)
         self.fake.refs["refs/heads/test/11-testes"] = "a" * 40
-        pr = {"number": 55, "head": {"ref": "test/11-testes"}, "base": {"ref": "develop"}, "merged": True}
+        pr = {"number": 55, "head": {"ref": "test/11-testes"}, "base": {"ref": "develop"}, "merged": True,
+              "merged_at": "2026-10-10T12:30:00Z"}
         self.event("pull_request", action="opened", pull_request=dict(pr, merged=False))
         self.move(11, "Done", actor="controller", facts={"pr_merged": True})  # the run died before releasing
         self.assertIsNotNone(self.client.locks().current("issue-11"))
         self.event("pull_request", action="closed", pull_request=pr)
         self.assertIsNone(self.client.locks().current("issue-11"))
+
+    def test_retried_merge_event_keeps_a_claim_taken_after_the_merge(self):
+        self.fake.add_issue(20, "Bug", labels=["type:bug"])
+        from bb import receipts as r
+        for previous, target in (("Brainstorm", "Backlog"), ("Backlog", "Ready"), ("Ready", "Selected"),
+                                 ("Selected", "Coding"), ("Coding", "In Review"), ("In Review", "QA")):
+            self.client.comment(20, r.render({"kind": "transition", "event_id": f"b-{target}", "issue": 20,
+                                              "actor": "dona", "at": "2026-10-10T11:00:00Z", "from": previous,
+                                              "to": target, "policy": "x"}))
+        later = NOW + datetime.timedelta(hours=1)
+        claims.claim(self.client, config(), 20, "claude-1", now=later)  # taken in QA, after the merge
+        pr = {"number": 56, "head": {"ref": "fix/20-x"}, "base": {"ref": "develop"}, "merged": True,
+              "merged_at": "2026-10-10T12:00:00Z"}
+        controller.handle(self.client, self.project, config("flash"), "pull_request",
+                          {"action": "closed", "pull_request": pr}, now=later)
+        self.assertIsNotNone(self.client.locks().current("issue-20"))
+
+    def test_bugfix_branches_are_read_by_the_controller(self):
+        self.assertEqual(controller._issue_of("bugfix/20-x"), 20)
 
     def test_late_closed_event_of_a_reopened_pr_is_ignored(self):
         claims.claim(self.client, config(), 11, "claude-1", now=NOW)
