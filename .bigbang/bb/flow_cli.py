@@ -65,6 +65,13 @@ def register(commands, pipeline_sub):
     p.add_argument("epic", type=int)
     p.add_argument("--reason", required=True, help="motivo nas palavras do dono")
     p.set_defaults(handler=_qa_reject)
+    p = qa_sub.add_parser("verdict", help="QA delegado: o agente independente registra o veredito da candidata")
+    p.add_argument("epic", type=int)
+    p.add_argument("--candidate", required=True, help="versão candidata homologada (ex.: v1.3.0-rc.1)")
+    p.add_argument("--digest", required=True, help="digest do artefato homologado")
+    p.add_argument("--verdict", required=True, choices=("approved", "rejected"))
+    p.add_argument("--agent", required=True, help="nome do agente que homologou (de agents.names)")
+    p.set_defaults(handler=_qa_verdict)
 
     p = commands.add_parser("cleanup", help="v3: faxina de branches concluídas; relata posses antigas")
     p.add_argument("--apply", action="store_true", help="apaga de verdade (padrão: só mostra o plano)")
@@ -361,6 +368,17 @@ def _qa_reject(args):
     config, client, project = _context(args.raiz)
     task = delivery.correction_task(client, project, config, args.epic, args.reason, actor=_actor(client))
     print(f"Épico #{args.epic} reprovado; tarefa de correção #{task} criada a partir da release.")
+    return EXIT_OK
+
+
+def _qa_verdict(args):
+    config, client, _ = _context(args.raiz)
+    if args.agent not in config_module.get(config, "agents.names"):
+        raise BbError(f"agente desconhecido: {args.agent} (declare em agents.names)", EXIT_USAGE)
+    board.record_qa(client, config, args.epic, candidate=args.candidate, digest=args.digest, verdict=args.verdict,
+                    approver=args.agent)
+    print(f"QA {args.verdict} de {args.agent} registrado na #{args.epic} para {args.candidate}. Ele só vale se "
+          "o agente não teve posse no épico nem nas tarefas dele.")
     return EXIT_OK
 
 
