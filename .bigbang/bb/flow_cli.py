@@ -44,6 +44,9 @@ def register(commands, pipeline_sub):
     p = release_sub.add_parser("cut", help="corta release/x.y.z da develop (versão pelos títulos dos PRs)")
     p.add_argument("--version", help="X.Y.Z (padrão: calculada)")
     p.set_defaults(handler=_release_cut)
+    p = release_sub.add_parser("items", help="PRs da release (número, título, labels) para o CHANGELOG")
+    p.add_argument("--head", default="develop", help="branch da release (padrão: develop)")
+    p.set_defaults(handler=_release_items)
     p = release_sub.add_parser("gate", help="confere flags e testes pendentes dos épicos da release")
     p.add_argument("--epic", type=int, action="append", required=True)
     p.set_defaults(handler=_release_gate)
@@ -171,6 +174,15 @@ def _release_cut(args):
         return EXIT_OK
     print(f"{release['branch']} cortada da develop ({release['sha'][:10]}); versão {release['previous']} → "
           f"{release['version']}; épicos " + ", ".join(f"#{n}" for n in release["epics"]) + ".")
+    return EXIT_OK
+
+
+def _release_items(args):
+    from . import flows
+    config = config_module.load(args.raiz)
+    for number, title, labels in flows.release_items(gh.GitHub(config_module.get(config, "project.repository")),
+                                                     head=args.head):
+        print(f"{number}\t{title}\t{','.join(labels)}")
     return EXIT_OK
 
 

@@ -120,20 +120,29 @@ def build_plan(root, install_pipeline=False):
     plan = Plan(installed)
 
     for layer in _layers(config, installed):
-        _add_tree(plan, root, os.path.join(framework_dir(root), *layer.split("/"), "arquivos"), "", context, version)
+        folder = "files" if layer.startswith("pipeline/") else "arquivos"
+        _add_tree(plan, root, os.path.join(framework_dir(root), *layer.split("/"), folder), "", context, version)
         if layer == "esteira/sempre" and any(path.startswith(".github/") for path in plan.expected):
             raise BbError(".bigbang/esteira/sempre/ não pode gerar arquivos em .github/ (só a esteira gera)",
                           EXIT_INVALID_STATE)
     _add_skills(plan, root, context, version)
-    _add_agents_md(plan, root, context, version, founded=config is not None)
+    _add_agents_md(plan, root, context, version, founded=config is not None, v3=is_v3_pipeline(config))
     if config is not None:
         _add_stack_md(plan, root, config, version)
     plan.stale = sorted(set(_generated_candidates(root, installed)) - set(plan.expected))
     return plan
 
 
+def is_v3_pipeline(config):
+    """The v3 tree (.bigbang/pipeline) is generated for the grouping workflow (ADR-0022)."""
+    return config is not None and config_module.get(config, "workflow.model") == "grouping"
+
+
 def _layers(config, installed):
     layers = ["esteira/sempre"]
+    if installed and is_v3_pipeline(config):
+        layers.append("pipeline/core")
+        return layers
     if installed:
         perfil = config["entrega"]["perfil"]
         layers += ["esteira/nucleo", f"esteira/perfis/{perfil}"]
@@ -176,15 +185,16 @@ def _add_skills(plan, root, context, version):
             _add_tree(plan, root, folder, f"{target}/{name}/", context, version)
 
 
-def agents_block(root, context, version, founded):
-    source = ".bigbang/AGENTS.base.md" if founded else ".bigbang/AGENTS.inicial.md"
+def agents_block(root, context, version, founded, v3=False):
+    source = (".bigbang/pipeline/AGENTS.base.md" if v3 else ".bigbang/AGENTS.base.md") if founded else \
+        ".bigbang/AGENTS.inicial.md"
     body = substitute(read_text(os.path.join(root, *source.split("/"))), context, source)
     return (f"<!-- bigbang:inicio v{version} -->\n<!-- {notice_text(version, source)} -->\n\n"
             f"{body.rstrip()}\n\n<!-- bigbang:fim -->")
 
 
-def _add_agents_md(plan, root, context, version, founded):
-    block = agents_block(root, context, version, founded)
+def _add_agents_md(plan, root, context, version, founded, v3=False):
+    block = agents_block(root, context, version, founded, v3)
     path = os.path.join(root, AGENTS_FILE)
     if os.path.exists(path):
         current = read_text(path)

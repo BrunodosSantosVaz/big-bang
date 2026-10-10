@@ -256,6 +256,13 @@ class MergeAndRelease(Flows):
         with self.assertRaises(BbError):  # the same version cannot be cut twice
             flows.cut_release(self.client, cfg(), now=NOW)
 
+    def test_release_items_for_the_changelog(self):
+        self.fake.add_pull(72, "feature/44-x", "develop", title="feat: x", labels=["type:task"], state="closed",
+                           merged=True)
+        self.fake.add_pull(73, "feature/45-y", "develop", title="feat: y", state="closed", merged=False)
+        self.fake.compares[("main", "develop")] = ["Merge pull request #72 from a/b", "Merge pull request #73 from a/c"]
+        self.assertEqual(flows.release_items(self.client), [(72, "feat: x", ["type:task"])])
+
     def test_nothing_to_release(self):
         self.fake.compares[("main", "develop")] = []
         self.assertIsNone(flows.cut_release(self.client, cfg(), now=NOW))
@@ -334,3 +341,47 @@ class PrRules(unittest.TestCase):
         self.assertTrue(self.rules(head="test/11-testes", body="Refs #11", diff=diff, issue_labels=("type:test",))[0])
         self.assertEqual(self.rules(head="test/11-testes", body="Refs #11", diff=diff, labels=("approved:test-change",),
                                     issue_labels=("type:test",))[0], [])
+
+
+class GeneratedV3(unittest.TestCase):
+    """A grouping-workflow project gets the v3 tree, never the legacy pipeline (ADR-0022)."""
+
+    def project(self, folder):
+        import shutil
+        from _cenarios import CENARIOS
+        from _raiz import RAIZ, ignorar_para_copia
+        from bb import checksums, config, init
+        from bb.paths import framework_version
+        root = os.path.join(folder, "projeto")
+        shutil.copytree(RAIZ, root, ignore=ignorar_para_copia("bigbang.toml", "STACK.md", ".worktrees"))
+        checksums.write(root)
+        with open(os.path.join(CENARIOS, "deploy-vps-docker.toml"), encoding="utf-8") as handle:
+            text = init.set_value(handle.read(), "bigbang", "versao", framework_version(root))
+        text = config.text_to_v3(text).replace('model = "epic-branch"', 'model = "grouping"').replace(
+            'model = "three-boards"                 # single depois da migração do quadro', 'model = "single"\nnumber = 7'
+        ).replace('labels = "legacy"                      # v3 depois da migração das labels', 'labels = "v3"')
+        text = text.replace('planning = 0\n', '').replace('execution = 0\n', '').replace('bugs = 0\n', '')
+        with open(os.path.join(root, "bigbang.toml"), "w", encoding="utf-8") as handle:
+            handle.write(text)
+        self.assertEqual(config.validate(config.parse(text)), [])
+        return root
+
+    def test_v3_tree_is_generated_and_verified(self):
+        from bb import generator, verify
+        with tempfile.TemporaryDirectory() as folder:
+            root = self.project(folder)
+            plan = generator.build_plan(root, install_pipeline=True)
+            generator.apply(plan, root)
+            workflows = sorted(os.listdir(os.path.join(root, ".github", "workflows")))
+            for name in ("bb-ci.yml", "bb-controller.yml", "bb-start-sprint.yml", "bb-create-branches.yml",
+                         "bb-merge-pr.yml", "bb-cut-release.yml", "bb-board-report.yml", "bb-codeql.yml"):
+                self.assertIn(name, workflows)
+            for legacy in ("bb-kanban.yml", "bb-iniciar-sprint.yml", "bb-mesclar-pr.yml", "bb-regras-pr.yml"):
+                self.assertNotIn(legacy, workflows)
+            self.assertNotIn("bb-framework-ci.yml", workflows)
+            agents = open(os.path.join(root, "AGENTS.md"), encoding="utf-8").read()
+            self.assertIn("fluxo v3", agents)
+            self.assertIn("a partir de .bigbang/pipeline/AGENTS.base.md", agents)
+            self.assertTrue(os.path.exists(os.path.join(root, ".github", "ISSUE_TEMPLATE", "bb-epic.yml")))
+            self.assertEqual(verify.run(root), [])
+            self.assertEqual(generator.changes(generator.build_plan(root), root), [])

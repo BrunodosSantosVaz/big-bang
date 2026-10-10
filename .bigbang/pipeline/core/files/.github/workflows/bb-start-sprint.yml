@@ -1,0 +1,45 @@
+# Button "Start sprint" (ADR-0022): for every epic in Selected, the acceptance-test issue, the tasks and the docs
+# issue as sub-issues with native dependencies, the test branch from develop and the epic in In Progress.
+name: Start sprint
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only show the plan'
+        type: boolean
+        required: true
+        default: true
+      epics:
+        description: 'Only these epics (comma separated; empty = every epic in Selected)'
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-start-sprint
+  cancel-in-progress: false
+
+jobs:
+  start:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Start the sprint
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          EPICS: ${{ inputs.epics }}
+        run: |
+          args=()
+          IFS=',' read -r -a list <<<"$EPICS"
+          for epic in "${list[@]}"; do [ -z "$epic" ] || args+=(--epic "${epic// /}"); done
+          if [ "$DRY_RUN" = true ]; then python .bigbang/bin/bb.py board show; exit 0; fi
+          python .bigbang/bin/bb.py sprint start "${args[@]}"

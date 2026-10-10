@@ -184,6 +184,17 @@ def current_version(client):
     return ".".join(str(part) for part in max(versions)) if versions else "0.0.0"
 
 
+def release_items(client, base="main", head="develop"):
+    """(number, title, labels) of the PRs merged into `head` and not yet in `base` (CHANGELOG input)."""
+    numbers = []
+    for message in client.compare_messages(base, head):
+        match = MERGE_MESSAGE.match(message)
+        if match and int(match.group(1)) not in numbers:
+            numbers.append(int(match.group(1)))
+    return [(pull["number"], pull["title"], pull["labels"]) for pull in map(client.pull, numbers)
+            if pull and pull["merged"]]
+
+
 def cut_release(client, config, *, version=None, now=None):
     """Cut release/x.y.z from develop with everything merged since main: version from the PR titles, version lock,
     milestone on the epics and tasks. Returns the release manifest, or None when there is nothing to release."""

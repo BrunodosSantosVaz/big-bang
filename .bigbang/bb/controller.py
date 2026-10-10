@@ -5,7 +5,7 @@ reconciles the board with the receipts instead."""
 import datetime
 import re
 
-from . import board, claims, config as config_module, names
+from . import board, claims, config as config_module, names, pipeline
 from .errors import EXIT_INVALID_STATE, BbError
 from .locks import expired
 
@@ -59,6 +59,29 @@ def release_on_merge(client, number, *, merged_at=None, now=None):
             client.remove_label(number, label)
 
 
+def apply_epic_form(client, number, body, previous=None):
+    """The answers of the epic form as v3 labels (and native dependencies); on an edit only changed answers count,
+    so a label decided later is not overwritten by an unrelated edit."""
+    add, remove = pipeline.form_label_changes(body, previous)
+    add_v3 = {names.label(label, "v3") for label in add if label != "tem-dependencia"}
+    remove_v3 = {names.label(label, "v3") for label in remove if label != "tem-dependencia"}
+    if "no-release" in add_v3:
+        add_v3.add("flag:waived")
+        remove_v3.add("flag:required")
+    elif "no-release" in remove_v3:
+        add_v3.add("flag:required")
+        remove_v3.add("flag:waived")
+    current = set(client.issue(number)["labels"])
+    client.add_labels(number, sorted(add_v3 - current))
+    for label in sorted((remove_v3 - add_v3) & current):
+        client.remove_label(number, label)
+    blockers = {blocker["number"] for blocker in client.blocked_by(number)}
+    for dependency in pipeline.dependencies(body):
+        if dependency != number and dependency not in blockers and client.issue(dependency):
+            client.add_blocked_by(number, dependency)
+    return add_v3, remove_v3
+
+
 def handle(client, project, config, event, payload, *, now=None):
     """Apply one event; returns the list of (issue, target) moves made."""
     now = _now(now)
@@ -75,6 +98,9 @@ def handle(client, project, config, event, payload, *, now=None):
         number = payload["issue"]["number"]
         if action in ("opened", "reopened", "edited"):
             issue = client.issue(number)
+            if issue and board.states.kind(set(issue["labels"])) == "epic" and action != "reopened":
+                previous = ((payload.get("changes") or {}).get("body") or {}).get("from") if action == "edited" else None
+                apply_epic_form(client, number, issue["body"], previous)
             state = _state(client, config, number)
             if issue and board.states.kind(set(issue["labels"])) and project.get(number, "Status") != state:
                 project.add(number)

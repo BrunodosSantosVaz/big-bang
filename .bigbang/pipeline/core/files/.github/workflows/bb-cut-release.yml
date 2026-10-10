@@ -1,0 +1,57 @@
+# Button "Cut release" (ADR-0022): release/x.y.z from develop with everything merged since main, version from the
+# PR titles, version lock and milestone; then the version file and CHANGELOG are committed on the release branch,
+# whose push starts the candidate.
+name: Cut release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only show the plan'
+        type: boolean
+        required: true
+        default: true
+      version:
+        description: 'X.Y.Z (empty = computed from the PR titles)'
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-cut-release
+  cancel-in-progress: false
+
+jobs:
+  cut:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: develop
+          fetch-depth: 0
+          token: ${{ secrets.PROJECT_TOKEN }}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Cut and prepare the release branch
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$DRY_RUN" = true ]; then git log --oneline origin/main..origin/develop; exit 0; fi
+          out=$(python .bigbang/bin/bb.py release cut ${VERSION:+--version "$VERSION"})
+          echo "$out"
+          branch=$(grep -o 'release/[0-9.]*' <<<"$out" | head -n 1)
+          [ -n "$branch" ] || exit 0
+          git fetch -q origin "$branch" && git switch -q "$branch"
+          version="${branch#release/}"
+          python .bigbang/bin/bb.py pipeline write-version "$version"
+          python .bigbang/bin/bb.py release items --head "$branch" | python .bigbang/bin/bb.py pipeline changelog --release "$version"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "chore(release): $version"
+          git push -q origin "HEAD:$branch"

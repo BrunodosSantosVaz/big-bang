@@ -321,6 +321,23 @@ class Controller(Base):
         self.event("issues", action="opened", issue={"number": 30})
         self.assertEqual(self.project.status(30), "Brainstorm")
 
+    def test_epic_form_answers_become_v3_labels_and_native_dependencies(self):
+        body = ("### Muda o artefato?\nNão: documentação, testes, esteira\n\n### Precisa de protótipo?\nNão\n\n"
+                "### Quem revisa os PRs?\nEu\n\n### Depende de outro épico ainda não publicado?\n#10\n")
+        self.fake.add_issue(31, "Guia", labels=["type:epic"], body=body)
+        self.event("issues", action="opened", issue={"number": 31})
+        labels = set(self.fake.label_names(31))
+        self.assertTrue({"no-release", "flag:waived", "prototype:waived", "review:human"} <= labels, labels)
+        self.assertNotIn("tem-dependencia", labels)
+        self.assertEqual([b["number"] for b in self.client.blocked_by(31)], [10])
+        edited = body.replace("Não: documentação, testes, esteira", "Sim")
+        self.fake.issues[31]["body"] = edited
+        self.event("issues", action="edited", issue={"number": 31}, changes={"body": {"from": body}})
+        labels = set(self.fake.label_names(31))
+        self.assertIn("flag:required", labels)
+        self.assertNotIn("no-release", labels)
+        self.assertIn("review:human", labels)  # unchanged answer keeps the later decision
+
     def test_pr_lifecycle_moves_the_task_and_closes_it_on_merge(self):
         claims.claim(self.client, config(), 11, "claude-1", now=NOW)
         self.fake.refs["refs/heads/test/11-testes"] = "a" * 40
