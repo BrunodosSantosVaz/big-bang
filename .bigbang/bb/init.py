@@ -174,8 +174,21 @@ def run(root, options, with_github=True, today=None):
         inherited = json.loads(read_text(manifest))
         if inherited.get("repositorio") == "BrunodosSantosVaz/big-bang":
             os.remove(manifest)  # Private project created from the public framework template.
+    _drop_framework_project_section(root)
     generator.apply(generator.build_plan(root), root)
     return issue
+
+
+def _drop_framework_project_section(root):
+    """A system born from the template inherits the framework's own AGENTS.md project section (its mode, its
+    priorities). Replace it with the project model, so a new system never follows the framework's instructions."""
+    path = os.path.join(root, generator.AGENTS_FILE)
+    if not os.path.isfile(path):
+        return
+    project_part = generator.AGENTS_BLOCK.sub("", read_text(path))
+    origin = generator.initial_context(root)["bigbang"]["origem"]
+    if origin in project_part:
+        write_text(path, read_text(os.path.join(framework_dir(root), "modelos", "AGENTS.projeto.md")))
 
 
 def _license_text(options, today):

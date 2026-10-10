@@ -23,8 +23,9 @@ from bb import cli, generator, init, verify  # noqa: E402
 from bb.errors import EXIT_OK  # noqa: E402
 
 FRAMEWORK_REPOSITORY = "BrunodosSantosVaz/big-bang"
-# The guard must be the job's own `if:` (four spaces in), never a comment or an env value.
-JOB_GUARD = re.compile(rf"^    if: github\.repository == '{re.escape(FRAMEWORK_REPOSITORY)}'[ \t]*$", re.M)
+# The guard must be the job's own `if:` (four spaces in), never a comment or an env value; it may only be narrowed
+# further with `&& (...)` (one parenthesized group, so a trailing `||` can never widen it).
+JOB_GUARD = re.compile(rf"^    if: github\.repository == '{re.escape(FRAMEWORK_REPOSITORY)}'(?: && \(.*\))?[ \t]*$", re.M)
 # A job header: two spaces, the id, a colon, then nothing but an optional comment.
 JOB_HEADER = re.compile(r"^  ([\w-]+):[ \t]*(?:#.*)?$", re.M)
 # Every top-level entry the template ships, and what the Foundation does with it. A new entry needs a deliberate
@@ -160,12 +161,14 @@ class Launcher(unittest.TestCase):
     def test_guard_check_rejects_unguarded_jobs(self):
         section = ("  a:\n    if: github.repository == 'BrunodosSantosVaz/big-bang'\n    runs-on: x\n"
                    "  b:   \n    runs-on: x\n  c:  # comment\n    runs-on: x\n"
-                   "  d:\n    steps:\n      # if: github.repository == 'BrunodosSantosVaz/big-bang'\n")
+                   "  d:\n    steps:\n      # if: github.repository == 'BrunodosSantosVaz/big-bang'\n"
+                   "  e:\n    if: github.repository == 'BrunodosSantosVaz/big-bang' && (github.event_name != 'x')\n"
+                   "  f:\n    if: github.repository == 'BrunodosSantosVaz/big-bang' && true || true\n")
         marks = list(JOB_HEADER.finditer(section))
-        self.assertEqual([m.group(1) for m in marks], ["a", "b", "c", "d"])
+        self.assertEqual([m.group(1) for m in marks], ["a", "b", "c", "d", "e", "f"])
         guarded = [bool(JOB_GUARD.search(section[m.end():n.start() if n else len(section)]))
                    for m, n in zip(marks, marks[1:] + [None])]
-        self.assertEqual(guarded, [True, False, False, False])
+        self.assertEqual(guarded, [True, False, False, False, True, False])
 
     def test_every_root_entry_has_a_foundation_decision(self):
         manifest = self.path(".bigbang-docs.json")
