@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "a2939455d11e2e255ab9ad4e34bde565ffbb19af",
+    "commit": "a81fbe04eaaf68446892f9ad511110f7bc9ce127",
     "branch": "master",
     "proposta": "bigbang/proposta-220-v3"
   },
@@ -42,7 +42,8 @@
     ".bigbang/docs/decisoes/ADR-0022-esteira-propria-e-modelo-agrupador.md": "ADR-0022-esteira-propria-e-modelo-agrupador",
     ".bigbang/docs/decisoes/ADR-0023-quadro-unico-e-estado.md": "ADR-0023-quadro-unico-e-estado",
     ".bigbang/docs/decisoes/ADR-0024-identificadores-em-ingles.md": "ADR-0024-identificadores-em-ingles",
-    ".bigbang/docs/decisoes/ADR-0025-modos-e-autonomia.md": "ADR-0025-modos-e-autonomia"
+    ".bigbang/docs/decisoes/ADR-0025-modos-e-autonomia.md": "ADR-0025-modos-e-autonomia",
+    ".bigbang/docs/decisoes/ADR-0026-orquestracao-em-python.md": "ADR-0026-orquestracao-em-python"
   },
   "categorias": {
     "produto": {
@@ -226,10 +227,16 @@
     },
     "RF-BB-049": {
       "pagina": "Requisitos"
+    },
+    "RF-BB-050": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-051": {
+      "pagina": "Requisitos"
     }
   },
   "codigo": {
-    "commit": "7d7bd0cff62d5a12d897999b613b55a7cda21d38",
+    "commit": "244bda6b9f8245f36ada6aac503b1c4bc02a8fe2",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -367,7 +374,7 @@
         ".bigbang/tests/test_names_config.py:test_pipeline_subcommands_by_either_name"
       ],
       "hashes": {
-        ".bigbang/bb/cli.py": "sha256:0f57c7050e3a94e514faeab8ebc4564a242ed3ef419e95a805d9bc2ad3f2485b",
+        ".bigbang/bb/cli.py": "sha256:b7a304ebe497bfcb028abd095836b483392eaef89fdcdf20d5e329c1c3f975c3",
         ".bigbang/bb/__init__.py": "sha256:9eafc1c524def17452aeb77d49ee0aca1a8c40c7e69d52c3c6dba384e78732eb",
         ".bigbang/bin/bb.py": "sha256:af864bf4452b5aad7c6e90ba6ed7f81cf9cb2fbb8c60f2a5e7e5e4e17372abb4",
         ".bigbang/bin/bb": "sha256:04bf9a43393503416a9307e7272d697afcd9327a0a5b388a451873a70c45e112"
@@ -454,6 +461,8 @@
         ".bigbang/tests/test_names_config.py:test_target_mode_reads_both_dialects",
         ".bigbang/tests/test_names_config.py:test_review_blockers_see_v3_labels",
         ".bigbang/tests/test_names_config.py:test_set_config_value_in_each_dialect",
+        ".bigbang/tests/test_names_config.py:test_legacy_value_in_a_v3_file_is_reported_once",
+        ".bigbang/tests/test_names_config.py:test_non_text_mode_on_the_target_is_a_clean_refusal",
         ".bigbang/tests/test_names_config.py:test_legacy_workflow_needs_legacy_labels",
         ".bigbang/tests/test_names_config.py:test_approval_label_follows_the_target_dialect",
         ".bigbang/tests/test_names_config.py:test_v3_errors_do_not_hide_structural_ones",
@@ -463,7 +472,7 @@
         ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect"
       ],
       "hashes": {
-        ".bigbang/bb/config.py": "sha256:3e2b32495eb1ea95912259b82b42de5d5a1e802423041395e334400bf0520f31",
+        ".bigbang/bb/config.py": "sha256:b933c72d121ffb06ddb12a348e4c4dfa28c7790e2c0eab31bf44ec07c5fc5434",
         ".bigbang/modelos/bigbang.toml.exemplo": "sha256:778ba08e5498600441fc495f8aa4f60d6df3fb995022aec32c6c75221cf8a702",
         ".bigbang/modelos/flags.toml": "sha256:3f4bf065d88d1b4b344e2ec8d24e536ef7433333bacb2cf974fc4194703a47ba"
       },
@@ -503,7 +512,7 @@
         ".bigbang/tests/test_names_config.py:test_approval_label_follows_the_target_dialect"
       ],
       "hashes": {
-        ".bigbang/bb/decisions.py": "sha256:6e49d7208e5b0f3500ae9d2a5962d3cf53ddce088c61a6e64c5cffedcdcc2f86"
+        ".bigbang/bb/decisions.py": "sha256:09d8be215a4c0b62833489114b48a56646b0c8be9388ea7231438c0e49a1512f"
       },
       "descricao": "Registrar a decisão autorizada do dono e impedir aprovação automática de PR que exija revisão humana."
     },
@@ -983,7 +992,7 @@
         ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls"
       ],
       "hashes": {
-        ".bigbang/bb/pipeline_cli.py": "sha256:fe54617837973b8b7cf4fba97bb313a91cabcbeacdaa6116282a8a9e41a26ad8"
+        ".bigbang/bb/pipeline_cli.py": "sha256:5c3982a65fe4d5593ff75e02c23c3a463bb82fa350e74855125d40639fa13512"
       },
       "descricao": "Expor regras verificáveis a scripts sem duplicar lógica de negócio entre Bash e Python."
     },
@@ -1287,20 +1296,25 @@
         ".bigbang/bb/workspaces.py"
       ],
       "testes": [
-        ".bigbang/tests/test_status_posses.py:test_status_le_so_e_marcacao_e_idempotente",
-        ".bigbang/tests/test_status_posses.py:test_push_renova_mesmo_quando_commit_foi_escrito_antes",
-        ".bigbang/tests/test_status_posses.py:test_push_concorrente_com_liberacao_nao_reabre_sessao",
-        ".bigbang/tests/test_status_posses.py:test_push_entre_conferencia_e_marcacao_nao_deixa_label_parada",
-        ".bigbang/tests/test_status_posses.py:test_push_durante_retomada_preserva_a_sessao_renovada",
-        ".bigbang/tests/test_status_posses.py:test_forcar_exige_ordem_e_posse_vencida",
-        ".bigbang/tests/test_status_posses.py:test_sem_nome_valido_nao_deve_revogar_a_posse",
-        ".bigbang/tests/test_status_posses.py:test_bb_status_e_somente_leitura",
-        ".bigbang/tests/test_status_posses.py:test_vencida_producao_antiga_e_ativa",
-        ".bigbang/tests/test_status_posses.py:test_flag_invalida_nao_desaparece_do_relatorio",
-        ".bigbang/tests/test_status_posses.py:test_merge_libera_label_e_preserva_comentario"
+        ".bigbang/tests/test_posse.py:test_assume_libera_e_preserva_historico",
+        ".bigbang/tests/test_posse.py:test_recusa_nome_issue_fechada_e_posse_existente",
+        ".bigbang/tests/test_posse.py:test_limite_e_comentario_sem_label_ainda_bloqueiam",
+        ".bigbang/tests/test_posse.py:test_recusa_bloqueio_mas_aceita_pr_de_teste_mesclado",
+        ".bigbang/tests/test_posse.py:test_outra_sessao_nao_libera",
+        ".bigbang/tests/test_posse.py:test_falha_na_confirmacao_remove_so_a_propria_marca",
+        ".bigbang/tests/test_posse.py:test_desempate_e_rollback_nao_apagam_label_do_mesmo_nome",
+        ".bigbang/tests/test_posse.py:test_comentario_de_terceiro_nao_e_posse",
+        ".bigbang/tests/test_posse.py:test_recusa_espera_zero",
+        ".bigbang/tests/test_posse.py:test_resposta_perdida_do_post_reconcilia_por_uuid",
+        ".bigbang/tests/test_posse.py:test_dois_processos_so_um_dono_e_uma_pasta",
+        ".bigbang/tests/test_posse.py:test_bug_ganha_a_branch_a_partir_da_main",
+        ".bigbang/tests/test_posse.py:test_falha_no_worktree_desfaz_a_posse",
+        ".bigbang/tests/test_posse.py:test_worktree_usa_avanco_remoto_e_recusa_divergencia",
+        ".bigbang/tests/test_posse.py:test_v3_kinds_find_the_test_branch",
+        ".bigbang/tests/test_posse.py:test_v3_bug_gets_a_fix_branch_from_main"
       ],
       "hashes": {
-        ".bigbang/bb/workspaces.py": "sha256:22f2c10bd6c9a765e8f10a88965fd214220052f178fb413867a00baa2a88f3f7"
+        ".bigbang/bb/workspaces.py": "sha256:4f776fee8d339d48d10f52db53705bd56e9e8aedb9e1f97d28df9d4bc5cd8c45"
       },
       "descricao": "Criar worktree próprio somente depois de confirmar posse da tarefa e guardar recibos em metadados Git."
     },
@@ -2137,6 +2151,128 @@
         ".bigbang/bb/names.py": "sha256:cd32fa3e90400978134c14dea4bf5e2fda4f803ea04e80dd39c06cd3898a1ee5"
       },
       "descricao": "Tabela única de nomes v2 ↔ v3 (configuração, valores, CLI, labels, branches, workflows, checks, ambiente, segredos)."
+    },
+    {
+      "id": "BB-F-050",
+      "requisitos": [
+        "RF-BB-050"
+      ],
+      "pagina": "Funcionalidade-nucleo-v3",
+      "fontes": [
+        ".bigbang/bb/states.py",
+        ".bigbang/bb/policy.py",
+        ".bigbang/bb/receipts.py",
+        ".bigbang/bb/locks.py",
+        ".bigbang/bb/claims.py",
+        ".bigbang/bb/gh.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_core_v3.py:test_fifteen_states_and_types",
+        ".bigbang/tests/test_core_v3.py:test_kind_from_labels_in_both_dialects",
+        ".bigbang/tests/test_core_v3.py:test_unknown_or_wrong_type_state",
+        ".bigbang/tests/test_core_v3.py:test_epic_planning_route",
+        ".bigbang/tests/test_core_v3.py:test_legacy_decision_labels_count",
+        ".bigbang/tests/test_core_v3.py:test_selection_and_plan",
+        ".bigbang/tests/test_core_v3.py:test_delivery_routes",
+        ".bigbang/tests/test_core_v3.py:test_qa_and_release",
+        ".bigbang/tests/test_core_v3.py:test_task_route",
+        ".bigbang/tests/test_core_v3.py:test_bug_route",
+        ".bigbang/tests/test_core_v3.py:test_impediments_block_forward_but_not_reject_or_cancel",
+        ".bigbang/tests/test_core_v3.py:test_rejection_needs_reason_and_allowed_return",
+        ".bigbang/tests/test_core_v3.py:test_leaving_rejected_only_to_the_recorded_return",
+        ".bigbang/tests/test_core_v3.py:test_terminal_states",
+        ".bigbang/tests/test_core_v3.py:test_allowed_targets",
+        ".bigbang/tests/test_core_v3.py:test_modes",
+        ".bigbang/tests/test_core_v3.py:test_normal_owner_decides_every_gate",
+        ".bigbang/tests/test_core_v3.py:test_flash_delegates_common_work_but_not_critical_or_selection",
+        ".bigbang/tests/test_core_v3.py:test_autonomous_needs_a_contract_and_never_widens_it",
+        ".bigbang/tests/test_core_v3.py:test_risk_floor_cannot_be_lowered",
+        ".bigbang/tests/test_core_v3.py:test_contract_validation",
+        ".bigbang/tests/test_core_v3.py:test_snapshot_is_canonical",
+        ".bigbang/tests/test_core_v3.py:test_limits",
+        ".bigbang/tests/test_core_v3.py:test_promotion_reuses_valid_evidence",
+        ".bigbang/tests/test_core_v3.py:test_round_trip_and_comment_safety",
+        ".bigbang/tests/test_core_v3.py:test_only_trusted_authors",
+        ".bigbang/tests/test_core_v3.py:test_malformed_and_incomplete_are_ignored",
+        ".bigbang/tests/test_core_v3.py:test_required_fields_per_kind",
+        ".bigbang/tests/test_core_v3.py:test_idempotency",
+        ".bigbang/tests/test_core_v3.py:test_test_receipt_reuse",
+        ".bigbang/tests/test_core_v3.py:test_resource_names",
+        ".bigbang/tests/test_core_v3.py:test_one_winner_and_the_loser_learns_the_holder",
+        ".bigbang/tests/test_core_v3.py:test_expired_lock_is_taken_over_with_a_new_generation",
+        ".bigbang/tests/test_core_v3.py:test_concurrent_takeover_has_one_winner",
+        ".bigbang/tests/test_core_v3.py:test_renew_only_by_the_holder_and_generation",
+        ".bigbang/tests/test_core_v3.py:test_expired_session_cannot_renew_after_takeover",
+        ".bigbang/tests/test_core_v3.py:test_release_only_by_the_holder",
+        ".bigbang/tests/test_core_v3.py:test_listing_and_expiry",
+        ".bigbang/tests/test_core_v3.py:test_foreign_ref_content_is_never_trusted_as_a_lock",
+        ".bigbang/tests/test_core_v3.py:test_status_and_body",
+        ".bigbang/tests/test_core_v3.py:test_no_http_status_is_an_error",
+        ".bigbang/tests/test_claims_v3.py:test_agent_claim_locks_labels_and_records",
+        ".bigbang/tests/test_claims_v3.py:test_person_claim_uses_the_login",
+        ".bigbang/tests/test_claims_v3.py:test_unknown_agent_and_closed_or_pr_issues_are_refused",
+        ".bigbang/tests/test_claims_v3.py:test_blocked_task_is_refused_until_the_blocker_closes",
+        ".bigbang/tests/test_claims_v3.py:test_second_claim_on_the_same_issue_loses_with_the_holder_named",
+        ".bigbang/tests/test_claims_v3.py:test_capacity_per_session",
+        ".bigbang/tests/test_claims_v3.py:test_epic_stages_can_be_claimed",
+        ".bigbang/tests/test_claims_v3.py:test_renew_extends_the_lease",
+        ".bigbang/tests/test_claims_v3.py:test_unclaim_releases_lock_and_label",
+        ".bigbang/tests/test_claims_v3.py:test_live_lock_cannot_be_forced",
+        ".bigbang/tests/test_claims_v3.py:test_expired_lock_is_forced_with_the_owner_order_and_fences_the_old_session",
+        ".bigbang/tests/test_claims_v3.py:test_stale_report_lists_expired_claims",
+        ".bigbang/tests/test_claims_v3.py:test_v3_when_the_workflow_or_labels_are_v3"
+      ],
+      "hashes": {
+        ".bigbang/bb/states.py": "sha256:4223cd2b08da0c6a79629a737b7c9c0166695f970239f776ddbc8806b4ced69a",
+        ".bigbang/bb/policy.py": "sha256:2e6c86689be52ce73cbba174cba10cafb8601786f864fdbd5b9716a2727758f0",
+        ".bigbang/bb/receipts.py": "sha256:786304654ccf9077c356732120686effc8b7e17cff82ed7b683ce8bbd95eb01d",
+        ".bigbang/bb/locks.py": "sha256:0149220ad3a4c9e743f8cb65cc769aff084650702c1917b3eb8d59696ebc8dc1",
+        ".bigbang/bb/claims.py": "sha256:16f1a05b03741011ae653514efdb25213f677e7e57a65a2e7518d7ed168f83ba",
+        ".bigbang/bb/gh.py": "sha256:f8888b16b9649d11b9d4669cbd5a057f5c5f26bb2fde8130f9fa772085593aa8"
+      },
+      "descricao": "Máquina de estados do quadro único, política dos modos, recibos estruturados e travas atômicas em refs Git."
+    },
+    {
+      "id": "BB-F-051",
+      "requisitos": [
+        "RF-BB-051"
+      ],
+      "pagina": "Funcionalidade-quadro-unico",
+      "fontes": [
+        ".bigbang/bb/board.py",
+        ".bigbang/bb/controller.py",
+        ".bigbang/bb/flow_cli.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_board_v3.py:test_catalog_covers_every_v3_label_the_rules_read",
+        ".bigbang/tests/test_board_v3.py:test_labels_command_is_idempotent",
+        ".bigbang/tests/test_board_v3.py:test_project_fields_and_fifteen_states",
+        ".bigbang/tests/test_board_v3.py:test_initial_state_by_kind",
+        ".bigbang/tests/test_board_v3.py:test_owner_moves_epic_through_planning_with_receipts_and_board",
+        ".bigbang/tests/test_board_v3.py:test_agent_cannot_pass_an_owner_gate_in_normal_mode",
+        ".bigbang/tests/test_board_v3.py:test_agent_passes_common_gates_in_flash",
+        ".bigbang/tests/test_board_v3.py:test_decision_label_is_the_owner_approval",
+        ".bigbang/tests/test_board_v3.py:test_task_done_closes_the_issue_and_cancelled_is_not_planned",
+        ".bigbang/tests/test_board_v3.py:test_rejection_records_reason_label_and_return",
+        ".bigbang/tests/test_board_v3.py:test_replayed_event_writes_nothing_new",
+        ".bigbang/tests/test_board_v3.py:test_blocked_task_cannot_start",
+        ".bigbang/tests/test_board_v3.py:test_facts_from_github",
+        ".bigbang/tests/test_board_v3.py:test_new_issue_enters_the_board_in_its_initial_state",
+        ".bigbang/tests/test_board_v3.py:test_pr_lifecycle_moves_the_task_and_closes_it_on_merge",
+        ".bigbang/tests/test_board_v3.py:test_pr_closed_without_merge_goes_back_to_coding",
+        ".bigbang/tests/test_board_v3.py:test_foreign_branches_and_events_are_ignored",
+        ".bigbang/tests/test_board_v3.py:test_decision_label_advances_the_epic",
+        ".bigbang/tests/test_board_v3.py:test_schedule_reconciles_the_board_and_marks_stale_claims",
+        ".bigbang/tests/test_board_v3.py:test_fields_are_created_and_status_options_replaced_keeping_ids",
+        ".bigbang/tests/test_board_v3.py:test_set_values_by_type",
+        ".bigbang/tests/test_board_v3.py:test_items_of_other_repositories_are_ignored"
+      ],
+      "hashes": {
+        ".bigbang/bb/board.py": "sha256:3846bf45698ec48760d319cace7751bc78044a970ad61cd35f7e264534cbd270",
+        ".bigbang/bb/controller.py": "sha256:76de560573a5e1e8dd08885963a269ec63b458b78763770852855baaccd33952",
+        ".bigbang/bb/flow_cli.py": "sha256:dbf0e86de1aa0854776fb2985a3a4e8bfbe886db979e3b89d85066d4caf36f6a"
+      },
+      "descricao": "Catálogo de labels v3, Project com 15 estados e campos, bb move validado, reconciliação e controlador de eventos."
     }
   ],
   "arquivos_funcionais": [
