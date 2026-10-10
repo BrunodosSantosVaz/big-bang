@@ -326,7 +326,18 @@ def _release_publish(args):
             print(problem)
         print("Portão: " + ("recusado." if problems else "em ordem."))
         return EXIT_USAGE if problems else EXIT_OK
-    result = delivery.publish(client, project, config, args.version, args.raiz, today=_today())
+    import os
+    import subprocess
+    profile_dir = config_module.get(config, "entrega.perfil")  # compilado | deploy (the shared profile scripts)
+    script = os.path.join(args.raiz, ".bigbang", "esteira", "perfis", profile_dir, "scripts", "promover.sh")
+
+    def promote(rc_tag, tag, target_sha):
+        completed = subprocess.run(["bash", script], cwd=args.raiz, check=False,
+                                   env={**os.environ, "RC_TAG": rc_tag, "TAG": tag, "TARGET_SHA": target_sha})
+        if completed.returncode:
+            raise BbError(f"promoção de {rc_tag} como {tag} falhou (veja o log acima)", EXIT_USAGE)
+
+    result = delivery.publish(client, project, config, args.version, args.raiz, today=_today(), promote=promote)
     print(f"Release {args.version} publicada (PR #{result['pr']}); concluídos: "
           + (", ".join(f"#{n}" for n in result["done"]) or "nenhum")
           + "; com a flag desligada: " + (", ".join(f"#{n}" for n in result["dark"]) or "nenhum") + ".")

@@ -142,6 +142,7 @@ def _layers(config, installed):
     layers = ["esteira/sempre"]
     if installed and is_v3_pipeline(config):
         layers.append("pipeline/core")
+        layers.append(f"pipeline/profiles/{config_module.get(config, 'delivery.profile')}")
         return layers
     if installed:
         perfil = config["entrega"]["perfil"]

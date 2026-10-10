@@ -95,7 +95,16 @@ def _return_main(client, version):
     return result
 
 
-def publish(client, project, config, version, root, *, today, now=None, pending=None):
+def _latest_candidate(client, version):
+    candidates = []
+    for tag in client.tags():
+        match = re.fullmatch(rf"v{re.escape(version)}-rc\.(\d+)", tag)
+        if match:
+            candidates.append((int(match.group(1)), tag))
+    return max(candidates)[1] if candidates else None
+
+
+def publish(client, project, config, version, root, *, today, now=None, pending=None, promote=None):
     """Publish a release behind its gate: every epic approved or dark behind its flag, pending acceptance only for
     dark epics, a candidate exists and the PR release → main is green on its exact head. Then merge, conclude the
     epics that are delivered, close the milestone and return main to develop. Running again is harmless."""
@@ -106,8 +115,18 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
     branch = f"release/{version}"
     problems = flows.release_gate(client, config, root, [epic["number"] for epic in epics], today=today,
                                   pending=pending)
-    if not any(tag.startswith(f"v{version}-rc.") for tag in client.tags()) and f"v{version}" not in client.tags():
+    published = f"v{version}" in client.tags()
+    rc_tag = _latest_candidate(client, version)
+    if rc_tag is None and not published:
         problems.append(f"nenhuma candidata v{version}-rc.N publicada")
+    elif rc_tag and not published:
+        rc_sha = client.call("GET", f"git/ref/tags/{rc_tag}")[1]["object"]["sha"]
+        if client.branch_sha(branch) not in (None, rc_sha):
+            problems.append(f"a {branch} mudou depois da candidata {rc_tag}: gere uma candidata nova")
+    blocking = [issue["number"] for issue in client.issues("open")
+                if "blocks-production" in issue["labels"] or "bloqueia-producao" in issue["labels"]]
+    if blocking:
+        problems.append("issues que bloqueiam produção abertas: " + ", ".join(f"#{n}" for n in blocking))
     pulls = client.pulls(head=branch, base="main", state="all")
     pull = next((p for p in pulls if p["state"] == "open" or p["merged"]), None)
     if pull is None:
@@ -118,6 +137,8 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
         raise BbError("publicação recusada:\n" + "\n".join(f"  - {p}" for p in problems), EXIT_INVALID_STATE)
     if not pull["merged"]:
         client.merge_pull(pull["number"], pull["sha"])
+    if promote and not published:
+        promote(rc_tag, f"v{version}", client.branch_sha("main"))  # the candidate's bytes, never a rebuild
     flags_by_epic = _flags(root, today)
     done, dark = [], []
     for epic in epics:

@@ -374,9 +374,18 @@ class GeneratedV3(unittest.TestCase):
             generator.apply(plan, root)
             workflows = sorted(os.listdir(os.path.join(root, ".github", "workflows")))
             for name in ("bb-ci.yml", "bb-controller.yml", "bb-start-sprint.yml", "bb-create-branches.yml",
-                         "bb-merge-pr.yml", "bb-cut-release.yml", "bb-board-report.yml", "bb-codeql.yml"):
+                         "bb-merge-pr.yml", "bb-cut-release.yml", "bb-board-report.yml", "bb-codeql.yml",
+                         "bb-candidate.yml", "bb-publish.yml", "bb-publish-maintenance.yml", "bb-qa-reject.yml",
+                         "bb-cleanup.yml", "bb-rollback.yml"):
                 self.assertIn(name, workflows)
-            for legacy in ("bb-kanban.yml", "bb-iniciar-sprint.yml", "bb-mesclar-pr.yml", "bb-regras-pr.yml"):
+            publish = open(os.path.join(root, ".github", "workflows", "bb-publish.yml"), encoding="utf-8").read()
+            self.assertIn("environment: production", publish)
+            self.assertNotIn("candidata-preparar.sh", publish)
+            candidate = open(os.path.join(root, ".github", "workflows", "bb-candidate.yml"), encoding="utf-8").read()
+            self.assertIn("pipeline candidate-ready", candidate)
+            self.assertNotIn("homologar.sh", candidate)
+            for legacy in ("bb-kanban.yml", "bb-iniciar-sprint.yml", "bb-mesclar-pr.yml", "bb-regras-pr.yml",
+                           "bb-candidata.yml", "bb-publicar-producao.yml", "bb-voltar-versao.yml", "bb-faxina.yml"):
                 self.assertNotIn(legacy, workflows)
             self.assertNotIn("bb-framework-ci.yml", workflows)
             agents = open(os.path.join(root, "AGENTS.md"), encoding="utf-8").read()
