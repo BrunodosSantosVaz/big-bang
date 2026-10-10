@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "1cae0da0cc7196592de4ba3eb12cdf7cbc8ab981",
+    "commit": "18afc6b7e37966c0ee28fb1fd41af6b7b2a0d620",
     "branch": "master",
     "proposta": "bigbang/proposta-220-v3"
   },
@@ -236,7 +236,7 @@
     }
   },
   "codigo": {
-    "commit": "24f19ac8ad23e0307ce8797a264012fc0832bb2b",
+    "commit": "c6d33a1af7a6d30446bb253cd3f3f2591c82b461",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -2224,6 +2224,7 @@
         ".bigbang/tests/test_claims_v3.py:test_blocked_task_is_refused_until_the_blocker_closes",
         ".bigbang/tests/test_claims_v3.py:test_second_claim_on_the_same_issue_loses_with_the_holder_named",
         ".bigbang/tests/test_claims_v3.py:test_capacity_per_session",
+        ".bigbang/tests/test_claims_v3.py:test_capacity_counts_the_locks_even_without_the_projection_label",
         ".bigbang/tests/test_claims_v3.py:test_epic_stages_can_be_claimed",
         ".bigbang/tests/test_claims_v3.py:test_renew_extends_the_lease",
         ".bigbang/tests/test_claims_v3.py:test_unclaim_releases_lock_and_label",
@@ -2237,11 +2238,11 @@
         ".bigbang/tests/test_claims_v3.py:test_v3_when_the_workflow_or_labels_are_v3"
       ],
       "hashes": {
-        ".bigbang/bb/states.py": "sha256:65297972af3b618fd06593501db44da229367bc018a3cb80444be6a98eeca35e",
+        ".bigbang/bb/states.py": "sha256:5fd33c7b3659a563c47378332b9bfa0bd699224d77f34b29a6ca8fa39f8e6cdb",
         ".bigbang/bb/policy.py": "sha256:c56cdf3a4aa2d99431f53a85fafa72ae667482a1a3ff34d135a63e4b3d912206",
         ".bigbang/bb/receipts.py": "sha256:fc0ca5d774e4a2cadaf1036002a399e175d4af8806e5a79ee920a175e330b33a",
         ".bigbang/bb/locks.py": "sha256:90b249a7fe0678f7b1369f3d9bb20090ec5dba75907a8864f710a77d46293e1d",
-        ".bigbang/bb/claims.py": "sha256:02a63e64a0eecfb51ddf91bdc8219080183d9f594f066cf18aedb3d48d9fb84e",
+        ".bigbang/bb/claims.py": "sha256:ce5b27f956941758c8da08bfb59c046b10415b039f336e4365ebd79f51766cf4",
         ".bigbang/bb/gh.py": "sha256:9d48b4ff0f8c80ba2f4e67e89832699ab375b60db99372a20a062be52ae8fd8a"
       },
       "descricao": "Máquina de estados do quadro único, política dos modos, recibos estruturados e travas atômicas em refs Git."
@@ -2269,6 +2270,9 @@
         ".bigbang/tests/test_board_v3.py:test_qa_rejection_and_epic_cancellation_need_the_owner_decision",
         ".bigbang/tests/test_board_v3.py:test_a_rejection_withdraws_the_decisions_from_the_return_stage_on",
         ".bigbang/tests/test_board_v3.py:test_qa_and_publish_risk_come_from_the_changed_paths",
+        ".bigbang/tests/test_board_v3.py:test_flash_qa_human_stays_with_the_owner_at_any_risk",
+        ".bigbang/tests/test_board_v3.py:test_flash_delegated_qa_needs_an_independent_qa_receipt",
+        ".bigbang/tests/test_board_v3.py:test_going_back_without_rejection_also_withdraws_the_decisions",
         ".bigbang/tests/test_board_v3.py:test_effects_happen_before_the_receipt",
         ".bigbang/tests/test_board_v3.py:test_attempts_come_from_receipts_and_the_limit_blocks",
         ".bigbang/tests/test_board_v3.py:test_agent_passes_common_gates_in_flash",
@@ -2285,6 +2289,8 @@
         ".bigbang/tests/test_board_v3.py:test_backlog_and_selection_decisions_advance_the_epic",
         ".bigbang/tests/test_board_v3.py:test_merge_refused_keeps_the_claim",
         ".bigbang/tests/test_board_v3.py:test_retried_merge_event_releases_a_claim_left_behind",
+        ".bigbang/tests/test_board_v3.py:test_retried_merge_event_keeps_a_claim_taken_after_the_merge",
+        ".bigbang/tests/test_board_v3.py:test_bugfix_branches_are_read_by_the_controller",
         ".bigbang/tests/test_board_v3.py:test_late_closed_event_of_a_reopened_pr_is_ignored",
         ".bigbang/tests/test_board_v3.py:test_decision_label_advances_the_epic",
         ".bigbang/tests/test_board_v3.py:test_schedule_reconciles_the_board_and_marks_stale_claims",
@@ -2293,8 +2299,8 @@
         ".bigbang/tests/test_board_v3.py:test_items_of_other_repositories_are_ignored"
       ],
       "hashes": {
-        ".bigbang/bb/board.py": "sha256:f50f85a7ca47723288da2242f11475db9368bb6898ba57d6f97098d1a4a33c23",
-        ".bigbang/bb/controller.py": "sha256:ff451f5c93fd09fbac7e6a615f0727468777bb44a05e3c46131bd69ba92867f8",
+        ".bigbang/bb/board.py": "sha256:642cdbb2b767fbd3853f70f7949243cb1afa55f38bcc1d612717d8cc83acefd4",
+        ".bigbang/bb/controller.py": "sha256:e9a9596ed2106053ecb47df992a90de9da0f6a776c3adac7600711951a03c9ce",
         ".bigbang/bb/flow_cli.py": "sha256:3417b8956c7f669e14b5450efdc65f8f4176575462fa2d8e2eda43b95fc87c7c"
       },
       "descricao": "Catálogo de labels v3, Project com 15 estados e campos, bb move validado, reconciliação e controlador de eventos."
