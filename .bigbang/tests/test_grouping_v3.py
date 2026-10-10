@@ -196,5 +196,82 @@ class Flows(unittest.TestCase):
         self.assertIn(f"docs/{docs}-documentacao-login", flows.create_branches(self.client, cfg()))
 
 
+class MergeAndRelease(Flows):
+    def green(self, sha):
+        self.fake.checks[sha] = [{"name": "gate", "status": "completed", "conclusion": "success"}]
+
+    def test_merge_needs_approval_and_a_green_gate_on_the_exact_head(self):
+        self.fake.add_issue(30, "Tarefa", labels=["type:task"], parent=10)
+        self.fake.add_pull(60, "feature/30-tarefa", "develop", title="feat: tarefa")
+        with self.assertRaises(BbError) as error:
+            flows.merge_pr(self.client, cfg(), 60)
+        self.assertIn("aprov", error.exception.message)
+        self.fake.pulls[60]["labels"].append({"name": "pr:approved"})
+        with self.assertRaises(BbError):
+            flows.merge_pr(self.client, cfg(), 60)  # gate not green
+        self.green(self.fake.pulls[60]["head"]["sha"])
+        flows.merge_pr(self.client, cfg(), 60)
+        self.assertTrue(self.fake.pulls[60]["merged"])
+        self.assertEqual(self.fake.pulls[60]["merge_method"], "merge")
+
+    def test_legacy_spelling_of_the_approval_counts(self):
+        self.fake.add_pull(61, "feature/31-x", "develop", labels=["pr-aprovado"])
+        self.green(self.fake.pulls[61]["head"]["sha"])
+        flows.merge_pr(self.client, cfg(), 61)
+        self.assertTrue(self.fake.pulls[61]["merged"])
+
+    def test_never_into_main_and_never_outside_the_branch_model(self):
+        for number, head, base in ((62, "release/1.0.0", "main"), (63, "feature/32-x", "main"),
+                                   (64, "epico/7-x", "develop")):
+            self.fake.add_pull(number, head, base, labels=["pr:approved"])
+            self.green(self.fake.pulls[number]["head"]["sha"])
+            with self.subTest(head=head, base=base), self.assertRaises(BbError):
+                flows.merge_pr(self.client, cfg(), number)
+            self.assertFalse(self.fake.pulls[number]["merged"])
+
+    def test_human_test_review_needs_the_owner_decision(self):
+        self.fake.add_issue(33, "Testes", labels=["type:test", "tests-review:human"], parent=10)
+        self.fake.add_pull(65, "test/33-testes", "develop", labels=["pr:approved"])
+        self.green(self.fake.pulls[65]["head"]["sha"])
+        with self.assertRaises(BbError):
+            flows.merge_pr(self.client, cfg(), 65)
+        self.fake.pulls[65]["labels"].append({"name": "approved:tests"})
+        flows.merge_pr(self.client, cfg(), 65)
+        self.assertTrue(self.fake.pulls[65]["merged"])
+
+    def test_cut_release_from_develop_with_version_lock_and_milestone(self):
+        self.fake.refs["refs/tags/v1.2.0"] = "1" * 40
+        self.fake.add_issue(40, "API", labels=["type:task"], parent=10, state="closed")
+        self.fake.add_pull(70, "feature/40-api", "develop", title="feat: api de login", state="closed", merged=True)
+        self.fake.add_pull(71, "docs/41-docs", "develop", title="docs: guia", state="closed", merged=True)
+        self.fake.compares[("main", "develop")] = ["Merge pull request #70 from dono/feature/40-api",
+                                                   "feat: api de login", "Merge pull request #71 from dono/docs/41"]
+        release = flows.cut_release(self.client, cfg(), now=NOW)
+        self.assertEqual(release["version"], "1.3.0")
+        self.assertEqual(self.fake.refs["refs/heads/release/1.3.0"], "d" * 40)
+        self.assertIn("refs/bigbang/locks/version-1.3.0", self.fake.refs)
+        self.assertEqual([m["title"] for m in self.fake.milestones.values()], ["v1.3.0"])
+        self.assertEqual(release["epics"], [10])
+        self.assertEqual(self.fake.issues[10]["milestone"], 1)
+        with self.assertRaises(BbError):  # the same version cannot be cut twice
+            flows.cut_release(self.client, cfg(), now=NOW)
+
+    def test_nothing_to_release(self):
+        self.fake.compares[("main", "develop")] = []
+        self.assertIsNone(flows.cut_release(self.client, cfg(), now=NOW))
+
+    def test_release_gate_reads_flags_and_pending_marks(self):
+        with tempfile.TemporaryDirectory() as root:
+            with open(os.path.join(root, "flags.toml"), "w", encoding="utf-8") as handle:
+                handle.write(FLAGS_V3)
+            self.fake.add_issue(42, "Outro épico", labels=["type:epic"])
+            self.assertEqual(flows.release_gate(self.client, cfg(), root, [10], today=TODAY, pending={}), [])
+            self.assertTrue(flows.release_gate(self.client, cfg(), root, [10, 42], today=TODAY, pending={}))
+            self.fake.issues[42]["labels"].append({"name": "qa:approved"})
+            self.assertEqual(flows.release_gate(self.client, cfg(), root, [10, 42], today=TODAY, pending={}), [])
+            self.fake.add_issue(43, "Testes do 42", labels=["type:test"], parent=42)
+            self.assertTrue(flows.release_gate(self.client, cfg(), root, [10, 42], today=TODAY, pending={43: ["x"]}))
+
+
 if __name__ == "__main__":
     unittest.main()

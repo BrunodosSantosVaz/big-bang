@@ -11,7 +11,7 @@ class FakeGitHub:
         self.issues, self.comments, self.labels = {}, {}, {}
         self.refs, self.commits = {}, {}
         self.parents, self.blockers = {}, {}
-        self.pulls = {}
+        self.pulls, self.checks, self.milestones, self.compares = {}, {}, {}, {}
         self.failures = set()  # (method, tail) answered with HTTP 500, to test partial failures
         self.author = "dona"  # login that authors new comments
         self.calls = []
@@ -80,6 +80,10 @@ class FakeGitHub:
         (r"git/commits/([0-9a-f]+)", ("GET", "_get_commit")),
         (r"pulls/(\d+)", ("GET", "_get_pull")), (r"pulls", ("GET", "_list_pulls")),
         (r"pulls/(\d+)/files", ("GET", "_pull_files")),
+         (r"pulls/(\d+)/merge", ("PUT", "_merge_pull")),
+        (r"commits/([0-9a-f]+)/check-runs", ("GET", "_check_runs")),
+        (r"compare/(.+)\.\.\.(.+)", ("GET", "_compare")),
+        (r"milestones", ("GET", "_list_milestones")), (r"milestones", ("POST", "_create_milestone")),
     ]
 
     def _page(self, items, params):
@@ -208,6 +212,34 @@ class FakeGitHub:
     def _get_pull(self, params, payload, number):
         pull = self.pulls.get(int(number))
         return (200, pull) if pull else (404, {"message": "Not Found"})
+
+    def _merge_pull(self, params, payload, number):
+        pull = self.pulls[int(number)]
+        if pull["state"] != "open":
+            return 405, {"message": "Pull Request is not mergeable"}
+        if payload.get("sha") and payload["sha"] != pull["head"]["sha"]:
+            return 409, {"message": "Head branch was modified"}
+        pull.update(state="closed", merged=True, merge_method=payload.get("merge_method"))
+        return 200, {"merged": True, "sha": "f" * 40}
+
+    def _check_runs(self, params, payload, sha):
+        runs = self.checks.get(sha, [])
+        return 200, {"total_count": len(runs), "check_runs": runs}
+
+    def _compare(self, params, payload, base, head):
+        commits = self.compares.get((base, head), [])
+        return 200, {"commits": [{"sha": f"{i:040x}", "commit": {"message": message}} for i, message in
+                                 enumerate(commits, start=1)], "total_commits": len(commits)}
+
+    def _list_milestones(self, params, payload):
+        return 200, self._page(list(self.milestones.values()), params)
+
+    def _create_milestone(self, params, payload):
+        if any(m["title"] == payload["title"] for m in self.milestones.values()):
+            return 422, {"message": "already_exists"}
+        number = len(self.milestones) + 1
+        self.milestones[number] = {"number": number, "title": payload["title"], "state": "open"}
+        return 201, self.milestones[number]
 
     def _create_tree(self, params, payload):
         return 201, {"sha": "4b825dc642cb6eb9a060e54bf8d69288fbee4904"}
