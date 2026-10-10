@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "d80da1e5b7b22c85a966c9b13e03dd18cd563cda",
+    "commit": "bd539ced4370d2ed4b0c5df2430a210d9c4a982d",
     "branch": "master",
     "proposta": "bigbang/proposta-220-v3"
   },
@@ -242,7 +242,7 @@
     }
   },
   "codigo": {
-    "commit": "a60482e41f4c99e31b2e7611554fd0f7d7c923fc",
+    "commit": "2a07486b53be8280957e4e037e2694377a545ce1",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -2279,7 +2279,9 @@
         ".bigbang/tests/test_board_v3.py:test_qa_and_publish_risk_come_from_the_changed_paths",
         ".bigbang/tests/test_board_v3.py:test_flash_qa_human_stays_with_the_owner_at_any_risk",
         ".bigbang/tests/test_board_v3.py:test_flash_delegated_qa_needs_an_independent_qa_receipt",
+        ".bigbang/tests/test_board_v3.py:test_qa_verdict_needs_a_declared_agent_and_the_current_candidate",
         ".bigbang/tests/test_board_v3.py:test_going_back_without_rejection_also_withdraws_the_decisions",
+        ".bigbang/tests/test_board_v3.py:test_delivery_paths_read_only_prs_updated_since_the_selection",
         ".bigbang/tests/test_board_v3.py:test_effects_happen_before_the_receipt",
         ".bigbang/tests/test_board_v3.py:test_attempts_come_from_receipts_and_the_limit_blocks",
         ".bigbang/tests/test_board_v3.py:test_agent_passes_common_gates_in_flash",
@@ -2307,7 +2309,7 @@
         ".bigbang/tests/test_board_v3.py:test_items_of_other_repositories_are_ignored"
       ],
       "hashes": {
-        ".bigbang/bb/board.py": "sha256:642cdbb2b767fbd3853f70f7949243cb1afa55f38bcc1d612717d8cc83acefd4",
+        ".bigbang/bb/board.py": "sha256:72c34bbdbb7090b14644dace7a7a1879a88fdecf0e129a219533bf22e53a591a",
         ".bigbang/bb/controller.py": "sha256:8c70bec7e79ad6786f7320c719e424d593f77fad6a006c8459a222d45e12200f",
         ".bigbang/bb/flow_cli.py": "sha256:0bb94aea3feea5d200d5d9f670bcce7db98a03fa5584b05e652208b666df7f78"
       },
@@ -2377,7 +2379,7 @@
       "hashes": {
         ".bigbang/bb/flags.py": "sha256:f10ecfbb24b3ecc9e334525b1b5034ba83f369f2f0bd6c10817fceab3b02e026",
         ".bigbang/bb/flows.py": "sha256:f1da052a9d7fc45e698ad09c706ea1979777efd64a4e32d40f92e5e1abcabf34",
-        ".bigbang/bb/delivery.py": "sha256:e5642cac55677b558dd1a865b6ecf09662b4fb74c6d8f0b4f666f33a759c1983"
+        ".bigbang/bb/delivery.py": "sha256:9f59de96578ce63fc520d7cccd5cee227f16f1b8da98cc67e25ec0b3dd4843f0"
       },
       "descricao": "Sprint, branches, merge, corte da release, flags, candidata, publicação, manutenção, correção e faxina do modelo B."
     },
