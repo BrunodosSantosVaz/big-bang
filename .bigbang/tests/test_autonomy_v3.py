@@ -148,3 +148,48 @@ class Bootstrap(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Commands(Bootstrap):
+    def run_cli(self, cfg, *argv):
+        import argparse
+        from unittest import mock
+        from bb import flow_cli
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--raiz", default=".")
+        commands = parser.add_subparsers(dest="command")
+        pipeline_sub = commands.add_parser("pipeline").add_subparsers(dest="pipeline_command")
+        flow_cli.register(commands, pipeline_sub)
+        args = parser.parse_args(["--raiz", self.root] + list(argv))
+        with mock.patch.object(flow_cli.config_module, "load", return_value=cfg), \
+                mock.patch.object(flow_cli.gh, "GitHub", return_value=self.client), \
+                mock.patch.object(flow_cli.gh, "graphql", side_effect=AssertionError("no GraphQL here")):
+            return args.handler(args)
+
+    def setUp(self):
+        super().setUp()
+        self.root = tempfile.mkdtemp()
+
+    def test_every_command_sees_the_contract_of_the_checkout(self):
+        from bb import flow_cli
+        with open(os.path.join(self.root, "autonomy.toml"), "w", encoding="utf-8") as handle:
+            handle.write(CONTRACT)
+        from unittest import mock
+        plain = {k: v for k, v in config(contract=None).items() if k != autonomy.KEY}
+        with mock.patch.object(flow_cli.config_module, "load", return_value=plain):
+            self.assertEqual(autonomy.contract_of(flow_cli._load(self.root))["wip"], 1)
+
+    def test_autonomy_check_reports_contract_and_bootstrap(self):
+        plain = {k: v for k, v in config(contract=None).items() if k != autonomy.KEY}
+        self.fake.branch_rules["main"] = []
+        with self.assertRaises(BbError) as error:
+            self.run_cli(plain, "autonomy", "check")
+        self.assertIn("autonomy.toml", error.exception.message)
+        self.assertIn("main", error.exception.message)
+
+    def test_board_create_refuses_autonomous_mode_without_the_controls(self):
+        plain = {k: v for k, v in config(contract=None).items() if k != autonomy.KEY}
+        self.fake.environments = {}
+        with self.assertRaises(BbError) as error:
+            self.run_cli(plain, "board", "create", "--title", "Sistema")
+        self.assertIn("production", error.exception.message)
