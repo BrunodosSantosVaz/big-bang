@@ -132,6 +132,7 @@ class RevisaoAprovar(ComCli):
         self.assertEqual(codigo, EXIT_OK, saida)
         self.assertIn("pr-aprovado", self.estado["prs"]["30"]["labels"])
         self.assertIn("Revisão da IA: aprovado", self.estado["comments"]["30"][0])
+        self.assertIn("PR #30: pr-aprovado", saida)  # the message names the label actually applied
 
     def test_recusa_quando_a_revisao_e_do_dono(self):
         casos = {"revisao-humana": dict(labels=["revisao-humana"]), "zona sensível": dict(diff=DIFF_AUTH)}

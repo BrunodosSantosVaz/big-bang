@@ -40,7 +40,7 @@ class Names(unittest.TestCase):
         self.assertEqual(names.key_to_legacy("board.planning"), "paineis.planejamento")
 
     def test_decision_labels_in_both_dialects(self):
-        self.assertEqual(len(names.DECISIONS), len(names.DECISIONS_LEGACY))
+        self.assertEqual(len(names.DECISIONS), len(names.DECISIONS_LEGACY) + len(names.V3_ONLY_DECISIONS))
         self.assertEqual(names.label("homologado", "v3"), "qa:approved")
         self.assertEqual(names.label("qa:approved", "legacy"), "homologado")
         self.assertEqual(names.label("qa:approved", "v3"), "qa:approved")
@@ -216,6 +216,20 @@ class ReviewFindings(unittest.TestCase):
         self.assertIn('name = "Outro"', init.set_config_value(v3, "projeto.nome", "Outro"))
         updated = init.set_config_value(legacy, "bigbang.versao", "9.9.9")
         self.assertEqual(updated, init.set_value(legacy, "bigbang", "versao", "9.9.9"))
+
+    def test_legacy_value_in_a_v3_file_is_reported_once(self):
+        raw = config.parse(config.text_to_v3(scenario_text("deploy-vps-docker")))
+        raw["project"]["visibility"] = "privado"
+        errors = config.validate(raw)
+        self.assertEqual(len(errors), 1, errors)
+        self.assertIn("use o valor em inglês 'private'", errors[0])
+
+    def test_non_text_mode_on_the_target_is_a_clean_refusal(self):
+        from bb import decisions
+        with self.assertRaises(BbError):
+            decisions.mode_from_text('[project]\nmode=["flash"]\n')
+        with self.assertRaises(BbError):
+            decisions.mode_from_text('[projeto]\nmodo=1\n')
 
     def test_legacy_workflow_needs_legacy_labels(self):
         raw = config.parse(config.text_to_v3(scenario_text("deploy-vps-docker")))

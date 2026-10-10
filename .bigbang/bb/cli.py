@@ -1,9 +1,10 @@
 """Command-line interface of the Big Bang (`bb`). Messages in Portuguese; stable exit codes in errors.py."""
 import argparse
+import os
 import sys
 
 from . import config as config_module
-from . import acceptance, checklist, checksums, decisions, deploy_catalog, generator, ownership, package, status, update, verify, workspaces
+from . import acceptance, checklist, checksums, claims, decisions, deploy_catalog, generator, ownership, package, status, update, verify, workspaces
 from . import init as init_module
 from . import documentation_cli, pipeline_cli, test_runs, names
 from .errors import EXIT_OK, EXIT_UNEXPECTED, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
@@ -66,7 +67,12 @@ def build_parser():
     assumir_parser.add_argument(*names.cli_option("--forcar"), dest="forcar", action="store_true", help="retoma uma posse parada por ordem do dono")
     assumir_parser.add_argument(*names.cli_option("--frase"), dest="frase", help="ordem do dono (obrigatória com --forcar)")
     assumir_parser.add_argument(*names.cli_option("--pasta"), dest="pasta", help="pasta própria do worktree (padrão: ../repo-nome)")
+    assumir_parser.add_argument("--person", action="store_true", help="v3: posse de uma pessoa (login) em vez de IA")
     assumir_parser.set_defaults(handler=_assumir)
+
+    renew_parser = commands.add_parser("renew", help="v3: renova o prazo da posse da sessão na pasta atual")
+    renew_parser.add_argument("issue", type=int)
+    renew_parser.set_defaults(handler=_renew)
 
     liberar_posse = commands.add_parser(**names.cli_name(None, "liberar"), help="libera a posse da sessão na pasta de trabalho atual")
     liberar_posse.add_argument("issue", type=int)
@@ -161,8 +167,15 @@ def _testes(args):
     return EXIT_OK
 
 
+def _v3_client(config):
+    from . import gh
+    return gh.GitHub(config_module.get(config, "project.repository"))
+
+
 def _assumir(args):
     config = config_module.load(args.raiz)
+    if claims.is_v3(config):
+        return _claim_v3(args, config)
     if args.forcar:
         acquired = ownership.recover(config, args.issue, args.nome, args.frase)
     else:
@@ -177,12 +190,76 @@ def _assumir(args):
     return EXIT_OK
 
 
-def _liberar(args):
+def _claim_v3(args, config):
+    """v3 claim: lock first, worktree only for issues with a branch (an epic in refinement has none)."""
+    import json
+    client = _v3_client(config)
+    if args.forcar:
+        acquired = claims.force(client, config, args.issue, args.nome, args.frase, person=args.person)
+    else:
+        acquired = claims.claim(client, config, args.issue, args.nome, person=args.person)
+    labels = client.issue(args.issue)["labels"]
+    if "type:epic" in labels or "epic" in labels:
+        print(f"#{args.issue}: posse confirmada de {args.nome} (geração {acquired['generation']}, até "
+              f"{acquired['expires']}); épico sem branch, nenhuma pasta criada.")
+        with open(_epic_receipt_path(args.raiz, args.issue), "w", encoding="utf-8") as handle:
+            json.dump(acquired, handle)  # one file per epic: claiming another epic never overwrites this one
+        return EXIT_OK
+    try:
+        folder = workspaces.isolate(args.raiz, config, acquired, args.pasta, kinds=workspaces.V3_KINDS)
+    except BaseException:
+        claims.unclaim(client, config, acquired, reason="pasta de trabalho não pôde ser criada")
+        raise
+    print(f"#{args.issue}: posse confirmada de {args.nome} (geração {acquired['generation']}, até "
+          f"{acquired['expires']}). Renove com bb renew {args.issue}.")
+    print(f"Pasta própria: {folder}")
+    return EXIT_OK
+
+
+def _epic_receipt_path(root, issue):
+    path = workspaces.git(root, "rev-parse", "--git-path", f"bb-posse-epic-{issue}.json")
+    return path if os.path.isabs(path) else os.path.join(root, path)
+
+
+def _session_receipt(args, command):
+    import json
+    epic_path = _epic_receipt_path(args.raiz, args.issue)
+    if os.path.exists(epic_path):
+        with open(epic_path, encoding="utf-8") as handle:
+            return json.load(handle)
     acquired = workspaces.receipt(args.raiz)
     if acquired.get("issue") != args.issue:
-        raise BbError("execute bb liberar na pasta da sessão dona da issue (o recibo da posse fica nos metadados "
+        raise BbError(f"execute bb {command} na pasta da sessão dona da issue (o recibo da posse fica nos metadados "
                       "Git dessa pasta: libere ANTES de remover a pasta com git worktree remove)", EXIT_USAGE)
-    ownership.release(config_module.load(args.raiz), args.issue, acquired["name"], acquired["session"])
+    return acquired
+
+
+def _renew(args):
+    import json
+    config = config_module.load(args.raiz)
+    if not claims.is_v3(config):
+        raise BbError("bb renew é da posse v3; no modelo legado a posse é renovada pelos pushes", EXIT_USAGE)
+    acquired = claims.renew(_v3_client(config), config, _session_receipt(args, "renew"))
+    epic_path = _epic_receipt_path(args.raiz, args.issue)
+    path = epic_path if os.path.exists(epic_path) else workspaces.git(args.raiz, "rev-parse", "--git-path",
+                                                                          "bb-posse.json")
+    with open(path if os.path.isabs(path) else os.path.join(args.raiz, path), "w", encoding="utf-8") as handle:
+        json.dump(acquired, handle)
+    print(f"#{args.issue}: posse renovada até {acquired['expires']}.")
+    return EXIT_OK
+
+
+def _liberar(args):
+    acquired = _session_receipt(args, "liberar")
+    config = config_module.load(args.raiz)
+    if claims.is_v3(config):
+        claims.unclaim(_v3_client(config), config, acquired)
+        epic_path = _epic_receipt_path(args.raiz, args.issue)
+        if os.path.exists(epic_path):
+            os.remove(epic_path)
+        print(f"#{args.issue}: posse liberada. A pasta de trabalho foi preservada.")
+        return EXIT_OK
+    ownership.release(config, args.issue, acquired["name"], acquired["session"])
     print(f"#{args.issue}: posse liberada. A pasta de trabalho foi preservada.")
     return EXIT_OK
 
@@ -216,9 +293,9 @@ def _revisao_aprovar(args):
     if args.relatorio:
         from .paths import read_text
         report = read_text(args.relatorio)
-    decisions.approve_review(config["projeto"]["repositorio"], args.pr, _ia(args),
-                             config["seguranca"]["zonas_sensiveis"], config["testes"]["marca_pendente"], report)
-    print(f"PR #{args.pr}: pr-aprovado (revisão da IA).")
+    label = decisions.approve_review(config["projeto"]["repositorio"], args.pr, _ia(args),
+                                     config["seguranca"]["zonas_sensiveis"], config["testes"]["marca_pendente"], report)
+    print(f"PR #{args.pr}: {label} (revisão da IA).")
     return EXIT_OK
 
 

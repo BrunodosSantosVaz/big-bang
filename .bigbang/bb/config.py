@@ -314,6 +314,7 @@ def _v3_to_legacy(raw):
             mapping = names.VALUES.get(dotted, {})
             if isinstance(value, str) and value in mapping and mapping[value] != value:
                 errors.append(f"{section}.{key}: use o valor em inglês {mapping[value]!r} (não {value!r})")
+                target[legacy_key] = value  # present: the structural check must not call it missing
                 continue
             if dotted == "projeto.modo" and value not in MODES:
                 errors.append(f"project.mode: deve ser um de: {', '.join(MODES)}")
