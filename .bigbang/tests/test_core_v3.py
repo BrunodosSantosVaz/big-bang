@@ -416,5 +416,36 @@ class Locks(unittest.TestCase):
             self.locks.acquire("issue-7", "claude-1", "s1", hours=1, now=NOW)
 
 
+class GhAdapter(unittest.TestCase):
+    """The real adapter reads the HTTP status from `gh api -i`, so 422 (ref exists / not fast-forward) is data."""
+
+    def run_with(self, stdout):
+        import os
+        import sys
+        import tempfile
+        with tempfile.TemporaryDirectory() as folder:
+            fake = os.path.join(folder, "gh.py")
+            with open(fake, "w", encoding="utf-8") as handle:
+                handle.write("import sys\nsys.stdin.read()\nsys.stdout.write(" + repr(stdout) + ")\n")
+            previous = os.environ.get("BB_GH")
+            os.environ["BB_GH"] = f'"{sys.executable}" "{fake}"'
+            try:
+                return locks.gh_api("POST", "repos/dono/repo/git/refs", {"ref": "x", "sha": "y"})
+            finally:
+                if previous is None:
+                    os.environ.pop("BB_GH")
+                else:
+                    os.environ["BB_GH"] = previous
+
+    def test_status_and_body(self):
+        self.assertEqual(self.run_with('HTTP/2.0 422 Unprocessable Entity\r\nX: y\r\n\r\n{"message": "Reference '
+                                       'already exists"}'), (422, {"message": "Reference already exists"}))
+        self.assertEqual(self.run_with("HTTP/2.0 204 No Content\n\n"), (204, None))
+
+    def test_no_http_status_is_an_error(self):
+        with self.assertRaises(BbError):
+            self.run_with("gh: not logged in")
+
+
 if __name__ == "__main__":
     unittest.main()
