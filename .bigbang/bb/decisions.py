@@ -126,9 +126,12 @@ def mode_from_text(text):
     except BbError as exc:
         raise BbError('configuração da branch de destino não pôde ser conferida', EXIT_VERIFICATION_FAILED) from exc
     if isinstance(raw.get('project'), dict):
-        mode = {'normal': 'padrao', 'flash': 'flash', 'autonomous': 'flash'}.get(raw['project'].get('mode', 'normal'))
+        value = raw['project'].get('mode', 'normal')
+        mode = {'normal': 'padrao', 'flash': 'flash', 'autonomous': 'flash'}.get(value) if isinstance(value, str) else None
     else:
-        mode = (raw.get('projeto') or {}).get('modo', 'padrao') if isinstance(raw.get('projeto') or {}, dict) else None
+        legacy = raw.get('projeto') or {}
+        value = legacy.get('modo', 'padrao') if isinstance(legacy, dict) else None
+        mode = value if isinstance(value, str) else None
     if mode not in ('padrao', 'flash'):
         raise BbError('modo inválido na branch de destino', EXIT_VERIFICATION_FAILED)
     return mode
@@ -170,4 +173,6 @@ def approve_review(repository, number, ai_name, zones, marker, report=""):
         body += "\n\n" + report.strip()
     _comment(repository, number, body)
     text = _target_text(repository, data.get('baseRefOid') or data['baseRefName'])
-    _add_label(repository, number, names.label("pr-aprovado", label_dialect_from_text(text) if text else "legacy"))
+    label = names.label("pr-aprovado", label_dialect_from_text(text) if text else "legacy")
+    _add_label(repository, number, label)
+    return label
