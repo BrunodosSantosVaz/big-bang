@@ -57,6 +57,12 @@ def register(commands, pipeline_sub):
         p.add_argument("--env", choices=("staging", "production"), default="production")
         p.set_defaults(handler=_flag_switch, value=action == "on")
 
+    p = pipeline_sub.add_parser("pr-rules", help="v3: regras do PR (branch, título, Refs, aceite, flag, zona sensível)")
+    p.add_argument("--pr", type=int, required=True)
+    p.add_argument("--content-dir", dest="content_dir",
+                   help="pasta com o conteúdo do PR (lido como dado): pendentes, rastreabilidade, guarda da stack")
+    p.set_defaults(handler=_pr_rules)
+
     p = pipeline_sub.add_parser("controller", help="v3: aplica um evento do GitHub ao quadro (uso da esteira)")
     p.add_argument("--event", required=True, help="nome do evento (issues, push, pull_request, schedule)")
     p.add_argument("--payload", help="arquivo JSON do evento (GITHUB_EVENT_PATH)")
@@ -207,6 +213,56 @@ def _flag_switch(args):
     print(f"flag {args.name}: {args.env} {'ligada' if args.value else 'desligada'} no flags.toml "
           "(zona sensível: abra o PR para a decisão registrada).")
     return EXIT_OK
+
+
+def _pr_rules(args):
+    from . import pipeline
+    config = config_module.load(args.raiz)
+    client = gh.GitHub(config_module.get(config, "project.repository"))
+    pull = client.pull(args.pr)
+    files = client.pull_files(args.pr)
+    paths, diffs = [], []
+    for file in files:
+        path, previous = file["filename"], file.get("previous_filename", file["filename"])
+        paths.extend({previous, path})
+        if path.startswith("tests/aceite/") or previous.startswith("tests/aceite/"):
+            diffs.append(f"diff --git a/{previous} b/{path}\n--- a/{previous}\n+++ b/{path}\n{file.get('patch', '')}")
+    _, issue_number = pipeline.branch_issue(pull["head"])
+    issue = client.issue(issue_number) if issue_number else None
+    parent = client.parent(issue_number) if issue_number else None
+    errors, add, remove = pipeline.v3_pr_rules(
+        pull["head"], pull["base"], pull["title"], pull["body"], set(pull["labels"]), paths, "\n".join(diffs),
+        config_module.get(config, "delivery.artifact_paths"), config_module.get(config, "security.sensitive_paths"),
+        config_module.get(config, "tests.pending_marker"), set(issue["labels"]) if issue else set(),
+        set(parent["labels"]) if parent else set(), mode=config_module.get(config, "project.mode"))
+    if args.content_dir:
+        errors += _content_problems(client, config, args.content_dir, paths, pull["head"])
+    else:
+        print("::notice::conteúdo do PR indisponível: pendentes, rastreabilidade e guarda da stack não conferidos")
+    for target in [args.pr] + ([issue_number] if issue else []):
+        client.add_labels(target, sorted(add))
+        for label in sorted(remove):
+            client.remove_label(target, label)
+    for error in errors:
+        print(f"::error::{error}")
+    if errors:
+        raise BbError(f"regras do PR #{args.pr}: {len(errors)} problema(s)", EXIT_USAGE)
+    print(f"Regras do PR #{args.pr}: em ordem.")
+    return EXIT_OK
+
+
+def _content_problems(client, config, content, paths, head):
+    """Checks on the PR head content, read as data by the target branch's code."""
+    from . import acceptance, stack_guard, traceability
+    found = []
+    for issue, location in acceptance.pending_marks(content, config_module.get(config, "tests.pending_marker")):
+        current = client.issue(issue)
+        if current and current["state"] == "closed":
+            found.append(f"{location}: teste ainda marcado como pendente da #{issue}, que já foi concluída")
+    pattern = config_module.get(config, "tests.test_pattern")
+    found += [f"rastreabilidade: {problem}" for problem in traceability.problems(content, pattern, paths)]
+    found += [f"guarda da stack: {problem}" for problem in stack_guard.problems(content)]
+    return found
 
 
 def _controller(args):

@@ -279,9 +279,25 @@ if __name__ == "__main__":
 
 class PrRules(unittest.TestCase):
     def rules(self, head="feature/12-tela", base="develop", title="feat: tela", body="Refs #12", labels=(),
-              paths=("src/app.py",), diff="", issue_labels=("type:task",), epic_labels=("type:epic", "flag:required")):
+              paths=("src/app.py",), diff="", issue_labels=("type:task",), epic_labels=("type:epic", "flag:required"),
+              mode="normal"):
         return pipeline.v3_pr_rules(head, base, title, body, set(labels), list(paths), diff, ["src/"],
-                                    ["src/**/auth/**"], "test.failing", set(issue_labels), set(epic_labels))
+                                    ["src/**/auth/**"], "test.failing", set(issue_labels), set(epic_labels), mode)
+
+    def test_flash_delegates_sensitive_review_unless_human_was_asked(self):
+        _, add, _ = self.rules(paths=("src/api/auth/login.py",), mode="flash")
+        self.assertNotIn("review:human", add)
+        _, add, _ = self.rules(paths=("src/api/auth/login.py",), mode="flash", issue_labels=("type:task", "review:human"))
+        self.assertIn("review:human", add)
+
+    def test_no_release_epic_cannot_change_the_artifact(self):
+        self.assertTrue(self.rules(epic_labels=("type:epic", "flag:waived", "no-release"))[0])
+
+    def test_release_pr_skips_the_acceptance_lock(self):
+        diff = ("diff --git a/tests/aceite/t.py b/tests/aceite/t.py\n--- a/tests/aceite/t.py\n+++ b/tests/aceite/t.py\n"
+                "@@ -1 +1 @@\n-a\n+b\n")
+        self.assertEqual(self.rules(head="release/1.2.0", base="main", title="chore: release 1.2.0", body="",
+                                    paths=("tests/aceite/t.py",), diff=diff)[0], [])
 
     def test_clean_task_pr(self):
         errors, add, remove = self.rules()

@@ -159,6 +159,12 @@ class GitHub:
                           EXIT_EXTERNAL_COMMAND)
         return body.get("sha")
 
+    def pull_files(self, number):
+        return self.paginate(f"pulls/{number}/files")
+
+    def add_pr_labels(self, number, labels):
+        self.add_labels(number, labels)  # a PR is an issue for labels
+
     def check_runs(self, sha):
         _, body = self.call("GET", f"commits/{sha}/check-runs?per_page=100")
         return body.get("check_runs", [])

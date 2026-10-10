@@ -230,6 +230,53 @@ def v3_branch_problem(head, base):
     return None if ok else f"'{head}' deve abrir PR para {expected}, não para '{base}'"
 
 
+CLOSING = re.compile(r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#\d+", re.I)
+
+
+def v3_pr_rules(head, base, title, body, labels, paths, diff, artifact_patterns, zones, marker, issue_labels,
+                epic_labels, mode="normal"):
+    """PR rules of the grouping workflow: (errors, labels to add, labels to remove). Labels may come in either
+    language; the effects use the v3 names."""
+    from . import acceptance, names
+    def has(collection, v3_label):
+        return v3_label in collection or names.label(v3_label, "legacy") in collection
+    errors, add, remove = [], set(), set()
+    problem = v3_branch_problem(head, base)
+    if problem:
+        errors.append(problem)
+    problem = title_problem(title)
+    if problem:
+        errors.append(problem)
+    kind, issue = branch_issue(head)
+    if issue is not None:
+        if not re.search(rf"\bRefs\s+#{issue}\b", body or "", re.I):
+            errors.append(f"o corpo do PR precisa de 'Refs #{issue}' (a issue da branch)")
+        if CLOSING.search(body or ""):
+            errors.append("use 'Refs #n', nunca Closes/Fixes/Resolves: o controlador fecha a issue no merge")
+    legacy_kind = {"test": "teste", "fix": "bugfix"}.get(kind, kind)
+    if not RELEASE.match(head):  # a release only carries changes that already passed these rules
+        errors += acceptance.lock_problems(diff, legacy_kind, issue, marker, has(labels, "approved:test-change"))
+    artifact = artifact_paths(paths, artifact_patterns)
+    if artifact:
+        remove.add("no-release")
+        if kind in ("feature", "test", "docs") and has(epic_labels, "no-release"):
+            errors.append("o épico desta tarefa é no-release, mas o PR muda o artefato: tire no-release do épico com "
+                          "o dono e refaça o planejamento")
+        if base == "develop" and kind in ("feature", "test", "docs") and not (
+                has(epic_labels, "flag:required") or has(epic_labels, "flag:waived")):
+            errors.append("código do artefato na develop exige a decisão de feature flag do épico "
+                          "(flag:required ou flag:waived)")
+    else:
+        add.add("no-release")
+    own_marks = issue is not None and only_own_marks_released(diff, issue, marker)
+    sensitive = sensitive_paths(paths, zones, acceptance_allowed=kind == "test" or own_marks)
+    explicit_human = has(labels, "review:human") or has(issue_labels, "review:human")
+    if sensitive and not (has(labels, "owner:ai-review") or has(issue_labels, "owner:ai-review")) and (
+            mode == "normal" or explicit_human):
+        add.add("review:human")  # flash/autonomous delegate routine review; an explicit human review stays
+    return errors, add, remove - add
+
+
 def title_problem(title):
     if CONVENTIONAL.match(title or ""):
         return None
