@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "18afc6b7e37966c0ee28fb1fd41af6b7b2a0d620",
+    "commit": "d80da1e5b7b22c85a966c9b13e03dd18cd563cda",
     "branch": "master",
     "proposta": "bigbang/proposta-220-v3"
   },
@@ -233,10 +233,16 @@
     },
     "RF-BB-051": {
       "pagina": "Requisitos"
+    },
+    "RF-BB-052": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-053": {
+      "pagina": "Requisitos"
     }
   },
   "codigo": {
-    "commit": "c6d33a1af7a6d30446bb253cd3f3f2591c82b461",
+    "commit": "a60482e41f4c99e31b2e7611554fd0f7d7c923fc",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -737,10 +743,11 @@
         ".bigbang/tests/test_bb_gerar.py:test_marcador_sem_valor",
         ".bigbang/tests/test_bb_gerar.py:test_aviso_por_tipo",
         ".bigbang/tests/test_bb_gerar.py:test_reconhece_aviso",
-        ".bigbang/tests/test_bb_gerar.py:test_template_em_dia"
+        ".bigbang/tests/test_bb_gerar.py:test_template_em_dia",
+        ".bigbang/tests/test_grouping_v3.py:test_v3_tree_is_generated_and_verified"
       ],
       "hashes": {
-        ".bigbang/bb/generator.py": "sha256:0c40e0a8dad1347595bf69aaf6e8bbd9f85b041db7f5b56f9a923ebe6ac6ace3"
+        ".bigbang/bb/generator.py": "sha256:7e8672501672ce3f115cf565148e1fcf2bc96bab351f438331fc7186a5c3efa7"
       },
       "descricao": "Gerar instruções e Actions a partir da configuração, preservando a camada do projeto e removendo saídas obsoletas."
     },
@@ -947,7 +954,7 @@
         ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls"
       ],
       "hashes": {
-        ".bigbang/bb/pipeline.py": "sha256:9a075e60666a043bc1641fcc7f5427fce44e423d87f8f119d63f7fd4cf48bc13"
+        ".bigbang/bb/pipeline.py": "sha256:afc133da97707379aeedc4c4b6ce2e2017097e89a73a853a5ce1378b3b0f9b3f"
       },
       "descricao": "Calcular prontidão, branches, revisão, SemVer, changelog, matriz e nomes de artefatos sem executar deploy."
     },
@@ -2243,7 +2250,7 @@
         ".bigbang/bb/receipts.py": "sha256:fc0ca5d774e4a2cadaf1036002a399e175d4af8806e5a79ee920a175e330b33a",
         ".bigbang/bb/locks.py": "sha256:90b249a7fe0678f7b1369f3d9bb20090ec5dba75907a8864f710a77d46293e1d",
         ".bigbang/bb/claims.py": "sha256:ce5b27f956941758c8da08bfb59c046b10415b039f336e4365ebd79f51766cf4",
-        ".bigbang/bb/gh.py": "sha256:9d48b4ff0f8c80ba2f4e67e89832699ab375b60db99372a20a062be52ae8fd8a"
+        ".bigbang/bb/gh.py": "sha256:1d22021e6b249e243684b06535ce300e9fc9dfcbccdab1d67ecb67d77b51d083"
       },
       "descricao": "Máquina de estados do quadro único, política dos modos, recibos estruturados e travas atômicas em refs Git."
     },
@@ -2283,6 +2290,7 @@
         ".bigbang/tests/test_board_v3.py:test_blocked_task_cannot_start",
         ".bigbang/tests/test_board_v3.py:test_facts_from_github",
         ".bigbang/tests/test_board_v3.py:test_new_issue_enters_the_board_in_its_initial_state",
+        ".bigbang/tests/test_board_v3.py:test_epic_form_answers_become_v3_labels_and_native_dependencies",
         ".bigbang/tests/test_board_v3.py:test_pr_lifecycle_moves_the_task_and_closes_it_on_merge",
         ".bigbang/tests/test_board_v3.py:test_pr_closed_without_merge_goes_back_to_coding",
         ".bigbang/tests/test_board_v3.py:test_foreign_branches_and_events_are_ignored",
@@ -2300,10 +2308,144 @@
       ],
       "hashes": {
         ".bigbang/bb/board.py": "sha256:642cdbb2b767fbd3853f70f7949243cb1afa55f38bcc1d612717d8cc83acefd4",
-        ".bigbang/bb/controller.py": "sha256:e9a9596ed2106053ecb47df992a90de9da0f6a776c3adac7600711951a03c9ce",
-        ".bigbang/bb/flow_cli.py": "sha256:3417b8956c7f669e14b5450efdc65f8f4176575462fa2d8e2eda43b95fc87c7c"
+        ".bigbang/bb/controller.py": "sha256:8c70bec7e79ad6786f7320c719e424d593f77fad6a006c8459a222d45e12200f",
+        ".bigbang/bb/flow_cli.py": "sha256:0bb94aea3feea5d200d5d9f670bcce7db98a03fa5584b05e652208b666df7f78"
       },
       "descricao": "Catálogo de labels v3, Project com 15 estados e campos, bb move validado, reconciliação e controlador de eventos."
+    },
+    {
+      "id": "BB-F-052",
+      "requisitos": [
+        "RF-BB-052"
+      ],
+      "pagina": "Funcionalidade-fluxo-agrupador",
+      "fontes": [
+        ".bigbang/bb/flags.py",
+        ".bigbang/bb/flows.py",
+        ".bigbang/bb/delivery.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_grouping_v3.py:test_both_languages_read_the_same",
+        ".bigbang/tests/test_grouping_v3.py:test_invalid_entries_are_refused",
+        ".bigbang/tests/test_grouping_v3.py:test_switch_keeps_the_file_and_its_language",
+        ".bigbang/tests/test_grouping_v3.py:test_release_gate",
+        ".bigbang/tests/test_grouping_v3.py:test_pending_acceptance_only_for_dark_epics",
+        ".bigbang/tests/test_grouping_v3.py:test_v3_targets",
+        ".bigbang/tests/test_grouping_v3.py:test_start_sprint_creates_children_dependencies_and_test_branch",
+        ".bigbang/tests/test_grouping_v3.py:test_start_sprint_is_idempotent",
+        ".bigbang/tests/test_grouping_v3.py:test_epic_without_readiness_is_refused_with_reasons",
+        ".bigbang/tests/test_grouping_v3.py:test_create_branches_from_develop_when_unblocked",
+        ".bigbang/tests/test_grouping_v3.py:test_docs_branch_only_after_every_task",
+        ".bigbang/tests/test_grouping_v3.py:test_merge_needs_approval_and_a_green_gate_on_the_exact_head",
+        ".bigbang/tests/test_grouping_v3.py:test_legacy_spelling_of_the_approval_counts",
+        ".bigbang/tests/test_grouping_v3.py:test_never_into_main_and_never_outside_the_branch_model",
+        ".bigbang/tests/test_grouping_v3.py:test_human_test_review_needs_the_owner_decision",
+        ".bigbang/tests/test_grouping_v3.py:test_cut_release_from_develop_with_version_lock_and_milestone",
+        ".bigbang/tests/test_grouping_v3.py:test_release_items_for_the_changelog",
+        ".bigbang/tests/test_grouping_v3.py:test_nothing_to_release",
+        ".bigbang/tests/test_grouping_v3.py:test_release_gate_reads_flags_and_pending_marks",
+        ".bigbang/tests/test_grouping_v3.py:test_flash_delegates_sensitive_review_unless_human_was_asked",
+        ".bigbang/tests/test_grouping_v3.py:test_no_release_epic_cannot_change_the_artifact",
+        ".bigbang/tests/test_grouping_v3.py:test_release_pr_skips_the_acceptance_lock",
+        ".bigbang/tests/test_grouping_v3.py:test_clean_task_pr",
+        ".bigbang/tests/test_grouping_v3.py:test_branch_title_and_refs",
+        ".bigbang/tests/test_grouping_v3.py:test_artifact_code_needs_the_epic_flag_decision",
+        ".bigbang/tests/test_grouping_v3.py:test_no_release_follows_the_artifact_paths",
+        ".bigbang/tests/test_grouping_v3.py:test_sensitive_paths_ask_for_the_owner_unless_he_said_otherwise",
+        ".bigbang/tests/test_grouping_v3.py:test_acceptance_lock",
+        ".bigbang/tests/test_grouping_v3.py:test_v3_tree_is_generated_and_verified",
+        ".bigbang/tests/test_delivery_v3.py:test_epics_go_to_qa_or_releasing_and_the_release_pr_opens_once",
+        ".bigbang/tests/test_delivery_v3.py:test_an_epic_with_open_tasks_does_not_enter_qa",
+        ".bigbang/tests/test_delivery_v3.py:test_the_same_candidate_is_promoted_after_the_merge",
+        ".bigbang/tests/test_delivery_v3.py:test_failed_promotion_concludes_nothing",
+        ".bigbang/tests/test_delivery_v3.py:test_open_blocking_issue_refuses",
+        ".bigbang/tests/test_delivery_v3.py:test_release_changed_after_the_candidate_refuses",
+        ".bigbang/tests/test_delivery_v3.py:test_dark_epic_ships_but_stays_in_qa_until_approved",
+        ".bigbang/tests/test_delivery_v3.py:test_approved_epic_with_flag_on_is_done",
+        ".bigbang/tests/test_delivery_v3.py:test_gate_refuses_flag_on_without_approval",
+        ".bigbang/tests/test_delivery_v3.py:test_gate_refuses_a_red_release_pr",
+        ".bigbang/tests/test_delivery_v3.py:test_conflict_returning_main_opens_a_sync_pr",
+        ".bigbang/tests/test_delivery_v3.py:test_publishing_twice_is_harmless",
+        ".bigbang/tests/test_delivery_v3.py:test_maintenance_merges_into_main_without_artifact_changes",
+        ".bigbang/tests/test_delivery_v3.py:test_artifact_change_needs_a_release",
+        ".bigbang/tests/test_delivery_v3.py:test_qa_rejection_creates_a_correction_task_on_the_release_branch",
+        ".bigbang/tests/test_delivery_v3.py:test_deletes_only_merged_branches_of_closed_issues_and_reports_old_claims",
+        ".bigbang/tests/test_delivery_v3.py:test_dry_run_changes_nothing",
+        ".bigbang/tests/test_delivery_v3.py:test_independent_agent_records_the_verdict_of_a_candidate",
+        ".bigbang/tests/test_delivery_v3.py:test_unknown_agent_cannot_record_a_verdict"
+      ],
+      "hashes": {
+        ".bigbang/bb/flags.py": "sha256:f10ecfbb24b3ecc9e334525b1b5034ba83f369f2f0bd6c10817fceab3b02e026",
+        ".bigbang/bb/flows.py": "sha256:f1da052a9d7fc45e698ad09c706ea1979777efd64a4e32d40f92e5e1abcabf34",
+        ".bigbang/bb/delivery.py": "sha256:e5642cac55677b558dd1a865b6ecf09662b4fb74c6d8f0b4f666f33a759c1983"
+      },
+      "descricao": "Sprint, branches, merge, corte da release, flags, candidata, publicação, manutenção, correção e faxina do modelo B."
+    },
+    {
+      "id": "BB-F-053",
+      "requisitos": [
+        "RF-BB-053"
+      ],
+      "pagina": "Funcionalidade-esteira-v3",
+      "fontes": [
+        ".bigbang/pipeline/AGENTS.base.md",
+        ".bigbang/pipeline/core/files/.github/dependabot.yml.tmpl",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-bug.yml",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-docs.yml",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-epic.yml",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-foundation.yml",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-task.yml",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-test.yml",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/config.yml",
+        ".bigbang/pipeline/core/files/.github/pull_request_template.md",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-board-report.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-ci.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-cleanup.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-codeql.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-controller.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-create-branches.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-cut-release.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-merge-pr.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-publish-maintenance.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-publish.yml.tmpl",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-qa-reject.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-start-sprint.yml",
+        ".bigbang/pipeline/profiles/compiled/files/.github/workflows/bb-candidate.yml.tmpl",
+        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-candidate.yml.tmpl",
+        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-rollback.yml.tmpl"
+      ],
+      "testes": [
+        ".bigbang/tests/test_grouping_v3.py:test_v3_tree_is_generated_and_verified",
+        ".bigbang/tests/test_grouping_v3.py:test_clean_task_pr"
+      ],
+      "hashes": {
+        ".bigbang/pipeline/AGENTS.base.md": "sha256:194602c8ea5bcbb77f174a5aa62decedbfd922bb1e439af5158b64a757a7c65e",
+        ".bigbang/pipeline/core/files/.github/dependabot.yml.tmpl": "sha256:34ab41c900e502b5e964c35d01fb97ca64f29b11c4c3c29e2bff3a6d718f2470",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-bug.yml": "sha256:a106896eef75aee654f73c09b2ec1d793d387ba0331c44c9982a90b5ac314840",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-docs.yml": "sha256:7330b1a0f1bd69d66711e66c1179a88327f6e38fea9940e5125e99f03fc96fd4",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-epic.yml": "sha256:152eee3b7d7b98f4e4a78f6990ff68f9c842d9b5524df2d4e420594c9e5a3c48",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-foundation.yml": "sha256:73fa35ee91ef0de7d190624600fd73eb436fe5ad4369229f51ccc5b14f200eb7",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-task.yml": "sha256:32efb68775935ff8aa23df0cac1f8702cfb64502022d1909d9ea6eac1a12f77e",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-test.yml": "sha256:bb9537e1f19073e6d262ab8904ccf88c4277077d812766f9f5fd9b0c29eb752e",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/config.yml": "sha256:1f103c6a9dd07cd13a9a6f17ace6b813f47747eb9cb7e00488cb2073caaf91bb",
+        ".bigbang/pipeline/core/files/.github/pull_request_template.md": "sha256:48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-board-report.yml": "sha256:f6de77cb16f5767464c7a9735bfcc955fc452d6036b987f36e07f219f29bb87f",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-ci.yml": "sha256:3a211980a00996c6783e1c6494b257b90768ae4b6ee3ba14d3273bfd64698410",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-cleanup.yml": "sha256:aeafd26d370a51c2a038c47349ed7a2a0b477f383e89264222509bfc0f792b01",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-codeql.yml": "sha256:164a28eaba2a75d0ba7f9b736b2341af46c56ff1331b460da201483f5ae467f6",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-controller.yml": "sha256:a2b9e18b184ef64b0eff582bb25ca24fa7746a5a6593977df37a716501ac533d",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-create-branches.yml": "sha256:ceb65a65bcac44411c522ab9fedd03e9bbf765964bbbbbdab7d959b174febda0",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-cut-release.yml": "sha256:82ccc75201ef417fdbdd91d2275d5eabc1120b03e69fb90c53adabc2dfaad04d",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-merge-pr.yml": "sha256:543b4724249bf17c4991b0588c1909c7852b124fc21b72e2fbb0f67a84161762",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-publish-maintenance.yml": "sha256:7f38ff57dd9a9f1c71f356a0318b5121c81690b1c1cddc556a6fc609517d3d5e",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-publish.yml.tmpl": "sha256:dd11902087e66a780ff898c212fd052452fe1797b5b6103421373ffa196327b7",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-qa-reject.yml": "sha256:c4e4a416711dcd705f263246eaf68ab721f0efdd8e6e6c922904ae9d1586eef8",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-start-sprint.yml": "sha256:def03451f99bcc7fb1f52717ccd30d433371dcbe616fbf379a03cb3f22c0596c",
+        ".bigbang/pipeline/profiles/compiled/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:f147e062910464854c2af097a2fead1c72111b72659dc5c35e63bce22dc609de",
+        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:6ee3021a64279732a2a1e15da150241d98948b4d5e21213d9bf6237b080ed022",
+        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-rollback.yml.tmpl": "sha256:14a3c57fc67e866a2141c65310cf565462dfe81736b4d585cdd28787fff11698"
+      },
+      "descricao": "Árvore .bigbang/pipeline: workflows v3 com gate único, controlador, botões, formulários, instruções e perfis."
     }
   ],
   "arquivos_funcionais": [

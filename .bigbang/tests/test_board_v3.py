@@ -16,7 +16,7 @@ NOW = datetime.datetime(2026, 10, 10, 12, 0, tzinfo=UTC)
 
 def config(mode="normal"):
     return {"project": {"repository": "dono/repo", "owner": "dona", "mode": mode},
-            "agents": {"names": ["claude-1"], "tasks_per_agent": 2, "lease_hours": 2},
+            "agents": {"names": ["claude-1", "codex-1"], "tasks_per_agent": 2, "lease_hours": 2},
             "workflow": {"model": "grouping"}, "board": {"labels": "v3", "model": "single", "number": 7,
                                                            "owner": "dona"},
             "security": {"sensitive_paths": []}, "delivery": {"profile": "deploy"}}
@@ -202,6 +202,22 @@ class Moves(Base):
         with self.assertRaises(BbError):
             board.record_qa(self.client, config("flash"), 10, candidate="", digest="sha256:aa",
                             verdict="approved", approver="codex-1", now=NOW)
+
+    def test_qa_verdict_needs_a_declared_agent_and_the_current_candidate(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        for approver in ("intruso", "dona"):  # outside agents.names, or the owner pretending to be an agent
+            with self.assertRaises(BbError):
+                board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                                verdict="approved", approver=approver, now=NOW)
+        self.project.set(10, "Candidate", "v1.2.0-rc.2")
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="codex-1", now=NOW)
+        with self.assertRaises(BbError):  # homologated an older candidate
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.2", digest="sha256:bb",
+                        verdict="approved", approver="codex-1", now=NOW)
+        self.move(10, "Releasing", actor="claude-1", mode="flash")
 
     def test_going_back_without_rejection_also_withdraws_the_decisions(self):
         self.approve(10, "approved:backlog")
@@ -412,6 +428,17 @@ class Controller(Base):
 
     def test_bugfix_branches_are_read_by_the_controller(self):
         self.assertEqual(controller._issue_of("bugfix/20-x"), 20)
+        self.fake.add_issue(20, "Bug", labels=["type:bug"])
+        from bb import receipts as r
+        for previous, target in (("Brainstorm", "Backlog"), ("Backlog", "Ready"), ("Ready", "Selected")):
+            self.client.comment(20, r.render({"kind": "transition", "event_id": f"b-{target}", "issue": 20,
+                                              "actor": "dona", "at": "2026-10-10T11:00:00Z", "from": previous,
+                                              "to": target, "policy": "x"}))
+        claims.claim(self.client, config(), 20, "claude-1", now=NOW)
+        self.fake.refs["refs/heads/bugfix/20-x"] = "b" * 40
+        pr = {"number": 57, "head": {"ref": "bugfix/20-x"}, "base": {"ref": "develop"}, "merged": False}
+        self.event("pull_request", action="opened", pull_request=pr)
+        self.assertEqual(self.state(20), "In Review")
 
     def test_late_closed_event_of_a_reopened_pr_is_ignored(self):
         claims.claim(self.client, config(), 11, "claude-1", now=NOW)
