@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "6efe79f59dd2791744a5addf959f2a58504001e7",
+    "commit": "7b5f6d3752d82b2ca574efcea658b472d9e288b5",
     "branch": "master",
     "proposta": "bigbang/proposta-220-v3"
   },
@@ -222,8 +222,8 @@
     }
   },
   "codigo": {
-    "commit": "f6a5d2a18d5bc19528f9552f64a19b5e5b0bb5dc",
-    "versao": "3.0.0",
+    "commit": "b2c7482a3dec06035960d9ae232e39b649de79d0",
+    "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
       ".github/workflows/",
@@ -731,6 +731,7 @@
       "testes": [
         ".bigbang/tests/test_bb_init.py:test_privado",
         ".bigbang/tests/test_bb_init.py:test_retira_so_o_trecho_exclusivo_do_framework",
+        ".bigbang/tests/test_bb_init.py:test_simulacao_mostra_a_retirada_do_trecho_do_framework",
         ".bigbang/tests/test_bb_init.py:test_sem_marcador_a_secao_do_projeto_fica_intacta",
         ".bigbang/tests/test_bb_init.py:test_publico_cria_licenca_do_sistema",
         ".bigbang/tests/test_bb_init.py:test_publico_sem_licenca",
