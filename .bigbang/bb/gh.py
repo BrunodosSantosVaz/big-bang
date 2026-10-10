@@ -184,5 +184,50 @@ class GitHub:
         _, body = self.call("POST", "milestones", {"title": title})
         return body["number"]
 
+    def milestone_number(self, title):
+        for milestone in self.paginate("milestones?state=all"):
+            if milestone["title"] == title:
+                return milestone["number"]
+        return None
+
+    def close_milestone(self, number):
+        self.call("PATCH", f"milestones/{number}", {"state": "closed"})
+
+    def milestone_issues(self, number):
+        return [normalize_issue(raw) for raw in self.paginate(f"issues?milestone={number}&state=all")
+                if "pull_request" not in raw]
+
+    def pulls(self, head=None, base=None, state="open"):
+        owner = self.repository.split("/")[0]
+        tail = f"pulls?state={state}" + (f"&head={owner}:{head}" if head else "") + (f"&base={base}" if base else "")
+        return [self.pull(raw["number"]) for raw in self.paginate(tail)]
+
+    def create_pull(self, head, base, title, body):
+        status, raw = self.call("POST", "pulls", {"head": head, "base": base, "title": title, "body": body},
+                                accept=(201, 422))
+        if status == 201:
+            return raw["number"]
+        existing = self.pulls(head=head, base=base)
+        if existing:
+            return existing[0]["number"]
+        raise BbError(f"PR {head} → {base} não pôde ser aberto", EXIT_EXTERNAL_COMMAND)
+
+    def merge_branches(self, base, head, message):
+        """'merged', 'noop' (already contained) or 'conflict' (GitHub merges API)."""
+        status, _ = self.call("POST", "merges", {"base": base, "head": head, "commit_message": message},
+                              accept=(201, 204, 409))
+        return {201: "merged", 204: "noop", 409: "conflict"}[status]
+
+    def ahead_by(self, base, head):
+        _, body = self.call("GET", f"compare/{base}...{head}")
+        return body.get("ahead_by", len(body.get("commits", [])))
+
+    def delete_ref(self, ref):
+        self.call("DELETE", f"git/{ref}", accept=(204, 422))
+
+    def all_branches(self):
+        _, refs = self.call("GET", "git/matching-refs/heads/")
+        return [ref["ref"][len("refs/heads/"):] for ref in refs or []]
+
     def locks(self):
         return locks.Locks(self.repository, api=self.api)

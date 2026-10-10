@@ -28,7 +28,7 @@ class Base(unittest.TestCase):
             self.fake.refs[f"refs/heads/{ref}"] = ref[0] * 40
         self.fake.milestones[1] = {"number": 1, "title": "v1.3.0", "state": "open"}
         self.fake.add_issue(10, "Login", labels=["type:epic", "qa:human", "flag:required"])
-        self.fake.add_issue(11, "Guia", labels=["type:epic", "qa:not-applicable", "flag:waived", "no-release"])
+        self.fake.add_issue(11, "Esteira", labels=["type:epic", "qa:not-applicable", "flag:waived"])
         self.fake.add_issue(20, "API", labels=["type:task"], parent=10, state="closed")
         self.fake.add_issue(21, "Página", labels=["type:docs"], parent=11, state="closed")
         for number in (10, 11, 20, 21):
@@ -170,6 +170,7 @@ class Cleanup(Base):
         self.fake.refs["refs/heads/feature/23-aberta"] = "b" * 40         # open issue: kept
         self.fake.refs["refs/heads/docs/21-pagina"] = "c" * 40            # closed but not merged: kept
         self.fake.compares[("develop", "docs/21-pagina")] = ["docs: draft"]
+        self.fake.compares[("main", "docs/21-pagina")] = ["docs: draft"]
         self.fake.refs["refs/heads/qualquer-coisa"] = "d" * 40            # outside the model: reported
         lock_api = self.client.locks()
         lock_api.acquire("issue-23", "claude-1", "s1", hours=1, now=NOW)

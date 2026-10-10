@@ -125,7 +125,7 @@ class FakeGitHub:
         return 200, self.issues[int(number)]
 
     def _add_labels(self, params, payload, number):
-        issue = self.issues[int(number)]
+        issue = self.issues.get(int(number)) or self.pulls[int(number)]  # a PR is an issue for labels
         for name in payload["labels"]:
             self.labels.setdefault(name, {"name": name})
             if name not in {label["name"] for label in issue["labels"]}:

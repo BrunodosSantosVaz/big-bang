@@ -241,7 +241,7 @@ def release_gate(client, config, root, epics, *, today, pending=None):
     decisions = {}
     for epic in epics:
         labels = set(client.issue(epic)["labels"])
-        decisions[epic] = "approved" if _has(labels, "qa:approved") else "pending"
+        decisions[epic] = "approved" if _has(labels, "qa:approved") or _has(labels, "qa:not-applicable") else "pending"
     if pending is None:
         marker = config_module.get(config, "tests.pending_marker")
         pending = {}
