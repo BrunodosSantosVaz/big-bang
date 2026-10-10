@@ -24,8 +24,28 @@ from bb.errors import EXIT_OK  # noqa: E402
 
 FRAMEWORK_REPOSITORY = "BrunodosSantosVaz/big-bang"
 # The guard must be the job's own `if:` (four spaces in), never a comment or an env value; it may only be narrowed
-# further with `&& (...)` (one parenthesized group, so a trailing `||` can never widen it).
-JOB_GUARD = re.compile(rf"^    if: github\.repository == '{re.escape(FRAMEWORK_REPOSITORY)}'(?: && \(.*\))?[ \t]*$", re.M)
+# further with `&& (...)`: exactly one balanced parenthesized group, so no top-level `||` can widen it.
+GUARD_PREFIX = re.compile(rf"^    if: github\.repository == '{re.escape(FRAMEWORK_REPOSITORY)}'(.*)$", re.M)
+
+
+def narrowing_only(rest):
+    """True when `rest` is empty or ` && (<one balanced group>)`, nothing after it."""
+    rest = rest.rstrip()
+    if not rest:
+        return True
+    if not rest.startswith(" && ("):
+        return False
+    depth = 0
+    for index, char in enumerate(rest[4:], start=4):
+        depth += {"(": 1, ")": -1}.get(char, 0)
+        if depth == 0:
+            return index == len(rest) - 1
+    return False
+
+
+def guarded(body):
+    match = GUARD_PREFIX.search(body)
+    return bool(match) and narrowing_only(match.group(1))
 # A job header: two spaces, the id, a colon, then nothing but an optional comment.
 JOB_HEADER = re.compile(r"^  ([\w-]+):[ \t]*(?:#.*)?$", re.M)
 # Every top-level entry the template ships, and what the Foundation does with it. A new entry needs a deliberate
@@ -156,19 +176,20 @@ class Launcher(unittest.TestCase):
             self.assertTrue(marks, name)
             for mark, following in zip(marks, marks[1:] + [None]):
                 body = section[mark.end():following.start() if following else len(section)]
-                self.assertRegex(body, JOB_GUARD, f"{name}: job {mark.group(1)} roda fora do repositório do framework")
+                self.assertTrue(guarded(body), f"{name}: job {mark.group(1)} roda fora do repositório do framework")
 
     def test_guard_check_rejects_unguarded_jobs(self):
         section = ("  a:\n    if: github.repository == 'BrunodosSantosVaz/big-bang'\n    runs-on: x\n"
                    "  b:   \n    runs-on: x\n  c:  # comment\n    runs-on: x\n"
                    "  d:\n    steps:\n      # if: github.repository == 'BrunodosSantosVaz/big-bang'\n"
                    "  e:\n    if: github.repository == 'BrunodosSantosVaz/big-bang' && (github.event_name != 'x')\n"
-                   "  f:\n    if: github.repository == 'BrunodosSantosVaz/big-bang' && true || true\n")
+                   "  f:\n    if: github.repository == 'BrunodosSantosVaz/big-bang' && true || true\n"
+                   "  g:\n    if: github.repository == 'BrunodosSantosVaz/big-bang' && (a) || (true)\n"
+                   "  h:\n    if: github.repository == 'BrunodosSantosVaz/big-bang' && (a || (b && c))\n")
         marks = list(JOB_HEADER.finditer(section))
-        self.assertEqual([m.group(1) for m in marks], ["a", "b", "c", "d", "e", "f"])
-        guarded = [bool(JOB_GUARD.search(section[m.end():n.start() if n else len(section)]))
-                   for m, n in zip(marks, marks[1:] + [None])]
-        self.assertEqual(guarded, [True, False, False, False, True, False])
+        self.assertEqual([m.group(1) for m in marks], ["a", "b", "c", "d", "e", "f", "g", "h"])
+        result = [guarded(section[m.end():n.start() if n else len(section)]) for m, n in zip(marks, marks[1:] + [None])]
+        self.assertEqual(result, [True, False, False, False, True, False, False, True])
 
     def test_every_root_entry_has_a_foundation_decision(self):
         manifest = self.path(".bigbang-docs.json")
@@ -192,6 +213,7 @@ class Launcher(unittest.TestCase):
         self.assertNotIn(FRAMEWORK_REPOSITORY, project_part, "instruções do próprio framework herdadas pelo sistema")
         self.assertNotIn("Modo do próprio framework", project_part)
         self.assertIn("Esta seção pertence ao projeto", project_part)
+        self.assertNotIn("bigbang:framework", project_part)
         self.assertTrue(generator.pipeline_installed(self.root))
         self.assertEqual(self.framework_workflows(), [], "a F5 precisa remover a CI do framework")
         self.assertRegex(self.read("README.md"), r"(?m)^# Sistema Novo$")
