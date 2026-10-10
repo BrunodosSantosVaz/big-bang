@@ -1,7 +1,11 @@
 """GitHub client of the v3 flows (ADR-0026): every REST call goes through one injectable `api(method, path,
 payload) -> (status, body)`, so the flows are tested against an in-memory GitHub with the same semantics. The real
 transport is `gh api -i` (locks.gh_api), authenticated by the gh CLI."""
+import json
+import subprocess
 from urllib.parse import quote
+
+from . import github
 
 from . import locks
 from .errors import EXIT_EXTERNAL_COMMAND, BbError
@@ -16,6 +20,24 @@ def normalize_issue(raw):
             "state": raw.get("state", "open").lower(), "state_reason": raw.get("state_reason"),
             "labels": _labels(raw), "pull_request": "pull_request" in raw, "comments": raw.get("comments", 0),
             "milestone": (raw.get("milestone") or {}).get("title")}
+
+
+def graphql(query, variables=None):
+    """data of a GitHub GraphQL call through `gh api graphql`; GraphQL errors become BbError."""
+    command = github.gh_command() + ["api", "graphql", "--input", "-"]
+    try:
+        completed = subprocess.run(command, input=json.dumps({"query": query, "variables": variables or {}}),
+                                   capture_output=True, text=True, encoding="utf-8", check=False)
+    except FileNotFoundError as exc:
+        raise BbError("GitHub CLI (gh) não encontrado", EXIT_EXTERNAL_COMMAND) from exc
+    try:
+        body = json.loads(completed.stdout or "{}")
+    except json.JSONDecodeError:
+        body = {}
+    if completed.returncode or body.get("errors"):
+        message = "; ".join(error.get("message", "") for error in body.get("errors", [])) or completed.stderr.strip()
+        raise BbError(f"GitHub GraphQL falhou: {message}", EXIT_EXTERNAL_COMMAND)
+    return body.get("data") or {}
 
 
 class GitHub:

@@ -137,6 +137,9 @@ def register(commands, parser_class):
     p.add_argument("issue", type=int)
     p.set_defaults(handler=lambda args: ownership.touch(config_module.load(args.raiz), args.issue) or EXIT_OK)
 
+    from . import flow_cli
+    flow_cli.register(commands, sub)
+
 
 def _stdin():
     return sys.stdin.read()
