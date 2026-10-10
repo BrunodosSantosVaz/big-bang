@@ -225,6 +225,31 @@ class Processos(ComGit):
                 workspaces.isolate(self.trabalho, config.load(self.trabalho), acquired, folder)
 
 
+class ProcessosV3(Processos):
+    """v3 branch prefixes (ADR-0024): test/, fix/ born from main for bugs; legacy prefixes are not picked up."""
+
+    def test_v3_kinds_find_the_test_branch(self):
+        self.branch("test/14-aceite", "main", "docs/aceite.md", "# Aceite\n")
+        self.issue(14, "Aceite", labels=["type:test"])
+        self.estado["refs"]["heads/test/14-aceite"] = self.git_origin("rev-parse", "test/14-aceite")
+        self.gravar_estado()
+        acquired = {"issue": 14, "name": "codex-1", "session": "s"}
+        with patch.dict(os.environ, self.env):
+            folder = workspaces.isolate(self.trabalho, config.load(self.trabalho), acquired,
+                                         os.path.join(self.pasta, "v3"), kinds=workspaces.V3_KINDS)
+        self.assertEqual(workspaces.git(folder, "branch", "--show-current"), "test/14-aceite")
+
+    def test_v3_bug_gets_a_fix_branch_from_main(self):
+        self.issue(15, "[Bug] Total errado", labels=["type:bug"])
+        self.gravar_estado()
+        acquired = {"issue": 15, "name": "codex-1", "session": "s"}
+        with patch.dict(os.environ, self.env):
+            folder = workspaces.isolate(self.trabalho, config.load(self.trabalho), acquired,
+                                         os.path.join(self.pasta, "fix"), kinds=workspaces.V3_KINDS)
+        self.assertEqual(workspaces.git(folder, "branch", "--show-current"), "fix/15-total-errado")
+        self.assertEqual(self.git_origin("rev-parse", "fix/15-total-errado"), self.git_origin("rev-parse", "main"))
+
+
 def open_toml(root):
     with open(os.path.join(root, "bigbang.toml"), encoding="utf-8") as handle:
         return handle.read()

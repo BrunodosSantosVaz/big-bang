@@ -16,6 +16,8 @@ REQUIRED = {
     "decision": COMMON + ("label", "quote", "approver"),
     "qa": COMMON + ("candidate", "digest", "verdict", "approver"),
     "publication": COMMON + ("version", "digest", "environment", "result"),
+    "claim": COMMON + ("resource", "session", "generation", "expires"),
+    "release": COMMON + ("resource", "session", "generation", "reason"),
 }
 
 
@@ -42,7 +44,10 @@ def render(receipt):
                "decision": f"decisão `{receipt.get('label')}` por {receipt.get('approver')}",
                "qa": f"QA {receipt.get('verdict')} da candidata {receipt.get('candidate')}",
                "publication": f"publicação {receipt.get('version')} em {receipt.get('environment')}: "
-                              f"{receipt.get('result')}"}[receipt["kind"]]
+                              f"{receipt.get('result')}",
+               "claim": f"posse de {receipt.get('actor')} (geração {receipt.get('generation')}, até "
+                        f"{receipt.get('expires')})",
+               "release": f"posse de {receipt.get('actor')} liberada: {receipt.get('reason')}"}[receipt["kind"]]
     return f"{MARK}{encoded} -->\n**Big Bang** · {summary} · `{receipt['event_id']}`"
 
 
