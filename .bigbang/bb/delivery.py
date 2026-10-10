@@ -4,7 +4,7 @@ scripts (the same bytes of the candidate); these flows decide and record."""
 import datetime
 import re
 
-from . import board, flows, names, pipeline, states
+from . import autonomy, board, flows, names, pipeline, states
 from . import config as config_module
 from .errors import EXIT_INVALID_STATE, BbError
 from .locks import expired
@@ -117,6 +117,7 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
     branch = f"release/{version}"
     problems = flows.release_gate(client, config, root, [epic["number"] for epic in epics], today=today,
                                   pending=pending, project=project)
+    problems += autonomy.publish_problems(config, "production", now)
     published = f"v{version}" in client.tags()
     rc_tag = _latest_candidate(client, version)
     rc_sha = None

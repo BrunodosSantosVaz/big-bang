@@ -114,6 +114,12 @@ def limits(config):
         result["tasks_per_session"] = agents["tasks_per_agent"]
     if isinstance(agents.get("lease_hours"), int):
         result["lease_hours"] = agents["lease_hours"]
+    contract = config.get("_autonomy") if mode(config) == "autonomous" else None
+    if isinstance(contract, dict):  # the contract's own limits replace the defaults
+        for key, limit in (("attempts", "attempts"), ("wip", "epics_in_progress")):
+            value = contract.get(key)
+            if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+                result[limit] = value
     return result
 
 

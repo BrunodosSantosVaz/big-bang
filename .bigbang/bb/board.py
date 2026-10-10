@@ -7,7 +7,7 @@ import datetime
 import json
 
 from . import config as config_module
-from . import names, pipeline, policy, receipts, states
+from . import autonomy, names, pipeline, policy, receipts, states
 from .errors import EXIT_INVALID_STATE, EXIT_USAGE, BbError
 from .locks import expired
 
@@ -248,7 +248,7 @@ def _epic_paths(client, number, since=None):
         page += 1
 
 
-def _gate_decision(config, client, number, card_kind, current, target, labels, since=None):
+def _gate_decision(config, client, number, card_kind, current, target, labels, since=None, now=None):
     """(gate, approver, risk) of a move, or (None, None, None) when no gate applies."""
     gate = _gate(card_kind, current, target)
     if gate is None:
@@ -258,7 +258,8 @@ def _gate_decision(config, client, number, card_kind, current, target, labels, s
     else:
         risk = policy.delivery_risk(labels, _epic_paths(client, number, since),
                                     config_module.get(config, "security.sensitive_paths"))
-    who = policy.approver(policy.mode(config), gate, risk)
+    today = (now or datetime.datetime.now(datetime.timezone.utc)).date()
+    who = policy.approver(policy.mode(config), gate, risk, autonomy.usable(config, today))
     if gate == "qa" and who == "agent" and "qa:human" in labels:
         who = "owner"  # the card asks for the owner's homologation: no mode or risk delegates it
     return gate, who, risk
@@ -271,7 +272,9 @@ def _approval_problems(config, card_kind, current, target, gathered, decision):
     mode = policy.mode(config)
     labels = gathered["labels"]
     if who == "blocked":
-        return [f"portão {gate} fora do contrato do modo {mode} (risco {risk}): bloqueado"]
+        reasons = autonomy.problems(config, datetime.datetime.now(datetime.timezone.utc).date())
+        return [f"portão {gate} fora do contrato do modo {mode} (risco {risk}): bloqueado"] + \
+            [f"  {reason}" for reason in reasons]
     if who == "agent":
         if (current, target) == ("QA", "Rejected") and not gathered.get("qa_agent_rejected") and \
                 "qa:rejected" not in labels and names.label("qa:rejected", "legacy") not in labels:
@@ -309,7 +312,7 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
     gathered.update(facts or {})
     gathered["accepted"] = gathered["selected"] = True  # the approval check below is their evidence
     decision = _gate_decision(config, client, number, card_kind, current, target, gathered["labels"],
-                              since=_born(client, number, issue))
+                              since=_born(client, number, issue), now=now)
     gathered["gate_delegated"] = decision[1] == "agent"
     if decision[0] == "qa" and decision[1] == "agent":
         verdict = _independent_qa(client, number, receipts_now, actor, trusted, project.get(number, "Candidate"))
@@ -327,6 +330,9 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
                "actor": actor, "at": _iso(now), "from": current, "to": target, "policy": policy_hash}
     if sha:
         receipt["sha"] = sha
+    if decision[0]:  # who approved, never presented as someone else: an agent signs as an agent
+        by = f"agent:{actor}" if decision[1] == "agent" else f"owner:{config_module.get(config, 'project.owner')}"
+        receipt["approval"] = {"gate": decision[0], "by": by, "risk": decision[2], "mode": policy.mode(config)}
     if target == "Rejected":
         receipt.update(kind="rejection", reason=reason, return_to=return_to,
                        evidence=[f"reprovado em {current} por {actor}"])
