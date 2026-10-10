@@ -74,7 +74,11 @@ class Moves(Base):
         self.fake.add_issue(20, "Bug", labels=["type:bug"])
         self.assertEqual(self.state(20), "Brainstorm")
 
+    def approve(self, number, label):
+        self.fake.issues[number]["labels"].append({"name": label})
+
     def test_owner_moves_epic_through_planning_with_receipts_and_board(self):
+        self.approve(10, "approved:backlog")
         self.move(10, "Backlog")
         self.assertEqual(self.state(10), "Backlog")
         self.assertEqual(self.project.status(10), "Backlog")
@@ -90,11 +94,59 @@ class Moves(Base):
             self.move(10, "Backlog", actor="claude-1")
         self.assertIn("dono", error.exception.message)
 
+    def test_claiming_to_be_the_owner_is_not_an_approval(self):
+        with self.assertRaises(BbError):
+            self.move(10, "Backlog", actor="dona")  # only a recorded decision approves an owner gate
+
+    def test_flash_sensitive_refinement_goes_to_the_owner(self):
+        self.approve(10, "approved:backlog")
+        self.move(10, "Backlog", mode="flash")
+        claims.claim(self.client, config("flash"), 10, "claude-1", now=NOW)
+        self.move(10, "Refinement", actor="claude-1", mode="flash")
+        self.fake.issues[10]["labels"] += [{"name": "prototype:waived"}, {"name": "flag:waived"},
+                                           {"name": "area:auth"}]
+        with self.assertRaises(BbError):  # area:auth makes the refinement critical: owner decision needed
+            self.move(10, "Ready", actor="claude-1", mode="flash")
+
+    def test_qa_rejection_and_epic_cancellation_need_the_owner_decision(self):
+        for target in ("Backlog",):
+            self.approve(10, "approved:backlog")
+            self.move(10, target)
+        with self.assertRaises(BbError):
+            self.move(10, "Cancelled", actor="claude-1", reason="fora do escopo")
+        self.approve(10, "approved:cancel")
+        self.move(10, "Cancelled", actor="claude-1", reason="fora do escopo")
+        self.assertEqual(self.state(10), "Cancelled")
+
+    def test_effects_happen_before_the_receipt(self):
+        self.fake.failures.add(("PATCH", "issues/11"))
+        with self.assertRaises(BbError):
+            self.move(11, "Cancelled", reason="duplicada")
+        self.assertEqual(self.state(11), "Todo")  # no receipt for an effect that did not happen
+        self.fake.failures.clear()
+        self.move(11, "Cancelled", reason="duplicada")
+        self.assertEqual(self.state(11), "Cancelled")
+
+    def test_attempts_come_from_receipts_and_the_limit_blocks(self):
+        claims.claim(self.client, config(), 11, "claude-1", now=NOW)
+        self.fake.refs["refs/heads/test/11-testes"] = "a" * 40
+        self.move(11, "Coding", actor="claude-1")
+        for attempt in range(1, 5):
+            self.move(11, "In Review", actor="claude-1", facts={"pr_open": True})
+            self.move(11, "Rejected", actor="claude-1", reason="tests", return_to="Coding")
+            if attempt < 3:
+                self.move(11, "Coding", actor="claude-1")
+            else:
+                break
+        self.assertIn("blocked", self.fake.label_names(11))
+        self.assertEqual(board.attempts(self.client, 11, {"dona"}), 3)
+
     def test_agent_passes_common_gates_in_flash(self):
-        self.move(10, "Backlog", actor="claude-1", mode="flash")
+        self.move(10, "Backlog", actor="claude-1", mode="flash")  # planning risk medium: delegated
         self.assertEqual(self.state(10), "Backlog")
 
     def test_decision_label_is_the_owner_approval(self):
+        self.approve(10, "approved:backlog")
         self.move(10, "Backlog")
         claims.claim(self.client, config(), 10, "claude-1", now=NOW)
         self.move(10, "Refinement", actor="claude-1")
@@ -120,6 +172,8 @@ class Moves(Base):
         self.move(11, "In Review", actor="claude-1", facts=facts)
         self.move(11, "Rejected", actor="claude-1", reason="tests", return_to="Todo")
         self.assertEqual(self.state(11), "Rejected")
+        claims.unclaim(self.client, config(), {"issue": 11, "name": "claude-1", "session":
+                       self.client.locks().current("issue-11")["session"], "generation": 1}, now=NOW)
         self.assertIn("reason:tests", self.fake.label_names(11))
         self.assertEqual(self.project.value(11, "Rejected from"), "In Review")
         self.assertEqual(self.project.value(11, "Return to"), "Todo")
@@ -127,8 +181,10 @@ class Moves(Base):
             self.move(11, "Coding", actor="claude-1")
         self.move(11, "Todo", actor="claude-1")
         self.assertEqual(self.project.value(11, "Attempt"), 1)
+        self.assertEqual(board.attempts(self.client, 11, {"dona"}), 1)
 
     def test_replayed_event_writes_nothing_new(self):
+        self.approve(10, "approved:backlog")
         self.move(10, "Backlog", event_id="evt-1")
         before = len(self.fake.comments[10])
         result = self.move(10, "Backlog", event_id="evt-1")
@@ -173,13 +229,14 @@ class Controller(Base):
         self.event("pull_request", action="closed", pull_request=dict(pr, merged=True))
         self.assertEqual(self.state(11), "Done")
         self.assertEqual(self.fake.issues[11]["state"], "closed")
-        self.assertNotIn("refs/bigbang/locks/issue-11", self.fake.refs)
+        self.assertIsNone(self.client.locks().current("issue-11"))
         self.assertNotIn("agent:claude-1", self.fake.label_names(11))
 
     def test_pr_closed_without_merge_goes_back_to_coding(self):
         claims.claim(self.client, config(), 11, "claude-1", now=NOW)
         self.fake.refs["refs/heads/test/11-testes"] = "a" * 40
         pr = {"number": 51, "head": {"ref": "test/11-testes"}, "base": {"ref": "develop"}, "merged": False}
+        self.fake.add_pull(51, "test/11-testes", "develop", state="closed")
         self.event("pull_request", action="opened", pull_request=pr)
         self.event("pull_request", action="closed", pull_request=pr)
         self.assertEqual(self.state(11), "Coding")
@@ -190,7 +247,32 @@ class Controller(Base):
             "number": 52, "head": {"ref": "dependabot/npm/x"}, "base": {"ref": "develop"}, "merged": False}), [])
         self.assertEqual(self.event("workflow_dispatch"), [])
 
+    def test_backlog_and_selection_decisions_advance_the_epic(self):
+        self.fake.issues[10]["labels"].append({"name": "approved:backlog"})
+        self.event("issues", action="labeled", issue={"number": 10}, label={"name": "approved:backlog"})
+        self.assertEqual(self.state(10), "Backlog")
+
+    def test_merge_refused_keeps_the_claim(self):
+        claims.claim(self.client, config(), 11, "claude-1", now=NOW)
+        self.fake.refs["refs/heads/test/11-testes"] = "a" * 40
+        pr = {"number": 53, "head": {"ref": "test/11-testes"}, "base": {"ref": "develop"}, "merged": False}
+        self.event("pull_request", action="opened", pull_request=pr)
+        self.fake.issues[11]["labels"].append({"name": "on-hold"})
+        self.event("pull_request", action="closed", pull_request=dict(pr, merged=True))
+        self.assertEqual(self.state(11), "In Review")
+        self.assertIsNotNone(self.client.locks().current("issue-11"))
+
+    def test_late_closed_event_of_a_reopened_pr_is_ignored(self):
+        claims.claim(self.client, config(), 11, "claude-1", now=NOW)
+        self.fake.refs["refs/heads/test/11-testes"] = "a" * 40
+        pr = {"number": 54, "head": {"ref": "test/11-testes"}, "base": {"ref": "develop"}, "merged": False}
+        self.fake.add_pull(54, "test/11-testes", "develop")
+        self.event("pull_request", action="opened", pull_request=pr)
+        self.event("pull_request", action="closed", pull_request=pr)  # arrives after the reopen
+        self.assertEqual(self.state(11), "In Review")
+
     def test_decision_label_advances_the_epic(self):
+        self.fake.issues[10]["labels"].append({"name": "approved:backlog"})
         self.move(10, "Backlog")
         claims.claim(self.client, config(), 10, "dona", person=True, now=NOW)
         self.move(10, "Refinement")
@@ -199,6 +281,7 @@ class Controller(Base):
         self.assertEqual(self.state(10), "Prototyping")
 
     def test_schedule_reconciles_the_board_and_marks_stale_claims(self):
+        self.fake.issues[10]["labels"].append({"name": "approved:backlog"})
         self.move(10, "Backlog")
         self.project.set_status(10, "Done")  # someone dragged the card
         claims.claim(self.client, config(), 11, "claude-1", now=NOW)

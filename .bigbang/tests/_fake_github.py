@@ -11,6 +11,9 @@ class FakeGitHub:
         self.issues, self.comments, self.labels = {}, {}, {}
         self.refs, self.commits = {}, {}
         self.parents, self.blockers = {}, {}
+        self.pulls = {}
+        self.failures = set()  # (method, tail) answered with HTTP 500, to test partial failures
+        self.author = "dona"  # login that authors new comments
         self.calls = []
         self.next_comment = 1000
 
@@ -25,6 +28,13 @@ class FakeGitHub:
         if parent is not None:
             self.parents[number] = parent
         self.blockers[number] = list(blocked_by)
+        return number
+
+    def add_pull(self, number, head, base, title="feat: x", labels=(), sha=None, state="open", merged=False,
+                 draft=False, body=""):
+        self.pulls[number] = {"number": number, "title": title, "body": body, "state": state, "merged": merged,
+                              "draft": draft, "labels": [{"name": n} for n in labels], "mergeable": True,
+                              "head": {"ref": head, "sha": sha or f"{number:040d}"}, "base": {"ref": base}}
         return number
 
     def label_names(self, number):
@@ -42,6 +52,8 @@ class FakeGitHub:
         prefix = f"repos/{self.repository}/"
         assert path.startswith(prefix), path
         tail, _, query = path[len(prefix):].partition("?")
+        if (method, tail) in self.failures:
+            return 500, {"message": "Server Error"}
         params = dict(item.split("=", 1) for item in query.split("&") if item)
         for pattern, handler in self.ROUTES:
             match = re.fullmatch(pattern, tail)
@@ -66,6 +78,7 @@ class FakeGitHub:
         (r"git/refs/(.+)", ("DELETE", "_delete_ref")),
         (r"git/trees", ("POST", "_create_tree")), (r"git/commits", ("POST", "_create_commit")),
         (r"git/commits/([0-9a-f]+)", ("GET", "_get_commit")),
+        (r"pulls/(\d+)", ("GET", "_get_pull")),
     ]
 
     def _page(self, items, params):
@@ -119,7 +132,7 @@ class FakeGitHub:
 
     def _add_comment(self, params, payload, number):
         self.next_comment += 1
-        comment = {"id": self.next_comment, "body": payload["body"], "user": {"login": "dona"},
+        comment = {"id": self.next_comment, "body": payload["body"], "user": {"login": self.author},
                    "created_at": "2026-10-10T12:00:00Z"}
         self.comments.setdefault(int(number), []).append(comment)
         self.issues[int(number)]["comments"] += 1
@@ -179,6 +192,10 @@ class FakeGitHub:
     def _delete_ref(self, params, payload, name):
         self.refs.pop("refs/" + name, None)
         return 204, None
+
+    def _get_pull(self, params, payload, number):
+        pull = self.pulls.get(int(number))
+        return (200, pull) if pull else (404, {"message": "Not Found"})
 
     def _create_tree(self, params, payload):
         return 201, {"sha": "4b825dc642cb6eb9a060e54bf8d69288fbee4904"}

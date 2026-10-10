@@ -6,6 +6,7 @@ import hashlib
 import json
 import unittest
 
+from _fake_github import FakeGitHub
 from _raiz import importar_bb
 
 importar_bb()
@@ -129,6 +130,15 @@ class States(unittest.TestCase):
         self.assertEqual(states.problems("bug", "In Review", "Done",
                                          facts(pr_merged=True, qa="not-applicable", delivery={"repository"})), [])
 
+    def test_bug_without_qa_but_with_publication_goes_to_releasing(self):
+        self.assertEqual(states.problems("bug", "In Review", "Releasing",
+                                         facts(pr_merged=True, qa="not-applicable", delivery={"deploy"})), [])
+        self.assertTrue(states.problems("bug", "In Review", "Releasing",
+                                        facts(pr_merged=True, qa="human", delivery={"deploy"})))
+
+    def test_leaving_rejected_respects_impediments(self):
+        self.assertTrue(states.problems("task", "Rejected", "Todo", facts(labels={"blocked"}), return_to="Todo"))
+
     def test_impediments_block_forward_but_not_reject_or_cancel(self):
         blocked = facts(labels={"blocked"}, pr_open=True)
         self.assertIn("impedimento", states.problems("task", "Coding", "In Review", blocked)[0])
@@ -205,6 +215,11 @@ class Policy(unittest.TestCase):
         self.assertEqual(policy.risk_floor(["src/api/auth/login.py"], zones), "critical")
         self.assertEqual(policy.risk_floor([".github/workflows/x.yml"], zones), "critical")
         self.assertEqual(policy.risk_floor(["migrations/0001.sql"], zones), "critical")
+        self.assertEqual(policy.risk_floor(["AGENTS.md"], zones), "high")
+        self.assertEqual(policy.risk_floor([".bigbang/bb/cli.py"], zones), "critical")
+        self.assertEqual(policy.planning_risk({"area:auth"}), "critical")
+        self.assertEqual(policy.planning_risk(set()), "medium")
+        self.assertEqual(policy.delivery_risk(set()), "high")  # no paths, no area: fail closed for QA/publish
         self.assertEqual(policy.effective_risk({"risk:low"}, "high"), "high")
         self.assertEqual(policy.effective_risk({"risk:critical"}, "low"), "critical")
 
@@ -265,6 +280,11 @@ class Receipts(unittest.TestCase):
                 "id": 2}]
         self.assertEqual(receipts.parse(bad, {"dona"}), [])
 
+    def test_transition_without_a_known_sha(self):
+        receipt = self.receipt()
+        del receipt["sha"]
+        self.assertEqual(receipts.problems(receipt), [])
+
     def test_required_fields_per_kind(self):
         self.assertTrue(receipts.problems({"kind": "test"}))
         self.assertTrue(receipts.problems(self.receipt(kind="nope")))
@@ -292,56 +312,6 @@ class Receipts(unittest.TestCase):
         self.assertTrue(receipts.reuse_problems(dict(test, result="failure"), **same))
 
 
-class FakeGitHub:
-    """In-memory refs and commits with GitHub's semantics for the lock tests."""
-
-    def __init__(self):
-        self.refs, self.commits, self.calls = {}, {}, []
-
-    def __call__(self, method, path, payload=None):
-        self.calls.append((method, path))
-        prefix = "repos/dono/repo/"
-        assert path.startswith(prefix), path
-        path = path[len(prefix):]
-        if method == "POST" and path == "git/trees":
-            return 201, {"sha": "4b825dc642cb6eb9a060e54bf8d69288fbee4904"}
-        if method == "POST" and path == "git/commits":
-            sha = hashlib.sha1(json.dumps(payload, sort_keys=True).encode()).hexdigest()
-            self.commits[sha] = payload
-            return 201, {"sha": sha}
-        if method == "POST" and path == "git/refs":
-            if payload["ref"] in self.refs:
-                return 422, {"message": "Reference already exists"}
-            self.refs[payload["ref"]] = payload["sha"]
-            return 201, {"ref": payload["ref"], "object": {"sha": payload["sha"]}}
-        if path.startswith("git/ref/"):
-            ref = "refs/" + path[len("git/ref/"):]
-            if ref not in self.refs:
-                return 404, {"message": "Not Found"}
-            return 200, {"ref": ref, "object": {"sha": self.refs[ref]}}
-        if method == "GET" and path.startswith("git/commits/"):
-            sha = path.rsplit("/", 1)[1]
-            return 200, {"sha": sha, "message": self.commits[sha]["message"], "parents": [
-                {"sha": parent} for parent in self.commits[sha]["parents"]]}
-        if method == "PATCH" and path.startswith("git/refs/"):
-            ref = "refs/" + path[len("git/refs/"):]
-            if ref not in self.refs:
-                return 422, {"message": "Reference does not exist"}
-            if self.refs[ref] not in self.commits[payload["sha"]]["parents"]:
-                return 422, {"message": "Update is not a fast forward"}
-            self.refs[ref] = payload["sha"]
-            return 200, {"ref": ref, "object": {"sha": payload["sha"]}}
-        if method == "DELETE" and path.startswith("git/refs/"):
-            ref = "refs/" + path[len("git/refs/"):]
-            self.refs.pop(ref, None)
-            return 204, None
-        if method == "GET" and path.startswith("git/matching-refs/"):
-            prefix_ref = "refs/" + path[len("git/matching-refs/"):]
-            return 200, [{"ref": ref, "object": {"sha": sha}} for ref, sha in sorted(self.refs.items())
-                         if ref.startswith(prefix_ref)]
-        raise AssertionError(f"unexpected {method} {path}")
-
-
 class Locks(unittest.TestCase):
     def setUp(self):
         self.github = FakeGitHub()
@@ -360,17 +330,54 @@ class Locks(unittest.TestCase):
         self.assertEqual(held.exception.record["owner"], "claude-1")
         self.assertEqual(self.locks.current("issue-12")["session"], "s1")
 
-    def test_expired_lock_is_taken_over_with_a_new_generation(self):
+    def test_expired_lock_is_taken_over_only_on_request(self):
         self.locks.acquire("issue-12", "claude-1", "s1", hours=1, now=NOW)
         later = NOW + datetime.timedelta(hours=2)
-        record = self.locks.acquire("issue-12", "codex-1", "s2", hours=1, now=later)
+        with self.assertRaises(locks.LockHeld):  # an expired claim is not silently taken
+            self.locks.acquire("issue-12", "codex-1", "s2", hours=1, now=later)
+        record = self.locks.acquire("issue-12", "codex-1", "s2", hours=1, now=later, take_expired=True)
         self.assertEqual((record["owner"], record["generation"]), ("codex-1", 2))
+
+    def test_take_over_refuses_a_live_lock(self):
+        self.locks.acquire("issue-12", "claude-1", "s1", hours=1, now=NOW)
+        head = self.github.refs["refs/bigbang/locks/issue-12"]
+        with self.assertRaises(locks.LockHeld):
+            self.locks.take_over("issue-12", head, "codex-1", "s2", hours=1, now=NOW)
+
+    def test_release_keeps_a_tombstone_so_a_late_release_cannot_delete_another_lock(self):
+        first = self.locks.acquire("issue-12", "claude-1", "s1", hours=1, now=NOW)
+        self.locks.release("issue-12", "s1", first["generation"], now=NOW)
+        self.assertIn("refs/bigbang/locks/issue-12", self.github.refs)  # tombstone, never deleted
+        second = self.locks.acquire("issue-12", "codex-1", "s2", hours=1, now=NOW)
+        self.assertEqual(second["generation"], 2)  # generations only grow
+        with self.assertRaises(locks.LockLost):  # the old session cannot touch the new lock
+            self.locks.release("issue-12", "s1", first["generation"], now=NOW)
+        self.assertEqual(self.locks.current("issue-12")["session"], "s2")
+
+    def test_expired_lock_cannot_be_renewed(self):
+        record = self.locks.acquire("issue-12", "claude-1", "s1", hours=1, now=NOW)
+        with self.assertRaises(locks.LockLost):
+            self.locks.renew("issue-12", "s1", record["generation"], hours=1, now=NOW + datetime.timedelta(hours=2))
+
+    def test_unexpected_422_is_an_error_not_a_loop(self):
+        def api(method, path, payload=None):
+            if method == "POST" and path.endswith("git/refs"):
+                return 422, {"message": "Object does not exist"}
+            if method == "GET" and "/git/ref/" in path:
+                return 404, {}
+            return self.github(method, path, payload)
+        with self.assertRaises(BbError):
+            locks.Locks("dono/repo", api=api).acquire("issue-12", "claude-1", "s1", hours=1, now=NOW)
+
+    def test_lock_commits_use_the_empty_tree_constant(self):
+        self.locks.acquire("issue-12", "claude-1", "s1", hours=1, now=NOW)
+        self.assertNotIn(("POST", "repos/dono/repo/git/trees"), self.github.calls)
 
     def test_concurrent_takeover_has_one_winner(self):
         self.locks.acquire("issue-12", "claude-1", "s1", hours=1, now=NOW)
         later = NOW + datetime.timedelta(hours=2)
         stale_head = self.github.refs["refs/bigbang/locks/issue-12"]
-        self.locks.acquire("issue-12", "codex-1", "s2", hours=1, now=later)
+        self.locks.acquire("issue-12", "codex-1", "s2", hours=1, now=later, take_expired=True)
         # A second taker that read the same expired head must fail on the non-fast-forward update.
         with self.assertRaises(locks.LockHeld):
             self.locks.take_over("issue-12", stale_head, "codex-2", "s3", hours=1, now=later)
@@ -387,7 +394,8 @@ class Locks(unittest.TestCase):
 
     def test_expired_session_cannot_renew_after_takeover(self):
         record = self.locks.acquire("issue-12", "claude-1", "s1", hours=1, now=NOW)
-        self.locks.acquire("issue-12", "codex-1", "s2", hours=1, now=NOW + datetime.timedelta(hours=2))
+        self.locks.acquire("issue-12", "codex-1", "s2", hours=1, now=NOW + datetime.timedelta(hours=2),
+                           take_expired=True)
         with self.assertRaises(locks.LockLost):
             self.locks.renew("issue-12", "s1", record["generation"], hours=1, now=NOW + datetime.timedelta(hours=2))
 
@@ -397,7 +405,7 @@ class Locks(unittest.TestCase):
             self.locks.release("issue-12", "s2", record["generation"], now=NOW)
         self.locks.release("issue-12", "s1", record["generation"], now=NOW)
         self.assertIsNone(self.locks.current("issue-12"))
-        self.assertEqual(self.locks.acquire("issue-12", "codex-1", "s2", hours=1, now=NOW)["generation"], 1)
+        self.assertEqual(self.locks.acquire("issue-12", "codex-1", "s2", hours=1, now=NOW)["generation"], 2)
 
     def test_listing_and_expiry(self):
         self.locks.acquire("issue-1", "claude-1", "s1", hours=1, now=NOW)

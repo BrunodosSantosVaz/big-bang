@@ -85,8 +85,31 @@ class Claims(unittest.TestCase):
         receipt = self.claim(11)
         claims.unclaim(self.client, CONFIG, receipt, now=NOW)
         self.assertNotIn("agent:claude-1", self.fake.label_names(11))
-        self.assertNotIn("refs/bigbang/locks/issue-11", self.fake.refs)
-        self.assertEqual(self.claim(11, name="codex-1")["generation"], 1)
+        self.assertIsNone(self.client.locks().current("issue-11"))
+        self.assertEqual(self.claim(11, name="codex-1")["generation"], 2)
+
+    def test_expired_claim_of_another_needs_the_owner_order(self):
+        self.claim(11)
+        with self.assertRaises(BbError) as error:
+            self.claim(11, name="codex-1", now=NOW + datetime.timedelta(hours=3))
+        self.assertIn("--force-claim", error.exception.message)
+        self.assertNotIn("agent:codex-1", self.fake.label_names(11))
+
+    def test_people_and_agents_never_collide(self):
+        self.claim(11, name="claude-1", person=True)
+        self.assertEqual(self.client.locks().current("issue-11")["owner"], "person:claude-1")
+        self.claim(13)  # the agent claude-1 still has its own capacity
+
+    def test_expired_session_cannot_renew(self):
+        receipt = self.claim(11)
+        with self.assertRaises(locks.LockLost):
+            claims.renew(self.client, CONFIG, receipt, now=NOW + datetime.timedelta(hours=3))
+
+    def test_failed_force_leaves_no_owner_order_comment(self):
+        self.claim(11)
+        with self.assertRaises(BbError):
+            claims.force(self.client, CONFIG, 11, "codex-1", "assuma", now=NOW)
+        self.assertFalse(any("Ordem do dono" in body for body in self.fake.comment_bodies(11)))
 
     def test_live_lock_cannot_be_forced(self):
         self.claim(11)
