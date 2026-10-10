@@ -151,6 +151,14 @@ class Comandos(ComHook):
         self.assertIsNone(self.call("gh issue edit 1 --add-label bug"))
         self.assertIsNone(self.call("gh issue comment 1 --body 'Falta homologado, nao aplicar a label'"))
 
+    def test_labels_de_decisao_em_ingles_tambem_negadas(self):  # v3 names (ADR-0023)
+        for command in ("gh issue edit 1 --add-label qa:approved", "gh pr edit 2 --add-label=pr:approved",
+                        "gh issue edit 1 --add-label 'type:bug,owner:ai-review'",
+                        "gh api -X POST repos/dono/repo/issues/1/labels -f 'labels[]=approved:tests'"):
+            with self.subTest(command=command):
+                self.assertEqual(self.call(command), "deny")
+        self.assertIsNone(self.call("gh issue edit 1 --add-label type:bug"))
+
     def test_composto_nao_e_isentado_por_bb(self):
         self.assertEqual(self.call("bb verificar && git push origin main"), "deny")
         self.assertEqual(self.call("git status; git reset --hard"), "deny")

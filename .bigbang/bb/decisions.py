@@ -7,13 +7,15 @@ import datetime
 import base64
 import json
 
-from . import github, pipeline
+from . import github, names, pipeline
 from . import config as config_module
 from .errors import EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 
 DECISIONS = ("refinamento-aprovado", "prototipo-aprovado", "testes-aprovados", "teste-alterado-aprovado",
              "homologado", "reprovado", "dono:revisao-ia", "pr-aprovado")
-OPPOSITES = {"homologado": ("reprovado",), "reprovado": ("homologado",), "dono:revisao-ia": ("revisao-humana",)}
+OPPOSITES = {"homologado": ("reprovado",), "reprovado": ("homologado",), "dono:revisao-ia": ("revisao-humana",),
+             "qa:approved": ("qa:rejected",), "qa:rejected": ("qa:approved",), "owner:ai-review": ("review:human",)}
+ALL_DECISIONS = DECISIONS + names.DECISIONS  # legacy Portuguese and v3 English spellings (ADR-0023)
 
 
 def _now():
@@ -43,8 +45,8 @@ def _remove_label(repository, number, label):
 
 def record_decision(repository, label, number, phrase, ai_name):
     """Comment the owner's phrase, then put the decision label (and drop its opposite)."""
-    if label not in DECISIONS:
-        raise BbError(f"{label} não é uma decisão do dono; use uma de: {', '.join(DECISIONS)}", EXIT_USAGE)
+    if label not in ALL_DECISIONS:
+        raise BbError(f"{label} não é uma decisão do dono; use uma de: {', '.join(ALL_DECISIONS)}", EXIT_USAGE)
     if not phrase or not phrase.strip():
         raise BbError("informe a frase do dono (--frase), com as palavras dele", EXIT_USAGE)
     quoted = "\n".join(f"> {line}" for line in phrase.strip().splitlines())

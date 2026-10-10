@@ -43,7 +43,7 @@ def exemplo_toml():
 def ignorar_para_copia(*nomes_na_raiz):
     """shutil.copytree ignore: VCS/cache everywhere, and the given names only at the repository root."""
     def ignorar(pasta, nomes):
-        sempre = {".git", "__pycache__", "big-bang-prompt.md"}
+        sempre = {".git", "__pycache__", "big-bang-prompt.md", ".worktrees"}
         if os.path.abspath(pasta) == os.path.abspath(RAIZ):
             sempre |= set(nomes_na_raiz) | {'.bigbang-docs.json', '.bigbang-producao.json'}
         return [nome for nome in nomes if nome in sempre]

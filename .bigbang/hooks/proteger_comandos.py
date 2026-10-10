@@ -7,8 +7,10 @@ import sys
 
 from _common import run
 
-DECISIONS = {"refinamento-aprovado", "prototipo-aprovado", "testes-aprovados", "teste-alterado-aprovado",
-             "homologado", "reprovado", "dono:revisao-ia", "pr-aprovado"}
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bb import names  # noqa: E402  (the single table of v2 and v3 names, ADR-0023)
+
+DECISIONS = set(names.DECISIONS_LEGACY) | set(names.DECISIONS)
 PROTECTED = re.compile(r"^(?:refs/heads/)?(?:main|develop|epico/.*)$")
 CONTROL = {";", "&&", "||", "|", "&", "\n"}
 

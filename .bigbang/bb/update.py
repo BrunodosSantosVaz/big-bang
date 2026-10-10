@@ -18,7 +18,7 @@ import tempfile
 from . import checksums, github, package
 from . import config as config_module
 from .errors import EXIT_EXTERNAL_COMMAND, EXIT_INVALID_STATE, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
-from .init import set_value
+from .init import set_config_value
 from .paths import FRAMEWORK_DIR, config_path, framework_dir, read_text, write_text
 
 PR_LABEL = "revisao-humana"
@@ -174,7 +174,7 @@ def update(root, target=None, simulate=False, confirmed=False, attestation=True)
         swap(root, new_framework)
     finally:
         shutil.rmtree(work, ignore_errors=True)
-    write_text(config_path(root), set_value(read_text(config_path(root)), "bigbang", "versao", target))
+    write_text(config_path(root), set_config_value(read_text(config_path(root)), "bigbang.versao", target))
     code, generated = _bb(root, "gerar")
     if code:
         raise BbError(f"bb gerar da v{target} falhou na branch {branch}:\n{generated}", EXIT_INVALID_STATE)

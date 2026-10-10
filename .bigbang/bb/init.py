@@ -5,7 +5,7 @@ import os
 import re
 import unicodedata
 
-from . import documentation, generator, github
+from . import documentation, generator, github, names
 from . import config as config_module
 from .errors import EXIT_INVALID_CONFIG, EXIT_INVALID_STATE, EXIT_USAGE, BbError
 from .paths import config_path, framework_dir, framework_version, read_text, write_text
@@ -77,6 +77,14 @@ def set_value(text, section, key, value):
     if count != 1:
         raise BbError(f"modelo do bigbang.toml sem a chave {section}.{key}", EXIT_INVALID_STATE)
     return text[:header.end()] + body + text[end:]
+
+
+def set_config_value(text, legacy_dotted, value):
+    """set_value in the dialect of the file: `bigbang.versao` writes `version` in a v3 (English) bigbang.toml."""
+    if config_module.dialect(config_module.parse(text)) == "v3":
+        legacy_dotted, value = names.key_to_v3(legacy_dotted), names.value_to_v3(legacy_dotted, value)
+    section, key = legacy_dotted.split(".", 1)
+    return set_value(text, section, key, value)
 
 
 def _repository_from_git(root):
