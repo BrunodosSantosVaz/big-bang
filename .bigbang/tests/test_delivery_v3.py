@@ -195,7 +195,7 @@ class Correction(Base):
 
 
 class Cleanup(Base):
-    def test_deletes_only_merged_branches_of_closed_issues_and_expired_locks(self):
+    def test_deletes_only_merged_branches_of_closed_issues_and_reports_old_claims(self):
         self.fake.refs["refs/heads/feature/20-api"] = "a" * 40            # closed issue, merged
         self.fake.add_issue(23, "Aberta", labels=["type:task"], parent=10)
         self.fake.refs["refs/heads/feature/23-aberta"] = "b" * 40         # open issue: kept
@@ -211,7 +211,7 @@ class Cleanup(Base):
         self.assertIn("refs/heads/docs/21-pagina", self.fake.refs)
         self.assertIn("qualquer-coisa", report["outside"])
         self.assertEqual(report["locks"], ["issue-23"])
-        self.assertNotIn("refs/bigbang/locks/issue-23", self.fake.refs)
+        self.assertIn("refs/bigbang/locks/issue-23", self.fake.refs)  # lock refs are never deleted
         for protected in ("main", "develop", "release/1.3.0"):
             self.assertIn(f"refs/heads/{protected}", self.fake.refs)
 

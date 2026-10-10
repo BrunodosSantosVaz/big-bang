@@ -96,14 +96,13 @@ class FakeGitHub:
 
     def _list_issues(self, params, payload):
         state = params.get("state", "open")
-        from urllib.parse import unquote
-        wanted = set(filter(None, unquote(params.get("labels", "")).split(",")))
         if "milestone" in params:
             items = [issue for _, issue in sorted(self.issues.items())
                      if issue.get("milestone") == int(params["milestone"]) and
                      (state == "all" or issue["state"] == state)]
             return 200, self._page(items, params)
-        wanted = set(filter(None, params.get("labels", "").replace("%2C", ",").split(",")))
+        from urllib.parse import unquote
+        wanted = set(filter(None, unquote(params.get("labels", "")).split(",")))
         items = [issue for _, issue in sorted(self.issues.items())
                  if (state == "all" or issue["state"] == state) and
                  wanted <= {label["name"] for label in issue["labels"]}]

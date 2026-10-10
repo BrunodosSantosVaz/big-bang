@@ -213,8 +213,9 @@ def correction_task(client, project, config, epic, reason, *, actor, now=None):
 
 
 def cleanup(client, config, *, now=None, dry_run=True):
-    """Delete the merged branches whose issue is closed and has no open PR, and the lock refs expired for more than
-    a week; report what is outside the branch model. main, develop, releases and tags are never touched."""
+    """Delete the merged branches whose issue is closed and has no open PR; report claims expired for more than a
+    week on open issues and what is outside the branch model. main, develop, releases, tags and lock refs (whose
+    tombstones keep generations monotonic) are never touched."""
     now = _now(now)
     report = {"deleted": [], "kept": [], "outside": [], "locks": []}
     open_heads = {pull["head"] for pull in client.pulls(state="open")}
@@ -233,10 +234,9 @@ def cleanup(client, config, *, now=None, dry_run=True):
                 client.delete_ref(f"refs/heads/{branch}")
         else:
             report["kept"].append(branch)
-    for resource, record in sorted(client.locks().all().items()):
+    open_issues = {f"issue-{issue['number']}" for issue in client.issues("open")}
+    for resource, record in sorted(client.locks().all(open_issues).items()):
         expiry = datetime.datetime.fromisoformat(record["expires"].replace("Z", "+00:00"))
-        if expired(record, now) and now - expiry > LOCK_GRACE:
-            report["locks"].append(resource)
-            if not dry_run:
-                client.delete_ref(f"refs/bigbang/locks/{resource}")
+        if record.get("state") == "held" and expired(record, now) and now - expiry > LOCK_GRACE:
+            report["locks"].append(resource)  # reported for the owner; lock refs are never deleted (ADR-0023)
     return report
