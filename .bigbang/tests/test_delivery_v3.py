@@ -149,6 +149,9 @@ class Maintenance(Base):
 class Correction(Base):
     def test_qa_rejection_creates_a_correction_task_on_the_release_branch(self):
         delivery.candidate_ready(self.client, self.project, cfg(), "release/1.3.0", "v1.3.0-rc.1", now=NOW)
+        with self.assertRaises(BbError):  # the rejection is the owner's decision
+            delivery.correction_task(self.client, self.project, cfg(), 10, "x", actor="claude-1", now=NOW)
+        self.fake.issues[10]["labels"].append({"name": "qa:rejected"})
         task = delivery.correction_task(self.client, self.project, cfg(), 10, "O botão some no celular",
                                         actor="dona", now=NOW)
         self.assertEqual(self.state(10), "In Progress")
