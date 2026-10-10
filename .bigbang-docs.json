@@ -3,10 +3,10 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "b19883dc38964bc48e465d2999df03985300b2ba",
-    "commit": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
+    "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
+    "commit": "6efe79f59dd2791744a5addf959f2a58504001e7",
     "branch": "master",
-    "proposta": "bigbang/proposta-99-ensaio-externo"
+    "proposta": "bigbang/proposta-220-v3"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -222,8 +222,8 @@
     }
   },
   "codigo": {
-    "commit": "9c73feb3e357a1216011eaf64bf4b5d944827087",
-    "versao": "2.0.1",
+    "commit": "f6a5d2a18d5bc19528f9552f64a19b5e5b0bb5dc",
+    "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
       ".github/workflows/",
@@ -730,6 +730,8 @@
       ],
       "testes": [
         ".bigbang/tests/test_bb_init.py:test_privado",
+        ".bigbang/tests/test_bb_init.py:test_retira_so_o_trecho_exclusivo_do_framework",
+        ".bigbang/tests/test_bb_init.py:test_sem_marcador_a_secao_do_projeto_fica_intacta",
         ".bigbang/tests/test_bb_init.py:test_publico_cria_licenca_do_sistema",
         ".bigbang/tests/test_bb_init.py:test_publico_sem_licenca",
         ".bigbang/tests/test_bb_init.py:test_nao_roda_duas_vezes",
@@ -742,10 +744,18 @@
         ".bigbang/tests/test_bb_init.py:test_set_value_mantem_a_coluna_do_comentario",
         ".bigbang/tests/test_bb_init.py:test_sem_python",
         ".bigbang/tests/test_bb_init.py:test_python_antigo",
-        ".bigbang/tests/test_bb_init.py:test_python_certo"
+        ".bigbang/tests/test_bb_init.py:test_python_certo",
+        ".bigbang/tests/test_launcher.py:test_template_is_not_founded",
+        ".bigbang/tests/test_launcher.py:test_template_ships_only_guarded_framework_workflows",
+        ".bigbang/tests/test_launcher.py:test_guard_check_rejects_unguarded_jobs",
+        ".bigbang/tests/test_launcher.py:test_every_root_entry_has_a_foundation_decision",
+        ".bigbang/tests/test_launcher.py:test_private_default_mode",
+        ".bigbang/tests/test_launcher.py:test_private_flash_mode",
+        ".bigbang/tests/test_launcher.py:test_public_gets_its_own_manifest",
+        ".bigbang/tests/test_launcher.py:test_compiled_profile_after_f2"
       ],
       "hashes": {
-        ".bigbang/bb/init.py": "sha256:0d87a32cba35f99046651c0be984238f26db5f10647585f6507faf13cce1e974"
+        ".bigbang/bb/init.py": "sha256:724a8f493a331ea743e9308230eddcf81eeac24eae50d9ad816b223740c710f0"
       },
       "descricao": "Preparar F0 com identidade, modo padrão ou Flash, configuração e arquivos comunitários sem destruir conteúdo do projeto."
     },
@@ -2028,7 +2038,7 @@
         ".bigbang/esteira/perfis/deploy/alvos/paas/README.md": "sha256:d8b52c4956fab996c303edcfbda6e162874b8311a23def757877de0aa272ad20",
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md": "sha256:bb04007d9e8e6977492685e35299a7801fdbd87b5fbeb4d5f78132d2cfc57411",
         ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md": "sha256:48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
-        "AGENTS.md": "sha256:3afdb46379e68f5f0b713ede912b8ec5a2c8f2631335b107811ce07970eb9694",
+        "AGENTS.md": "sha256:cdb54ffea7561dcb0290fee3dbf8141a3b776e6e791a5398c0930c092375f3ca",
         "CLAUDE.md": "sha256:336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49"
       },
       "descricao": "Orientar Fundação, planejamento, execução, revisão, entrega e manutenção com contratos compartilhados entre as IAs."
