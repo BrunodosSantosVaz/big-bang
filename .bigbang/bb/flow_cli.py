@@ -66,7 +66,7 @@ def register(commands, pipeline_sub):
     p.add_argument("--reason", required=True, help="motivo nas palavras do dono")
     p.set_defaults(handler=_qa_reject)
 
-    p = commands.add_parser("cleanup", help="v3: faxina de branches concluídas e travas antigas")
+    p = commands.add_parser("cleanup", help="v3: faxina de branches concluídas; relata posses antigas")
     p.add_argument("--apply", action="store_true", help="apaga de verdade (padrão: só mostra o plano)")
     p.set_defaults(handler=_cleanup)
 
@@ -373,7 +373,7 @@ def _cleanup(args):
     for branch in report["deleted"]:
         print(f"branch {verb}: {branch}")
     for resource in report["locks"]:
-        print(f"trava antiga {verb}: {resource}")
+        print(f"::warning::posse vencida há mais de uma semana (a trava fica; o dono decide): {resource}")
     for branch in report["outside"]:
         print(f"::warning::branch fora do padrão: {branch}")
     return EXIT_OK
