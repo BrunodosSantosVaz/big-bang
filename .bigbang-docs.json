@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "7b5f6d3752d82b2ca574efcea658b472d9e288b5",
+    "commit": "b48197d613e8d6381b81a5ccd9d1f2ead6437b36",
     "branch": "master",
     "proposta": "bigbang/proposta-220-v3"
   },
@@ -38,7 +38,11 @@
     "CHANGELOG.md": "Changelog",
     "README.md": "Guia-de-inicio",
     "docs/relatorios/2026-10-07-entrega-flash-tsuru.md": "Historico-docs-relatorios-2026-10-07-entrega-flash-tsuru",
-    ".bigbang/docs/decisoes/ADR-0021-documentacao-publica-wiki.md": "ADR-0021-documentacao-publica-wiki"
+    ".bigbang/docs/decisoes/ADR-0021-documentacao-publica-wiki.md": "ADR-0021-documentacao-publica-wiki",
+    ".bigbang/docs/decisoes/ADR-0022-esteira-propria-e-modelo-agrupador.md": "ADR-0022-esteira-propria-e-modelo-agrupador",
+    ".bigbang/docs/decisoes/ADR-0023-quadro-unico-e-estado.md": "ADR-0023-quadro-unico-e-estado",
+    ".bigbang/docs/decisoes/ADR-0024-identificadores-em-ingles.md": "ADR-0024-identificadores-em-ingles",
+    ".bigbang/docs/decisoes/ADR-0025-modos-e-autonomia.md": "ADR-0025-modos-e-autonomia"
   },
   "categorias": {
     "produto": {
