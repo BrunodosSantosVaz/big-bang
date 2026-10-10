@@ -60,7 +60,8 @@ def candidate_ready(client, project, config, branch, rc_tag, *, now=None):
                 continue
         project.set(number, "Candidate", rc_tag)
         message = (f"**Big Bang** · candidata `{rc_tag}` pronta para homologação. Confira os critérios de aceite "
-                   f"deste épico na candidata e registre `qa:approved` ou a reprovação com o motivo.")
+                   f"deste épico na candidata e registre `qa:approved` ou a reprovação com o motivo (QA delegado: "
+                   f"um agente sem posse no épico registra `bb qa verdict` para esta candidata).")
         if message not in [comment["body"] for comment in client.comments(number)]:
             client.comment(number, message)
     pull = client.create_pull(branch, "main", f"chore(release): {version}",

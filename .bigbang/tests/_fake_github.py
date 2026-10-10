@@ -216,6 +216,8 @@ class FakeGitHub:
                  if (params.get("state", "open") == "all" or pull["state"] == params.get("state", "open")) and
                  (not params.get("head") or params["head"].split(":", 1)[-1] == pull["head"]["ref"]) and
                  (not params.get("base") or params["base"] == pull["base"]["ref"])]
+        if params.get("sort") == "updated":
+            items.sort(key=lambda pull: pull.get("updated_at", "9999"), reverse=params.get("direction") != "asc")
         return 200, self._page(items, params)
 
     def _pull_files(self, params, payload, number):

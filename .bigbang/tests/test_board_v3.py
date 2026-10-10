@@ -238,6 +238,21 @@ class Moves(Base):
         with self.assertRaises(BbError):
             self.move(10, "Ready", actor="claude-1")
 
+    def test_delivery_paths_read_only_prs_updated_since_the_selection(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")  # seeded at 11:00 (selection included)
+        self.fake.pulls[71]["updated_at"] = "2026-10-10T11:30:00Z"
+        self.fake.add_pull(72, "feature/12-tela", "develop", state="closed", merged=True)
+        self.fake.pulls[72].update(files=[{"filename": "migrations/0001.sql"}], updated_at="2026-10-09T10:00:00Z")
+        for number in range(80, 300):  # older history: never read
+            self.fake.add_pull(number, f"feature/{number}-x", "develop", state="closed", merged=True)
+            self.fake.pulls[number]["updated_at"] = "2026-01-01T00:00:00Z"
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        self.fake.calls.clear()
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="codex-1", now=NOW)
+        self.move(10, "Releasing", actor="claude-1", mode="flash")  # the old migration PR is not this epic's
+        self.assertLessEqual(sum(1 for method, path in self.fake.calls if path.startswith("pulls?")), 1)
+
     def test_effects_happen_before_the_receipt(self):
         self.fake.failures.add(("PATCH", "issues/11"))
         with self.assertRaises(BbError):

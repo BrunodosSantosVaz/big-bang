@@ -141,7 +141,7 @@ def facts(client, config, number, *, now=None):
     labels = set(issue["labels"])
     lock = client.locks().current(f"issue-{number}")
     subissues = client.sub_issues(number)
-    branch_prefixes = [f"{kind}/{number}-" for kind in ("test", "feature", "docs", "fix", "hotfix")]
+    branch_prefixes = [f"{kind}/{number}-" for kind in ("test", "feature", "docs", "fix", "bugfix", "hotfix")]
     profile = config_module.get(config, "delivery.profile")
     delivery = {"repository"} if "no-release" in labels else {"package" if profile == "compiled" else "deploy"}
     return {"labels": {names.label(label, "v3") for label in labels} | labels,
@@ -180,6 +180,9 @@ def record_qa(client, config, number, *, candidate, digest, verdict, approver, n
     now = now or datetime.datetime.now(datetime.timezone.utc)
     if verdict not in ("approved", "rejected"):
         raise BbError("veredito de QA deve ser approved ou rejected", EXIT_USAGE)
+    agents = config_module.get(config, "agents.names") or []
+    if approver not in agents or approver.casefold() in {login.casefold() for login in _trusted(config)}:
+        raise BbError(f"veredito de QA só de um agente declarado em agents.names (recebido: {approver})", EXIT_USAGE)
     receipt = {"kind": "qa", "event_id": f"qa-{number}-{candidate}-{approver}-{_iso(now)}", "issue": number,
                "actor": approver, "at": _iso(now), "candidate": candidate, "digest": digest, "verdict": verdict,
                "approver": approver}
@@ -190,14 +193,16 @@ def record_qa(client, config, number, *, candidate, digest, verdict, approver, n
     return receipt
 
 
-def _independent_qa(client, number, receipts_now, actor, trusted):
-    """True when the last QA receipt after the card entered QA approves it and comes from an agent that neither
-    moves the card nor held any claim on the epic or its sub-issues (who delivers never homologates)."""
+def _independent_qa(client, number, receipts_now, actor, trusted, candidate=None):
+    """True when the last QA receipt after the card entered QA approves the current candidate and comes from an agent
+    that neither moves the card nor held any claim on the epic or its sub-issues (who delivers never homologates)."""
     entered = max((i for i, r in enumerate(receipts_now) if r["kind"] in ("transition", "rejection")
                    and r.get("to") == "QA"), default=None)
     verdicts = [r for r in receipts_now[entered + 1:] if r["kind"] == "qa"] if entered is not None else []
     if not verdicts or verdicts[-1]["verdict"] != "approved":
         return False
+    if candidate and verdicts[-1]["candidate"] != candidate:
+        return False  # homologated another candidate: the bytes going out were not seen
     delivered_by = {actor.casefold()}
     for issue in [number] + [child["number"] for child in client.sub_issues(number)]:
         found = receipts_now if issue == number else receipts.parse(client.comments(issue), trusted)
@@ -285,7 +290,7 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
     decision = _gate_decision(config, client, number, card_kind, current, target, gathered["labels"])
     gathered["gate_delegated"] = decision[1] == "agent"
     if decision[0] == "qa" and decision[1] == "agent" and _independent_qa(client, number, receipts_now, actor,
-                                                                          trusted):
+                                                                          trusted, project.get(number, "Candidate")):
         gathered["qa_decision"] = "automatic"
     found = states.problems(card_kind, current, target, gathered, reason=reason,
                             return_to=recorded_return if current == "Rejected" else return_to)
