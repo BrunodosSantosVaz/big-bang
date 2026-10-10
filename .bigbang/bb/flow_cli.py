@@ -24,6 +24,39 @@ def register(commands, pipeline_sub):
     move.add_argument("--return-to", dest="return_to", help="Rejected: estado para onde o trabalho volta")
     move.set_defaults(handler=_move)
 
+    sprint = commands.add_parser("sprint", help="v3: inicia a sprint dos épicos em Selected")
+    sprint_sub = sprint.add_subparsers(dest="sprint_command", metavar="<subcomando>")
+    p = sprint_sub.add_parser("start", help="cria teste, tarefas e documentação; branch de teste a partir da develop")
+    p.add_argument("--epic", type=int, action="append", help="só estes épicos (repetível)")
+    p.add_argument("--date", help="AAAA-MM-DD (padrão: hoje)")
+    p.set_defaults(handler=_sprint_start)
+
+    p = commands.add_parser("branches", help="v3: cria as branches desbloqueadas a partir da develop")
+    p.add_argument("--epic", type=int)
+    p.set_defaults(handler=_branches)
+
+    p = commands.add_parser("merge", help="v3: mescla um PR aprovado e verde na develop ou na release (nunca na main)")
+    p.add_argument("pr", type=int)
+    p.set_defaults(handler=_merge)
+
+    release = commands.add_parser("release", help="v3: corte e portão da release")
+    release_sub = release.add_subparsers(dest="release_command", metavar="<subcomando>")
+    p = release_sub.add_parser("cut", help="corta release/x.y.z da develop (versão pelos títulos dos PRs)")
+    p.add_argument("--version", help="X.Y.Z (padrão: calculada)")
+    p.set_defaults(handler=_release_cut)
+    p = release_sub.add_parser("gate", help="confere flags e testes pendentes dos épicos da release")
+    p.add_argument("--epic", type=int, action="append", required=True)
+    p.set_defaults(handler=_release_gate)
+
+    flag = commands.add_parser("flag", help="v3: liga, desliga ou lista feature flags (flags.toml)")
+    flag_sub = flag.add_subparsers(dest="flag_command", metavar="<subcomando>")
+    flag_sub.add_parser("list", help="lista as flags e seus estados").set_defaults(handler=_flag_list)
+    for action in ("on", "off"):
+        p = flag_sub.add_parser(action, help=f"{'liga' if action == 'on' else 'desliga'} uma flag num ambiente")
+        p.add_argument("name")
+        p.add_argument("--env", choices=("staging", "production"), default="production")
+        p.set_defaults(handler=_flag_switch, value=action == "on")
+
     p = pipeline_sub.add_parser("controller", help="v3: aplica um evento do GitHub ao quadro (uso da esteira)")
     p.add_argument("--event", required=True, help="nome do evento (issues, push, pull_request, schedule)")
     p.add_argument("--payload", help="arquivo JSON do evento (GITHUB_EVENT_PATH)")
@@ -87,6 +120,92 @@ def _move(args):
     receipt = board.move(client, project, config, args.issue, args.state, actor, reason=args.reason,
                          return_to=args.return_to)
     print(f"#{args.issue}: {receipt['from']} → {receipt['to']} ({receipt['event_id']}).")
+    return EXIT_OK
+
+
+def _today(value=None):
+    import datetime
+    return datetime.date.fromisoformat(value) if value else datetime.date.today()
+
+
+def _sprint_start(args):
+    from . import flows
+    config, client, project = _context(args.raiz)
+    plan = flows.start_sprint(client, project, config, date=_today(args.date), epics=args.epic)
+    for item in plan:
+        print(f"Épico #{item['epic']} em {item['sprint']}: teste #{item['test']}, tarefas "
+              + ", ".join(f"#{n}" for n in item["tasks"]) + f", documentação #{item['docs']}.")
+    print(f"Sprint: {len(plan)} épico(s) iniciado(s).")
+    return EXIT_OK
+
+
+def _branches(args):
+    from . import flows
+    config = config_module.load(args.raiz)
+    for name in flows.create_branches(gh.GitHub(config_module.get(config, "project.repository")), config, args.epic):
+        print(f"branch criada: {name}")
+    return EXIT_OK
+
+
+def _merge(args):
+    from . import flows
+    config = config_module.load(args.raiz)
+    created = flows.merge_pr(gh.GitHub(config_module.get(config, "project.repository")), config, args.pr)
+    print(f"PR #{args.pr} mesclado." + (" Branches criadas: " + ", ".join(created) if created else ""))
+    return EXIT_OK
+
+
+def _release_cut(args):
+    from . import flows
+    config = config_module.load(args.raiz)
+    release = flows.cut_release(gh.GitHub(config_module.get(config, "project.repository")), config,
+                                version=args.version)
+    if release is None:
+        print("Nada a publicar: a develop não tem PRs mesclados fora da main.")
+        return EXIT_OK
+    print(f"{release['branch']} cortada da develop ({release['sha'][:10]}); versão {release['previous']} → "
+          f"{release['version']}; épicos " + ", ".join(f"#{n}" for n in release["epics"]) + ".")
+    return EXIT_OK
+
+
+def _release_gate(args):
+    from . import flows
+    config = config_module.load(args.raiz)
+    problems = flows.release_gate(gh.GitHub(config_module.get(config, "project.repository")), config, args.raiz,
+                                  args.epic, today=_today())
+    for problem in problems:
+        print(problem)
+    if problems:
+        raise BbError("portão da release recusado", EXIT_USAGE)
+    print("Portão da release: cada épico está homologado ou entra com a flag desligada.")
+    return EXIT_OK
+
+
+def _flag_path(root):
+    import os
+    return os.path.join(root, "flags.toml")
+
+
+def _flag_list(args):
+    from . import flags
+    import os
+    path = _flag_path(args.raiz)
+    registered = flags.parse(open(path, encoding="utf-8").read(), _today()) if os.path.exists(path) else []
+    for flag in registered:
+        print(f"{flag['name']}: épico #{flag['epic']} · staging={'on' if flag['staging'] else 'off'} · "
+              f"production={'on' if flag['production'] else 'off'} · expira {flag['expires']}")
+    return EXIT_OK
+
+
+def _flag_switch(args):
+    from . import flags
+    path = _flag_path(args.raiz)
+    with open(path, encoding="utf-8") as handle:
+        text = handle.read()
+    with open(path, "w", encoding="utf-8", newline="\n") as handle:
+        handle.write(flags.switch(text, args.name, args.env, args.value, _today()))
+    print(f"flag {args.name}: {args.env} {'ligada' if args.value else 'desligada'} no flags.toml "
+          "(zona sensível: abra o PR para a decisão registrada).")
     return EXIT_OK
 
 
