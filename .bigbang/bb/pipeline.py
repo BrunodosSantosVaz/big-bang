@@ -203,6 +203,33 @@ def branch_problem(head, base):
     return None if ok else f"'{head}' deve abrir PR para {expected}, não para '{base}'"
 
 
+RELEASE = re.compile(r"^release/\d+\.\d+\.\d+$")
+
+
+def v3_branch_problem(head, base):
+    """Branch model of the grouping workflow (ADR-0022): tasks into develop, fixes into develop or a release,
+    maintenance into main, releases into main; there are no epic branches."""
+    kind, _ = branch_issue(head)
+    if kind in ("test", "feature", "docs", "foundation"):
+        expected, ok = "develop", base == "develop"
+    elif kind in ("fix", "hotfix"):
+        expected, ok = "develop ou release/x.y.z", base == "develop" or bool(RELEASE.match(base))
+    elif kind == "maintenance":
+        expected, ok = "main", base == "main"
+    elif RELEASE.match(head):
+        expected, ok = "main", base == "main"
+    elif re.match(r"^framework/v\d+\.\d+\.\d+$", head) or head.startswith("dependabot/github_actions/"):
+        expected, ok = "develop", base == "develop"
+    elif re.match(r"^sync/[a-z0-9-]+$", head):
+        expected, ok = "develop ou release/x.y.z", base == "develop" or bool(RELEASE.match(base))
+    elif head.startswith("dependabot/"):
+        expected, ok = "main", base == "main"
+    else:
+        return (f"branch '{head}' fora do padrão v3: use test|feature|docs|fix|hotfix|maintenance|foundation/"
+                "<n>-<slug>, release/x.y.z, framework/vX.Y.Z ou sync/<nome>")
+    return None if ok else f"'{head}' deve abrir PR para {expected}, não para '{base}'"
+
+
 def title_problem(title):
     if CONVENTIONAL.match(title or ""):
         return None

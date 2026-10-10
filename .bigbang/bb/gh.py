@@ -19,7 +19,13 @@ def normalize_issue(raw):
     return {"number": raw["number"], "id": raw.get("id"), "title": raw.get("title", ""), "body": raw.get("body") or "",
             "state": raw.get("state", "open").lower(), "state_reason": raw.get("state_reason"),
             "labels": _labels(raw), "pull_request": "pull_request" in raw, "comments": raw.get("comments", 0),
-            "milestone": (raw.get("milestone") or {}).get("title")}
+            "milestone": _milestone(raw.get("milestone"))}
+
+
+def _milestone(value):
+    if isinstance(value, dict):
+        return value.get("title")
+    return value
 
 
 def graphql(query, variables=None):
@@ -133,7 +139,7 @@ class GitHub:
         status, _ = self.call("POST", "git/refs", {"ref": f"refs/heads/{name}", "sha": sha}, accept=(201, 422))
         return status == 201
 
-    # --- pull requests ----------------------------------------------------------------------------------------------
+    # --- pull requests, checks, comparisons ------------------------------------------------------------------------
 
     def pull(self, number):
         status, raw = self.call("GET", f"pulls/{number}", accept=(200, 404))
@@ -143,6 +149,34 @@ class GitHub:
                 "state": raw.get("state"), "merged": bool(raw.get("merged")), "draft": bool(raw.get("draft")),
                 "labels": _labels(raw), "head": raw["head"]["ref"], "sha": raw["head"]["sha"],
                 "base": raw["base"]["ref"]}
+
+    def merge_pull(self, number, sha):
+        """Merge commit, guarded by the exact head SHA (a newer push makes GitHub refuse)."""
+        status, body = self.call("PUT", f"pulls/{number}/merge", {"merge_method": "merge", "sha": sha},
+                                 accept=(200, 405, 409))
+        if status != 200:
+            raise BbError(f"merge do PR #{number} recusado pelo GitHub: {(body or {}).get('message', '')}",
+                          EXIT_EXTERNAL_COMMAND)
+        return body.get("sha")
+
+    def check_runs(self, sha):
+        _, body = self.call("GET", f"commits/{sha}/check-runs?per_page=100")
+        return body.get("check_runs", [])
+
+    def compare_messages(self, base, head):
+        _, body = self.call("GET", f"compare/{base}...{head}")
+        return [commit["commit"]["message"] for commit in body.get("commits", [])]
+
+    def tags(self):
+        _, refs = self.call("GET", "git/matching-refs/tags/")
+        return [ref["ref"][len("refs/tags/"):] for ref in refs or []]
+
+    def ensure_milestone(self, title):
+        for milestone in self.paginate("milestones?state=all"):
+            if milestone["title"] == title:
+                return milestone["number"]
+        _, body = self.call("POST", "milestones", {"title": title})
+        return body["number"]
 
     def locks(self):
         return locks.Locks(self.repository, api=self.api)

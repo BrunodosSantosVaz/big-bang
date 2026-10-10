@@ -109,6 +109,8 @@ class FakeGitHub:
         return (200, issue) if issue else (404, {"message": "Not Found"})
 
     def _patch_issue(self, params, payload, number):
+        if int(number) not in self.issues:
+            return 404, {"message": "Not Found"}
         self.issues[int(number)].update(payload)
         return 200, self.issues[int(number)]
 
