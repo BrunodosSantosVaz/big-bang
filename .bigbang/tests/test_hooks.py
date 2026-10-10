@@ -151,7 +151,7 @@ class Comandos(ComHook):
         self.assertIsNone(self.call("gh issue edit 1 --add-label bug"))
         self.assertIsNone(self.call("gh issue comment 1 --body 'Falta homologado, nao aplicar a label'"))
 
-    def test_labels_de_decisao_em_ingles_tambem_negadas(self):  # v3 names (ADR-0023)
+    def test_labels_de_decisao_em_ingles_tambem_negadas(self):  # v3 names (ADR-0024)
         for command in ("gh issue edit 1 --add-label qa:approved", "gh pr edit 2 --add-label=pr:approved",
                         "gh issue edit 1 --add-label 'type:bug,owner:ai-review'",
                         "gh api -X POST repos/dono/repo/issues/1/labels -f 'labels[]=approved:tests'"):

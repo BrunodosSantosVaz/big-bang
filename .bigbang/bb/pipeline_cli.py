@@ -70,7 +70,7 @@ def register(commands, parser_class):
     p.add_argument(*names.cli_option("--dados"), dest="dados", help="pasta com o conteúdo revisado a conferir")
     p.add_argument(*names.cli_option("--publicada"), dest="publicada", action="store_true")
     p.add_argument(*names.cli_option("--comunidade"), dest="comunidade", action="store_true")
-    p.add_argument('--visibilidade-remota', action='store_true')
+    p.add_argument(*names.cli_option("--visibilidade-remota"), dest="visibilidade_remota", action="store_true")
     p.set_defaults(handler=_docs)
 
     p = sub.add_parser(**names.cli_name('esteira', "comunidade"), help="cria os arquivos de comunidade que faltam (DOC-16) a partir dos modelos")
@@ -291,7 +291,11 @@ def _traceability(args):
     pattern = config_module.load(args.raiz)["testes"]["padrao_teste"]
     if args.padrao_dos_dados and args.dados and os.path.exists(os.path.join(args.dados, CONFIG_FILE)):
         with open(os.path.join(args.dados, CONFIG_FILE), "rb") as handle:  # only this key; scripts stay the target's
-            pattern = tomllib.load(handle).get("testes", {}).get("padrao_teste", pattern)
+            raw = tomllib.load(handle)
+        try:
+            pattern = config_module.get(raw, "testes.padrao_teste")  # either language (ADR-0024)
+        except BbError:
+            pass
     changed = read_text(args.mudados).split() if args.mudados else []
     return _report(traceability.problems(args.dados or args.raiz, pattern, changed),
                    "Rastreabilidade: toda RN vigente tem teste e todo teste cita uma RN.")

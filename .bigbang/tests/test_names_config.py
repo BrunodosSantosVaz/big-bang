@@ -128,6 +128,7 @@ class BilingualConfig(unittest.TestCase):
     def test_single_board_needs_its_number_and_fills_the_legacy_view(self):
         raw = config.parse(config.text_to_v3(scenario_text("compilado-windows-linux")))
         raw["board"] = {"owner": "BrunodosSantosVaz", "model": "single", "number": 42}
+        raw["workflow"]["model"] = "grouping"
         self.assertEqual(config.validate(raw), [])
         loaded = config.views(raw)
         self.assertEqual(loaded["paineis"]["planejamento"], 42)
@@ -215,6 +216,19 @@ class ReviewFindings(unittest.TestCase):
         self.assertIn('name = "Outro"', init.set_config_value(v3, "projeto.nome", "Outro"))
         updated = init.set_config_value(legacy, "bigbang.versao", "9.9.9")
         self.assertEqual(updated, init.set_value(legacy, "bigbang", "versao", "9.9.9"))
+
+    def test_legacy_workflow_needs_legacy_labels(self):
+        raw = config.parse(config.text_to_v3(scenario_text("deploy-vps-docker")))
+        self.assertEqual(config.validate(raw), [])
+        raw["board"]["labels"] = "v3"
+        self.assertTrue(any("epic-branch" in error for error in config.validate(raw)))
+
+    def test_approval_label_follows_the_target_dialect(self):
+        from bb import decisions
+        self.assertEqual(decisions.label_dialect_from_text('[projeto]\nmodo="flash"\n'), "legacy")
+        self.assertEqual(decisions.label_dialect_from_text('[project]\nmode="flash"\n'), "v3")
+        self.assertEqual(decisions.label_dialect_from_text('[project]\nmode="flash"\n[board]\nlabels="legacy"\n'),
+                         "legacy")
 
     def test_v3_errors_do_not_hide_structural_ones(self):
         raw = config.parse(config.text_to_v3(scenario_text("deploy-vps-docker")))

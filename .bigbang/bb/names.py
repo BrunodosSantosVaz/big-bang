@@ -1,4 +1,4 @@
-"""The single table of Big Bang v3 names (ADR-0023): English identifiers, with the v2 Portuguese names as aliases.
+"""The single table of Big Bang v3 names (ADR-0024): English identifiers, with the v2 Portuguese names as aliases.
 
 Every translation goes through this module, so a legacy name is never spelled in two places. Legacy projects keep
 their Portuguese configuration, labels and branches; v3 projects use the English ones. Nothing here touches files.

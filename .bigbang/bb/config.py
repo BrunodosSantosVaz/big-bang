@@ -1,4 +1,4 @@
-"""Reading and schema validation of bigbang.toml (spec 5.4; ADR-0002; ADR-0023).
+"""Reading and schema validation of bigbang.toml (spec 5.4; ADR-0002; ADR-0024).
 
 The schema is strict: unknown sections and keys are refused, so a typo never silently disables a rule.
 A file is written either in the legacy Portuguese names (v2) or in the v3 English names, never mixed. Once loaded,
@@ -158,12 +158,12 @@ def validate(config, expected_version=None):
     """Return the list of schema errors (empty when valid), for a legacy or a v3 file."""
     kind = dialect(config)
     if kind == "mixed":
-        return ["bigbang.toml mistura nomes em português (v2) e em inglês (v3); use um só (bb migrate config)"]
+        return ["bigbang.toml mistura nomes em português (v2) e em inglês (v3); escreva o arquivo em um só idioma "
+                "(ADR-0024)"]
     if kind == "v3":
         legacy, _, errors = _v3_to_legacy(config)
-        if errors:
-            return errors
-        return [_message_to_v3(error) for error in _validate_legacy(legacy, expected_version)]
+        structural = [_message_to_v3(error) for error in _validate_legacy(legacy, expected_version)]
+        return errors + [error for error in structural if error not in errors]
     return _validate_legacy(config, expected_version)
 
 
@@ -324,6 +324,9 @@ def _v3_to_legacy(raw):
     board = extras["board"]
     if board["labels"] not in LABEL_DIALECTS:
         errors.append(f"board.labels: deve ser um de: {', '.join(LABEL_DIALECTS)}")
+    elif extras["workflow"]["model"] == "epic-branch" and board["labels"] != "legacy":
+        errors.append('board.labels: o modelo epic-branch (esteira legada) só entende as labels em português; '
+                      'use labels = "legacy"')
     if board["model"] not in BOARD_MODELS:
         errors.append(f"board.model: deve ser um de: {', '.join(BOARD_MODELS)}")
     elif board["model"] == "single":
@@ -399,9 +402,9 @@ ASSIGNMENT = re.compile(r'^(\s*)([A-Za-z0-9_-]+)(\s*=\s*)("(?:[^"\\]|\\.)*"|[^#\
 
 
 def text_to_v3(text):
-    """Rewrite a legacy bigbang.toml text with the v3 names, keeping layout and comments (bb migrate config).
+    """Rewrite a legacy bigbang.toml text with the v3 names, keeping layout and comments (migration, ADR-0024).
 
-    [paineis] becomes [board] with model = "three-boards" (the boards are migrated separately); [workflow] with
+    [paineis] becomes [board] with model = "three-boards" (the boards migrate in a later step); [workflow] with
     model = "epic-branch" is appended, so the project keeps its current behavior until it migrates its workflow."""
     if dialect(parse(text)) != "legacy":
         raise BbError("bigbang.toml já está em inglês (v3) ou mistura os dois", EXIT_INVALID_CONFIG)
@@ -412,8 +415,8 @@ def text_to_v3(text):
             section = header.group(2)
             lines.append(f"{header.group(1)}[{names.SECTIONS.get(section, section)}]{header.group(3)}")
             if section == "paineis":
-                lines.append('model = "three-boards"                 # single depois de bb migrate board')
-                lines.append('labels = "legacy"                      # v3 depois de bb migrate labels')
+                lines.append('model = "three-boards"                 # single depois da migração do quadro')
+                lines.append('labels = "legacy"                      # v3 depois da migração das labels')
             continue
         assignment = ASSIGNMENT.match(line)
         if assignment and section in names.KEYS:
@@ -458,24 +461,51 @@ def load(root, required=True):
     return views(config)
 
 
-def get(config, dotted_key):
-    """Return the value at `secao.chave` (only scalar values and lists of scalars), in either dialect.
+def _consistent(dotted_key):
+    """'legacy', 'v3' or None: a key must be spelled wholly in one language (section and key)."""
+    section, _, key = dotted_key.partition(".")
+    if section.startswith("_") or key.startswith("_"):
+        return None
+    legacy_keys, v3_keys = names.KEYS.get(section), names.KEYS_V3.get(section)
+    legacy = legacy_keys is not None and (not key or key in legacy_keys or
+                                          (section == "compilado" and names.is_build_key(key)))
+    v3 = v3_keys is not None and (not key or key in v3_keys or (section == "compiled" and names.is_build_key(key)))
+    if (section, key) in names.V3_ONLY or section == "workflow":
+        return "v3"
+    if legacy and v3:
+        return "shared"
+    return "legacy" if legacy else "v3" if v3 else "unknown"
 
-    A loaded configuration already holds both views. A plain mapping (as tests build) is translated on the fly:
-    a v3 key on a legacy mapping returns the v3 value, and the other way around."""
+
+def get(config, dotted_key):
+    """Return the value at `secao.chave` (only scalar values and lists of scalars), in either language.
+
+    The key must be spelled wholly in one language (`projeto.modo` or `project.mode`, never `projeto.mode`), and
+    internal keys are never exposed. A loaded configuration holds both views; a plain mapping (as tests build) is
+    translated on the fly. A missing key reports the key that was asked."""
+    spelling = _consistent(dotted_key)
+    if spelling is None or (spelling == "unknown" and "." in dotted_key and config.get("_dialect")):
+        raise BbError(f"chave inexistente no bigbang.toml: {dotted_key}", EXIT_UNKNOWN_KEY)
     try:
         return _get(config, dotted_key)
-    except BbError:
-        legacy_key = names.key_to_legacy(dotted_key)
-        if legacy_key and legacy_key != dotted_key:
-            return names.value_to_v3(legacy_key, _get(config, legacy_key))
-        v3_key = names.key_to_v3(dotted_key)
-        if v3_key != dotted_key:
-            return names.value_to_legacy(dotted_key, _get(config, v3_key))
-        section, _, key = dotted_key.partition(".")
-        if (section, key) in names.V3_ONLY:
-            return names.V3_ONLY[(section, key)]
-        raise
+    except BbError as original:
+        if spelling in ("unknown", "shared") or config.get("_dialect"):
+            raise original
+        try:
+            if spelling == "v3":
+                legacy_key = names.key_to_legacy(dotted_key)
+                if legacy_key and legacy_key != dotted_key:
+                    return names.value_to_v3(legacy_key, _get(config, legacy_key))
+                section, _, key = dotted_key.partition(".")
+                if (section, key) in names.V3_ONLY:
+                    return names.V3_ONLY[(section, key)]
+            else:
+                v3_key = names.key_to_v3(dotted_key)
+                if v3_key != dotted_key:
+                    return names.value_to_legacy(dotted_key, _get(config, v3_key))
+        except BbError:
+            pass
+        raise original
 
 
 def _get(config, dotted_key):
