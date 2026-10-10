@@ -11,7 +11,7 @@ import uuid
 from . import config as config_module
 from . import names, policy, receipts
 from .errors import EXIT_INVALID_STATE, EXIT_USAGE, BbError
-from .locks import LockLost, expired
+from .locks import LockHeld, LockLost, expired
 
 LOGIN = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$")
 LABEL_COLORS = {"agent": ("5319E7", "Posse de tarefa por IA (projeção da trava)"),
@@ -39,6 +39,11 @@ def _label(name, person):
     return f"{'person' if person else 'agent'}:{name}"
 
 
+def _owner(name, person):
+    """The lock owner: people and agents never share a key, even with the same spelling."""
+    return f"person:{name}" if person else name
+
+
 def _check_name(config, name, person):
     if person:
         if not LOGIN.match(name or ""):
@@ -63,9 +68,9 @@ def _blockers(client, number):
                       EXIT_INVALID_STATE)
 
 
-def _held_by(client, name, now):
+def _held_by(client, owner, now):
     return sorted(int(resource.split("-", 1)[1]) for resource, record in client.locks().all().items()
-                  if resource.startswith("issue-") and record.get("owner") == name and not expired(record, now))
+                  if resource.startswith("issue-") and record.get("owner") == owner and not expired(record, now))
 
 
 def _record(client, number, receipt):
@@ -79,13 +84,20 @@ def claim(client, config, number, name, *, person=False, now=None):
     _open_issue(client, number)
     _blockers(client, number)
     limit = policy.limits(config)["tasks_per_session"]
-    held = [n for n in _held_by(client, name, now) if n != number]
+    held = [n for n in _held_by(client, _owner(name, person), now) if n != number]
     if len(held) >= limit:
         raise BbError(f"{name} atingiu o limite de {limit} posse(s): " + ", ".join(f"#{n}" for n in held),
                       EXIT_INVALID_STATE)
     session = str(uuid.uuid4())
-    record = client.locks().acquire(f"issue-{number}", name, session, hours=policy.limits(config)["lease_hours"],
-                                    now=now)
+    try:
+        record = client.locks().acquire(f"issue-{number}", _owner(name, person), session,
+                                        hours=policy.limits(config)["lease_hours"], now=now)
+    except LockHeld as held:
+        if held.record and expired(held.record, now):
+            raise BbError(f"#{number}: a posse de {held.record.get('owner')} venceu em {held.record.get('expires')}; "
+                          f"só o dono pode mandar retomá-la (bb claim {number} {name} --force-claim --quote "
+                          f"\"<frase do dono>\")", EXIT_INVALID_STATE) from held
+        raise
     return _project(client, number, name, person, session, record, now)
 
 
@@ -129,13 +141,15 @@ def force(client, config, number, name, quote, *, person=False, now=None):
     if current and not expired(current, now):
         raise BbError(f"#{number}: posse de {current['owner']} ainda válida até {current['expires']}; nada foi "
                       f"retomado", EXIT_INVALID_STATE)
+    session = str(uuid.uuid4())
+    record = lock_api.acquire(f"issue-{number}", _owner(name, person), session,
+                              hours=policy.limits(config)["lease_hours"], now=now, take_expired=True)
     client.comment(number, f"**Ordem do dono para retomar a posse** (`{name}`):\n\n" +
                    "\n".join("> " + line for line in quote.strip().splitlines()))
-    session = str(uuid.uuid4())
-    record = lock_api.acquire(f"issue-{number}", name, session, hours=policy.limits(config)["lease_hours"], now=now)
     if current:
         for label in client.issue(number)["labels"]:
-            if label in (_label(current["owner"], False), _label(current["owner"], True)):
+            previous = current["owner"].removeprefix("person:")
+            if label in (_label(previous, False), _label(previous, True)):
                 client.remove_label(number, label)
     return _project(client, number, name, person, session, record, now)
 
@@ -143,7 +157,8 @@ def force(client, config, number, name, quote, *, person=False, now=None):
 def stale(client, *, now=None):
     """Held claims whose lease expired: the controller projects them as `stale`; nobody's work is touched."""
     now = _now(now)
-    return [{"issue": int(resource.split("-", 1)[1]), "owner": record["owner"], "expires": record["expires"],
+    return [{"issue": int(resource.split("-", 1)[1]), "owner": record["owner"].removeprefix("person:"),
+             "expires": record["expires"],
              "generation": record["generation"]}
             for resource, record in sorted(client.locks().all().items())
             if resource.startswith("issue-") and record.get("state") == "held" and expired(record, now)]

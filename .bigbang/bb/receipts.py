@@ -8,7 +8,7 @@ MARK = "<!-- bb:receipt "
 LINE = re.compile(r"^<!-- bb:receipt (\{.*\}) -->$", re.M)
 COMMON = ("kind", "event_id", "issue", "actor", "at")
 REQUIRED = {
-    "transition": COMMON + ("from", "to", "sha", "policy"),
+    "transition": COMMON + ("from", "to", "policy"),  # sha only when the move concerns a commit
     "rejection": COMMON + ("from", "to", "reason", "return_to", "evidence", "policy"),
     "test": COMMON + ("sha", "tree", "base", "policy", "lockfiles", "toolchain", "selector", "commands", "result",
                       "runner"),

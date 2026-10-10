@@ -131,7 +131,8 @@ LABELS_REPLACED = {"tem-dependencia": "native issue dependency (blocked by)",
                    "prioridade:baixa": "Priority field"}
 DECISIONS_LEGACY = ("refinamento-aprovado", "prototipo-aprovado", "testes-aprovados", "teste-alterado-aprovado",
                     "homologado", "reprovado", "dono:revisao-ia", "pr-aprovado")
-DECISIONS = tuple(LABELS[label] for label in DECISIONS_LEGACY)
+V3_ONLY_DECISIONS = ("approved:backlog", "approved:selection", "approved:cancel")
+DECISIONS = tuple(LABELS[label] for label in DECISIONS_LEGACY) + V3_ONLY_DECISIONS
 CLAIM_PREFIX = {"legacy": "ia:", "v3": "agent:"}
 
 BRANCH_PREFIXES = {"teste": "test", "feature": "feature", "docs": "docs", "bugfix": "fix", "hotfix": "hotfix",

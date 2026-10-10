@@ -7,20 +7,20 @@ import json
 import re
 
 MODES = ("normal", "flash", "autonomous")
-GATES = ("backlog", "refinement", "prototype", "selection", "tests", "pr", "qa", "publish", "flag")
+GATES = ("backlog", "refinement", "prototype", "selection", "tests", "pr", "qa", "publish", "flag", "cancel")
 RISKS = ("low", "medium", "high", "critical")
 # Changes whose risk floor is critical or high, whatever the label says (the AI never lowers a risk floor).
-CRITICAL_PATHS = (".github/**", "migrations/**", "**/migrations/**", "**/auth/**", "**/payments/**",
+CRITICAL_PATHS = (".github/**", ".bigbang/**", "migrations/**", "**/migrations/**", "**/auth/**", "**/payments/**",
                   "infra/**", "infrastructure/**", "deploy/**", "autonomy.toml", "bigbang.toml",
                   ".bigbang-framework.toml", "**/secrets/**")
-HIGH_PATHS = ("STACK.md", "PRODUTO.md", "DESIGN.md", "flags.toml", "tests/aceite/**", "tests/acceptance/**",
+HIGH_PATHS = ("AGENTS.md", "CLAUDE.md", "STACK.md", "PRODUTO.md", "DESIGN.md", "flags.toml", "tests/aceite/**", "tests/acceptance/**",
               "*lock*", "package.json", "pyproject.toml", "requirements*.txt", "go.mod", "go.sum", "Cargo.toml",
               "pom.xml", "*gradle*", "Gemfile", "composer.json", "*Dockerfile*", "compose.y*ml",
               "docker-compose*")
 LOW_PATHS = ("docs/**", "*.md", "**/*.md", "LICENSE", ".gitignore")
 # Flash: the agent approves common work; these gates always go to the owner, and so does anything at or above the
 # listed risk.
-FLASH_OWNER_GATES = ("selection",)
+FLASH_OWNER_GATES = ("selection", "cancel")
 FLASH_OWNER_FROM = {"refinement": "critical", "prototype": "critical", "qa": "high", "publish": "high",
                     "flag": "high", "tests": "critical", "pr": "critical", "backlog": "high"}
 DEFAULT_LIMITS = {"attempts": 3, "expedite": 1, "epics_in_progress": 2, "tasks_per_session": 1, "lease_hours": 24}
@@ -76,6 +76,26 @@ def risk_floor(paths, sensitive_paths=()):
         elif not _matches(path, LOW_PATHS) and _rank(floor) < _rank("medium"):
             floor = "medium"
     return floor
+
+
+AREA_RISK = {"area:auth": "critical", "area:data": "high", "area:infra": "high", "area:ci": "high"}
+
+
+def _area_risk(labels, default):
+    areas = [AREA_RISK.get(label, "medium") for label in labels if label.startswith("area:")]
+    return max(areas, key=_rank) if areas else default
+
+
+def planning_risk(labels):
+    """Risk of a planning gate (no code yet): from the declared areas and risk:* labels; medium by default."""
+    return effective_risk(labels, _area_risk(labels, "medium"))
+
+
+def delivery_risk(labels, paths=(), sensitive_paths=()):
+    """Risk of a QA or publication gate: the changed paths when known; without them, the areas, and high when
+    nothing is declared (fail closed)."""
+    floor = risk_floor(paths, sensitive_paths) if paths else _area_risk(labels, "high")
+    return effective_risk(labels, floor)
 
 
 def effective_risk(labels, floor):

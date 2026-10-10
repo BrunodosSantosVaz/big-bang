@@ -24,7 +24,8 @@ FORWARD = {
              "In Progress": {"QA", "Releasing", "Done"}, "QA": {"Releasing"}, "Releasing": {"Done"}},
     "task": {"Todo": {"Coding"}, "Coding": {"In Review", "Todo"}, "In Review": {"Done", "Coding"}},
     "bug": {"Brainstorm": {"Backlog"}, "Backlog": {"Ready"}, "Ready": {"Selected"}, "Selected": {"Coding"},
-            "Coding": {"In Review", "Selected"}, "In Review": {"QA", "Done", "Coding"}, "QA": {"Releasing"},
+            "Coding": {"In Review", "Selected"}, "In Review": {"QA", "Done", "Coding", "Releasing"},
+            "QA": {"Releasing"},
             "Releasing": {"Done"}},
 }
 # Where a validation may send its card back (proposal section 6): origin -> allowed return states.
@@ -85,7 +86,10 @@ def problems(card_kind, current, target, facts, *, reason=None, return_to=None):
     if current == "Rejected":
         if not return_to:
             return ["sair de Rejected exige o retorno registrado na reprovação"]
-        return [] if target == return_to else [f"o retorno registrado é {return_to}, não {target}"]
+        if target != return_to:
+            return [f"o retorno registrado é {return_to}, não {target}"]
+        impediments = [label for label in IMPEDIMENTS if _has(facts, label)]
+        return [f"impedimento ativo ({', '.join(impediments)}): resolva antes de retomar"] if impediments else []
     if target == "Rejected":
         return _rejection_problems(card_kind, current, facts, reason, return_to)
     if target not in FORWARD.get(card_kind, {}).get(current, set()):
@@ -181,10 +185,14 @@ PRECONDITIONS = {
     ("bug", "In Review", "QA"): lambda f: (
         _need(f.get("pr_merged"), "PR ainda não mesclado")
         + _need(f.get("qa") in ("human", "agent"), "QA não se aplica: conclua sem QA")),
+    ("bug", "In Review", "Releasing"): lambda f: (
+        _need(f.get("pr_merged"), "PR ainda não mesclado")
+        + _need(f.get("qa") == "not-applicable", "QA se aplica: passe por QA")
+        + _need(f.get("delivery") != {"repository"}, "entrega só no repositório: conclua em Done")),
     ("bug", "In Review", "Done"): lambda f: (
         _need(f.get("pr_merged"), "PR ainda não mesclado") + _need(f.get("qa") == "not-applicable", "QA se aplica")
         + _need(f.get("delivery") == {"repository"}, "há publicação a fazer: passe por QA/Releasing")),
 }
 BUG_OWN = {("Backlog", "Ready"), ("Selected", "Coding"), ("Coding", "Selected"), ("In Review", "QA"),
-           ("In Review", "Done")}
+           ("In Review", "Done"), ("In Review", "Releasing")}
 BUG_AS_TASK = {("Coding", "In Review"), ("In Review", "Coding")}

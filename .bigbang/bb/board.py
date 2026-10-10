@@ -39,6 +39,9 @@ LABELS = (
     ("approved:prototype", "0E8A16", "Decisão do dono: protótipo aprovado"),
     ("approved:tests", "0E8A16", "Decisão do dono: testes de aceite aprovados"),
     ("approved:test-change", "D93F0B", "Decisão do dono: mudança em testes de aceite aprovada"),
+    ("approved:backlog", "0E8A16", "Decisão do dono: a demanda entra no backlog"),
+    ("approved:selection", "0E8A16", "Decisão do dono: o épico entra na próxima sprint"),
+    ("approved:cancel", "B60205", "Decisão do dono: o épico é cancelado"),
     ("qa:approved", "0E8A16", "Decisão do dono: homologado"), ("qa:rejected", "B60205", "Decisão do dono: reprovado"),
     ("owner:ai-review", "5319E7", "Decisão do dono: a revisão volta para a IA"),
     ("pr:approved", "0E8A16", "PR aprovado pela revisão exigida"),
@@ -80,10 +83,13 @@ FIELDS = (
 GATE_OF = {("Brainstorm", "Backlog"): "backlog", ("Refinement", "Ready"): "refinement",
            ("Refinement", "Prototyping"): "refinement", ("Prototyping", "Ready"): "prototype",
            ("Ready", "Selected"): "selection", ("Backlog", "Ready"): "backlog", ("QA", "Releasing"): "qa",
-           ("Releasing", "Done"): "publish"}
-# A decision label that already records the owner's approval of that gate.
-DECISION_OF = {"refinement": "approved:refinement", "prototype": "approved:prototype", "qa": "qa:approved",
-               "tests": "approved:tests"}
+           ("QA", "Rejected"): "qa", ("Releasing", "Done"): "publish"}
+PLANNING_GATES = ("backlog", "refinement", "prototype", "selection", "cancel")
+# The decision label that records the owner's approval of a gate (bb decision writes it with his words). The
+# identity of whoever runs a command is never an approval: on a personal account the owner and the AIs share it.
+DECISION_OF = {"backlog": "approved:backlog", "refinement": "approved:refinement", "prototype": "approved:prototype",
+               "selection": "approved:selection", "qa": "qa:approved", "tests": "approved:tests",
+               "cancel": "approved:cancel"}
 INITIAL = {"epic": "Brainstorm", "bug": "Brainstorm", "task": "Todo"}
 
 
@@ -153,22 +159,36 @@ def facts(client, config, number, *, now=None):
             "ready_problems": []}
 
 
-def _role(config, actor):
-    return "owner" if actor and actor.casefold() == config_module.get(config, "project.owner").casefold() else "agent"
+def attempts(client, number, trusted):
+    """Rejections recorded for a card (the attempt counter comes from receipts, the board only shows it)."""
+    return sum(1 for receipt in history(client, number, trusted) if receipt["kind"] == "rejection")
 
 
-def _approval_problems(config, card_kind, current, target, actor, labels, paths=()):
-    gate = GATE_OF.get((current, target))
+def _gate(card_kind, current, target):
+    if target == "Cancelled" and card_kind == "epic":
+        return "cancel"
+    return GATE_OF.get((current, target))
+
+
+def _approval_problems(config, card_kind, current, target, gathered):
+    gate = _gate(card_kind, current, target)
     if gate is None:
         return []
     mode = policy.mode(config)
-    risk = policy.effective_risk(labels, policy.risk_floor(paths, config_module.get(config, "security.sensitive_paths")))
+    labels = gathered["labels"]
+    risk = policy.planning_risk(labels) if gate in PLANNING_GATES else policy.delivery_risk(labels)
     who = policy.approver(mode, gate, risk)
     if who == "blocked":
-        return [f"portão {gate} fora do contrato do modo {mode}: bloqueado"]
-    if who == "owner" and _role(config, actor) != "owner" and DECISION_OF.get(gate) not in labels:
-        return [f"portão {gate} é do dono no modo {mode}: registre a decisão dele (bb decision) ou peça que ele mova"]
-    return []
+        return [f"portão {gate} fora do contrato do modo {mode} (risco {risk}): bloqueado"]
+    if who == "agent":
+        return []
+    if gate == "publish" and gathered.get("delivered"):
+        return []  # the publish job only runs after the owner approved the production environment
+    evidence = "qa:rejected" if (current, target) == ("QA", "Rejected") else DECISION_OF.get(gate)
+    if evidence and (evidence in labels or names.label(evidence, "legacy") in labels):
+        return []
+    return [f"portão {gate} é do dono no modo {mode} (risco {risk}): falta a decisão registrada "
+            f"{evidence or ''} (bb decision, com as palavras dele)".replace(" )", ")")]
 
 
 def move(client, project, config, number, target, actor, *, reason=None, return_to=None, facts=None,
@@ -193,37 +213,43 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
     gathered["accepted"] = gathered["selected"] = True  # the approval check below is their evidence
     found = states.problems(card_kind, current, target, gathered, reason=reason,
                             return_to=recorded_return if current == "Rejected" else return_to)
-    found += [] if found else _approval_problems(config, card_kind, current, target, actor, gathered["labels"])
+    found += [] if found else _approval_problems(config, card_kind, current, target, gathered)
     if found:
         raise BbError(f"#{number}: {current} → {target} recusado:\n" + "\n".join(f"  - {p}" for p in found),
                       EXIT_INVALID_STATE)
     _, policy_hash = policy.snapshot({"mode": policy.mode(config), "limits": policy.limits(config)})
     receipt = {"event_id": event_id or f"move-{number}-{len(moves) + 1}-{target}", "issue": number,
-               "actor": actor, "at": _iso(now), "from": current, "to": target, "policy": policy_hash,
-               "sha": sha or "0" * 40}
+               "actor": actor, "at": _iso(now), "from": current, "to": target, "policy": policy_hash}
+    if sha:
+        receipt["sha"] = sha
     if target == "Rejected":
         receipt.update(kind="rejection", reason=reason, return_to=return_to,
                        evidence=[f"reprovado em {current} por {actor}"])
     else:
         receipt["kind"] = "transition"
-    client.comment(number, receipts.render(receipt))
-    _effects(client, project, number, issue, card_kind, current, target, receipt)
+    done_attempts = attempts(client, number, trusted) + (1 if target == "Rejected" else 0)
+    _effects(client, project, number, issue, card_kind, current, target, receipt, done_attempts)
+    client.comment(number, receipts.render(receipt))  # recorded only after the effects happened
+    if target == "Rejected" and done_attempts >= policy.limits(config)["attempts"]:
+        client.add_labels(number, ["blocked"])
+        client.comment(number, f"**Big Bang** · {done_attempts} reprovações: limite de tentativas atingido. O cartão "
+                               "fica em Rejected com `blocked` até o dono decidir o próximo passo.")
     return receipt
 
 
-def _effects(client, project, number, issue, card_kind, current, target, receipt):
+def _effects(client, project, number, issue, card_kind, current, target, receipt, done_attempts):
+    if target == "Done" and issue["state"] == "open":
+        client.update_issue(number, state="closed", state_reason="completed")
+    if target == "Cancelled" and issue["state"] == "open":
+        client.update_issue(number, state="closed", state_reason="not_planned")
     project.add(number)
     project.set(number, "Status", target)
     if target == "Rejected":
         client.add_labels(number, [f"reason:{receipt['reason']}"])
         project.set(number, "Rejected from", current)
         project.set(number, "Return to", receipt["return_to"])
-    if current == "Rejected":
-        project.set(number, "Attempt", (project.get(number, "Attempt") or 0) + 1)
-    if target == "Done" and issue["state"] == "open":
-        client.update_issue(number, state="closed", state_reason="completed")
-    if target == "Cancelled" and issue["state"] == "open":
-        client.update_issue(number, state="closed", state_reason="not_planned")
+    if current == "Rejected" or target == "Rejected":
+        project.set(number, "Attempt", done_attempts)
 
 
 def reconcile(client, project, config, *, now=None):

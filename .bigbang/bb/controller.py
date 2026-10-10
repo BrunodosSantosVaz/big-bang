@@ -6,12 +6,13 @@ import datetime
 import re
 
 from . import board, claims, config as config_module, names
-from .errors import BbError
+from .errors import EXIT_INVALID_STATE, BbError
 from .locks import expired
 
 TASK_BRANCH = re.compile(r"^(test|feature|docs|fix|hotfix)/(\d+)-[a-z0-9]+(?:-[a-z0-9]+)*$")
 CONTROLLER = "controller"
-AUTO_ADVANCE = {"Refinement": ("Prototyping", "Ready"), "Prototyping": ("Ready",), "QA": ("Releasing",)}
+AUTO_ADVANCE = {"Brainstorm": ("Backlog",), "Refinement": ("Prototyping", "Ready"), "Prototyping": ("Ready",),
+                "Ready": ("Selected",), "QA": ("Releasing",)}
 
 
 def _now(now):
@@ -19,10 +20,13 @@ def _now(now):
 
 
 def _try(client, project, config, number, target, *, actor=CONTROLLER, **kwargs):
-    """Move if the rules allow it now; returns the receipt, or None when refused (refusal is not an error here)."""
+    """Move if the rules allow it now; returns the receipt, or None when refused. Only a refusal (invalid state)
+    is swallowed: transport and unexpected errors fail the run, so nothing is silently lost."""
     try:
         return board.move(client, project, config, number, target, actor, **kwargs)
-    except BbError:
+    except BbError as error:
+        if error.code != EXIT_INVALID_STATE:
+            raise
         return None
 
 
@@ -90,12 +94,14 @@ def handle(client, project, config, event, payload, *, now=None):
         elif action == "closed" and pull.get("merged"):
             if state == "Coding":
                 advance(number, "In Review", facts={"pr_open": True})
-            for target in ("Done", "QA"):
+            for target in ("Done", "QA", "Releasing"):
                 if advance(number, target, facts={"pr_merged": True}):
+                    release_on_merge(client, number, now=now)  # only once the card really left In Review
                     break
-            release_on_merge(client, number, now=now)
         elif action == "closed":
-            advance(number, "Coding", facts={"pr_open": False})
+            current = client.pull(pull["number"]) if pull.get("number") else None
+            if current is None or current["state"] != "open":  # a late event of a reopened PR changes nothing
+                advance(number, "Coding", facts={"pr_open": False})
     elif event == "schedule":
         for number, _, expected in board.reconcile(client, project, config, now=now):
             done.append((number, expected))

@@ -98,8 +98,7 @@ class Locks:
             raise BbError(f"nome de trava inválido: {resource!r} (minúsculas, números, . _ -)", EXIT_USAGE)
 
     def _commit(self, record, parent=None):
-        _, tree = self._call("POST", "git/trees", {"tree": []})
-        _, commit = self._call("POST", "git/commits", {"message": encode(record), "tree": tree["sha"],
+        _, commit = self._call("POST", "git/commits", {"message": encode(record), "tree": EMPTY_TREE,
                                                         "parents": [parent] if parent else []})
         return commit["sha"]
 
@@ -124,31 +123,37 @@ class Locks:
         return {"resource": resource, "owner": owner, "session": session, "generation": generation,
                 "acquired": _iso(now), "expires": _iso(now + datetime.timedelta(hours=hours)), "state": "held"}
 
-    def acquire(self, resource, owner, session, *, hours, now):
+    def acquire(self, resource, owner, session, *, hours, now, take_expired=False):
+        """Create the lock, or take a released one. An expired lock that was not released is taken only with
+        take_expired (the owner's order); a live lock never is."""
         self._check(resource)
         record = self._record(resource, owner, session, 1, hours, now)
-        status, _ = self._call("POST", "git/refs", {"ref": PREFIX + resource, "sha": self._commit(record)},
-                               accept=(201, 422))
+        status, body = self._call("POST", "git/refs", {"ref": PREFIX + resource, "sha": self._commit(record)},
+                                  accept=(201, 422))
         if status == 201:
             return record
         head, current = self._head(resource)
-        if current is None:  # deleted between the two calls: try once more from scratch
-            return self.acquire(resource, owner, session, hours=hours, now=now)
-        if not expired(current, now):
+        if current is None:
+            raise BbError(f"a trava {resource} não pôde ser criada: {(body or {}).get('message', '')}",
+                          EXIT_EXTERNAL_COMMAND)
+        if current.get("state") == "held" and (not expired(current, now) or not take_expired):
             raise LockHeld(current)
         return self.take_over(resource, head, owner, session, hours=hours, now=now)
 
     def take_over(self, resource, expected_head, owner, session, *, hours, now):
-        """Replace an expired (or released) lock whose head is `expected_head`; fails if anyone moved it first."""
+        """Replace an expired or released lock whose head is `expected_head`; fails if anyone moved it first and
+        never replaces a live lock."""
         self._check(resource)
-        _, current = self._head(resource)
+        head, current = self._head(resource)
+        if current and current.get("state") == "held" and not expired(current, now):
+            raise LockHeld(current)
         generation = (current or {}).get("generation", 0) + 1
         record = self._record(resource, owner, session, generation, hours, now)
         sha = self._commit(record, parent=expected_head)
         status, _ = self._call("PATCH", f"git/refs/bigbang/locks/{resource}", {"sha": sha, "force": False},
                                accept=(200, 422))
         if status == 422:
-            raise LockHeld(self.current(resource) or current)
+            raise LockHeld(self.current(resource) or current or {})
         return record
 
     def renew(self, resource, session, generation, *, hours, now):
@@ -156,6 +161,8 @@ class Locks:
         if not current or current["session"] != session or current["generation"] != generation or \
                 current.get("state") != "held":
             raise LockLost(f"a trava {resource} não pertence mais a esta sessão; reconcilie antes de continuar")
+        if expired(current, now):
+            raise LockLost(f"a posse de {resource} venceu: só o dono pode mandar retomá-la (--force-claim)")
         record = dict(current, expires=_iso(now + datetime.timedelta(hours=hours)))
         status, _ = self._call("PATCH", f"git/refs/bigbang/locks/{resource}",
                                {"sha": self._commit(record, parent=head), "force": False}, accept=(200, 422))
@@ -172,7 +179,7 @@ class Locks:
                                {"sha": self._commit(tombstone, parent=head), "force": False}, accept=(200, 422))
         if status == 422:
             raise LockLost(f"a trava {resource} mudou durante a liberação")
-        self._call("DELETE", f"git/refs/bigbang/locks/{resource}", accept=(204, 422))
+        # The tombstone stays: deleting here could remove a lock taken right after (old tombstones go in cleanup).
 
     def all(self):
         """{resource: record} of every lock ref (held, expired or tombstone)."""

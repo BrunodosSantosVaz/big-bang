@@ -202,9 +202,8 @@ def _claim_v3(args, config):
     if "type:epic" in labels or "epic" in labels:
         print(f"#{args.issue}: posse confirmada de {args.nome} (geração {acquired['generation']}, até "
               f"{acquired['expires']}); épico sem branch, nenhuma pasta criada.")
-        path = workspaces.git(args.raiz, "rev-parse", "--git-path", "bb-posse.json")
-        with open(path if os.path.isabs(path) else os.path.join(args.raiz, path), "w", encoding="utf-8") as handle:
-            json.dump(acquired, handle)
+        with open(_epic_receipt_path(args.raiz, args.issue), "w", encoding="utf-8") as handle:
+            json.dump(acquired, handle)  # one file per epic: claiming another epic never overwrites this one
         return EXIT_OK
     try:
         folder = workspaces.isolate(args.raiz, config, acquired, args.pasta, kinds=workspaces.V3_KINDS)
@@ -217,7 +216,17 @@ def _claim_v3(args, config):
     return EXIT_OK
 
 
+def _epic_receipt_path(root, issue):
+    path = workspaces.git(root, "rev-parse", "--git-path", f"bb-posse-epic-{issue}.json")
+    return path if os.path.isabs(path) else os.path.join(root, path)
+
+
 def _session_receipt(args, command):
+    import json
+    epic_path = _epic_receipt_path(args.raiz, args.issue)
+    if os.path.exists(epic_path):
+        with open(epic_path, encoding="utf-8") as handle:
+            return json.load(handle)
     acquired = workspaces.receipt(args.raiz)
     if acquired.get("issue") != args.issue:
         raise BbError(f"execute bb {command} na pasta da sessão dona da issue (o recibo da posse fica nos metadados "
@@ -231,7 +240,9 @@ def _renew(args):
     if not claims.is_v3(config):
         raise BbError("bb renew é da posse v3; no modelo legado a posse é renovada pelos pushes", EXIT_USAGE)
     acquired = claims.renew(_v3_client(config), config, _session_receipt(args, "renew"))
-    path = workspaces.git(args.raiz, "rev-parse", "--git-path", "bb-posse.json")
+    epic_path = _epic_receipt_path(args.raiz, args.issue)
+    path = epic_path if os.path.exists(epic_path) else workspaces.git(args.raiz, "rev-parse", "--git-path",
+                                                                          "bb-posse.json")
     with open(path if os.path.isabs(path) else os.path.join(args.raiz, path), "w", encoding="utf-8") as handle:
         json.dump(acquired, handle)
     print(f"#{args.issue}: posse renovada até {acquired['expires']}.")

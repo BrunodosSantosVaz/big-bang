@@ -40,7 +40,7 @@ class Names(unittest.TestCase):
         self.assertEqual(names.key_to_legacy("board.planning"), "paineis.planejamento")
 
     def test_decision_labels_in_both_dialects(self):
-        self.assertEqual(len(names.DECISIONS), len(names.DECISIONS_LEGACY))
+        self.assertEqual(len(names.DECISIONS), len(names.DECISIONS_LEGACY) + len(names.V3_ONLY_DECISIONS))
         self.assertEqual(names.label("homologado", "v3"), "qa:approved")
         self.assertEqual(names.label("qa:approved", "legacy"), "homologado")
         self.assertEqual(names.label("qa:approved", "v3"), "qa:approved")

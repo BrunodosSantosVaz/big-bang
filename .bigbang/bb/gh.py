@@ -133,5 +133,16 @@ class GitHub:
         status, _ = self.call("POST", "git/refs", {"ref": f"refs/heads/{name}", "sha": sha}, accept=(201, 422))
         return status == 201
 
+    # --- pull requests ----------------------------------------------------------------------------------------------
+
+    def pull(self, number):
+        status, raw = self.call("GET", f"pulls/{number}", accept=(200, 404))
+        if status == 404:
+            return None
+        return {"number": raw["number"], "title": raw.get("title", ""), "body": raw.get("body") or "",
+                "state": raw.get("state"), "merged": bool(raw.get("merged")), "draft": bool(raw.get("draft")),
+                "labels": _labels(raw), "head": raw["head"]["ref"], "sha": raw["head"]["sha"],
+                "base": raw["base"]["ref"]}
+
     def locks(self):
         return locks.Locks(self.repository, api=self.api)

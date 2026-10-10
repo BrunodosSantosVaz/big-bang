@@ -22,7 +22,6 @@ def register(commands, pipeline_sub):
     move.add_argument("state", help="estado de destino (por exemplo: Backlog, Refinement, Rejected)")
     move.add_argument("--reason", help="motivo (Rejected: requirements, tests, code, security, docs, qa…; Cancelled: texto)")
     move.add_argument("--return-to", dest="return_to", help="Rejected: estado para onde o trabalho volta")
-    move.add_argument("--actor", help="quem move (padrão: login do gh)")
     move.set_defaults(handler=_move)
 
     p = pipeline_sub.add_parser("controller", help="v3: aplica um evento do GitHub ao quadro (uso da esteira)")
@@ -84,7 +83,7 @@ def _show(args):
 
 def _move(args):
     config, client, project = _context(args.raiz)
-    actor = args.actor or gh.GitHub(config_module.get(config, "project.repository")).api("GET", "user")[1]["login"]
+    actor = gh.GitHub(config_module.get(config, "project.repository")).api("GET", "user")[1]["login"]  # recorded only
     receipt = board.move(client, project, config, args.issue, args.state, actor, reason=args.reason,
                          return_to=args.return_to)
     print(f"#{args.issue}: {receipt['from']} → {receipt['to']} ({receipt['event_id']}).")

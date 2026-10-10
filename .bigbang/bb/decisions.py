@@ -15,7 +15,7 @@ DECISIONS = ("refinamento-aprovado", "prototipo-aprovado", "testes-aprovados", "
              "homologado", "reprovado", "dono:revisao-ia", "pr-aprovado")
 OPPOSITES = {"homologado": ("reprovado",), "reprovado": ("homologado",), "dono:revisao-ia": ("revisao-humana",),
              "qa:approved": ("qa:rejected",), "qa:rejected": ("qa:approved",), "owner:ai-review": ("review:human",)}
-ALL_DECISIONS = DECISIONS + names.DECISIONS  # legacy Portuguese and v3 English spellings (ADR-0024)
+ALL_DECISIONS = DECISIONS + tuple(label for label in names.DECISIONS if label not in DECISIONS)  # legacy Portuguese and v3 English spellings (ADR-0024)
 
 
 def _now():

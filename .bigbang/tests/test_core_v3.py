@@ -276,7 +276,7 @@ class Receipts(unittest.TestCase):
 
     def test_malformed_and_incomplete_are_ignored(self):
         bad = [{"user": {"login": "dona"}, "body": "<!-- bb:receipt {not json} -->", "id": 1},
-               {"user": {"login": "dona"}, "body": receipts.render(self.receipt()).replace('"sha"', '"shax"'),
+               {"user": {"login": "dona"}, "body": receipts.render(self.receipt()).replace('"policy"', '"policyx"'),
                 "id": 2}]
         self.assertEqual(receipts.parse(bad, {"dona"}), [])
 
