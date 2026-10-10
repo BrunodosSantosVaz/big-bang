@@ -275,3 +275,46 @@ class MergeAndRelease(Flows):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PrRules(unittest.TestCase):
+    def rules(self, head="feature/12-tela", base="develop", title="feat: tela", body="Refs #12", labels=(),
+              paths=("src/app.py",), diff="", issue_labels=("type:task",), epic_labels=("type:epic", "flag:required")):
+        return pipeline.v3_pr_rules(head, base, title, body, set(labels), list(paths), diff, ["src/"],
+                                    ["src/**/auth/**"], "test.failing", set(issue_labels), set(epic_labels))
+
+    def test_clean_task_pr(self):
+        errors, add, remove = self.rules()
+        self.assertEqual(errors, [])
+        self.assertEqual(add, set())
+        self.assertIn("no-release", remove)
+
+    def test_branch_title_and_refs(self):
+        self.assertTrue(self.rules(base="main")[0])
+        self.assertTrue(self.rules(title="tela nova")[0])
+        self.assertTrue(self.rules(body="sem referência")[0])
+        self.assertTrue(self.rules(body="Refs #12\nCloses #12")[0])
+
+    def test_artifact_code_needs_the_epic_flag_decision(self):
+        errors, _, _ = self.rules(epic_labels=("type:epic",))
+        self.assertTrue(any("flag" in error for error in errors))
+        self.assertEqual(self.rules(epic_labels=("type:epic", "flag:waived"))[0], [])
+        self.assertEqual(self.rules(paths=("docs/guia.md",), epic_labels=("type:epic",))[0], [])
+
+    def test_no_release_follows_the_artifact_paths(self):
+        _, add, remove = self.rules(paths=("docs/guia.md",))
+        self.assertIn("no-release", add)
+        self.assertNotIn("no-release", remove)
+
+    def test_sensitive_paths_ask_for_the_owner_unless_he_said_otherwise(self):
+        _, add, _ = self.rules(paths=("src/api/auth/login.py",))
+        self.assertIn("review:human", add)
+        _, add, _ = self.rules(paths=("src/api/auth/login.py",), issue_labels=("type:task", "owner:ai-review"))
+        self.assertNotIn("review:human", add)
+
+    def test_acceptance_lock(self):
+        diff = ("diff --git a/tests/aceite/test_rn.py b/tests/aceite/test_rn.py\n--- a/tests/aceite/test_rn.py\n"
+                "+++ b/tests/aceite/test_rn.py\n@@ -1 +1 @@\n-assert total == 10\n+assert total == 11\n")
+        self.assertTrue(self.rules(head="test/11-testes", body="Refs #11", diff=diff, issue_labels=("type:test",))[0])
+        self.assertEqual(self.rules(head="test/11-testes", body="Refs #11", diff=diff, labels=("approved:test-change",),
+                                    issue_labels=("type:test",))[0], [])
