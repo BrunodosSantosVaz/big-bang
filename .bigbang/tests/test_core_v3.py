@@ -338,6 +338,23 @@ class Locks(unittest.TestCase):
         record = self.locks.acquire("issue-12", "codex-1", "s2", hours=1, now=later, take_expired=True)
         self.assertEqual((record["owner"], record["generation"]), ("codex-1", 2))
 
+    def test_take_over_needs_the_same_mark_for_an_expired_lock(self):
+        self.locks.acquire("issue-12", "claude-1", "s1", hours=1, now=NOW)
+        head = self.github.refs["refs/bigbang/locks/issue-12"]
+        later = NOW + datetime.timedelta(hours=2)
+        with self.assertRaises(locks.LockHeld):
+            self.locks.take_over("issue-12", head, "codex-1", "s2", hours=1, now=later)
+        self.assertEqual(self.locks.take_over("issue-12", head, "codex-1", "s2", hours=1, now=later,
+                                              take_expired=True)["generation"], 2)
+
+    def test_listing_only_the_requested_locks(self):
+        self.locks.acquire("issue-1", "claude-1", "s1", hours=1, now=NOW)
+        self.locks.acquire("issue-2", "claude-1", "s2", hours=1, now=NOW)
+        self.github.calls.clear()
+        self.assertEqual(sorted(self.locks.all(resources=["issue-2"])), ["issue-2"])
+        commit_reads = [c for c in self.github.calls if "/git/commits/" in c[1]]
+        self.assertEqual(len(commit_reads), 1)
+
     def test_take_over_refuses_a_live_lock(self):
         self.locks.acquire("issue-12", "claude-1", "s1", hours=1, now=NOW)
         head = self.github.refs["refs/bigbang/locks/issue-12"]
@@ -380,7 +397,7 @@ class Locks(unittest.TestCase):
         self.locks.acquire("issue-12", "codex-1", "s2", hours=1, now=later, take_expired=True)
         # A second taker that read the same expired head must fail on the non-fast-forward update.
         with self.assertRaises(locks.LockHeld):
-            self.locks.take_over("issue-12", stale_head, "codex-2", "s3", hours=1, now=later)
+            self.locks.take_over("issue-12", stale_head, "codex-2", "s3", hours=1, now=later, take_expired=True)
 
     def test_renew_only_by_the_holder_and_generation(self):
         record = self.locks.acquire("issue-12", "claude-1", "s1", hours=1, now=NOW)

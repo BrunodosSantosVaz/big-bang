@@ -78,7 +78,8 @@ class FakeGitHub:
         (r"git/refs/(.+)", ("DELETE", "_delete_ref")),
         (r"git/trees", ("POST", "_create_tree")), (r"git/commits", ("POST", "_create_commit")),
         (r"git/commits/([0-9a-f]+)", ("GET", "_get_commit")),
-        (r"pulls/(\d+)", ("GET", "_get_pull")),
+        (r"pulls/(\d+)", ("GET", "_get_pull")), (r"pulls", ("GET", "_list_pulls")),
+        (r"pulls/(\d+)/files", ("GET", "_pull_files")),
     ]
 
     def _page(self, items, params):
@@ -192,6 +193,16 @@ class FakeGitHub:
     def _delete_ref(self, params, payload, name):
         self.refs.pop("refs/" + name, None)
         return 204, None
+
+    def _list_pulls(self, params, payload):
+        items = [pull for _, pull in sorted(self.pulls.items())
+                 if (params.get("state", "open") == "all" or pull["state"] == params.get("state", "open")) and
+                 (not params.get("head") or params["head"].split(":", 1)[-1] == pull["head"]["ref"]) and
+                 (not params.get("base") or params["base"] == pull["base"]["ref"])]
+        return 200, self._page(items, params)
+
+    def _pull_files(self, params, payload, number):
+        return 200, self._page(self.pulls[int(number)].get("files", []), params)
 
     def _get_pull(self, params, payload, number):
         pull = self.pulls.get(int(number))

@@ -107,6 +107,10 @@ class Moves(Base):
                                            {"name": "area:auth"}]
         with self.assertRaises(BbError):  # area:auth makes the refinement critical: owner decision needed
             self.move(10, "Ready", actor="claude-1", mode="flash")
+        self.fake.issues[10]["labels"] = [label for label in self.fake.issues[10]["labels"]
+                                          if label["name"] != "area:auth"]
+        self.move(10, "Ready", actor="claude-1", mode="flash")  # common refinement: delegated in Flash
+        self.assertEqual(self.state(10), "Ready")
 
     def test_qa_rejection_and_epic_cancellation_need_the_owner_decision(self):
         for target in ("Backlog",):
@@ -114,9 +118,42 @@ class Moves(Base):
             self.move(10, target)
         with self.assertRaises(BbError):
             self.move(10, "Cancelled", actor="claude-1", reason="fora do escopo")
+        self.fake.add_issue(40, "Bug", labels=["type:bug"])
+        with self.assertRaises(BbError):  # cancelling a reported bug is also the owner's decision
+            self.move(40, "Cancelled", actor="claude-1", reason="não reproduz")
         self.approve(10, "approved:cancel")
         self.move(10, "Cancelled", actor="claude-1", reason="fora do escopo")
         self.assertEqual(self.state(10), "Cancelled")
+
+    def test_a_rejection_withdraws_the_decisions_from_the_return_stage_on(self):
+        self.approve(10, "approved:backlog")
+        self.move(10, "Backlog")
+        claims.claim(self.client, config(), 10, "claude-1", now=NOW)
+        self.move(10, "Refinement", actor="claude-1")
+        self.fake.issues[10]["labels"] += [{"name": "prototype:required"}, {"name": "approved:refinement"}]
+        self.move(10, "Prototyping", actor="claude-1")
+        self.move(10, "Rejected", actor="claude-1", reason="requirements", return_to="Refinement")
+        self.assertNotIn("approved:refinement", self.fake.label_names(10))
+        self.move(10, "Refinement", actor="claude-1")
+        with self.assertRaises(BbError):  # the old approval does not approve the new cycle
+            self.move(10, "Prototyping", actor="claude-1")
+
+    def test_qa_and_publish_risk_come_from_the_changed_paths(self):
+        self.fake.issues[10]["labels"] += [{"name": "area:ui"}, {"name": "qa:human"}]
+        self.fake.issues[11]["state"] = "closed"
+        self.fake.issues[12]["state"] = "closed"
+        self.fake.add_pull(70, "feature/12-tela", "develop", state="closed", merged=True)
+        self.fake.pulls[70]["files"] = [{"filename": "migrations/0002.sql"}]
+        for target in ("Backlog", "Refinement", "Ready", "Selected", "In Progress"):
+            from bb import receipts as r
+            previous = self.state(10)
+            self.client.comment(10, r.render({"kind": "transition", "event_id": f"s-{target}", "issue": 10,
+                                              "actor": "dona", "at": "2026-10-10T11:00:00Z", "from": previous,
+                                              "to": target, "policy": "x"}))
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        self.assertEqual(policy.delivery_risk({"area:ui"}), "high")  # an area never lowers the default
+        with self.assertRaises(BbError):  # migrations make the QA critical: the owner homologates
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
 
     def test_effects_happen_before_the_receipt(self):
         self.fake.failures.add(("PATCH", "issues/11"))
@@ -261,6 +298,16 @@ class Controller(Base):
         self.event("pull_request", action="closed", pull_request=dict(pr, merged=True))
         self.assertEqual(self.state(11), "In Review")
         self.assertIsNotNone(self.client.locks().current("issue-11"))
+
+    def test_retried_merge_event_releases_a_claim_left_behind(self):
+        claims.claim(self.client, config(), 11, "claude-1", now=NOW)
+        self.fake.refs["refs/heads/test/11-testes"] = "a" * 40
+        pr = {"number": 55, "head": {"ref": "test/11-testes"}, "base": {"ref": "develop"}, "merged": True}
+        self.event("pull_request", action="opened", pull_request=dict(pr, merged=False))
+        self.move(11, "Done", actor="controller", facts={"pr_merged": True})  # the run died before releasing
+        self.assertIsNotNone(self.client.locks().current("issue-11"))
+        self.event("pull_request", action="closed", pull_request=pr)
+        self.assertIsNone(self.client.locks().current("issue-11"))
 
     def test_late_closed_event_of_a_reopened_pr_is_ignored(self):
         claims.claim(self.client, config(), 11, "claude-1", now=NOW)
