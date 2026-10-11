@@ -58,6 +58,7 @@ ROOT_ENTRIES = {
     ".bigbang": "kept: the framework layer",
     ".bigbang-framework.toml": "framework only: removed by bb init",
     ".bigbang-producao.json": "framework only: its production contract is removed by bb init",
+    "autonomy.toml": "framework only: its autonomy contract is removed by bb init; the system writes its own",
     ".bigbang-docs.json": "framework only: removed (private) or replaced by the system's manifest (public)",
     ".claude": "kept: generated settings and agents",
     ".github": "kept: bb-framework-* removed by F5",
@@ -224,6 +225,8 @@ class Launcher(unittest.TestCase):
         self.assertFalse(os.path.exists(self.path(".bigbang-framework.toml")))
         self.assertFalse(os.path.exists(self.path(".bigbang-producao.json")),
                          "o contrato de produção do framework isentaria o sistema de provar o checklist")
+        self.assertFalse(os.path.exists(self.path("autonomy.toml")),
+                         "o contrato de autonomia do framework delegaria aprovações ao sistema novo")
         self.assertTrue(generator.pipeline_installed(self.root))
         self.assertEqual(self.framework_workflows(), [], "a F5 precisa remover a CI do framework")
         self.assertRegex(self.read("README.md"), r"(?m)^# Sistema Novo$")
