@@ -100,6 +100,19 @@ class FrameworkPipeline(unittest.TestCase):
         with self.assertRaises(BbError):
             framework.prepare(self.root, '3.0.0-rc.1')
 
+    def test_prepare_refreshes_documented_hashes_for_the_version_change(self):
+        import json
+        import hashlib
+        from bb import framework
+        shutil.copy2(os.path.join(RAIZ, '.bigbang-docs.json'), self.root)
+        framework.prepare(self.root, '3.0.0')
+        manifest = json.loads(self.read('.bigbang-docs.json'))
+        for feature in manifest['funcionalidades']:
+            for path in feature['fontes']:
+                with open(os.path.join(self.root, path), 'rb') as handle:
+                    digest = 'sha256:' + hashlib.sha256(handle.read()).hexdigest()
+                self.assertEqual(feature['hashes'][path], digest, path)
+
     def test_candidate_and_promotion_keep_updater_names(self):
         from bb import framework
         from bb import checksums
