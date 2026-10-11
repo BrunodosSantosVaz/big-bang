@@ -4,6 +4,26 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [3.0.1] - 2026-10-11
+
+### O que muda
+
+Correções da v3.0.0, sem mudar o fluxo:
+
+- A atualização do framework deixa de invalidar os hashes de `.bigbang-docs.json` em projetos públicos: o carimbo
+  de versão dos arquivos gerados é normalizado, então `bb atualizar` não exige mais renovar a documentação só por
+  causa da versão.
+- `bb migrate config` remove a citação herdada do framework no `AGENTS.md` por inteiro, não só a primeira linha.
+- `bb migrate board` confere as automações embutidas do Project antes de adicionar cartões, aplica o Status
+  calculado, relê todos os valores e repara divergências antes de trocar a configuração; a coleta de evidências de
+  PRs passou a ser feita uma vez por execução, e não por cartão.
+- `bb init` remove o `autonomy.toml` herdado do framework, para que um sistema novo nunca receba a delegação do
+  Big Bang.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [3.0.0]
 
 ### O que muda
