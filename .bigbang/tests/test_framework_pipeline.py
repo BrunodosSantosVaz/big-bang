@@ -44,6 +44,17 @@ class FrameworkPipeline(unittest.TestCase):
                          'python .bigbang/bin/bb.py package --output $BB_OUTPUT')
         self.assertFalse(os.path.exists(os.path.join(self.root, 'bigbang.toml')))
 
+    def test_trusted_base_can_read_bootstrap_config_before_workflow_activation(self):
+        os.remove(os.path.join(self.root, '.bigbang-framework.toml'))
+        loaded = config.load(self.root)
+        self.assertTrue(loaded['_framework'])
+        self.assertEqual(config.get(loaded, 'project.repository'), ORIGIN)
+        self.assertIsNone(config.load(self.root, required=False))
+        implicit = generator.build_plan(self.root)
+        self.assertFalse(any(path.startswith('.github/workflows/bb-framework-') for path in implicit.expected))
+        with self.assertRaises(BbError):
+            generator.build_plan(self.root, framework=True)
+
     def test_generate_framework_is_idempotent_guarded_and_preserves_legacy(self):
         before = {name: self.read('.github/workflows/' + name) for name in
                   ('bb-framework-ci.yml', 'bb-framework-release.yml', 'bb-framework-faxina.yml')}
