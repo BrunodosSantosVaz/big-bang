@@ -18,6 +18,7 @@ FEATURE_SECTIONS = ("Finalidade", "Atores", "Pré-condições", "Fluxo principal
 SHA = re.compile(r"^[a-f0-9]{40}$")
 REPOSITORY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+$")
 PAGE = re.compile(r'^[^\\/:*?"<>|\x00-\x1f]+$')
+FRAMEWORK_VERSION_STAMP = re.compile(rb"Big Bang v\d+\.\d+\.\d+")
 
 
 def fail(message):
@@ -218,6 +219,43 @@ def inventory(root, data, *, include_untracked=False):
                   not any(path == name or (name.endswith("/") and path.startswith(name)) for name in exclusions))
 
 
+def source_digest(path):
+    """Hash a documented source without the generated framework version stamp."""
+    content = Path(path).read_bytes()
+    normalized = FRAMEWORK_VERSION_STAMP.sub(b"Big Bang v<version>", content)
+    return hashlib.sha256(normalized).hexdigest()
+
+
+def _hash_matches(expected, digest):
+    return expected in (digest, "sha256:" + digest)
+
+
+def refresh_framework_version_hashes(root, current, target):
+    """Upgrade only documented generated sources whose sole delta is the framework version."""
+    manifest = Path(root) / MANIFEST
+    if not manifest.is_file() or not is_public(root):
+        return False
+    data = load(root)
+    old_stamp = f"Big Bang v{current}".encode()
+    new_stamp = f"Big Bang v{target}".encode()
+    changed = False
+    for feature in data["funcionalidades"]:
+        for source in feature["fontes"]:
+            path = safe_path(root, source)
+            if not path.is_file():
+                continue
+            content = path.read_bytes()
+            expected = feature.get("hashes", {}).get(source)
+            previous = hashlib.sha256(content.replace(new_stamp, old_stamp)).hexdigest()
+            normalized = source_digest(path)
+            if new_stamp in content and _hash_matches(expected, previous):
+                feature["hashes"][source] = ("sha256:" if str(expected).startswith("sha256:") else "") + normalized
+                changed = True
+    if changed:
+        manifest.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return changed
+
+
 def _feature_problems(root, wiki, data):
     from .docs_check import HEADING, outside_code
     found, covered, ids = [], set(), set()
@@ -248,9 +286,10 @@ def _feature_problems(root, wiki, data):
         for source in feature.get("fontes", []):
             code = safe_path(root, source)
             covered.add(source)
-            digest = hashlib.sha256(code.read_bytes()).hexdigest() if code.is_file() else "ausente"
+            digest = source_digest(code) if code.is_file() else "ausente"
+            raw_digest = hashlib.sha256(code.read_bytes()).hexdigest() if code.is_file() else "ausente"
             expected = feature.get("hashes", {}).get(source)
-            if expected not in (digest, "sha256:" + digest):
+            if not _hash_matches(expected, digest) and not _hash_matches(expected, raw_digest):
                 found.append(f"{label}: documentação desatualizada para {source}")
         for reference in feature.get("testes", []):
             name, _, symbol = reference.partition(":")
