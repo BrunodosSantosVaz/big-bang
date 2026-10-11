@@ -201,7 +201,7 @@ def run(root, options, with_github=True, today=None):
                                                         {"projeto": options}, source))
     if license_text:
         write_text(os.path.join(root, "LICENSE"), license_text)
-    for name in (".bigbang-framework.toml", ".bigbang-producao.json"):  # the framework's own, never the system's
+    for name in (".bigbang-framework.toml", ".bigbang-producao.json", "autonomy.toml"):  # the framework's own, never the system's
         framework_file = os.path.join(root, name)
         if os.path.isfile(framework_file):
             os.remove(framework_file)

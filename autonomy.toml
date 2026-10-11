@@ -1,0 +1,12 @@
+# Contrato do modo autonomous do Big Bang (ADR-0025). Zona sensível: só o dono altera, renova e aprova.
+# Lido do checkout que roda o bb; na CI é a branch de destino, então um PR não amplia o contrato que o julga.
+version = 1
+targets = ["production"]          # ambiente reconhecido; a aprovação do environment `production` no GitHub continua só do dono
+risk = ["low", "medium"]          # alto e crítico (contrato, segurança, .bigbang/, release) continuam com o dono
+gates = ["backlog", "refinement", "prototype", "tests", "pr", "qa", "publish"]  # `publish` é o portão do bb; risco alto/crítico (todo release muda .bigbang/) segue bloqueado para o dono
+flags = "owner"                   # quem liga feature flags
+wip = 3                           # tarefas/épicos em andamento ao mesmo tempo
+attempts = 3                      # reprovações antes de blocked
+max_cost_usd = 50
+publish_window = "00:00-23:59"    # UTC; sem restrição de horário
+expires = "2027-01-11"            # o dono renova o contrato (3 meses)

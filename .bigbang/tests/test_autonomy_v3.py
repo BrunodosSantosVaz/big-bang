@@ -343,3 +343,22 @@ class BootstrapResiduals(Bootstrap):
     def test_private_repository_of_a_free_or_unknown_organization_refuses(self):
         self.fake.repo = {"private": True, "visibility": "private", "owner": {"login": "org", "type": "Organization"}}
         self.assertTrue(any("plano" in item for item in autonomy.bootstrap_problems(self.client)))
+
+
+class FrameworkContract(unittest.TestCase):
+    """The real autonomy.toml of the repository (#305): valid, and it must not make the framework unpublishable."""
+
+    def test_root_contract_is_valid_and_lets_the_owner_publish(self):
+        import tomllib
+        from _raiz import RAIZ
+        from bb import policy
+        with open(os.path.join(RAIZ, "autonomy.toml"), "rb") as handle:
+            contract = tomllib.load(handle)
+        self.assertEqual(policy.contract_problems(contract, datetime.date(2026, 10, 11)), [])
+        loaded = config(root=RAIZ, contract=None)
+        loaded["_autonomy"] = contract
+        self.assertEqual(autonomy.publish_problems(loaded, "production", NOW), [])
+        self.assertIn("publish", contract["gates"])
+        self.assertEqual(contract["flags"], "owner")
+        self.assertNotIn("high", contract["risk"])
+        self.assertNotIn("critical", contract["risk"])

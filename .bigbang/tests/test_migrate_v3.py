@@ -74,6 +74,83 @@ class Base(unittest.TestCase):
 
 
 class Config(Base):
+    def test_real_three_line_framework_quote_is_removed_and_rollback_is_exact(self):
+        agents = """<!-- bigbang:inicio v3.0.0 -->
+generated instructions
+<!-- bigbang:fim -->
+
+## Projeto
+
+Esta seção pertence ao projeto.
+
+> **Se este é o repositório `BrunodosSantosVaz/big-bang`** (o próprio framework, não um sistema criado a partir
+> dele): não rode a Fundação. Siga `.bigbang/docs/especificacao.md`, trabalhe um épico por vez (seção 17) e registre
+> as decisões do framework em `.bigbang/docs/decisoes/`.
+
+### Comandos
+
+npm test
+"""
+        self.write("AGENTS.md", agents)
+        before = (self.read("bigbang.toml"), agents)
+        snapshot = os.path.join(self.root, "config.json")
+        migrate.config_part(self.root, snapshot=snapshot, dry_run=True)
+        self.assertEqual((self.read("bigbang.toml"), self.read("AGENTS.md")), before)
+        self.assertFalse(os.path.exists(snapshot))
+        migrate.config_part(self.root, snapshot=snapshot)
+        cleaned = self.read("AGENTS.md")
+        self.assertNotIn("BrunodosSantosVaz/big-bang", cleaned)
+        self.assertNotIn("não rode a Fundação", cleaned)
+        self.assertNotIn("as decisões do framework", cleaned)
+        self.assertIn("generated instructions", cleaned)
+        self.assertIn("## Projeto\n\nEsta seção pertence ao projeto.", cleaned)
+        self.assertIn("### Comandos\n\nnpm test\n", cleaned)
+        migrate.config_part(self.root, snapshot=snapshot, rollback=True)
+        self.assertEqual((self.read("bigbang.toml"), self.read("AGENTS.md")), before)
+
+    def test_single_line_framework_quote_preserves_following_project_subsection(self):
+        agents = """## Projeto
+
+Descrição do projeto.
+
+> **Se este é o repositório `BrunodosSantosVaz/big-bang`**: não rode a Fundação.
+
+### Comandos
+
+npm test
+"""
+        expected = """## Projeto
+
+Descrição do projeto.
+
+### Comandos
+
+npm test
+"""
+        self.write("AGENTS.md", agents)
+        migrate.config_part(self.root)
+        self.assertEqual(self.read("AGENTS.md"), expected)
+
+    def test_framework_quote_preserves_later_subsections_and_unrelated_quote(self):
+        prefix = "## Projeto\n\nDescrição do projeto.\n\n"
+        quote = ("> **Se este é o repositório `BrunodosSantosVaz/big-bang`**: instrução herdada\n"
+                 "> continuação do framework\n> última linha herdada\n")
+        following = """### Comandos
+
+npm test
+
+> Nota específica do projeto.
+> Preserve esta continuação.
+
+### Operação
+
+Preserve as instruções do projeto.
+"""
+        # Even without a blank line, the next heading ends the inherited quote.
+        self.write("AGENTS.md", prefix + quote + following)
+        migrate.config_part(self.root)
+        self.assertEqual(self.read("AGENTS.md"), prefix + following)
+
     def test_existing_snapshot_is_never_overwritten(self):
         snapshot = os.path.join(self.root, "config.json")
         self.write("config.json", "precious backup")
@@ -204,6 +281,31 @@ class Labels(Base):
 
 
 class Board(Base):
+    def test_pr_evidence_api_calls_do_not_scale_with_board_cards(self):
+        self.ready()
+        small_cards = 0
+
+        def dry_run(extra_cards):
+            first = 30
+            for offset in range(extra_cards):
+                number = first + offset
+                self.fake.add_issue(number, f"Tarefa {number}", labels=["type:task"])
+                self.old[29].set(number, "Status", "CI/PR")
+            before = len(self.fake.calls)
+            report = self.run_part(dry_run=True)
+            pr_calls = [path for _, path in self.fake.calls[before:]
+                        if "/pulls" in path.split("?", 1)[0]]
+            return report, pr_calls
+
+        small_report, small_pr_calls = dry_run(small_cards)
+        large_report, large_pr_calls = dry_run(28)
+
+        self.assertEqual(len(small_pr_calls), len(large_pr_calls), large_pr_calls)
+        self.assertEqual(len(large_pr_calls), 1, large_pr_calls)
+        self.assertEqual(large_report["mapped"][17], "In Review")
+        self.assertEqual({n: large_report["mapped"][n] for n in small_report["mapped"]},
+                         small_report["mapped"])
+
     def test_remigration_after_rollback_uses_current_legacy_evidence(self):
         self.ready()
         self.run_part()
@@ -302,7 +404,8 @@ class Board(Base):
         self.snapshot = os.path.join(self.root, "board.json")
 
     def run_part(self, **kwargs):
-        return migrate.board_part(self.client, self.root, open_project=lambda number: self.old[number],
+        return migrate.board_part(self.client, self.root,
+                                  open_project=lambda number: self.new if number == 7 else self.old[number],
                                   create_project=lambda: (7, self.new), snapshot=self.snapshot, now=NOW, **kwargs)
 
     def ready(self):
@@ -326,6 +429,66 @@ class Board(Base):
         config = self.config()
         self.assertEqual(config_module.get(config, "board.model"), "single")
         self.assertEqual(config_module.get(config, "board.number"), 7)
+
+    def test_active_project_workflows_block_before_receipts_or_card_adds(self):
+        self.ready()
+        self.new.active_workflows = [{"name": "Item added to project", "enabled": True}]
+        before = self.config()
+        with self.assertRaisesRegex(BbError, r"Desative.*Project.*Workflows"):
+            self.run_part()
+        self.assertFalse(self.new.values)
+        self.assertFalse(any("migrate-" in comment["body"] for rows in self.fake.comments.values()
+                             for comment in rows))
+        self.assertEqual(config_module.get(self.config(), "board.model"),
+                         config_module.get(before, "board.model"))
+        self.new.active_workflows = []
+        self.run_part(project_number=7)
+        self.assertEqual(config_module.get(self.config(), "board.model"), "single")
+
+    def test_status_is_written_from_the_calculated_mapping_and_verified(self):
+        self.ready()
+        with patch("bb.migrate.board.current_state", return_value="Brainstorm"):
+            report = self.run_part()
+        for number, state in report["mapped"].items():
+            self.assertEqual(self.new.get(number, "Status"), state)
+        self.assertGreaterEqual(self.new.read_calls, 2)
+
+    def test_status_readback_is_repaired_before_config_switch(self):
+        self.ready()
+        project = self.new
+        original_items = project.items
+        reads = 0
+
+        def stale_once(refresh=False):
+            nonlocal reads
+            result = original_items(refresh=refresh)
+            if refresh:
+                reads += 1
+                if reads == 1 and 10 in result:
+                    result[10]["Status"] = "Brainstorm"
+            return result
+
+        project.items = stale_once
+        report = self.run_part()
+        self.assertEqual(project.get(10, "Status"), report["mapped"][10])
+        self.assertEqual(config_module.get(self.config(), "board.model"), "single")
+        self.assertEqual(reads, 2)
+
+    def test_unconfirmed_status_keeps_old_config_model(self):
+        self.ready()
+        project = self.new
+        original_items = project.items
+
+        def always_stale(refresh=False):
+            result = original_items(refresh=refresh)
+            if refresh and 10 in result:
+                result[10]["Status"] = "Brainstorm"
+            return result
+
+        project.items = always_stale
+        with self.assertRaisesRegex(BbError, r"confirmação.*Status"):
+            self.run_part()
+        self.assertEqual(config_module.get(self.config(), "board.model"), "three-boards")
 
     def test_snapshot_keeps_the_old_boards_and_rollback_restores_them(self):
         self.ready()

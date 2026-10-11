@@ -221,6 +221,27 @@ class Wiki(unittest.TestCase):
         self.root.joinpath("src/game.py").write_text("def move():\n    return 2\n")
         self.assertTrue(any("desatualizada" in p for p in self.problems()))
 
+    def test_framework_version_stamp_does_not_invalidate_public_documentation(self):
+        generated = self.root.joinpath(".github/workflows/bb-ci.yml")
+        generated.parent.mkdir(parents=True)
+        old = "name: CI do Big Bang v2.0.1\n"
+        generated.write_text(old)
+        feature = self.manifest["funcionalidades"][0]
+        feature["fontes"].append(".github/workflows/bb-ci.yml")
+        feature["hashes"][".github/workflows/bb-ci.yml"] = hashlib.sha256(old.encode()).hexdigest()
+        self.manifest["codigo"]["raizes"].append(".github/")
+        self.save()
+
+        generated.write_text("name: CI do Big Bang v3.0.0\n")
+        self.assertTrue(any("bb-ci.yml" in problem for problem in self.problems()))
+
+        documentation.refresh_framework_version_hashes(self.root, "2.0.1", "3.0.0")
+        self.assertEqual(self.problems(), [])
+
+        generated.write_text("name: CI do Big Bang v3.0.0\npermissions: write-all\n")
+        documentation.refresh_framework_version_hashes(self.root, "2.0.1", "3.0.0")
+        self.assertTrue(any("bb-ci.yml" in problem for problem in self.problems()))
+
     def test_algorithm_tagged_source_hash_is_validated_and_tampering_blocks(self):
         hashes = self.manifest['funcionalidades'][0]['hashes']
         hashes['src/game.py'] = 'sha256:' + hashes['src/game.py']

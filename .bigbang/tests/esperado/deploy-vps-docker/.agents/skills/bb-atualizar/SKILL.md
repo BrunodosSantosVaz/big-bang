@@ -2,7 +2,7 @@
 name: bb-atualizar
 description: Use para atualizar o Big Bang. Confere versão e migração, preserva a camada do projeto e prepara PR framework/vX.Y.Z para revisão independente; não atualiza dependências do sistema.
 ---
-<!-- Gerado pelo Big Bang v3.0.0 a partir de .bigbang/skills/bb-atualizar/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v3.0.1 a partir de .bigbang/skills/bb-atualizar/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Atualizar Big Bang
 
@@ -27,7 +27,9 @@ públicos após auditoria e Social preview. Preserve configurações do projeto 
    registre a resposta dele; só com o sim dele rode com `--confirmo-migracao`.
 3. Rode `bb atualizar [versão]`: cria `framework/vX.Y.Z` da `develop`, troca `.bigbang/`, atualiza
    `bigbang.versao`, roda `bb gerar` e `bb verificar` da versão nova e abre o PR com `revisao-humana` no padrão ou `revisao-ia` no Flash.
-4. Rode os testes do projeto na branch e confira no diff do PR que só `.bigbang/`, a camada gerada e
+4. Em projeto público com Wiki, ao atualizar para a v3.0.0, use `bb documentacao gravar` e
+   `bb documentacao propor` no mesmo PR para revisar os hashes dos arquivos gerados; não publique a Wiki sem
+   revisão. Rode os testes do projeto na branch e confira no diff do PR que só `.bigbang/`, a camada gerada e
    `bigbang.versao` mudaram. Faça os passos manuais confirmados em commits seguintes, na mesma branch.
 
 ## Pare e pergunte quando
