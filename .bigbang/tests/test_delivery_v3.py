@@ -190,6 +190,31 @@ class GateHardening(Publish):
         with self.assertRaises(BbError):
             self.publish()
 
+    def test_without_a_candidate_the_gate_explains_instead_of_crashing(self):
+        del self.fake.refs["refs/tags/v1.3.0-rc.1"]
+        with self.assertRaises(BbError) as error:
+            self.publish()
+        self.assertIn("nenhuma candidata", error.exception.message)
+        self.assertFalse(self.fake.pulls[self.pr]["merged"])
+
+    def test_epic_that_lost_its_qa_after_the_gate_is_reported_pending_not_dark(self):
+        self.fake.issues[10]["labels"].append({"name": "qa:approved"})
+        from bb import flags
+        with open(os.path.join(self.root, "flags.toml"), "w", encoding="utf-8") as handle:
+            handle.write(flags.switch(FLAGS_V3, "novo-login", "production", True, TODAY))
+        original = delivery._green
+
+        def green_then_withdraw(client, sha):  # the owner withdraws qa:approved while the release merges
+            result = original(client, sha)
+            self.fake.issues[10]["labels"] = [l for l in self.fake.issues[10]["labels"]
+                                              if l["name"] != "qa:approved"]
+            return result
+        from unittest import mock
+        with mock.patch.object(delivery, "_green", side_effect=green_then_withdraw):
+            result = self.publish()
+        self.assertEqual(result["dark"], [])
+        self.assertEqual(result["pending"], [10])
+
     def test_gate_reads_flags_and_pending_from_the_release_content(self):
         from unittest import mock
         from bb import flow_cli

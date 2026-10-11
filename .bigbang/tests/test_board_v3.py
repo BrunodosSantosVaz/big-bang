@@ -286,6 +286,19 @@ class Moves(Base):
         with self.assertRaises(BbError):  # the migration makes the QA critical: the owner homologates
             self.move(10, "Releasing", actor="claude-1", mode="flash")
 
+    def test_prs_of_the_epic_itself_count_even_before_its_children(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")
+        self.fake.issues[10]["created_at"] = "2026-10-01T10:00:00Z"
+        for child in (11, 12):
+            self.fake.issues[child]["created_at"] = "2026-10-10T10:00:00Z"
+        self.fake.add_pull(74, "feature/10-login", "develop", state="closed", merged=True)
+        self.fake.pulls[74].update(files=[{"filename": "migrations/0004.sql"}], updated_at="2026-10-05T10:00:00Z")
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="codex-1", now=NOW)
+        with self.assertRaises(BbError):
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
+
     def test_effects_happen_before_the_receipt(self):
         self.fake.failures.add(("PATCH", "issues/11"))
         with self.assertRaises(BbError):
