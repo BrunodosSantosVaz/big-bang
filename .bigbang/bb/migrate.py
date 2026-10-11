@@ -264,9 +264,9 @@ def map_card(role, column, card_kind, facts):
         if column == "Novo":
             return "Brainstorm"
         if column == "Em correção":
-            return "Coding" if facts["claimed"] else "Todo"
+            return "Coding" if facts["claimed"] else "Selected"
         if column in ("CI/PR", "Validar PR"):
-            return "In Review" if facts["open_pr"] else ("Coding" if facts["claimed"] else "Todo")
+            return "In Review" if facts["open_pr"] else ("Coding" if facts["claimed"] else "Selected")
         if column == "Homologação":
             return "QA" if facts["candidate"] else "In Review"
         if column == "Corrigido":
