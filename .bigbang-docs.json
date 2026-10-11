@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "e820a0375996268f179575133418a182b68916b2",
+    "commit": "f5740036723cd1c2b5de117af3abfd6f5b37a485",
     "branch": "master",
-    "proposta": "wiki/248-foundation-fixes"
+    "proposta": "wiki/250-guided-migration"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -245,10 +245,13 @@
     },
     "RF-BB-055": {
       "pagina": "Requisitos"
+    },
+    "RF-BB-057": {
+      "pagina": "Requisitos"
     }
   },
   "codigo": {
-    "commit": "5d6593b65706f21413a3f604648c701ae8ac1e9e",
+    "commit": "567df87e62c6a84e03d32c57c302cf0b331f0655",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -2166,7 +2169,7 @@
         ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect"
       ],
       "hashes": {
-        ".bigbang/bb/names.py": "sha256:851859520af667d7f2599d6625f3bfab47a5305777aaed86d439e91eff0d8db1"
+        ".bigbang/bb/names.py": "sha256:c273678f0f14d36e3bd9690058d759d954f6f76e49f522f839838bf89c92c9cf"
       },
       "descricao": "Tabela única de nomes v2 ↔ v3 (configuração, valores, CLI, labels, branches, workflows, checks, ambiente, segredos)."
     },
@@ -2326,7 +2329,7 @@
       "hashes": {
         ".bigbang/bb/board.py": "sha256:b56463151ae793e86be92b70d0670fb1b98713aaef42ff35bc13efb3f193c4b8",
         ".bigbang/bb/controller.py": "sha256:8c70bec7e79ad6786f7320c719e424d593f77fad6a006c8459a222d45e12200f",
-        ".bigbang/bb/flow_cli.py": "sha256:eb7ea171d1301e2aa0858e51f8371312387a98a4a9cd1d2e66442132a9217b11"
+        ".bigbang/bb/flow_cli.py": "sha256:e8c7c6b66bcb6c620273467c59b1465a26563603a93ad524c39bc9218564e7cd"
       },
       "descricao": "Catálogo de labels v3, Project com 15 estados e campos, bb move validado, reconciliação e controlador de eventos."
     },
@@ -2593,6 +2596,57 @@
         ".bigbang/pipeline/skills/bb-prototipar/SKILL.md": "sha256:c4e1c0ce10fc5948f46ae9a00b127a560b8f2aab53ea86801a8f524b3154d850"
       },
       "descricao": "Versões v3 das skills adaptadas, a skill bb-reject e os documentos de processo da v3, instalados só em projetos com workflow.model = grouping."
+    },
+    {
+      "id": "BB-F-057",
+      "requisitos": [
+        "RF-BB-057"
+      ],
+      "pagina": "Funcionalidade-migracao-v3",
+      "fontes": [
+        ".bigbang/bb/migrate.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_migrate_v3.py:test_existing_snapshot_is_never_overwritten",
+        ".bigbang/tests/test_migrate_v3.py:test_snapshot_restores_config_and_agents_exactly",
+        ".bigbang/tests/test_migrate_v3.py:test_dry_run_changes_nothing",
+        ".bigbang/tests/test_migrate_v3.py:test_rewrites_in_english_keeping_the_behavior",
+        ".bigbang/tests/test_migrate_v3.py:test_removes_the_inherited_framework_section_and_keeps_the_project_part",
+        ".bigbang/tests/test_migrate_v3.py:test_second_run_is_a_no_op",
+        ".bigbang/tests/test_migrate_v3.py:test_rollback_after_a_partial_rename_is_idempotent",
+        ".bigbang/tests/test_migrate_v3.py:test_copying_existing_labels_includes_pull_requests",
+        ".bigbang/tests/test_migrate_v3.py:test_foreign_snapshot_refuses_before_any_write",
+        ".bigbang/tests/test_migrate_v3.py:test_needs_the_workflow_part_first",
+        ".bigbang/tests/test_migrate_v3.py:test_renames_keeping_the_issues_copies_when_both_exist_and_creates_the_catalog",
+        ".bigbang/tests/test_migrate_v3.py:test_rollback_restores_the_names",
+        ".bigbang/tests/test_migrate_v3.py:test_dry_run_changes_nothing",
+        ".bigbang/tests/test_migrate_v3.py:test_remigration_after_rollback_uses_current_legacy_evidence",
+        ".bigbang/tests/test_migrate_v3.py:test_closed_epic_without_release_does_not_advance_to_done",
+        ".bigbang/tests/test_migrate_v3.py:test_closed_epic_with_its_stable_tag_is_done",
+        ".bigbang/tests/test_migrate_v3.py:test_bug_without_candidate_does_not_advance_to_qa",
+        ".bigbang/tests/test_migrate_v3.py:test_stale_or_unverified_claim_does_not_advance_to_coding",
+        ".bigbang/tests/test_migrate_v3.py:test_ready_task_waits_for_workflow_migration_even_with_merged_pr",
+        ".bigbang/tests/test_migrate_v3.py:test_bug_without_claim_uses_a_state_allowed_by_the_runtime",
+        ".bigbang/tests/test_migrate_v3.py:test_initial_cards_also_receive_a_migration_receipt",
+        ".bigbang/tests/test_migrate_v3.py:test_legacy_labels_are_mapped_before_the_label_migration",
+        ".bigbang/tests/test_migrate_v3.py:test_needs_the_config_part_first",
+        ".bigbang/tests/test_migrate_v3.py:test_maps_every_card_by_evidence_with_a_migration_receipt",
+        ".bigbang/tests/test_migrate_v3.py:test_snapshot_keeps_the_old_boards_and_rollback_restores_them",
+        ".bigbang/tests/test_migrate_v3.py:test_dry_run_writes_nothing",
+        ".bigbang/tests/test_migrate_v3.py:test_second_run_does_not_duplicate_receipts",
+        ".bigbang/tests/test_migrate_v3.py:test_snapshot_rollback_restores_the_original_configuration",
+        ".bigbang/tests/test_migrate_v3.py:test_needs_the_board_part_first",
+        ".bigbang/tests/test_migrate_v3.py:test_refuses_while_epic_branches_carry_unmerged_work",
+        ".bigbang/tests/test_migrate_v3.py:test_switches_to_grouping_and_lists_the_owner_steps",
+        ".bigbang/tests/test_migrate_v3.py:test_config_alias_dry_run_never_writes_or_contacts_github",
+        ".bigbang/tests/test_migrate_v3.py:test_github_parts_default_to_the_plan_without_yes",
+        ".bigbang/tests/test_migrate_v3.py:test_real_run_without_snapshot_refuses_before_mutation",
+        ".bigbang/tests/test_migrate_v3.py:test_config_roundtrip_from_cli"
+      ],
+      "hashes": {
+        ".bigbang/bb/migrate.py": "sha256:f5aef0b077bf015cf40a06da321c15857b49af2529aee6150d4e86006f2dd348"
+      },
+      "descricao": "Migração guiada opcional com ordem segura, consentimento explícito de escrita no GitHub e preservação do legado."
     }
   ],
   "arquivos_funcionais": [
