@@ -135,6 +135,17 @@ class AlvoPersonalizado(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual((self.root / "calls").read_text(encoding="utf-8").splitlines(), ["migrar:staging"])
 
+    def test_publish_failure_stops_staging_before_health(self):
+        self.configure_custom()
+        result = self.run_deploy_script(
+            "scripts/staging.sh", env=self.runner_environment(FAIL_OPERATION="publicar")
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(
+            (self.root / "calls").read_text(encoding="utf-8").splitlines(),
+            ["migrar:staging", "publicar:staging"],
+        )
+
     def test_mutable_image_reference_is_rejected_before_script_execution(self):
         self.configure_custom()
         sentinel = self.root / "unexpected-command"
