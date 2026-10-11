@@ -171,6 +171,27 @@ class FrameworkPipeline(unittest.TestCase):
             framework.prepare(self.root, '3.0.0')
         self.assertEqual(self.read('.bigbang/VERSION'), before)
 
+    def test_prepare_refuses_untracked_sources_in_all_declared_roots(self):
+        import json
+        from bb import documentation, framework
+        files = ('.bigbang/VERSION', '.bigbang/CHECKSUMS', '.bigbang-framework.toml')
+        before = {path: self.read(path) for path in files}
+        original = self.read('.bigbang-docs.json')
+        for probe in ('.github/workflows/undocumented-review-probe.yml', 'undocumented-root.toml'):
+            with self.subTest(probe=probe):
+                data = json.loads(original)
+                if probe.endswith('.toml'):
+                    data['codigo']['raizes'].append(probe)
+                with open(os.path.join(self.root, '.bigbang-docs.json'), 'w', encoding='utf-8') as handle:
+                    json.dump(data, handle)
+                with open(os.path.join(self.root, probe), 'w', encoding='utf-8') as handle:
+                    handle.write('# source without a documented feature\n')
+                self.assertNotIn(probe, documentation.inventory(self.root, data))
+                with self.assertRaises(BbError):
+                    framework.prepare(self.root, '3.0.0')
+                self.assertEqual({path: self.read(path) for path in files}, before)
+                os.remove(os.path.join(self.root, probe))
+
     def test_candidate_and_promotion_keep_updater_names(self):
         from bb import framework
         from bb import checksums
