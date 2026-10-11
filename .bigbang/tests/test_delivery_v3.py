@@ -75,6 +75,7 @@ class Publish(Base):
         super().setUp()
         delivery.candidate_ready(self.client, self.project, cfg(), "release/1.3.0", "v1.3.0-rc.1", now=NOW)
         self.pr = next(p["number"] for p in self.fake.pulls.values() if p["head"]["ref"] == "release/1.3.0")
+        self.fake.pulls[self.pr]["head"]["sha"] = "r" * 40  # the release PR's head is the candidate's commit
         self.fake.checks[self.fake.pulls[self.pr]["head"]["sha"]] = [
             {"name": "gate", "status": "completed", "conclusion": "success"}]
         self.root = tempfile.mkdtemp()
@@ -154,6 +155,121 @@ class Publish(Base):
         self.publish()
         self.publish()
         self.assertEqual(self.fake.merges.count(("develop", "main")), 1)
+
+
+class GateHardening(Publish):
+    def test_unfinished_epic_without_a_flag_cannot_ship(self):
+        self.fake.add_issue(12, "Ajustes", labels=["type:epic", "qa:not-applicable", "flag:waived"])
+        self.fake.add_issue(24, "Tarefa aberta", labels=["type:task"], parent=12)
+        self.fake.issues[12]["milestone"] = 1
+        self.seed(12, ["Backlog", "Refinement", "Ready", "Selected", "In Progress"])
+        with self.assertRaises(BbError) as error:
+            self.publish()
+        self.assertIn("#12", error.exception.message)
+        self.assertFalse(self.fake.pulls[self.pr]["merged"])
+
+    def test_any_flag_of_the_epic_on_in_production_counts(self):
+        extra = FLAGS_V3.replace('name = "novo-login"', 'name = "novo-login-2"').replace(
+            "production = false", "production = true")
+        with open(os.path.join(self.root, "flags.toml"), "w", encoding="utf-8") as handle:
+            handle.write(FLAGS_V3 + extra)
+        with self.assertRaises(BbError) as error:
+            self.publish()
+        self.assertIn("novo-login-2", error.exception.message)
+
+    def test_expired_flag_blocks_the_release(self):
+        late = TODAY.replace(month=12)
+        with self.assertRaises(BbError) as error:
+            delivery.publish(self.client, self.project, cfg(), "1.3.0", self.root, today=late, now=NOW,
+                             pending={}, promote=self.promote)
+        self.assertIn("vencida", error.exception.message)
+
+    def test_release_pr_head_must_be_the_candidate(self):
+        self.fake.pulls[self.pr]["head"]["sha"] = "z" * 40
+        self.fake.checks["z" * 40] = [{"name": "gate", "status": "completed", "conclusion": "success"}]
+        with self.assertRaises(BbError):
+            self.publish()
+
+    def test_gate_reads_flags_and_pending_from_the_release_content(self):
+        from unittest import mock
+        from bb import flow_cli
+        seen = {}
+
+        def fake_publish(client, project, config, version, root, **kwargs):
+            seen["root"] = root
+            return {"pr": 1, "done": [], "dark": []}
+        import argparse
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--raiz", default=".")
+        commands = parser.add_subparsers(dest="command")
+        flow_cli.register(commands, commands.add_parser("pipeline").add_subparsers(dest="pipeline_command"))
+        args = parser.parse_args(["release", "publish", "--version", "1.3.0", "--dry-run",
+                                  "--content-dir", self.root])
+        with mock.patch.object(flow_cli, "_context", return_value=(cfg(), self.client, self.project)), \
+                mock.patch.object(delivery, "publish", side_effect=fake_publish):
+            args.handler(args)
+        self.assertEqual(seen["root"], self.root)
+
+
+class GeneratedWorkflows(unittest.TestCase):
+    def test_no_expression_is_interpolated_into_a_shell_script(self):
+        import re
+        from _raiz import RAIZ
+        base = os.path.join(RAIZ, ".bigbang", "pipeline")
+        offenders = []
+        for folder, _, files in os.walk(base):
+            for name in files:
+                if not re.search(r"\.ya?ml(\.tmpl)?$", name):
+                    continue
+                lines = open(os.path.join(folder, name), encoding="utf-8").read().split("\n")
+                in_run, indent = False, 0
+                for number, line in enumerate(lines, 1):
+                    stripped = line.lstrip()
+                    current = len(line) - len(stripped)
+                    if in_run and stripped and current <= indent:
+                        in_run = False
+                    match = re.match(r"^(\s*)(?:- )?run:\s*(.*)$", line)
+                    if match:
+                        indent = len(match.group(1))
+                        if match.group(2).strip() in ("|", ">", "|-", ">-"):
+                            in_run = True
+                        elif "${{" in match.group(2):
+                            offenders.append(f"{name}:{number}")
+                        continue
+                    if in_run and "${{" in line:
+                        offenders.append(f"{name}:{number}")
+        self.assertEqual(offenders, [])
+
+    def test_publish_reads_the_release_content_and_buttons_simulate_first(self):
+        from _raiz import RAIZ
+        flows_dir = os.path.join(RAIZ, ".bigbang", "pipeline", "core", "files", ".github", "workflows")
+        publish = open(os.path.join(flows_dir, "bb-publish.yml.tmpl"), encoding="utf-8").read()
+        self.assertEqual(publish.count('--content-dir "$RUNNER_TEMP/release"'), 4)
+        self.assertIn("^[0-9]+\\.[0-9]+\\.[0-9]+$", publish)
+        for name in ("bb-qa-reject.yml", "bb-publish-maintenance.yml"):
+            text = open(os.path.join(flows_dir, name), encoding="utf-8").read()
+            self.assertIn("dry_run:", text)
+            self.assertIn("default: true", text)
+
+
+class DryRuns(Base):
+    def test_qa_reject_dry_run_checks_and_changes_nothing(self):
+        delivery.candidate_ready(self.client, self.project, cfg(), "release/1.3.0", "v1.3.0-rc.1", now=NOW)
+        self.fake.issues[10]["labels"].append({"name": "qa:rejected"})
+        before = len(self.fake.issues)
+        delivery.correction_task(self.client, self.project, cfg(), 10, "x", actor="dona", now=NOW, dry_run=True)
+        self.assertEqual(len(self.fake.issues), before)
+        self.assertEqual(self.state(10), "QA")
+        self.fake.issues[10]["labels"] = [l for l in self.fake.issues[10]["labels"] if l["name"] != "qa:rejected"]
+        with self.assertRaises(BbError):
+            delivery.correction_task(self.client, self.project, cfg(), 10, "x", actor="dona", now=NOW, dry_run=True)
+
+    def test_maintenance_dry_run_merges_nothing(self):
+        self.fake.add_pull(80, "maintenance/30-readme", "main", title="docs: readme", labels=["pr:approved"])
+        self.fake.checks[self.fake.pulls[80]["head"]["sha"]] = [
+            {"name": "gate", "status": "completed", "conclusion": "success"}]
+        delivery.publish_maintenance(self.client, cfg(), 80, changed_paths=["README.md"], dry_run=True)
+        self.assertFalse(self.fake.pulls[80]["merged"])
 
 
 class Maintenance(Base):

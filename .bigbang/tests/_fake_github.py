@@ -82,7 +82,7 @@ class FakeGitHub:
         (r"pulls/(\d+)", ("GET", "_get_pull")), (r"pulls", ("GET", "_list_pulls")),
         (r"pulls/(\d+)/files", ("GET", "_pull_files")),
          (r"pulls/(\d+)/merge", ("PUT", "_merge_pull")),
-        (r"commits/([0-9a-f]+)/check-runs", ("GET", "_check_runs")),
+        (r"commits/([0-9a-z]+)/check-runs", ("GET", "_check_runs")),
         (r"compare/(.+)\.\.\.(.+)", ("GET", "_compare")),
         (r"milestones", ("GET", "_list_milestones")), (r"milestones", ("POST", "_create_milestone")),
         (r"milestones/(\d+)", ("PATCH", "_patch_milestone")),

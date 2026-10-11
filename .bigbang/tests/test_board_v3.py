@@ -162,6 +162,7 @@ class Moves(Base):
         self.fake.issues[12]["state"] = "closed"
         self.fake.add_pull(71, "feature/12-tela", "develop", state="closed", merged=True)
         self.fake.pulls[71]["files"] = [{"filename": path}]
+        self.project.set(10, "Candidate", "v1.2.0-rc.1")
         for target in ("Backlog", "Refinement", "Ready", "Selected", "In Progress"):
             previous = self.state(10)
             self.client.comment(10, r.render({"kind": "transition", "event_id": f"s-{target}", "issue": 10,
@@ -219,6 +220,24 @@ class Moves(Base):
                         verdict="approved", approver="codex-1", now=NOW)
         self.move(10, "Releasing", actor="claude-1", mode="flash")
 
+    def test_delegated_qa_rejection_needs_evidence_and_a_candidate(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        with self.assertRaises(BbError):  # nothing recorded: the button alone never rejects
+            self.move(10, "Rejected", actor="claude-1", mode="flash", reason="qa", return_to="In Progress")
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="rejected", approver="codex-1", now=NOW)
+        self.move(10, "Rejected", actor="claude-1", mode="flash", reason="qa", return_to="In Progress")
+
+    def test_without_a_current_candidate_no_verdict_counts(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")
+        self.project.values.get(10, {}).pop("Candidate", None)
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="codex-1", now=NOW)
+        with self.assertRaises(BbError):
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
+
     def test_going_back_without_rejection_also_withdraws_the_decisions(self):
         self.approve(10, "approved:backlog")
         self.move(10, "Backlog")
@@ -238,8 +257,10 @@ class Moves(Base):
         with self.assertRaises(BbError):
             self.move(10, "Ready", actor="claude-1")
 
-    def test_delivery_paths_read_only_prs_updated_since_the_selection(self):
-        self._epic_in_progress(["qa:agent"], "src/app.py")  # seeded at 11:00 (selection included)
+    def test_delivery_paths_read_only_prs_updated_since_the_children_exist(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")
+        for child in (11, 12):  # the sub-issues were born at the sprint start
+            self.fake.issues[child]["created_at"] = "2026-10-10T10:00:00Z"
         self.fake.pulls[71]["updated_at"] = "2026-10-10T11:30:00Z"
         self.fake.add_pull(72, "feature/12-tela", "develop", state="closed", merged=True)
         self.fake.pulls[72].update(files=[{"filename": "migrations/0001.sql"}], updated_at="2026-10-09T10:00:00Z")
@@ -250,8 +271,20 @@ class Moves(Base):
         self.fake.calls.clear()
         board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
                         verdict="approved", approver="codex-1", now=NOW)
-        self.move(10, "Releasing", actor="claude-1", mode="flash")  # the old migration PR is not this epic's
+        self.move(10, "Releasing", actor="claude-1", mode="flash")  # updated before any child existed
         self.assertLessEqual(sum(1 for method, path in self.fake.calls if path.startswith("pulls?")), 1)
+
+    def test_a_child_attached_late_still_counts_its_older_prs(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")
+        self.fake.issues[11]["created_at"] = "2026-10-01T10:00:00Z"  # an older issue attached as a sub-issue
+        self.fake.issues[12]["created_at"] = "2026-10-10T10:00:00Z"
+        self.fake.add_pull(73, "test/11-testes", "develop", state="closed", merged=True)
+        self.fake.pulls[73].update(files=[{"filename": "migrations/0003.sql"}], updated_at="2026-10-05T10:00:00Z")
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="codex-1", now=NOW)
+        with self.assertRaises(BbError):  # the migration makes the QA critical: the owner homologates
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
 
     def test_effects_happen_before_the_receipt(self):
         self.fake.failures.add(("PATCH", "issues/11"))
