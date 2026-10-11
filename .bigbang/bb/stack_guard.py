@@ -187,9 +187,12 @@ GRADLE_FILES = ("build.gradle", "build.gradle.kts")
 
 def dependency_files(root, *, include_framework=False):
     for current, folders, names in os.walk(root):
-        folders[:] = sorted(f for f in folders if f not in SKIPPED_FOLDERS or
-                            (include_framework and f == '.bigbang'))
-        if include_framework and to_posix(os.path.relpath(current, root)) == '.bigbang':
+        relative = to_posix(os.path.relpath(current, root))
+        in_framework = include_framework and (relative == '.bigbang' or relative.startswith('.bigbang/'))
+        # These directories ship in the framework tarball; a system's output/vendor exclusions do not apply.
+        folders[:] = sorted(f for f in folders if (f != '__pycache__' if in_framework else
+                            f not in SKIPPED_FOLDERS or (include_framework and f == '.bigbang')))
+        if include_framework and relative == '.bigbang':
             folders[:] = [f for f in folders if f != 'tests']  # development fixtures, never runtime packages
         for name in sorted(names):
             yield os.path.join(current, name), name
