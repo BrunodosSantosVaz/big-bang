@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "93ae0581f6ae01bf198bbcf5053f731bf5c97831",
+    "commit": "f97b75f23c1f32bc8178455c170e5d1484275a34",
     "branch": "master",
     "proposta": "wiki/251-framework-bootstrap"
   },
@@ -254,7 +254,7 @@
     }
   },
   "codigo": {
-    "commit": "39da568ec0255bcd0ee319e5018e9d7035450d18",
+    "commit": "5047bd08a20906a55ccbccabf71af970583937a2",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
