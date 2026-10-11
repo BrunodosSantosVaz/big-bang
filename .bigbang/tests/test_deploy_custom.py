@@ -1,4 +1,4 @@
-"""Project-owned deployment scripts receive only the immutable artifact manifest."""
+"""Project-owned deployment scripts receive a clean environment and immutable manifest."""
 import os
 import subprocess
 import sys
@@ -115,38 +115,54 @@ class AlvoPersonalizado(unittest.TestCase):
 
     def test_custom_scripts_do_not_receive_publication_or_project_secrets(self):
         self.configure_custom()
-        script = self.root / "scripts/deploy/saude.sh"
-        script.write_text(
+        script_body = (
             "#!/usr/bin/env bash\n"
             "for name in GH_TOKEN GITHUB_TOKEN ACTIONS_RUNTIME_TOKEN AWS_SECRET_ACCESS_KEY "
-            "CUSTOM_TOKEN LOG; do\n"
+            "CUSTOM_TOKEN LOG MANIFEST_LOG HOME BB GITHUB_REPOSITORY IMAGEM; do\n"
             "  if [[ -v $name ]]; then printf '%s=set\\n' \"$name\" >> script-env; "
             "else printf '%s=unset\\n' \"$name\" >> script-env; fi\n"
             "done\n"
-            "printf 'PATH=%s\\n' \"${PATH-unset}\" >> script-env\n",
+            "printf 'PATH=%s\\n' \"${PATH-unset}\" >> script-env\n"
+        )
+        for operation in SCRIPT_KEYS:
+            (self.root / f"scripts/deploy/{operation}.sh").write_text(script_body, encoding="utf-8")
+        gh = self.root / "fake-bin/gh"
+        gh.parent.mkdir(exist_ok=True)
+        gh.write_text(
+            "#!/usr/bin/env bash\n"
+            "while [ \"$#\" -gt 0 ]; do\n"
+            "  if [ \"$1\" = --output ]; then output=\"$2\"; shift 2; else shift; fi\n"
+            "done\n"
+            "printf '%s\\n' '" + MANIFEST + "' > \"$output\"\n",
             encoding="utf-8",
         )
-        result = self.run_deploy_script(
-            "alvos/personalizado/scripts/alvo.sh",
-            "saude",
-            "producao",
-            env=self.runner_environment(
-                GH_TOKEN="gh-secret-sentinel",
-                GITHUB_TOKEN="github-secret-sentinel",
-                ACTIONS_RUNTIME_TOKEN="runtime-secret-sentinel",
-                AWS_SECRET_ACCESS_KEY="aws-secret-sentinel",
-                CUSTOM_TOKEN="project-secret-sentinel",
-            ),
+        gh.chmod(0o755)
+        env = self.runner_environment(
+            GH_TOKEN="gh-secret-sentinel",
+            GITHUB_TOKEN="github-secret-sentinel",
+            ACTIONS_RUNTIME_TOKEN="runtime-secret-sentinel",
+            AWS_SECRET_ACCESS_KEY="aws-secret-sentinel",
+            CUSTOM_TOKEN="project-secret-sentinel",
         )
-        self.assertEqual(result.returncode, 0, result.stderr)
-        script_environment = (self.root / "script-env").read_text(encoding="utf-8")
-        for name in (
-            "GH_TOKEN", "GITHUB_TOKEN", "ACTIONS_RUNTIME_TOKEN", "AWS_SECRET_ACCESS_KEY",
-            "CUSTOM_TOKEN", "LOG",
+        wrapper = "alvos/personalizado/scripts/alvo.sh"
+        for operation, args in (
+            ("saude", ["producao"]),
+            ("publicar", ["producao", MANIFEST]),
+            ("migrar", ["producao", MANIFEST]),
+            ("voltar", ["producao", "v1.2.3"]),
         ):
-            with self.subTest(variable=name):
-                self.assertIn(f"{name}=unset\n", script_environment)
-        self.assertRegex(script_environment, r"(?m)^PATH=.+$")
+            with self.subTest(operation=operation):
+                (self.root / "script-env").unlink(missing_ok=True)
+                result = self.run_deploy_script(wrapper, operation, *args, env=env)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                script_environment = (self.root / "script-env").read_text(encoding="utf-8")
+                for name in (
+                    "GH_TOKEN", "GITHUB_TOKEN", "ACTIONS_RUNTIME_TOKEN", "AWS_SECRET_ACCESS_KEY",
+                    "CUSTOM_TOKEN", "LOG", "MANIFEST_LOG", "HOME", "BB", "GITHUB_REPOSITORY", "IMAGEM",
+                ):
+                    with self.subTest(variable=name):
+                        self.assertIn(f"{name}=unset\n", script_environment)
+                self.assertRegex(script_environment, r"(?m)^PATH=.+$")
 
     def test_staging_runs_migration_before_publish_and_health(self):
         self.configure_custom()

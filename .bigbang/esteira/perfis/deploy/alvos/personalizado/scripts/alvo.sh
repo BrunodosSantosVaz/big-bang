@@ -25,8 +25,18 @@ script_real=$(realpath -e -- "$script")
 [[ "$script_real" == "$raiz/"* && "$script_real" != "$raiz/.bigbang/"* ]] \
   || { echo "::error::script fora da raiz do projeto"; exit 2; }
 
+project_environment=("PATH=${PATH:-/usr/bin:/bin}")
+for variable in LANG LC_ALL TZ TMPDIR TMP TEMP; do
+  if [[ -n "${!variable:-}" ]]; then
+    project_environment+=("$variable=${!variable}")
+  fi
+done
+run_project_script() {
+  env -i "${project_environment[@]}" bash "$@"
+}
+
 if [[ "$operacao" == saude ]]; then
-  exec bash "$script" "$ambiente"
+  exec env -i "${project_environment[@]}" bash "$script" "$ambiente"
 fi
 
 tmp=$(mktemp -d)
@@ -73,8 +83,8 @@ done <"$manifesto"
   || { echo "::error::manifesto incompleto para deploy.servicos"; exit 2; }
 
 if [[ "$operacao" == voltar ]]; then
-  if bash "$script" "$ambiente" "$normalizado" "$versao"; then status=0; else status=$?; fi
+  if run_project_script "$script" "$ambiente" "$normalizado" "$versao"; then status=0; else status=$?; fi
 else
-  if bash "$script" "$ambiente" "$normalizado"; then status=0; else status=$?; fi
+  if run_project_script "$script" "$ambiente" "$normalizado"; then status=0; else status=$?; fi
 fi
 exit "$status"
