@@ -15,6 +15,8 @@ from _raiz import importar_bb
 importar_bb()
 from bb import board, config as config_module, gh, migrate, receipts  # noqa: E402
 from bb.errors import BbError  # noqa: E402
+from unittest.mock import patch
+from bb import cli
 
 UTC = datetime.timezone.utc
 NOW = datetime.datetime(2026, 10, 11, 12, 0, tzinfo=UTC)
@@ -71,6 +73,13 @@ class Base(unittest.TestCase):
 
 
 class Config(Base):
+    def test_snapshot_restores_config_and_agents_exactly(self):
+        before = (self.read("bigbang.toml"), self.read("AGENTS.md"))
+        snapshot = os.path.join(self.root, "config.json")
+        migrate.config_part(self.root, snapshot=snapshot)
+        migrate.config_part(self.root, snapshot=snapshot, rollback=True)
+        self.assertEqual((self.read("bigbang.toml"), self.read("AGENTS.md")), before)
+
     def test_dry_run_changes_nothing(self):
         before = self.read("bigbang.toml")
         report = migrate.config_part(self.root, dry_run=True)
@@ -104,6 +113,17 @@ class Config(Base):
 
 
 class Labels(Base):
+    def test_foreign_snapshot_refuses_before_any_write(self):
+        self.ready()
+        migrate.labels_part(self.client, self.root, snapshot=self.snapshot)
+        data = json.loads(self.read("labels.json"))
+        data["repository"] = "another/project"
+        self.write("labels.json", json.dumps(data))
+        before = dict(self.fake.labels)
+        with self.assertRaises(BbError):
+            migrate.labels_part(self.client, self.root, snapshot=self.snapshot, rollback=True)
+        self.assertEqual(self.fake.labels, before)
+
     def setUp(self):
         super().setUp()
         for name in ("epic", "task", "homologado", "revisao-humana", "tem-dependencia", "qa:approved"):
@@ -156,6 +176,16 @@ class Labels(Base):
 
 
 class Board(Base):
+    def test_legacy_labels_are_mapped_before_the_label_migration(self):
+        self.ready()
+        from bb import names
+        for issue in self.fake.issues.values():
+            issue["labels"] = [{"name": names.label(label["name"], "legacy")} for label in issue["labels"]]
+        report = self.run_part()
+        self.assertEqual(report["mapped"][12], "Selected")
+        self.assertEqual(report["mapped"][14], "Coding")
+        self.assertEqual(config_module.get(self.config(), "board.labels"), "legacy")
+
     def setUp(self):
         super().setUp()
         self.fake.add_issue(10, "Épico em refinamento", labels=["type:epic", "approved:refinement"])
@@ -234,6 +264,14 @@ class Board(Base):
 
 
 class Workflow(Base):
+    def test_snapshot_rollback_restores_the_original_configuration(self):
+        self.ready()
+        before = self.read("bigbang.toml")
+        snapshot = os.path.join(self.root, "workflow.json")
+        migrate.workflow_part(self.client, self.root, snapshot=snapshot)
+        migrate.workflow_part(self.client, self.root, snapshot=snapshot, rollback=True)
+        self.assertEqual(self.read("bigbang.toml"), before)
+
     def ready(self):
         migrate.config_part(self.root)
         text = self.read("bigbang.toml").replace('model = "three-boards"', 'model = "single"', 1)
@@ -265,6 +303,34 @@ class Workflow(Base):
         self.assertTrue(any("PROJECT_TOKEN" in step for step in report["owner_steps"]))
         migrate.workflow_part(self.client, self.root, rollback=True)
         self.assertEqual(config_module.get(self.config(), "workflow.model"), "epic-branch")
+
+
+class CLI(Base):
+    def test_config_alias_dry_run_never_writes_or_contacts_github(self):
+        before = self.read("bigbang.toml")
+        with patch("bb.gh.GitHub", side_effect=AssertionError("GitHub inesperado")):
+            self.assertEqual(cli.main(["--root", self.root, "migrar", "config", "--dry-run"]), 0)
+        self.assertEqual(self.read("bigbang.toml"), before)
+
+    def test_github_parts_default_to_the_plan_without_yes(self):
+        for part in ("board", "labels"):
+            with self.subTest(part=part), patch("bb.migrate." + part + "_part", return_value={}) as action:
+                self.assertEqual(cli.main(["--root", self.root, "migrate", part]), 0)
+                self.assertTrue(action.call_args.kwargs["dry_run"])
+
+    def test_real_run_without_snapshot_refuses_before_mutation(self):
+        with patch("bb.migrate.labels_part") as action:
+            self.assertNotEqual(cli.main(["--root", self.root, "migrate", "labels", "--yes"]), 0)
+            action.assert_not_called()
+
+    def test_config_roundtrip_from_cli(self):
+        before = self.read("bigbang.toml")
+        snapshot = os.path.join(self.root, "config.json")
+        args = ["--root", self.root, "migrate", "config", "--snapshot", snapshot]
+        self.assertEqual(cli.main(args), 0)
+        self.assertIn("[project]", self.read("bigbang.toml"))
+        self.assertEqual(cli.main(args + ["--rollback"]), 0)
+        self.assertEqual(self.read("bigbang.toml"), before)
 
 
 if __name__ == "__main__":
