@@ -426,5 +426,39 @@ class CLI(Base):
         self.assertEqual(self.read("bigbang.toml"), before)
 
 
+class RollbackOrder(Workflow):
+    """Undoing an earlier part while a later one is applied would orphan the later work (audit of #263/#265/#266)."""
+
+    def applied(self):
+        self.ready()  # config + single board
+        snapshot = os.path.join(self.root, "workflow.json")
+        migrate.workflow_part(self.client, self.root, snapshot=snapshot)
+        return snapshot
+
+    def test_config_and_board_rollbacks_are_refused_while_the_workflow_is_applied(self):
+        self.applied()
+        before = self.read("bigbang.toml")
+        for call in (lambda: migrate.config_part(self.root, snapshot="x.json", rollback=True),
+                     lambda: migrate.board_part(self.client, self.root, open_project=None, create_project=None,
+                                                snapshot="x.json", rollback=True)):
+            with self.assertRaises(BbError) as error:
+                call()
+            self.assertIn("desfaça antes", error.exception.message)
+        self.assertEqual(self.read("bigbang.toml"), before)
+
+    def test_workflow_rollback_is_refused_while_the_labels_are_migrated(self):
+        snapshot = self.applied()
+        self.write("bigbang.toml", self.read("bigbang.toml").replace('labels = "legacy"', 'labels = "v3"', 1)
+                   .replace('model = "grouping"', 'model = "grouping"', 1))
+        with self.assertRaises(BbError) as error:
+            migrate.workflow_part(self.client, self.root, snapshot=snapshot, rollback=True)
+        self.assertIn("desfaça antes", error.exception.message)
+
+    def test_rolling_back_in_reverse_order_works(self):
+        snapshot = self.applied()
+        migrate.workflow_part(self.client, self.root, snapshot=snapshot, rollback=True)
+        self.assertEqual(config_module.get(self.config(), "workflow.model"), "epic-branch")
+
+
 if __name__ == "__main__":
     unittest.main()

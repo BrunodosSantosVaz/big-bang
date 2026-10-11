@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "69a0d082b62c70eb72582067aa6db98fddae7732",
+    "commit": "cc86b874e24e93b58d002b49a7d26bc3060e6206",
     "branch": "master",
-    "proposta": "wiki/251-framework-pipeline"
+    "proposta": "wiki/integration"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -254,7 +254,7 @@
     }
   },
   "codigo": {
-    "commit": "f9832d9bff9df45ee56689171fd1f537a0e5e97d",
+    "commit": "31437eb75aa492da1699eb4e285eabdd5eec3c47",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -2153,7 +2153,7 @@
         ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md": "sha256:48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
         "AGENTS.md": "sha256:fc1133acaadd780072b09ec90bbf0502b27727242103f8b9a33630afda020c8b",
         "CLAUDE.md": "sha256:336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
-        ".bigbang/skills/bb-migrate/SKILL.md": "sha256:7c03894d6beaf34a40c695c8ac95e1b2c3b48864095040c99febf189d2e281c6"
+        ".bigbang/skills/bb-migrate/SKILL.md": "sha256:700dc19417dbfde4ef4e59cb30f40251ecf3ec77f131d2eec7c5c2f442034401"
       },
       "descricao": "Orientar Fundação, planejamento, execução, revisão, entrega e manutenção com contratos compartilhados entre as IAs."
     },
@@ -2646,11 +2646,11 @@
       "hashes": {
         ".bigbang/bb/framework.py": "sha256:1ecbe5ed20b6c26bc1c5de1c53cb71173002f1086f1020775549c6803b308f7a",
         ".bigbang/pipeline/framework/config.toml": "sha256:cefb67f9023d0a1df781f42980dcda03dfcc30caac33ea93c2b59248efeb7a89",
-        ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:fe2258f8489b5d490d3aef6b381068a743917d94b723162d285ef8c00db0b89b",
+        ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:2785942b7b484776b0f70b72477a2bc525a01998aea2088120c0db282e96fadd",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:907afd6987d2626d0858be2e52943cb4905eae90d8b094da63dc0691db0eac59",
         ".bigbang/pipeline/framework/scripts/testes-candidata.sh": "sha256:b9cc01977794173b5dc2a2bec28b7ca53eb0f8fa91798f10148d25efae546a0e",
         ".github/workflows/bb-framework-board-report.yml": "sha256:fdf21975274f0435b160985acf046a059a21f4cc9c1d81c9de3534533f461570",
-        ".github/workflows/bb-framework-candidate.yml": "sha256:c70a6aea4115745226400e18b1af997fda9402e404267dbf38a1b1130e9b10d5",
+        ".github/workflows/bb-framework-candidate.yml": "sha256:21ea5962768fb5952f781211396216e36c52ef79c2cc485ef9af5c4bb2acb83b",
         ".github/workflows/bb-framework-cleanup.yml": "sha256:66780bb097764c62f51cf9b185be998e672770680f4c5a228e446ab675048f8f",
         ".github/workflows/bb-framework-codeql.yml": "sha256:9fe01b4710f75f10ddde17a0a7cd2ef5873280cbdf32e2c1ff3e79a94eb90a56",
         ".github/workflows/bb-framework-controller.yml": "sha256:86450c3a42d4db1c0f88003084f33d707ba30a0b194b4ab6464bc53873b74cc4",
@@ -2777,10 +2777,13 @@
         ".bigbang/tests/test_migrate_v3.py:test_config_alias_dry_run_never_writes_or_contacts_github",
         ".bigbang/tests/test_migrate_v3.py:test_github_parts_default_to_the_plan_without_yes",
         ".bigbang/tests/test_migrate_v3.py:test_real_run_without_snapshot_refuses_before_mutation",
-        ".bigbang/tests/test_migrate_v3.py:test_config_roundtrip_from_cli"
+        ".bigbang/tests/test_migrate_v3.py:test_config_roundtrip_from_cli",
+        ".bigbang/tests/test_migrate_v3.py:test_config_and_board_rollbacks_are_refused_while_the_workflow_is_applied",
+        ".bigbang/tests/test_migrate_v3.py:test_workflow_rollback_is_refused_while_the_labels_are_migrated",
+        ".bigbang/tests/test_migrate_v3.py:test_rolling_back_in_reverse_order_works"
       ],
       "hashes": {
-        ".bigbang/bb/migrate.py": "sha256:f5aef0b077bf015cf40a06da321c15857b49af2529aee6150d4e86006f2dd348"
+        ".bigbang/bb/migrate.py": "sha256:80c1a8779c3872015b7e37dc9b37981a663bfc7f8667ec0dbe70e7fff15a9323"
       },
       "descricao": "Migração guiada opcional com ordem segura, consentimento explícito de escrita no GitHub e preservação do legado."
     }

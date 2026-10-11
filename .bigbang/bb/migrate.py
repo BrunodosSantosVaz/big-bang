@@ -99,11 +99,24 @@ def clean_agents(text):
     return FRAMEWORK_MODE.sub("", FRAMEWORK_QUOTE.sub("", text)).replace("\n\n\n", "\n\n")
 
 
+def _rollback_order(config, part):
+    """Parts are undone in reverse order: an earlier part cannot go back while a later one is still applied."""
+    applied = {"labels": config_module.get(config, "board.labels") == "v3",
+               "workflow": config_module.get(config, "workflow.model") == "grouping",
+               "board": config_module.get(config, "board.model") == "single"}
+    order = ("config", "board", "workflow", "labels")
+    later = [name for name in order[order.index(part) + 1:] if applied.get(name)]
+    if later:
+        raise BbError(f"volta fora de ordem: desfaça antes {', '.join(reversed(later))} (as partes voltam na ordem "
+                      "inversa: labels, workflow, board, config)", EXIT_INVALID_STATE)
+
+
 def config_part(root, *, snapshot=None, dry_run=False, rollback=False):
     """bigbang.toml with the English names, same behavior (epic-branch, three boards, legacy labels)."""
     text = _config_text(root)
     repository = config_module.get(config_module.load(root), "project.repository")
     if rollback:
+        _rollback_order(config_module.load(root), "config")
         data = _load_snapshot(snapshot, "config", repository)
         if not dry_run:
             _write_config(root, data["config_before"])
@@ -306,6 +319,7 @@ def board_part(client, root, *, open_project, create_project, snapshot=None, dry
     text = _config_text(root)
     config = config_module.load(root)
     if rollback:
+        _rollback_order(config, "board")
         data = _load_snapshot(snapshot, "board", config_module.get(config, "project.repository"))
         if not dry_run:
             restored = set_key(drop_key(text, "board", "number"), "board", "model", "three-boards")
@@ -381,6 +395,7 @@ def workflow_part(client, root, *, snapshot=None, dry_run=False, rollback=False)
     text = _config_text(root)
     config = config_module.load(root)
     if rollback:
+        _rollback_order(config, "workflow")
         data = _load_snapshot(snapshot, "workflow", config_module.get(config, "project.repository")) if snapshot else None
         if not dry_run:
             _write_config(root, data["config_before"] if data else set_key(text, "workflow", "model", "epic-branch"))

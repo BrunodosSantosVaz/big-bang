@@ -81,6 +81,16 @@ class FrameworkPipeline(unittest.TestCase):
             self.assertIn(job, gate)
         self.assertIn('--remote-visibility', gate)
 
+    def test_candidate_ready_runs_trusted_code_never_the_release_branch(self):
+        import re
+        from _raiz import RAIZ
+        text = open(os.path.join(RAIZ, ".bigbang", "pipeline", "framework", "files", ".github", "workflows",
+                                 "bb-candidate.yml.tmpl"), encoding="utf-8").read()
+        job = text[text.index("  candidate-ready:"):]
+        checkout = re.search(r"actions/checkout@[0-9a-f]{40}[^\n]*\n\s+with:\n((?:\s+[a-z-]+:[^\n]*\n)+)", job)
+        self.assertIn("ref: develop", checkout.group(1))  # the release branch is only data (--branch)
+        self.assertIn('--branch "$BRANCH"', job)
+
     def test_foreign_repository_refuses_the_framework_configuration(self):
         subprocess.run(['git', '-C', self.root, 'remote', 'set-url', 'origin',
                         'https://github.com/another/system.git'], check=True)
