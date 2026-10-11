@@ -10,7 +10,7 @@ A **v3** usa um quadro único de 15 estados, de Brainstorm a Done, com Rejected 
 
 Os modos são **normal**, **flash** e **autonomous**. Flash executa os testes ao fim das alterações e seleciona os afetados; mudanças estruturais exigem a suíte completa. Testes são escritos antes do código em todos os modos. Autonomous exige `autonomy.toml` e os controles previstos no contrato, com revisão independente.
 
-Identificadores e CLI usam inglês, com os nomes em português mantidos como aliases. Quem já usa a v2 pode adotar a v3 opcionalmente com `bb migrate` e a skill `bb-migrate`, por etapas com simulação, snapshot e volta.
+Identificadores e CLI usam inglês, com os nomes em português mantidos como aliases. Quem já usa a v2 pode adotar a v3 opcionalmente com `bb migrate` e a skill `bb-migrate`, por etapas com simulação, snapshot e volta. A etapa config preserva as seções do projeto ao remover a citação herdada do framework; correções na develop entram nos consumidores pela atualização oficial.
 
 A documentação oficial deste repositório público está na **[Wiki](https://github.com/BrunodosSantosVaz/big-bang/wiki)**. Repositórios privados conservam a documentação local. A validação inclui links, imagens e destinos de badges.
 

@@ -3,10 +3,10 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "6b6093a535cf858a2fa955ab58ddcaad9d5feb7b",
-    "commit": "97dce9f1c7fe878c7d9654d0fb184c710357f91b",
+    "base": "97dce9f1c7fe878c7d9654d0fb184c710357f91b",
+    "commit": "4d594910b1568529174e3a7e4c00d85251236846",
     "branch": "master",
-    "proposta": "wiki/integration"
+    "proposta": "bigbang/proposta-292-codex-1-quote"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -254,7 +254,7 @@
     }
   },
   "codigo": {
-    "commit": "241f44d77d26e4d6677cfe3f339255b2ce52f6cc",
+    "commit": "d857f66912706c6620823b3155888c4bc6b64bbf",
     "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
@@ -2743,6 +2743,9 @@
         ".bigbang/bb/migrate.py"
       ],
       "testes": [
+        ".bigbang/tests/test_migrate_v3.py:test_real_three_line_framework_quote_is_removed_and_rollback_is_exact",
+        ".bigbang/tests/test_migrate_v3.py:test_single_line_framework_quote_preserves_following_project_subsection",
+        ".bigbang/tests/test_migrate_v3.py:test_framework_quote_preserves_later_subsections_and_unrelated_quote",
         ".bigbang/tests/test_migrate_v3.py:test_existing_snapshot_is_never_overwritten",
         ".bigbang/tests/test_migrate_v3.py:test_snapshot_restores_config_and_agents_exactly",
         ".bigbang/tests/test_migrate_v3.py:test_dry_run_changes_nothing",
@@ -2783,7 +2786,7 @@
         ".bigbang/tests/test_migrate_v3.py:test_rolling_back_in_reverse_order_works"
       ],
       "hashes": {
-        ".bigbang/bb/migrate.py": "sha256:80c1a8779c3872015b7e37dc9b37981a663bfc7f8667ec0dbe70e7fff15a9323"
+        ".bigbang/bb/migrate.py": "sha256:3fa905bd5d93d4f9a4cb3169bdd722b76a9d733a149c9ab40662a1dedc642e98"
       },
       "descricao": "Migração guiada opcional com ordem segura, consentimento explícito de escrita no GitHub e preservação do legado."
     }
@@ -2808,13 +2811,13 @@
     }
   },
   "revisao": {
-    "codigo": "9c73feb3e357a1216011eaf64bf4b5d944827087",
-    "wiki_base": "b19883dc38964bc48e465d2999df03985300b2ba",
-    "independente": "aprovada",
-    "issue": 99,
-    "revisor": "revisar_wiki_208",
-    "wiki": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "publicada": true
+    "codigo": "d857f66912706c6620823b3155888c4bc6b64bbf",
+    "wiki_base": "97dce9f1c7fe878c7d9654d0fb184c710357f91b",
+    "independente": "pendente",
+    "issue": 292,
+    "revisor": "copilot-1",
+    "wiki": "4d594910b1568529174e3a7e4c00d85251236846",
+    "publicada": false
   },
   "social_preview": {
     "arquivo_wiki": "assets/social-preview.png",
