@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "d31cdc6c05383ffcf6110092beed2972566662d3",
+    "commit": "bf6cae7041ce078a81ef9869c11132d35f5a83d4",
     "branch": "master",
     "proposta": "wiki/251-framework-bootstrap"
   },
@@ -248,7 +248,7 @@
     }
   },
   "codigo": {
-    "commit": "f13504cd94af0dd02d916760efbb88eb3fe72a4f",
+    "commit": "a3975bf316d2fc5775dd86ae44ffae199a37447b",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -484,7 +484,7 @@
         ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect"
       ],
       "hashes": {
-        ".bigbang/bb/config.py": "sha256:e730392ee3e49e85f500ec6a2c47e8cba66ef7edbe64fa92d715134b0e12c961",
+        ".bigbang/bb/config.py": "sha256:cbf986d3cd253040fc5f074292c96bbb8b873fab7b23ce926d0aef73415352d2",
         ".bigbang/modelos/bigbang.toml.exemplo": "sha256:778ba08e5498600441fc495f8aa4f60d6df3fb995022aec32c6c75221cf8a702",
         ".bigbang/modelos/flags.toml": "sha256:3f4bf065d88d1b4b344e2ec8d24e536ef7433333bacb2cf974fc4194703a47ba"
       },
@@ -2540,6 +2540,7 @@
       ],
       "testes": [
         ".bigbang/tests/test_framework_pipeline.py:test_framework_config_is_v3_grouping_flash_and_universal",
+        ".bigbang/tests/test_framework_pipeline.py:test_trusted_base_can_read_bootstrap_config_before_workflow_activation",
         ".bigbang/tests/test_framework_pipeline.py:test_generate_framework_is_idempotent_guarded_and_preserves_legacy",
         ".bigbang/tests/test_framework_pipeline.py:test_foreign_repository_refuses_the_framework_configuration",
         ".bigbang/tests/test_framework_pipeline.py:test_init_removes_framework_file_and_f5_removes_its_workflows",
@@ -2561,7 +2562,7 @@
         ".bigbang/tests/test_launcher.py:test_compiled_profile_after_f2"
       ],
       "hashes": {
-        ".bigbang/bb/framework.py": "sha256:f9c0b165d91792be0a7e0337e1c77753e7af85d82dd76d89b82577742dd1a751",
+        ".bigbang/bb/framework.py": "sha256:9f1b5ef4f1fbaafaea6ec1cfd370e43e65117eaed2f011b36e581da75d65d0e4",
         ".bigbang/pipeline/framework/config.toml": "sha256:c57f7f196bc92b6ada7018e03771a385e8af381940c6905dc5cb87cce27aa37f",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:fe2258f8489b5d490d3aef6b381068a743917d94b723162d285ef8c00db0b89b",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:907afd6987d2626d0858be2e52943cb4905eae90d8b094da63dc0691db0eac59",
