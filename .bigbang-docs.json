@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "b5e7754e989fe054a2c9798e50fc69457251436b",
-    "commit": "7d221d24ba587bed3e4b16795387e58430cb557c",
+    "commit": "962cf517a925fb87c248c078f67e460b283d4508",
     "branch": "master",
     "proposta": "bigbang/proposta-177-alvo-personalizado"
   },
@@ -255,7 +255,7 @@
     }
   },
   "codigo": {
-    "commit": "23d2b923bf2a8252d031f06b6f3ebca9da3f3d98",
+    "commit": "27f46db42a32c204094612bca55e8808f0b5ef53",
     "versao": "3.0.1",
     "raizes": [
       ".bigbang/",
@@ -602,7 +602,7 @@
         ".bigbang/bb/config.py": "sha256:d3158d093d8bf3997e6fc5831cae86342cc9c23b3c454818e5dc778abd612cf2",
         ".bigbang/bb/names.py": "sha256:7efdd69e473b9282f07c8cc831f0e9a6cdb72640fc6e08ea17139e0db15ad4f0",
         ".bigbang/esteira/perfis/deploy/README.md": "sha256:9d7174376225426873f181ebccbd517cdb1282549aefe19385188c808a9305b8",
-        ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh": "sha256:ce4af79b7ae20c4f3595c057687da1c8e6fb5dfef14e3cd419551a539e07630e",
+        ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh": "sha256:3f88823267d8c70c9720627a0118f1e46c20691661e7964ff9f40b1155601d53",
         ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:421edf4993240f4188eda72421e7d314dd15d2148a6ab4a4216eb28811869869"
       },
       "descricao": "Resolver entregas por contratos instalados, distinguindo suporte implementado de integração reservada."
