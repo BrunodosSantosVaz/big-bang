@@ -276,7 +276,8 @@ class Launcher(unittest.TestCase):
         environment = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t", GIT_COMMITTER_NAME="t",
                            GIT_COMMITTER_EMAIL="t@t")
         for command in (["init", "-q"], ["add", "-A"], ["commit", "-q", "-m", "template"]):
-            subprocess.run(["git", "-C", self.root, *command], check=True, env=environment, capture_output=True)
+            subprocess.run(["git", "-c", "gc.auto=0", "-c", "maintenance.auto=false", "-C", self.root, *command],
+                           check=True, env=environment, capture_output=True)  # no background gc racing the cleanup
         head = subprocess.run(["git", "-C", self.root, "rev-parse", "HEAD"], check=True, capture_output=True,
                               text=True).stdout.strip()
         self.found(visibility="publico")
