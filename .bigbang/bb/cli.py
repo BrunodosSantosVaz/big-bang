@@ -36,6 +36,7 @@ def build_parser():
     gerar_parser.add_argument(*names.cli_option("--simular"), dest="simular", action="store_true", help="só mostra o que mudaria (diff), sem gravar")
     gerar_parser.add_argument(*names.cli_option("--esteira"), dest="esteira", action="store_true",
                               help="instala a esteira (.github/) pela primeira vez (Fundação F5)")
+    gerar_parser.add_argument("--framework", action="store_true", help="gera a esteira própria na origem")
     gerar_parser.set_defaults(handler=_gerar)
 
     init_parser = commands.add_parser(**names.cli_name(None, "init"), help="Fundação F0: cria o bigbang.toml e liga o projeto ao GitHub")
@@ -133,6 +134,8 @@ def build_parser():
     checksums_parser.add_argument(*names.cli_option("--escrever"), dest="escrever", action="store_true", help="grava o CHECKSUMS com o estado atual")
     checksums_parser.set_defaults(handler=_checksums)
 
+    from . import framework
+    framework.register(commands)
     return parser
 
 
@@ -368,7 +371,9 @@ def _checksums(args):
 
 
 def _gerar(args):
-    plan = generator.build_plan(args.raiz, install_pipeline=args.esteira)
+    if args.framework and args.esteira:
+        raise BbError("--framework e --pipeline são mutuamente exclusivos", EXIT_USAGE)
+    plan = generator.build_plan(args.raiz, install_pipeline=args.esteira, framework=args.framework)
     pending = generator.changes(plan, args.raiz)
     if not pending:
         print("Camada gerada em dia: nada a mudar.")

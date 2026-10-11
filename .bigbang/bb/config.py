@@ -26,7 +26,7 @@ HEALTH_PATH = re.compile(r"^/\S*$")
 
 DEPENDABOT_ECOSYSTEMS = ("npm", "pip", "uv", "gomod", "cargo", "maven", "gradle", "composer", "nuget", "bundler",
                         "docker", "pub", "mix", "swift", "terraform")
-BUILD_SYSTEMS = ("windows-x64", "windows-arm64", "linux-x64", "linux-arm64", "macos-x64", "macos-arm64", "android")
+BUILD_SYSTEMS = ("windows-x64", "windows-arm64", "linux-x64", "linux-arm64", "macos-x64", "macos-arm64", "android", "universal")
 DEPLOY_PLATFORMS = ("linux/amd64", "linux/arm64")
 COMMAND_KEYS = ("instalar", "lint", "tipos", "testes", "testes_aceite", "arquitetura", "cobertura", "build",
                 "testes_alterados")
@@ -447,6 +447,10 @@ def load(root, required=True):
     """Load and validate bigbang.toml. Returns None when the file does not exist and is not required."""
     path = config_path(root)
     if not os.path.exists(path):
+        from . import framework
+        own = framework.load(root, bootstrap=required)
+        if own is not None:
+            return own
         if required:
             raise BbError("bigbang.toml não encontrado: o projeto ainda não foi fundado (rode bb init)",
                           EXIT_INVALID_CONFIG)

@@ -436,6 +436,10 @@ def _release_publish(args):
     script = os.path.join(args.raiz, ".bigbang", "esteira", "perfis", profile_dir, "scripts", "promover.sh")
 
     def promote(rc_tag, tag, target_sha):
+        if config.get("_framework"):
+            from . import framework
+            framework.promote(args.raiz, rc_tag, tag, target_sha)
+            return
         completed = subprocess.run(["bash", script], cwd=args.raiz, check=False,
                                    env={**os.environ, "RC_TAG": rc_tag, "TAG": tag, "TARGET_SHA": target_sha})
         if completed.returncode:
