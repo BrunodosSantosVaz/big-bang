@@ -93,6 +93,19 @@ def _load_snapshot(snapshot, part=None, repository=None):
     return data
 
 
+def _save_project_number(snapshot, number, repository):
+    """Record the created Project so an owner can disable its workflows and safely resume."""
+    if not snapshot:
+        return
+    data = _load_snapshot(snapshot, "board", repository)
+    data["project_number"] = number
+    try:
+        with open(snapshot, "w", encoding="utf-8") as handle:
+            json.dump(data, handle, ensure_ascii=False, indent=2, sort_keys=True)
+    except OSError as exc:
+        raise BbError("não foi possível atualizar o snapshot do quadro: " + str(exc), EXIT_USAGE)
+
+
 # --- config ----------------------------------------------------------------------------------------------------------
 
 def clean_agents(text):
@@ -313,7 +326,7 @@ def _facts(client, issue, candidate_tags, config, now):
 
 
 def board_part(client, root, *, open_project, create_project, snapshot=None, dry_run=False, rollback=False,
-               now=None):
+               project_number=None, now=None):
     """Snapshot of the three boards, single Project, every card mapped by evidence with a migration receipt, then
     the switch in bigbang.toml. The old boards are left untouched."""
     now = now or datetime.datetime.now(datetime.timezone.utc)
@@ -353,10 +366,27 @@ def board_part(client, root, *, open_project, create_project, snapshot=None, dry
               "next": "abra o PR com o bigbang.toml; arquive os painéis antigos depois de um ciclo sem divergência"}
     if dry_run:
         return report
-    attempt = uuid.uuid4().hex
-    _save(snapshot, {"attempt": attempt, "part": "board", "repository": config_module.get(config, "project.repository"), "boards": boards, "items": items, "mapped": {str(k): v for k, v in mapped.items()},
-                     "at": _iso(now)})
-    number, project = create_project()
+    repository = config_module.get(config, "project.repository")
+    if project_number is not None:
+        data = _load_snapshot(snapshot, "board", repository)
+        if data.get("boards") != boards or data.get("mapped") != {str(k): v for k, v in mapped.items()}:
+            raise BbError("o mapa ou os quadros mudaram desde o snapshot; não é seguro retomar", EXIT_INVALID_STATE)
+        if data.get("project_number") not in (None, project_number):
+            raise BbError("o Project informado não corresponde ao snapshot", EXIT_INVALID_STATE)
+        attempt = data["attempt"]
+        number, project = project_number, open_project(project_number)
+    else:
+        attempt = uuid.uuid4().hex
+        _save(snapshot, {"attempt": attempt, "part": "board", "repository": repository, "boards": boards,
+                         "items": items, "mapped": {str(k): v for k, v in mapped.items()}, "at": _iso(now)})
+        number, project = create_project()
+        _save_project_number(snapshot, number, repository)
+    active = [workflow for workflow in project.workflows() if workflow.get("enabled")]
+    if active:
+        workflow_names = ", ".join(workflow.get("name", "(sem nome)") for workflow in active)
+        raise BbError(f"Project #{number} tem workflows embutidas ativas ({workflow_names}). Desative-as na interface "
+                      f"do Project, em Workflows, e retome com `bb migrate board --project {number} --snapshot "
+                      f"{snapshot} --yes`.", EXIT_INVALID_STATE)
     board.ensure_fields(project)
     _, policy_hash = policy.snapshot({"mode": policy.mode(config), "limits": policy.limits(config)})
     for card, state in sorted(mapped.items()):
@@ -365,7 +395,17 @@ def board_part(client, root, *, open_project, create_project, snapshot=None, dry
             "kind": "transition", "event_id": f"migrate-{attempt}-{card}", "issue": card,
             "actor": MIGRATION_ACTOR, "at": _iso(now), "from": initial, "to": state, "policy": policy_hash}))
         project.add(card)
-        project.set(card, "Status", board.current_state(client, card, {owner}))
+        project.set(card, "Status", state)
+    observed = project.items(refresh=True)
+    for card, state in sorted(mapped.items()):
+        if observed.get(card, {}).get("Status") != state:
+            project.set(card, "Status", state)
+    confirmed = project.items(refresh=True)
+    mismatches = {card: {"esperado": state, "observado": confirmed.get(card, {}).get("Status")}
+                  for card, state in mapped.items() if confirmed.get(card, {}).get("Status") != state}
+    if mismatches:
+        raise BbError("confirmação final de Status divergiu; bigbang.toml permanece nos três quadros: "
+                      + json.dumps(mismatches, ensure_ascii=False, sort_keys=True), EXIT_INVALID_STATE)
     migrated = set_key(text, "board", "model", "single")
     for role in (PLANNING, EXECUTION, BUGS):
         migrated = drop_key(migrated, "board", role)

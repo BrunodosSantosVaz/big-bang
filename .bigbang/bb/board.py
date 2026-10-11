@@ -473,6 +473,12 @@ class ProjectGraphQL:
         return {name: {"type": spec["type"], "options": list(spec["options"])}
                 for name, spec in (self._fields or self._load_fields()).items()}
 
+    def workflows(self):
+        """Read the Project's built-in automation workflows without changing them."""
+        data = self.graphql("query($id:ID!){ node(id:$id){ ... on ProjectV2 { workflows(first:50){ "
+                            "nodes{ name enabled } } } } }", {"id": self._project()})
+        return list(((data.get("node") or {}).get("workflows") or {}).get("nodes") or [])
+
     def ensure_field(self, name, field_type, options=None):
         fields = self._fields or self._load_fields()
         colors = ["GRAY", "BLUE", "GREEN", "YELLOW", "ORANGE", "RED", "PINK", "PURPLE"]
@@ -524,7 +530,9 @@ class ProjectGraphQL:
                 return self._items
             cursor = items["pageInfo"]["endCursor"]
 
-    def items(self):
+    def items(self, refresh=False):
+        if refresh:
+            self._items = None
         return {number: dict(item["values"]) for number, item in (self._items or self._load_items()).items()}
 
     def add(self, number):
