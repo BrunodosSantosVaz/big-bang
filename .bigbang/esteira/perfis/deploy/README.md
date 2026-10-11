@@ -18,19 +18,20 @@ a sintaxe dos nomes. `bb gerar` e `bb verificar` conferem a disponibilidade e a 
 framework instalado, antes de planejar alterações de arquivos. Um nome sintaticamente válido não é prova de
 suporte. Não há acesso ao servidor nessa conferência.
 
-## Disponível na 1.5.0
+## Alvos e formatos disponíveis
 
 | Categoria | Implementado | Reservado (não gera esteira) |
 | --- | --- | --- |
-| Alvo | `vps-docker`, `tsuru` (um serviço OCI por app) | `personalizado`, `aws`, `paas` |
+| Alvo | `vps-docker`, `tsuru` (um serviço OCI por app), `personalizado` (scripts do projeto) | `aws`, `paas` |
 | Formato | `imagem` (identidade por digest) | `pacote`, `estatico` (identidade por SHA-256) |
 
 O [épico #174](https://github.com/BrunodosSantosVaz/big-bang/issues/174) entregou o catálogo (#175), composição de
 credenciais, preparação e acesso à rede (#176) e Tsuru por imagem/job manual (#178), com migração na
-inicialização para SQLite (#187). Personalizado (#177), pacotes
-e arquivos (#179) e serviço AWS concreto (#180) continuam reservados. A presença de uma reserva documenta a
-intenção, sem prometer funcionalidade. Entrega de deploy por hashes permanece recusada enquanto o perfil
-implementar somente imagens; o perfil compilado conserva sua própria promoção de binários por hashes.
+inicialização para SQLite (#187). O alvo `personalizado` (#177) executa scripts mantidos pelo projeto usando o
+manifesto de imagem imutável. Pacotes e arquivos (#179) e serviço AWS concreto (#180) continuam reservados. A
+presença de uma reserva documenta a intenção, sem prometer funcionalidade. Entrega de deploy por hashes permanece
+recusada enquanto o perfil implementar somente imagens; o perfil compilado conserva sua própria promoção de
+binários por hashes.
 
 O [runbook do Tsuru](https://github.com/BrunodosSantosVaz/big-bang/wiki/Historico-bigbang-docs-deploy-tsuru) documenta API, apps/jobs por ambiente, importação por
 digest, `TSURU_MIGRACAO=job` (padrão) ou `inicializacao` e limites dessa implementação. Neste último modo,
@@ -60,6 +61,35 @@ Listas de variáveis/segredos só aceitam nomes de ambiente em maiúsculas e nã
 As Actions injetam somente essas referências, conforme o alvo. Os valores ficam nas variáveis e segredos dos
 ambientes do GitHub. As Actions de VPS preservam seu comportamento para os projetos existentes.
 
+## Alvo `personalizado`
+
+O alvo usa somente o formato `imagem`, identificado por digest SHA-256. Configure os quatro scripts relativos à
+raiz do projeto, fora de `.bigbang`; devem existir, não estar vazios e terminar em `.sh`:
+
+```toml
+[entrega]
+perfil = "deploy"
+alvo = "personalizado"
+
+[deploy]
+script_publicar = "scripts/deploy/publicar.sh"
+script_migrar = "scripts/deploy/migrar.sh"
+script_saude = "scripts/deploy/saude.sh"
+script_voltar = "scripts/deploy/voltar.sh"
+variaveis_personalizado = ["DEPLOY_APP"]
+segredos_personalizado = ["DEPLOY_TOKEN"]
+```
+
+Os scripts recebem argumentos posicionais: `publicar` e `migrar` recebem `<ambiente> <manifesto>`, `saude` recebe
+`<ambiente>`, e `voltar` recebe `<ambiente> <manifesto> <versao>`. O manifesto é um arquivo temporário com uma linha
+`servico=imagem@sha256:<64 hex>` por serviço. O fluxo valida que todos os serviços aparecem uma vez e recusa tags
+mutáveis, caminhos fora do projeto ou ausentes. No rollback, o framework baixa o `imagem.txt` da release escolhida
+e passa o manifesto verificado; não executa migração. Falha ou ausência em qualquer script impede o próximo passo.
+
+`variaveis_personalizado` e `segredos_personalizado` aceitam somente nomes, nunca valores. O framework injeta apenas
+essas referências nos jobs de deploy do GitHub. Os scripts devem promover o manifesto recebido sem reconstruir ou
+substituir a identidade imutável do artefato.
+
 ## Contrato de um formato
 
 Cada pasta `artefatos/<nome>/` tem `artefato.toml`:
@@ -88,7 +118,7 @@ obsoletos; arquivos do projeto e workflows sem marca gerada permanecem próprios
 
 Novos adaptadores **do framework** chegam por PR e release do Big Bang, com contrato, implementação, testes,
 documentação e checksums. O projeto consumidor recebe a versão com `bb atualizar`; não edita `.bigbang/`.
-Personalizações do projeto terão o alvo `personalizado`, quando estiver implementado.
+O alvo `personalizado` executa os scripts do projeto sem adicionar arquivos a `.bigbang/`.
 
 Destinos AWS precisam de adaptadores concretos por serviço. Acesso via VPN ou runner próprio é um aspecto da rede,
 não um formato de artefato nem um provedor. Produção e rollback mantêm os portões humanos existentes; nenhuma

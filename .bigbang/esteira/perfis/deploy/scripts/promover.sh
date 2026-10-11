@@ -18,12 +18,17 @@ IFS=',' read -r -a itens <<<"$imagem"
 for item in "${itens[@]}"; do
   [[ "$item" =~ @sha256:[0-9a-f]{64}$ ]] || { echo "::error::a candidata $rc não registra um digest ($item): nada foi publicado"; exit 1; }
 done
-alvo=".bigbang/esteira/perfis/deploy/alvos/$("${BB_CMD[@]}" config get entrega.alvo)/scripts/alvo.sh"
+alvo_nome=$("${BB_CMD[@]}" config get entrega.alvo)
+alvo=".bigbang/esteira/perfis/deploy/alvos/$alvo_nome/scripts/alvo.sh"
 
 bash "$alvo" migrar producao "$imagem"
 bash "$alvo" publicar producao "$imagem"
 saude="ok"
-bash "$alvo" saude producao || { saude="FALHOU"; echo "::error::produção não respondeu ao health check depois de publicar $tag: avise o dono (Voltar versão)"; }
+if ! bash "$alvo" saude producao; then
+  saude="FALHOU"
+  echo "::error::produção não respondeu ao health check depois de publicar $tag: avise o dono (Voltar versão)"
+  [ "$alvo_nome" != personalizado ] || exit 1
+fi
 
 { git show "$alvo_sha:CHANGELOG.md" 2>/dev/null || true; } | awk -v v="$v" '
   index($0, "## [" v "]") == 1 { dentro = 1; next }
