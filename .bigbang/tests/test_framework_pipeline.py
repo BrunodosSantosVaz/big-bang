@@ -166,6 +166,17 @@ class FrameworkPipeline(unittest.TestCase):
             self.assertEqual(pipeline_cli._docs(args), 0)
         self.assertEqual(audit.call_args.args[1]['paineis']['planejamento'], 28)
 
+    def test_documentation_cli_keeps_the_framework_board_audit(self):
+        from types import SimpleNamespace
+        from bb import documentation_cli
+        args = SimpleNamespace(raiz=RAIZ, wiki=None, publicada=False, comunidade=True)
+        own = config.load(self.root)
+        with patch.object(documentation_cli.documentation, 'validate', return_value=[]), \
+                patch.object(documentation_cli.config_module, 'load', return_value=own), \
+                patch.object(documentation_cli.community_public, 'verify', return_value=[]) as audit:
+            self.assertEqual(documentation_cli._validate(args), 0)
+        self.assertEqual(audit.call_args.args[1]['paineis']['planejamento'], 28)
+
     def test_callbacks_and_candidate_ci_use_the_framework_namespace(self):
         plan = generator.build_plan(self.root, framework=True)
         merge = plan.expected['.github/workflows/bb-framework-merge-pr.yml']
