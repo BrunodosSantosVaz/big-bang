@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "6b6093a535cf858a2fa955ab58ddcaad9d5feb7b",
+    "commit": "97dce9f1c7fe878c7d9654d0fb184c710357f91b",
     "branch": "master",
     "proposta": "wiki/integration"
   },
@@ -254,7 +254,7 @@
     }
   },
   "codigo": {
-    "commit": "73aeb15734aada45ef9bed3537d704c9e96b993d",
+    "commit": "241f44d77d26e4d6677cfe3f339255b2ce52f6cc",
     "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
@@ -2645,7 +2645,7 @@
       ],
       "hashes": {
         ".bigbang/bb/framework.py": "sha256:1ecbe5ed20b6c26bc1c5de1c53cb71173002f1086f1020775549c6803b308f7a",
-        ".bigbang/pipeline/framework/config.toml": "sha256:e8c3c7578b3d880ba05499eddf41b7251c276f6db15e62ae47038f5dc21e6fed",
+        ".bigbang/pipeline/framework/config.toml": "sha256:86e8f4405178dd302d6e6a9ef54403e96a49e43dc4a5fb751e76c331850aa0d9",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:49709060fa19fa6c0e86e624df856dac13ec41e02eb64d3e4f763d6654b0f810",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:0245df537e46101bd142701cd485913c8558ed61a262efdae7fd9a2e229dc8d4",
         ".bigbang/pipeline/framework/scripts/testes-candidata.sh": "sha256:b9cc01977794173b5dc2a2bec28b7ca53eb0f8fa91798f10148d25efae546a0e",
@@ -2662,7 +2662,7 @@
         ".github/workflows/bb-framework-publish.yml": "sha256:23f4dca0f67161c6d9213e57ef35dd303b070873e96d8b749e554abe7cc3b19a",
         ".github/workflows/bb-framework-qa-reject.yml": "sha256:75511a3098c9e3ad5d89e679200c63140c9e5e28687f71490d8c7582d280b189",
         ".github/workflows/bb-framework-start-sprint.yml": "sha256:9f20dcc8a7e95f75c05465081481aad72bf31012f1305ad812a77c29021e9f9b",
-        ".bigbang-framework.toml": "sha256:e8c3c7578b3d880ba05499eddf41b7251c276f6db15e62ae47038f5dc21e6fed"
+        ".bigbang-framework.toml": "sha256:86e8f4405178dd302d6e6a9ef54403e96a49e43dc4a5fb751e76c331850aa0d9"
       },
       "descricao": "Suporte à esteira exclusiva da origem, namespace próprio e preservação do template não fundado."
     },
