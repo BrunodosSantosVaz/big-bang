@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v2.0.1 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-start-sprint.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v3.0.0 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-start-sprint.yml. Não edite: personalize em bigbang.toml.
 # Button "Start sprint" (ADR-0022): for every epic in Selected, the acceptance-test issue, the tasks and the docs
 # issue as sub-issues with native dependencies, the test branch from develop and the epic in In Progress.
 name: Start sprint

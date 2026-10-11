@@ -2,7 +2,7 @@
 name: bb-migrate
 description: Use para migrar um projeto existente para a v3. Simula config, board, workflow e labels, preserva snapshots e histórico, conduz um PR por parte e deixa os controles do GitHub com o dono.
 ---
-<!-- Gerado pelo Big Bang v2.0.1 a partir de .bigbang/skills/bb-migrate/SKILL.md. Não edite: personalize em bigbang.toml. -->
+<!-- Gerado pelo Big Bang v3.0.0 a partir de .bigbang/skills/bb-migrate/SKILL.md. Não edite: personalize em bigbang.toml. -->
 
 # Migrar um projeto para a v3
 
