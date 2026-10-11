@@ -3,10 +3,10 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "dee6eab5dcbe66a2ef5e66884edd5b5f96b006b0",
-    "commit": "9deba460f33889838b614a5f68ef7b48316bf315",
+    "base": "b5e7754e989fe054a2c9798e50fc69457251436b",
+    "commit": "262abdbc156103ccdbfbb7359a4809bafd59bb83",
     "branch": "master",
-    "proposta": "bigbang/proposta-307-cut-release-git-identity"
+    "proposta": "bigbang/proposta-177-alvo-personalizado"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -255,7 +255,7 @@
     }
   },
   "codigo": {
-    "commit": "433c238ccc2de0c5cb9196965e98ec228a7f9e64",
+    "commit": "79e4263998323b0c9ecb64721e1c40666bd43efb",
     "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
