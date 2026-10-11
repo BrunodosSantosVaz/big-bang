@@ -64,6 +64,18 @@ class FrameworkStack(unittest.TestCase):
                 self.problems()
         self.assertIn('documento obrigatório ausente: STACK.md', error.exception.message)
 
+    def test_a_declared_stack_keeps_the_normal_approved_package_table(self):
+        self.manifest['paginas']['STACK.md'] = 'Stack'
+        self.write_manifest()
+        self.write('Stack.md', '<!-- bb:dependencias:inicio -->\n'
+                   '| approved-package | npm |\n<!-- bb:dependencias:fim -->\n')
+        self.write('package.json', json.dumps({'dependencies': {'approved-package': '1.0.0'}}))
+        from unittest.mock import patch
+        with patch('bb.documentation.checkout', return_value=Path(self.root)):
+            self.assertEqual(self.problems(), [])
+            self.write('package.json', json.dumps({'dependencies': {'unapproved-package': '1.0.0'}}))
+            self.assertTrue(any('não está na tabela' in problem for problem in self.problems()))
+
     def test_standalone_framework_stack_guard_uses_the_same_checks(self):
         args = SimpleNamespace(raiz=RAIZ, dados=self.root)
         self.assertEqual(pipeline_cli._stack_guard(args), 0)
