@@ -46,7 +46,8 @@ def build_parser():
     init_parser.add_argument(*names.cli_option("--repositorio"), dest="repositorio", help="dono/nome (padrão: o remote origin)")
     init_parser.add_argument(*names.cli_option("--visibilidade"), dest="visibilidade", choices=("privado", "publico"), default="privado")
     init_parser.add_argument(*names.cli_option("--licenca"), dest="licenca", default="", help="identificador SPDX (obrigatório se público)")
-    init_parser.add_argument(*names.cli_option("--modo"), dest="modo", choices=("padrao", "flash"), default="padrao", help="modo de trabalho (pode mudar depois)")
+    init_parser.add_argument(*names.cli_option("--modo"), dest="modo", choices=("normal", "padrao", "flash", "autonomous"), default="normal", help="modo de trabalho: normal (padrao), flash ou autonomous (pode mudar depois)")
+    init_parser.add_argument(*names.cli_option("--fluxo"), dest="fluxo", choices=("grouping", "epic-branch"), default="grouping", help="fluxo de trabalho: grouping (v3, quadro único) ou epic-branch (anterior)")
     init_parser.add_argument(*names.cli_option("--sem-github"), dest="sem_github", action="store_true", help="não cria label nem issue no GitHub")
     init_parser.add_argument(*names.cli_option("--simular"), dest="simular", action="store_true", help="só mostra o plano")
     init_parser.set_defaults(handler=_init)
@@ -140,7 +141,7 @@ def build_parser():
 
 def _init(args):
     options = init_module.resolve_options(args.raiz, args.nome, args.slug, args.dono, args.repositorio,
-                                          args.visibilidade, args.licenca, args.modo)
+                                          args.visibilidade, args.licenca, args.modo, args.fluxo)
     steps = init_module.plan_steps(options, with_github=not args.sem_github)
     if args.simular:
         print("Simulação do bb init para " + options["repositorio"] + ":")
@@ -155,7 +156,8 @@ def _init(args):
         print(f"feito: {step}")
     if issue:
         print(f"Issue de F0: {issue}")
-    print("Próximo passo: revisar o diff, commitar numa branch fundacao/<n>-f0 e abrir o PR para a develop.")
+    prefix = "foundation" if options["fluxo"] == "grouping" else "fundacao"
+    print(f"Próximo passo: revisar o diff, commitar numa branch {prefix}/<n>-f0 e abrir o PR para a develop.")
     return EXIT_OK
 
 

@@ -25,9 +25,13 @@ def repository(root):
     return match[1] if match else None
 
 
-def load(root, *, required=False):
+def load(root, *, required=False, bootstrap=False):
     from . import config
     path = os.path.join(root, CONFIG)
+    if bootstrap and not os.path.isfile(path) and repository(root) == ORIGIN:
+        # The trusted base must validate the activation PR before the exclusive root file exists.
+        # Optional template reads and explicit generation never use this bootstrap fixture.
+        path = os.path.join(root, '.bigbang/pipeline/framework/config.toml')
     if not os.path.isfile(path):
         if required:
             raise BbError(f'falta {CONFIG}', EXIT_INVALID_CONFIG)
@@ -71,19 +75,54 @@ def problems(root):
 
 def prepare(root, version):
     """After write-version: regenerate the version, client snapshots, own workflows and integrity manifest."""
-    from . import checksums, generator, init
+    from . import checksums, documentation, generator, init
     if not re.fullmatch(r'\d+\.\d+\.\d+', version):
         raise BbError('versão inválida: use x.y.z', EXIT_INVALID_STATE)
     load(root, required=True)
+    import json
+    manifest = os.path.join(root, ".bigbang-docs.json")
+    data = documentation.load(root)
+    try:
+        covered = {source for feature in data['funcionalidades'] for source in feature['fontes']}
+        actual = set(documentation.inventory(root, data))
+        # Integrity also includes untracked sources. They cannot become trusted merely by preparing a version.
+        excluded = data['codigo'].get('excluir', [])
+        extensions = data['codigo'].get('excluir_extensoes', [])
+        from pathlib import Path
+        for relative, _ in checksums.framework_files(root):
+            source = '.bigbang/' + relative
+            if (Path(source).suffix not in extensions and
+                    not any(source == name or (name.endswith('/') and source.startswith(name)) for name in excluded)):
+                actual.add(source)
+        missing = actual - covered
+        if missing or not actual or not covered:
+            raise BbError('inventário documental incompleto antes do corte: ' + ', '.join(sorted(missing)),
+                          EXIT_INVALID_STATE)
+        for feature in data["funcionalidades"]:
+            for source in feature["fontes"]:
+                with open(documentation.safe_path(root, source), "rb") as handle:
+                    digest = "sha256:" + hashlib.sha256(handle.read()).hexdigest()
+                if feature["hashes"].get(source) != digest:
+                    raise BbError("documentação desatualizada antes do corte: " + source, EXIT_INVALID_STATE)
+    except (OSError, KeyError, TypeError, ValueError) as error:
+        raise BbError('inventário documental inválido antes do corte: ' + str(error), EXIT_INVALID_STATE) from error
     write_text(os.path.join(root, '.bigbang/VERSION'), version + '\n')
     path = os.path.join(root, CONFIG)
     write_text(path, init.set_value(read_text(path), 'bigbang', 'version', version))
     example = os.path.join(root, '.bigbang/modelos/bigbang.toml.exemplo')
     write_text(example, init.set_value(read_text(example), 'bigbang', 'versao', version))
+    fixture = os.path.join(root, '.bigbang/pipeline/framework/config.toml')
+    if os.path.isfile(fixture):
+        write_text(fixture, init.set_value(read_text(fixture), 'bigbang', 'version', version))
     # Launch the script from this checkout: its helpers must never copy the main checkout or its worktrees.
     subprocess.run([sys.executable, os.path.join(root, '.bigbang/tests/atualizar_esperado.py')],
                    cwd=root, check=True)
     generator.apply(generator.build_plan(root, framework=True), root)
+    for feature in data["funcionalidades"]:
+        for source in feature["fontes"]:
+            with open(os.path.join(root, source), "rb") as handle:
+                feature["hashes"][source] = "sha256:" + hashlib.sha256(handle.read()).hexdigest()
+    write_text(manifest, json.dumps(data, ensure_ascii=False, indent=2) + "\n")
     checksums.write(root)
 
 

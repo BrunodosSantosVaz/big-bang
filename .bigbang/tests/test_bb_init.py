@@ -84,11 +84,12 @@ class Init(unittest.TestCase):
         self.assertEqual(codigo, EXIT_OK, saida)
         with open(os.path.join(self.raiz, "bigbang.toml"), "rb") as arquivo:
             config = tomllib.load(arquivo)
-        self.assertEqual(config["projeto"], {"nome": "Sistema Ação X", "slug": "sistema-acao-x", "dono": "dona-teste",
-                                             "repositorio": "dona-teste/sistema-x", "visibilidade": "privado",
-                                             "licenca": "", "modo": "padrao"})
-        self.assertEqual(config["deploy"]["imagem"], "ghcr.io/dona-teste/sistema-acao-x")
-        self.assertEqual(config["paineis"]["owner"], "dona-teste")
+        self.assertEqual(config["project"], {"name": "Sistema Ação X", "slug": "sistema-acao-x", "owner": "dona-teste",
+                                             "repository": "dona-teste/sistema-x", "visibility": "private",
+                                             "license": "", "mode": "normal"})
+        self.assertEqual(config["deploy"]["image"], "ghcr.io/dona-teste/sistema-acao-x")
+        self.assertEqual(config["board"]["owner"], "dona-teste")
+        self.assertEqual(config["workflow"]["model"], "grouping")
         self.assertIn("# versão do framework instalada", self.ler("bigbang.toml"))  # comments kept
         self.assertEqual(self.ler(".bigbang/README.md"), readme_framework)
         self.assertTrue(self.ler(".bigbang/LICENSE").startswith("MIT License"))
@@ -98,12 +99,12 @@ class Init(unittest.TestCase):
         for nome in ("CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "SECURITY.md"):  # DOC-16
             self.assertIn("dona-teste/sistema-x", self.ler(nome))
             self.assertNotIn("{{", self.ler(nome))
-        self.assertIn("a partir de .bigbang/AGENTS.base.md", self.ler("AGENTS.md"))
+        self.assertIn("a partir de .bigbang/pipeline/AGENTS.base.md", self.ler("AGENTS.md"))
         self.assertIn("# Instruções para IAs — Sistema Ação X", self.ler("AGENTS.md"))
         self.assertIn("Issue de F0: https://github.com/dona-teste/sistema-x/issues/1", saida)
         self.assertEqual(verify.run(self.raiz), [])
         chamadas = self.chamadas()
-        self.assertEqual(chamadas[0][:3], ["label", "create", "fundacao"])
+        self.assertEqual(chamadas[0][:3], ["label", "create", "type:foundation"])
         self.assertEqual(chamadas[-1][:2], ["issue", "create"])
         self.assertIn(init.F0_TITLE, chamadas[-1])
 

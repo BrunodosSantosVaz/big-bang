@@ -26,9 +26,11 @@ class FrameworkPipeline(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.root = os.path.join(self.tmp.name, 'repo')
         shutil.copytree(RAIZ, self.root, ignore=ignorar_para_copia())
-        shutil.copy2(os.path.join(RAIZ, '.bigbang-framework.toml'), self.root)
+        shutil.copy2(os.path.join(RAIZ, '.bigbang/pipeline/framework/config.toml'), os.path.join(self.root, '.bigbang-framework.toml'))
         subprocess.run(['git', 'init', '-q', self.root], check=True)
         subprocess.run(['git', '-C', self.root, 'remote', 'add', 'origin', f'https://github.com/{ORIGIN}.git'], check=True)
+        shutil.copy2(os.path.join(RAIZ, '.bigbang-docs.json'), self.root)
+        subprocess.run(['git', '-C', self.root, 'add', '.'], check=True)
 
     def read(self, path):
         with open(os.path.join(self.root, path), encoding='utf-8') as handle:
@@ -43,6 +45,17 @@ class FrameworkPipeline(unittest.TestCase):
         self.assertEqual(config.get(loaded, 'compiled.build_universal'),
                          'python .bigbang/bin/bb.py package --output $BB_OUTPUT')
         self.assertFalse(os.path.exists(os.path.join(self.root, 'bigbang.toml')))
+
+    def test_trusted_base_can_read_bootstrap_config_before_workflow_activation(self):
+        os.remove(os.path.join(self.root, '.bigbang-framework.toml'))
+        loaded = config.load(self.root)
+        self.assertTrue(loaded['_framework'])
+        self.assertEqual(config.get(loaded, 'project.repository'), ORIGIN)
+        self.assertIsNone(config.load(self.root, required=False))
+        implicit = generator.build_plan(self.root)
+        self.assertFalse(any(path.startswith('.github/workflows/bb-framework-') for path in implicit.expected))
+        with self.assertRaises(BbError):
+            generator.build_plan(self.root, framework=True)
 
     def test_generate_framework_is_idempotent_guarded_and_preserves_legacy(self):
         before = {name: self.read('.github/workflows/' + name) for name in
@@ -100,6 +113,64 @@ class FrameworkPipeline(unittest.TestCase):
         with self.assertRaises(BbError):
             framework.prepare(self.root, '3.0.0-rc.1')
 
+    def test_prepare_refreshes_documented_hashes_for_the_version_change(self):
+        import json
+        import hashlib
+        from bb import framework
+        shutil.copy2(os.path.join(RAIZ, '.bigbang-docs.json'), self.root)
+        framework.prepare(self.root, '3.0.0')
+        manifest = json.loads(self.read('.bigbang-docs.json'))
+        for feature in manifest['funcionalidades']:
+            for path in feature['fontes']:
+                with open(os.path.join(self.root, path), 'rb') as handle:
+                    digest = 'sha256:' + hashlib.sha256(handle.read()).hexdigest()
+                self.assertEqual(feature['hashes'][path], digest, path)
+
+    def test_prepare_refuses_to_relabel_unreviewed_source_changes(self):
+        from bb import framework
+        shutil.copy2(os.path.join(RAIZ, '.bigbang-docs.json'), self.root)
+        with open(os.path.join(self.root, '.bigbang/bb/config.py'), 'a', encoding='utf-8') as handle:
+            handle.write('\n# unreviewed runtime change\n')
+        before = self.read('.bigbang/VERSION')
+        with self.assertRaises(BbError):
+            framework.prepare(self.root, '3.0.0')
+        self.assertEqual(self.read('.bigbang/VERSION'), before)
+
+    def test_prepare_requires_the_documentation_manifest_before_any_write(self):
+        from bb import framework
+        os.remove(os.path.join(self.root, '.bigbang-docs.json'))
+        files = ('.bigbang/VERSION', '.bigbang/CHECKSUMS', '.bigbang-framework.toml',
+                 '.bigbang/modelos/bigbang.toml.exemplo')
+        before = {path: self.read(path) for path in files}
+        with self.assertRaises(BbError):
+            framework.prepare(self.root, '3.0.0')
+        self.assertEqual({path: self.read(path) for path in files}, before)
+
+    def test_prepare_refuses_new_sources_without_documentary_coverage(self):
+        from bb import framework
+        files = ('.bigbang/VERSION', '.bigbang/CHECKSUMS', '.bigbang-framework.toml')
+        before = {path: self.read(path) for path in files}
+        probe = '.bigbang/bb/undocumented_review_probe.py'
+        with open(os.path.join(self.root, probe), 'w', encoding='utf-8') as handle:
+            handle.write('# new runtime source without a documented feature\n')
+        # CHECKSUMS inventories untracked runtime files too: both forms must fail closed.
+        for tracked in (False, True):
+            with self.subTest(tracked=tracked):
+                if tracked:
+                    subprocess.run(['git', '-C', self.root, 'add', probe], check=True)
+                with self.assertRaises(BbError):
+                    framework.prepare(self.root, '3.0.0')
+                self.assertEqual({path: self.read(path) for path in files}, before)
+
+    def test_prepare_rejects_an_invalid_documentation_manifest_before_any_write(self):
+        from bb import framework
+        before = self.read('.bigbang/VERSION')
+        with open(os.path.join(self.root, '.bigbang-docs.json'), 'w', encoding='utf-8') as handle:
+            handle.write('{invalid')
+        with self.assertRaises(BbError):
+            framework.prepare(self.root, '3.0.0')
+        self.assertEqual(self.read('.bigbang/VERSION'), before)
+
     def test_candidate_and_promotion_keep_updater_names(self):
         from bb import framework
         from bb import checksums
@@ -141,6 +212,17 @@ class FrameworkPipeline(unittest.TestCase):
                 patch.object(pipeline_cli.config_module, 'load', return_value=own), \
                 patch.object(pipeline_cli.community_public, 'verify', return_value=[]) as audit:
             self.assertEqual(pipeline_cli._docs(args), 0)
+        self.assertEqual(audit.call_args.args[1]['paineis']['planejamento'], 28)
+
+    def test_documentation_cli_keeps_the_framework_board_audit(self):
+        from types import SimpleNamespace
+        from bb import documentation_cli
+        args = SimpleNamespace(raiz=RAIZ, wiki=None, publicada=False, comunidade=True)
+        own = config.load(self.root)
+        with patch.object(documentation_cli.documentation, 'validate', return_value=[]), \
+                patch.object(documentation_cli.config_module, 'load', return_value=own), \
+                patch.object(documentation_cli.community_public, 'verify', return_value=[]) as audit:
+            self.assertEqual(documentation_cli._validate(args), 0)
         self.assertEqual(audit.call_args.args[1]['paineis']['planejamento'], 28)
 
     def test_callbacks_and_candidate_ci_use_the_framework_namespace(self):
