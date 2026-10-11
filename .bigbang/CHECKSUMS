@@ -352,7 +352,7 @@ ab08d3bbf76c5023b8d8aff2931aa7313b3eaffb5cf01526aba3747406fa7ef8  tests/esperado
 6a2ed82ef417b26339d4375ca709242dd6358bbabb8068a41e2da5f6ba7e5f8b  tests/esperado/compilado-windows-linux/.agents/skills/bb-escrever-testes-aceite/SKILL.md
 50ce00f51c61ffb49f054b38eeb8c23e6999ad8f1351121b046ecb3897a61ed4  tests/esperado/compilado-windows-linux/.agents/skills/bb-gerar/SKILL.md
 fa78cffb9dd88f1280d6ae8b2aeb9278cc071fadf5179103631f62c84d5a93cd  tests/esperado/compilado-windows-linux/.agents/skills/bb-iniciar-projeto/SKILL.md
-4514e310675b4ee3f802a7408968bf91183316e0569e87e4a386eab1a4af3d4e  tests/esperado/compilado-windows-linux/.agents/skills/bb-migrate/SKILL.md
+ee4f4081f8020f5ddf649c76733f2a2c4f574578780d2318eba18acbf176ece7  tests/esperado/compilado-windows-linux/.agents/skills/bb-migrate/SKILL.md
 6ee9c904bd1d455526b65b14e95191e223c74f696f336dca71e360e38da90e71  tests/esperado/compilado-windows-linux/.agents/skills/bb-montar-github/SKILL.md
 ee087b8890eb8ed70921a9beffd95e25e344004c10961c8e8409230eff637d08  tests/esperado/compilado-windows-linux/.agents/skills/bb-nova-tecnologia/SKILL.md
 23f82ce10f94ee25c2ecca69f7a1dab20be739833b9c7deb2b6f1e4f5711f300  tests/esperado/compilado-windows-linux/.agents/skills/bb-prototipar/SKILL.md
@@ -376,7 +376,7 @@ ab08d3bbf76c5023b8d8aff2931aa7313b3eaffb5cf01526aba3747406fa7ef8  tests/esperado
 6a2ed82ef417b26339d4375ca709242dd6358bbabb8068a41e2da5f6ba7e5f8b  tests/esperado/compilado-windows-linux/.claude/skills/bb-escrever-testes-aceite/SKILL.md
 50ce00f51c61ffb49f054b38eeb8c23e6999ad8f1351121b046ecb3897a61ed4  tests/esperado/compilado-windows-linux/.claude/skills/bb-gerar/SKILL.md
 fa78cffb9dd88f1280d6ae8b2aeb9278cc071fadf5179103631f62c84d5a93cd  tests/esperado/compilado-windows-linux/.claude/skills/bb-iniciar-projeto/SKILL.md
-4514e310675b4ee3f802a7408968bf91183316e0569e87e4a386eab1a4af3d4e  tests/esperado/compilado-windows-linux/.claude/skills/bb-migrate/SKILL.md
+ee4f4081f8020f5ddf649c76733f2a2c4f574578780d2318eba18acbf176ece7  tests/esperado/compilado-windows-linux/.claude/skills/bb-migrate/SKILL.md
 6ee9c904bd1d455526b65b14e95191e223c74f696f336dca71e360e38da90e71  tests/esperado/compilado-windows-linux/.claude/skills/bb-montar-github/SKILL.md
 ee087b8890eb8ed70921a9beffd95e25e344004c10961c8e8409230eff637d08  tests/esperado/compilado-windows-linux/.claude/skills/bb-nova-tecnologia/SKILL.md
 23f82ce10f94ee25c2ecca69f7a1dab20be739833b9c7deb2b6f1e4f5711f300  tests/esperado/compilado-windows-linux/.claude/skills/bb-prototipar/SKILL.md
@@ -425,7 +425,7 @@ ab08d3bbf76c5023b8d8aff2931aa7313b3eaffb5cf01526aba3747406fa7ef8  tests/esperado
 6a2ed82ef417b26339d4375ca709242dd6358bbabb8068a41e2da5f6ba7e5f8b  tests/esperado/deploy-vps-docker/.agents/skills/bb-escrever-testes-aceite/SKILL.md
 50ce00f51c61ffb49f054b38eeb8c23e6999ad8f1351121b046ecb3897a61ed4  tests/esperado/deploy-vps-docker/.agents/skills/bb-gerar/SKILL.md
 fa78cffb9dd88f1280d6ae8b2aeb9278cc071fadf5179103631f62c84d5a93cd  tests/esperado/deploy-vps-docker/.agents/skills/bb-iniciar-projeto/SKILL.md
-4514e310675b4ee3f802a7408968bf91183316e0569e87e4a386eab1a4af3d4e  tests/esperado/deploy-vps-docker/.agents/skills/bb-migrate/SKILL.md
+ee4f4081f8020f5ddf649c76733f2a2c4f574578780d2318eba18acbf176ece7  tests/esperado/deploy-vps-docker/.agents/skills/bb-migrate/SKILL.md
 6ee9c904bd1d455526b65b14e95191e223c74f696f336dca71e360e38da90e71  tests/esperado/deploy-vps-docker/.agents/skills/bb-montar-github/SKILL.md
 ee087b8890eb8ed70921a9beffd95e25e344004c10961c8e8409230eff637d08  tests/esperado/deploy-vps-docker/.agents/skills/bb-nova-tecnologia/SKILL.md
 23f82ce10f94ee25c2ecca69f7a1dab20be739833b9c7deb2b6f1e4f5711f300  tests/esperado/deploy-vps-docker/.agents/skills/bb-prototipar/SKILL.md
@@ -449,7 +449,7 @@ ab08d3bbf76c5023b8d8aff2931aa7313b3eaffb5cf01526aba3747406fa7ef8  tests/esperado
 6a2ed82ef417b26339d4375ca709242dd6358bbabb8068a41e2da5f6ba7e5f8b  tests/esperado/deploy-vps-docker/.claude/skills/bb-escrever-testes-aceite/SKILL.md
 50ce00f51c61ffb49f054b38eeb8c23e6999ad8f1351121b046ecb3897a61ed4  tests/esperado/deploy-vps-docker/.claude/skills/bb-gerar/SKILL.md
 fa78cffb9dd88f1280d6ae8b2aeb9278cc071fadf5179103631f62c84d5a93cd  tests/esperado/deploy-vps-docker/.claude/skills/bb-iniciar-projeto/SKILL.md
-4514e310675b4ee3f802a7408968bf91183316e0569e87e4a386eab1a4af3d4e  tests/esperado/deploy-vps-docker/.claude/skills/bb-migrate/SKILL.md
+ee4f4081f8020f5ddf649c76733f2a2c4f574578780d2318eba18acbf176ece7  tests/esperado/deploy-vps-docker/.claude/skills/bb-migrate/SKILL.md
 6ee9c904bd1d455526b65b14e95191e223c74f696f336dca71e360e38da90e71  tests/esperado/deploy-vps-docker/.claude/skills/bb-montar-github/SKILL.md
 ee087b8890eb8ed70921a9beffd95e25e344004c10961c8e8409230eff637d08  tests/esperado/deploy-vps-docker/.claude/skills/bb-nova-tecnologia/SKILL.md
 23f82ce10f94ee25c2ecca69f7a1dab20be739833b9c7deb2b6f1e4f5711f300  tests/esperado/deploy-vps-docker/.claude/skills/bb-prototipar/SKILL.md
