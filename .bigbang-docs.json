@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "5ed7e4c73a8d7505d8e3a50ecf90d5bf80fe6d1b",
+    "commit": "4b8c78c375034eabe0c0b59b9b76f885add7eb81",
     "branch": "master",
     "proposta": "wiki/251-framework-pipeline"
   },
@@ -251,14 +251,15 @@
     }
   },
   "codigo": {
-    "commit": "b114d2d076f74e364df290e3cae40f55e22495f1",
+    "commit": "e11df5142759ba88b8c270a7a97a407b0ffe10ed",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
       ".github/workflows/",
       "AGENTS.md",
       "CLAUDE.md",
-      ".gitleaksignore"
+      ".gitleaksignore",
+      ".bigbang-framework.toml"
     ],
     "excluir": [
       ".bigbang/tests/",
@@ -2554,7 +2555,8 @@
         ".github/workflows/bb-framework-publish-maintenance.yml",
         ".github/workflows/bb-framework-publish.yml",
         ".github/workflows/bb-framework-qa-reject.yml",
-        ".github/workflows/bb-framework-start-sprint.yml"
+        ".github/workflows/bb-framework-start-sprint.yml",
+        ".bigbang-framework.toml"
       ],
       "testes": [
         ".bigbang/tests/test_framework_pipeline.py:test_framework_config_is_v3_grouping_flash_and_universal",
@@ -2602,7 +2604,8 @@
         ".github/workflows/bb-framework-publish-maintenance.yml": "sha256:250c23c7d9d1d9e159740d11f0a0c3e568cb5a39a75f0e06cd884f2f82dcde82",
         ".github/workflows/bb-framework-publish.yml": "sha256:3e540871f8e22f94347f6e9bc542cb3d030c154f58b6c017422c78c03b47ff50",
         ".github/workflows/bb-framework-qa-reject.yml": "sha256:499efc108101ee021df36644edd205689a5cee21b6108566b3b4cb020e1bcbb9",
-        ".github/workflows/bb-framework-start-sprint.yml": "sha256:0701d220ddb29a8ab08222f7b0dc21ac59634c183010a5a491049959818f08e7"
+        ".github/workflows/bb-framework-start-sprint.yml": "sha256:0701d220ddb29a8ab08222f7b0dc21ac59634c183010a5a491049959818f08e7",
+        ".bigbang-framework.toml": "sha256:c57f7f196bc92b6ada7018e03771a385e8af381940c6905dc5cb87cce27aa37f"
       },
       "descricao": "Suporte à esteira exclusiva da origem, namespace próprio e preservação do template não fundado."
     },
