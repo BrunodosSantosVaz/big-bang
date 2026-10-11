@@ -107,7 +107,7 @@ def effective_risk(labels, floor):
     return max([floor, *[risk for risk in declared if risk in RISKS]], key=_rank)
 
 
-def limits(config):
+def limits(config, today=None):
     result = dict(DEFAULT_LIMITS)
     agents = config.get("agents") if isinstance(config.get("agents"), dict) else {}
     if isinstance(agents.get("tasks_per_agent"), int):
@@ -115,7 +115,7 @@ def limits(config):
     if isinstance(agents.get("lease_hours"), int):
         result["lease_hours"] = agents["lease_hours"]
     contract = config.get("_autonomy") if mode(config) == "autonomous" else None
-    today = datetime.datetime.now(datetime.timezone.utc).date()
+    today = today or datetime.datetime.now(datetime.timezone.utc).date()
     if isinstance(contract, dict) and not contract_problems(contract, today):  # a usable contract's own limits
         for key, limit in (("attempts", "attempts"), ("wip", "epics_in_progress")):
             value = contract.get(key)

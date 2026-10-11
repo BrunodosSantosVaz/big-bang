@@ -50,6 +50,9 @@ class FakeGitHub:
         self.calls.append((method, path))
         if path == "user":
             return 200, getattr(self, "user", None) or {"login": "dona"}
+        if path.startswith("orgs/"):
+            org = getattr(self, "orgs", {}).get(path[len("orgs/"):])
+            return (200, org) if org else (404, {"message": "Not Found"})
         if path == f"repos/{self.repository}":
             repo = getattr(self, "repo", None)
             return (200, repo) if repo else (404, {"message": "Not Found"})

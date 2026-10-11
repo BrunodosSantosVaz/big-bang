@@ -63,9 +63,20 @@ def _both_spellings(labels):
     return labels | {names.label(label, "legacy") for label in labels} | {names.label(label, "v3") for label in labels}
 
 
-def review_blockers(pr_labels, issue_labels, head, changed_paths, diff_text, zones, marker, mode="padrao"):
-    """Reasons why the AI may NOT approve this PR (empty = the AI review is enough)."""
+def review_blockers(pr_labels, issue_labels, head, changed_paths, diff_text, zones, marker, mode="padrao",
+                    owner_files=False, flags_by_agent=False):
+    """Reasons why the AI may NOT approve this PR (empty = the AI review is enough). The autonomy contract is never
+    approved by an agent; in a v3 project (owner_files) the owner's own files need the owner too, unless he delegated
+    this very PR (owner:ai-review on the PR, never inherited) or the contract delegates flags.toml."""
     pr_labels, issue_labels = _both_spellings(pr_labels), _both_spellings(issue_labels)
+    contract = [path for path in changed_paths if pipeline.matches(path, pipeline.NEVER_DELEGATED)]
+    if contract:
+        return ["o PR muda o contrato de autonomia (autonomy.toml): a revisão é sempre do dono"]
+    if owner_files:
+        own = [path for path in changed_paths if pipeline.matches(path, pipeline.OWNER_FILES)
+               and not (flags_by_agent and pipeline.matches(path, ("flags.toml",)))]
+        if own and "dono:revisao-ia" not in pr_labels:
+            return [f"o PR muda arquivo do dono ({', '.join(sorted(set(own))[:3])}): a revisão é do dono"]
     owner_says_ai = "dono:revisao-ia" in pr_labels or "dono:revisao-ia" in issue_labels
     kind, issue = pipeline.branch_issue(head)
     if kind in ("teste", "test"):
@@ -99,6 +110,34 @@ def _target_text(repository, base):
         return base64.b64decode(encoded).decode('utf-8')
     except (ValueError, TypeError, UnicodeError) as exc:
         raise BbError('configuração da branch de destino não pôde ser conferida', EXIT_VERIFICATION_FAILED) from exc
+
+
+def _target_owner_rules(repository, base):
+    """(owner_files, flags_by_agent) from the target branch: owner files need the owner in a v3 (grouping) project;
+    flags.toml is delegated only by a valid autonomy contract with flags = agent."""
+    import datetime
+    text = _target_text(repository, base)
+    if text is None:
+        return False, False
+    try:
+        raw = config_module.parse(text)
+    except BbError:
+        return True, False
+    workflow = raw.get("workflow") if isinstance(raw.get("workflow"), dict) else {}
+    project = raw.get("project") if isinstance(raw.get("project"), dict) else {}
+    grouping = workflow.get("model") == "grouping"
+    if not grouping or project.get("mode") != "autonomous":
+        return grouping, False
+    try:
+        encoded = github.run("api", f"repos/{repository}/contents/autonomy.toml", "-X", "GET", "-f", f"ref={base}",
+                             "--jq", ".content")
+        import tomllib
+        contract = tomllib.loads(base64.b64decode(encoded).decode("utf-8"))
+    except (BbError, ValueError, TypeError, UnicodeError):
+        return True, False
+    from . import policy
+    usable = not policy.contract_problems(contract, datetime.datetime.now(datetime.timezone.utc).date())
+    return True, usable and contract.get("flags") == "agent"
 
 
 def _target_mode(repository, base):
@@ -165,7 +204,10 @@ def approve_review(repository, number, ai_name, zones, marker, report=""):
                 acceptance_diffs.append(f'diff --git a/{previous} b/{path}\n--- a/{previous}\n'
                                         f'+++ b/{path}\n{patch}')
     diff_text = '\n'.join(acceptance_diffs)
-    blockers = review_blockers(pr_labels, issue_labels, data["headRefName"], changed, diff_text, zones, marker, mode)
+    base = data.get('baseRefOid') or data['baseRefName']
+    owner_files, flags_by_agent = _target_owner_rules(repository, base)
+    blockers = review_blockers(pr_labels, issue_labels, data["headRefName"], changed, diff_text, zones, marker, mode,
+                               owner_files=owner_files, flags_by_agent=flags_by_agent)
     if blockers:
         raise BbError("bb revisao aprovar recusado: " + "; ".join(blockers), EXIT_VERIFICATION_FAILED)
     body = f"**Revisão da IA: aprovado** (`{ai_name}`, {_now()}, contexto limpo: `.bigbang/agents/revisor-pr.md`)."

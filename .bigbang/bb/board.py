@@ -321,8 +321,9 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
             gathered["qa_decision"] = "automatic"
         gathered["qa_agent_rejected"] = verdict == "rejected"
     gathered["today"] = now.date()
-    if (card_kind, current, target) == ("epic", "Selected", "In Progress") and policy.mode(config) == "autonomous":
-        limit = policy.limits(config)["epics_in_progress"]
+    if card_kind == "epic" and target == "In Progress" and current in ("Selected", "Rejected") and \
+            policy.mode(config) == "autonomous":
+        limit = policy.limits(config, now.date())["epics_in_progress"]
         busy = [other["number"] for other in client.issues("open", labels=["type:epic"])
                 if other["number"] != number and current_state(client, other["number"], trusted) in ("In Progress", "QA")]
         if len(busy) >= limit:
@@ -334,7 +335,7 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
     if found:
         raise BbError(f"#{number}: {current} → {target} recusado:\n" + "\n".join(f"  - {p}" for p in found),
                       EXIT_INVALID_STATE)
-    _, policy_hash = policy.snapshot({"mode": policy.mode(config), "limits": policy.limits(config)})
+    _, policy_hash = policy.snapshot({"mode": policy.mode(config), "limits": policy.limits(config, now.date())})
     receipt = {"event_id": event_id or f"move-{number}-{len(moves) + 1}-{target}", "issue": number,
                "actor": actor, "at": _iso(now), "from": current, "to": target, "policy": policy_hash}
     if sha:

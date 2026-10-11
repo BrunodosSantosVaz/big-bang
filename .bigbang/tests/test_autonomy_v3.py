@@ -319,6 +319,7 @@ class ReviewOfOwnerFiles(unittest.TestCase):
         from bb import flows
         fake = Fake()
         client = gh.GitHub("dono/repo", api=fake)
+        fake.add_issue(60, "PR (issues and PRs share numbers)")
         fake.add_pull(60, "feature/30-tarefa", "develop", title="feat: tarefa", labels=["pr:approved", "review:human"])
         fake.checks[fake.pulls[60]["head"]["sha"]] = [{"name": "gate", "status": "completed", "conclusion": "success"}]
         cfg = config(mode="normal")
@@ -329,3 +330,16 @@ class ReviewOfOwnerFiles(unittest.TestCase):
         client.comment(60, "**Decisão do dono:** `pr:approved`\n\n> pode mesclar\n\nRegistrada por `claude-1`.")
         flows.merge_pr(client, cfg, 60)
         self.assertTrue(fake.pulls[60]["merged"])
+
+
+class BootstrapResiduals(Bootstrap):
+    def test_unseen_bypass_list_refuses(self):
+        for branch in ("main", "develop"):
+            for rule in self.fake.branch_rules[branch]:
+                rule["ruleset_id"] = 6
+        self.fake.rulesets = {6: {"id": 6}}  # bypass_actors only shown to who can edit the ruleset
+        self.assertTrue(any("bypass" in item for item in autonomy.bootstrap_problems(self.client)))
+
+    def test_private_repository_of_a_free_or_unknown_organization_refuses(self):
+        self.fake.repo = {"private": True, "visibility": "private", "owner": {"login": "org", "type": "Organization"}}
+        self.assertTrue(any("plano" in item for item in autonomy.bootstrap_problems(self.client)))

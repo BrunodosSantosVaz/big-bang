@@ -83,6 +83,12 @@ def bootstrap_problems(client):
     if repo is None:
         return ["repositório inacessível com o token atual"]
     found = []
+    if repo.get("private") and (repo.get("owner") or {}).get("type") == "Organization":
+        status, org = client.api("GET", f"orgs/{repo['owner']['login']}", None)
+        plan = ((org or {}).get("plan") or {}).get("name") if status == 200 else None
+        if plan in (None, "free"):
+            found.append("repositório privado de organização sem plano pago confirmado: rulesets e ambientes "
+                         "protegidos podem não ser aplicados")
     if repo.get("private") and (repo.get("owner") or {}).get("type") == "User":
         user = client.user() or {}
         plan = (user.get("plan") or {}).get("name")
@@ -99,7 +105,10 @@ def bootstrap_problems(client):
             found.append(f"a branch {branch} não exige o check {GATE_CHECK} (ruleset)")
         for ruleset_id in sorted({rule.get("ruleset_id") for rule in rules if rule.get("ruleset_id")}):
             ruleset = client.ruleset(ruleset_id) or {}
-            if ruleset.get("bypass_actors"):
+            if "bypass_actors" not in ruleset:
+                found.append(f"não foi possível ver os bypass_actors do ruleset {ruleset_id} (rode com o token do "
+                             "dono, que pode editar o ruleset)")
+            elif ruleset.get("bypass_actors"):
                 found.append(f"o ruleset {ruleset_id} da branch {branch} tem bypass_actors: quem está na lista "
                              "contorna o check gate")
     environment = client.environment("production")
