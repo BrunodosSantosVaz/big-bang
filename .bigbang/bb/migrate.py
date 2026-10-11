@@ -5,8 +5,11 @@ import datetime
 import json
 import os
 import re
+import uuid
+from urllib.parse import quote
 
-from . import board, names, policy, receipts, states
+from . import board, names, policy, receipts, states, ownership
+from .locks import expired
 from . import config as config_module
 from .errors import EXIT_INVALID_STATE, EXIT_USAGE, BbError
 from .paths import config_path, read_text, write_text
@@ -143,8 +146,10 @@ def labels_part(client, root, *, snapshot=None, dry_run=False, rollback=False):
     if rollback:
         data = _load_snapshot(snapshot, "labels", config_module.get(config, "project.repository"))
         if not dry_run:
+            existing = _labels_of(client)
             for legacy, v3 in data["renamed"].items():
-                client.call("PATCH", f"labels/{v3.replace(':', '%3A')}", {"new_name": legacy})
+                if v3 in existing and legacy not in existing:
+                    client.call("PATCH", f"labels/{quote(v3, safe='')}", {"new_name": legacy})
             for v3, numbers in data["copied"].items():
                 for number in numbers:
                     client.remove_label(number, v3)
@@ -164,8 +169,8 @@ def labels_part(client, root, *, snapshot=None, dry_run=False, rollback=False):
         if v3 not in existing:
             renamed.append((legacy, v3))
         else:
-            numbers = [issue["number"] for issue in client.issues("all", labels=[legacy])
-                       if v3 not in issue["labels"]]
+            numbers = [issue["number"] for issue in client.paginate("issues?state=all&labels=" + quote(legacy, safe=""))
+                       if v3 not in {label["name"] for label in issue["labels"]}]
             if numbers:
                 copied[v3] = numbers
     replaced = {}
@@ -199,8 +204,32 @@ def _has(labels, v3_label):
     return v3_label in labels or names.label(v3_label, "legacy") in labels
 
 
-def _claimed(labels):
-    return any(label.startswith(("ia:", "agent:", "person:")) for label in labels)
+def _claimed(client, issue, config, now):
+    labels = set(issue["labels"])
+    if labels & {"stale", "parada"}:
+        return False
+    current = client.locks().current(f"issue-{issue['number']}")
+    if current is not None:
+        return current.get("state") == "held" and not expired(current, now)
+    owner = config_module.get(config, "project.owner").casefold()
+    comments = [c for c in client.comments(issue["number"])
+                if (c.get("user") or {}).get("login", "").casefold() == owner]
+    for comment in comments:
+        match = ownership.CLAIM.search(comment.get("body") or "")
+        if not match or f"ia:{match[1]}" not in labels:
+            continue
+        stamps = [comment.get("created_at")]
+        for heartbeat in comments:
+            push = ownership.PUSH.search(heartbeat.get("body") or "")
+            if push and push[1] == match[2]:
+                stamps.append(heartbeat.get("created_at"))
+        try:
+            last = max(ownership.timestamp(stamp) for stamp in stamps)
+        except (TypeError, ValueError):
+            continue
+        if last <= now and now - last <= datetime.timedelta(hours=config_module.get(config, "agents.lease_hours")):
+            return True
+    return False
 
 
 def map_card(role, column, card_kind, facts):
@@ -221,37 +250,48 @@ def map_card(role, column, card_kind, facts):
         if column == "Homologação":
             return "QA" if facts["candidate"] else "In Progress"
         if column == "Concluída":
-            return "Done" if facts["closed"] else "Releasing"
+            return "Done" if facts["closed"] and facts["published"] else "Releasing"
     if role == EXECUTION:
         if column in ("A fazer", "Feature"):
             return "Todo"
         if column == "Code":
-            return "Coding" if _claimed(labels) else "Todo"
+            return "Coding" if facts["claimed"] else "Todo"
         if column in ("CI/PR", "Validar PR"):
-            return "In Review" if facts["open_pr"] else ("Coding" if _claimed(labels) else "Todo")
+            return "In Review" if facts["open_pr"] else ("Coding" if facts["claimed"] else "Todo")
         if column in ("Pronto", "Concluído"):
-            return "Done" if facts["closed"] else "In Review"
+            return "Done" if facts["merged_pr"] and facts["grouping"] else "In Review"
     if role == BUGS:
         if column == "Novo":
             return "Brainstorm"
         if column == "Em correção":
-            return "Coding" if _claimed(labels) else "Selected"
+            return "Coding" if facts["claimed"] else "Todo"
         if column in ("CI/PR", "Validar PR"):
-            return "In Review" if facts["open_pr"] else ("Coding" if _claimed(labels) else "Selected")
+            return "In Review" if facts["open_pr"] else ("Coding" if facts["claimed"] else "Todo")
         if column == "Homologação":
-            return "QA"
+            return "QA" if facts["candidate"] else "In Review"
         if column == "Corrigido":
-            return "Done" if facts["closed"] else "Releasing"
+            return "Done" if facts["closed"] and facts["published"] else "Releasing"
     return states.INITIAL.get(card_kind, "Brainstorm") if hasattr(states, "INITIAL") else "Brainstorm"
 
 
-def _facts(client, issue, candidate_tags):
+def _facts(client, issue, candidate_tags, config, now):
     number = issue["number"]
     children = client.sub_issues(number)
     pulls = client.pulls(state="open")
     milestone = issue.get("milestone")
-    version = milestone[1:] if isinstance(milestone, str) and milestone.startswith("v") else None
-    return {"labels": set(issue["labels"]), "closed": issue["state"] == "closed",
+    matched = re.fullmatch(r"v?(\d+\.\d+\.\d+)", milestone) if isinstance(milestone, str) else None
+    version = matched[1] if matched else None
+    all_pulls = client.pulls(state="all")
+    recorded = receipts.parse(client.comments(number), {config_module.get(config, "project.owner")})
+    published = bool(version and f"v{version}" in candidate_tags) or any(
+        r["kind"] == "publication" and r["result"] == "success"
+        and r["environment"] in ("production", "producao")
+        and (r["version"] in (version, f"v{version}") or str(r["version"]).startswith("maintenance-"))
+        for r in recorded)
+    return {"claimed": _claimed(client, issue, config, now), "published": published,
+            "grouping": config_module.get(config, "workflow.model") == "grouping",
+            "merged_pr": any(pull["merged"] and re.match(rf"^[a-z]+/{number}-", pull["head"]) for pull in all_pulls),
+            "labels": set(issue["labels"]), "closed": issue["state"] == "closed",
             "open_children": any(child["state"] == "open" for child in children),
             "epic_branch": bool(client.branches(f"epico/{number}-")),
             "candidate": bool(version and any(tag.startswith(f"v{version}-rc.") for tag in candidate_tags)),
@@ -293,24 +333,22 @@ def board_part(client, root, *, open_project, create_project, snapshot=None, dry
             card_kind = states.kind(set(issue["labels"]))
             if card_kind is None:
                 continue
-            mapped[card] = map_card(role, values.get("Status"), card_kind, _facts(client, issue, tags))
+            mapped[card] = map_card(role, values.get("Status"), card_kind, _facts(client, issue, tags, config, now))
     report = {"part": "board", "mapped": mapped, "boards": boards,
               "next": "abra o PR com o bigbang.toml; arquive os painéis antigos depois de um ciclo sem divergência"}
     if dry_run:
         return report
-    _save(snapshot, {"part": "board", "repository": config_module.get(config, "project.repository"), "boards": boards, "items": items, "mapped": {str(k): v for k, v in mapped.items()},
+    attempt = uuid.uuid4().hex
+    _save(snapshot, {"attempt": attempt, "part": "board", "repository": config_module.get(config, "project.repository"), "boards": boards, "items": items, "mapped": {str(k): v for k, v in mapped.items()},
                      "at": _iso(now)})
     number, project = create_project()
     board.ensure_fields(project)
     _, policy_hash = policy.snapshot({"mode": policy.mode(config), "limits": policy.limits(config)})
     for card, state in sorted(mapped.items()):
-        history = receipts.parse(client.comments(card), {owner})
-        if not any(r["kind"] in ("transition", "rejection") for r in history):
-            card_kind = states.kind(set(client.issue(card)["labels"]))
-            initial = board.INITIAL.get(card_kind, "Brainstorm")
-            client.comment(card, receipts.render({
-                "kind": "transition", "event_id": f"migrate-{card}", "issue": card, "actor": MIGRATION_ACTOR,
-                "at": _iso(now), "from": initial, "to": state, "policy": policy_hash}))
+        initial = board.current_state(client, card, {owner})
+        client.comment(card, receipts.render({
+            "kind": "transition", "event_id": f"migrate-{attempt}-{card}", "issue": card,
+            "actor": MIGRATION_ACTOR, "at": _iso(now), "from": initial, "to": state, "policy": policy_hash}))
         project.add(card)
         project.set(card, "Status", board.current_state(client, card, {owner}))
     migrated = set_key(text, "board", "model", "single")
