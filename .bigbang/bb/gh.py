@@ -31,7 +31,8 @@ def _milestone(value):
 
 def _normalize_pull(raw):
     return {"number": raw["number"], "title": raw.get("title", ""), "body": raw.get("body") or "",
-            "state": raw.get("state"), "merged": bool(raw.get("merged")), "draft": bool(raw.get("draft")),
+            "state": raw.get("state"), "merged": bool(raw.get("merged") or raw.get("merged_at")),
+            "draft": bool(raw.get("draft")),
             "labels": _labels(raw), "head": raw["head"]["ref"], "sha": raw["head"]["sha"],
             "base": raw["base"]["ref"]}
 
