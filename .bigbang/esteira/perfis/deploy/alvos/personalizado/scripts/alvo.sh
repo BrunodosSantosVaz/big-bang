@@ -31,6 +31,15 @@ for variable in LANG LC_ALL TZ TMPDIR TMP TEMP; do
     project_environment+=("$variable=${!variable}")
   fi
 done
+variaveis_personalizado=$("${BB_CMD[@]}" config get deploy.variaveis_personalizado)
+while IFS= read -r variable; do
+  [[ -n "$variable" ]] || continue
+  [[ "$variable" =~ ^[A-Z][A-Z0-9_]*$ ]] \
+    || { echo "::error::nome de variável personalizada inválido"; exit 2; }
+  if [[ -v "$variable" ]]; then
+    project_environment+=("$variable=${!variable}")
+  fi
+done <<<"$variaveis_personalizado"
 run_project_script() {
   env -i "${project_environment[@]}" bash "$@"
 }
