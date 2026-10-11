@@ -7,7 +7,7 @@ import datetime
 import json
 
 from . import config as config_module
-from . import names, pipeline, policy, receipts, states
+from . import autonomy, names, pipeline, policy, receipts, states
 from .errors import EXIT_INVALID_STATE, EXIT_USAGE, BbError
 from .locks import expired
 
@@ -226,7 +226,8 @@ def _gate(card_kind, current, target):
 
 def _epic_paths(client, number, since=None):
     """Files changed by the merged PRs of an epic's sub-issues (the evidence of a QA or publication risk). Only the
-    PRs updated since the oldest sub-issue was created are read: its work cannot be older than that."""
+    PRs updated since the card or its oldest sub-issue was created are read (the card's own PRs included): its
+    work cannot be older than that."""
     children = {child["number"] for child in client.sub_issues(number)} | {number}
     paths = set()
     page = 1
@@ -248,7 +249,7 @@ def _epic_paths(client, number, since=None):
         page += 1
 
 
-def _gate_decision(config, client, number, card_kind, current, target, labels, since=None):
+def _gate_decision(config, client, number, card_kind, current, target, labels, since=None, now=None):
     """(gate, approver, risk) of a move, or (None, None, None) when no gate applies."""
     gate = _gate(card_kind, current, target)
     if gate is None:
@@ -258,7 +259,8 @@ def _gate_decision(config, client, number, card_kind, current, target, labels, s
     else:
         risk = policy.delivery_risk(labels, _epic_paths(client, number, since),
                                     config_module.get(config, "security.sensitive_paths"))
-    who = policy.approver(policy.mode(config), gate, risk)
+    today = (now or datetime.datetime.now(datetime.timezone.utc)).date()
+    who = policy.approver(policy.mode(config), gate, risk, autonomy.usable(config, today))
     if gate == "qa" and who == "agent" and "qa:human" in labels:
         who = "owner"  # the card asks for the owner's homologation: no mode or risk delegates it
     return gate, who, risk
@@ -270,8 +272,6 @@ def _approval_problems(config, card_kind, current, target, gathered, decision):
         return []
     mode = policy.mode(config)
     labels = gathered["labels"]
-    if who == "blocked":
-        return [f"portão {gate} fora do contrato do modo {mode} (risco {risk}): bloqueado"]
     if who == "agent":
         if (current, target) == ("QA", "Rejected") and not gathered.get("qa_agent_rejected") and \
                 "qa:rejected" not in labels and names.label("qa:rejected", "legacy") not in labels:
@@ -282,7 +282,11 @@ def _approval_problems(config, card_kind, current, target, gathered, decision):
         return []  # the publish job only runs after the owner approved the production environment
     evidence = "qa:rejected" if (current, target) == ("QA", "Rejected") else DECISION_OF.get(gate)
     if evidence and (evidence in labels or names.label(evidence, "legacy") in labels):
-        return []
+        return []  # the owner's recorded decision passes any gate, also one outside the autonomy contract
+    if who == "blocked":
+        reasons = autonomy.problems(config, gathered.get("today") or datetime.datetime.now(datetime.timezone.utc).date())
+        return [f"portão {gate} fora do contrato do modo {mode} (risco {risk}): bloqueado para o agente; só a "
+                f"decisão registrada {evidence or 'do dono'} libera"] + [f"  {reason}" for reason in reasons]
     return [f"portão {gate} é do dono no modo {mode} (risco {risk}): falta a decisão registrada "
             f"{evidence or ''} (bb decision, com as palavras dele)".replace(" )", ")")]
 
@@ -309,24 +313,36 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
     gathered.update(facts or {})
     gathered["accepted"] = gathered["selected"] = True  # the approval check below is their evidence
     decision = _gate_decision(config, client, number, card_kind, current, target, gathered["labels"],
-                              since=_born(client, number, issue))
+                              since=_born(client, number, issue), now=now)
     gathered["gate_delegated"] = decision[1] == "agent"
     if decision[0] == "qa" and decision[1] == "agent":
         verdict = _independent_qa(client, number, receipts_now, actor, trusted, project.get(number, "Candidate"))
         if verdict == "approved":
             gathered["qa_decision"] = "automatic"
         gathered["qa_agent_rejected"] = verdict == "rejected"
+    gathered["today"] = now.date()
+    if card_kind == "epic" and target == "In Progress" and current in ("Selected", "Rejected") and \
+            policy.mode(config) == "autonomous":
+        limit = policy.limits(config, now.date())["epics_in_progress"]
+        busy = [other["number"] for other in client.issues("open", labels=["type:epic"])
+                if other["number"] != number and current_state(client, other["number"], trusted) in ("In Progress", "QA")]
+        if len(busy) >= limit:
+            raise BbError(f"#{number}: WIP do contrato atingido ({limit} épico(s) em andamento: "
+                          + ", ".join(f"#{n}" for n in busy) + ")", EXIT_INVALID_STATE)
     found = states.problems(card_kind, current, target, gathered, reason=reason,
                             return_to=recorded_return if current == "Rejected" else return_to)
     found += [] if found else _approval_problems(config, card_kind, current, target, gathered, decision)
     if found:
         raise BbError(f"#{number}: {current} → {target} recusado:\n" + "\n".join(f"  - {p}" for p in found),
                       EXIT_INVALID_STATE)
-    _, policy_hash = policy.snapshot({"mode": policy.mode(config), "limits": policy.limits(config)})
+    _, policy_hash = policy.snapshot({"mode": policy.mode(config), "limits": policy.limits(config, now.date())})
     receipt = {"event_id": event_id or f"move-{number}-{len(moves) + 1}-{target}", "issue": number,
                "actor": actor, "at": _iso(now), "from": current, "to": target, "policy": policy_hash}
     if sha:
         receipt["sha"] = sha
+    if decision[0]:  # who approved, never presented as someone else: an agent signs as an agent
+        by = f"agent:{actor}" if decision[1] == "agent" else f"owner:{config_module.get(config, 'project.owner')}"
+        receipt["approval"] = {"gate": decision[0], "by": by, "risk": decision[2], "mode": policy.mode(config)}
     if target == "Rejected":
         receipt.update(kind="rejection", reason=reason, return_to=return_to,
                        evidence=[f"reprovado em {current} por {actor}"])

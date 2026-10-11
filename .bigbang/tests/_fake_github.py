@@ -49,7 +49,13 @@ class FakeGitHub:
     def __call__(self, method, path, payload=None):
         self.calls.append((method, path))
         if path == "user":
-            return 200, {"login": "dona"}
+            return 200, getattr(self, "user", None) or {"login": "dona"}
+        if path.startswith("orgs/"):
+            org = getattr(self, "orgs", {}).get(path[len("orgs/"):])
+            return (200, org) if org else (404, {"message": "Not Found"})
+        if path == f"repos/{self.repository}":
+            repo = getattr(self, "repo", None)
+            return (200, repo) if repo else (404, {"message": "Not Found"})
         prefix = f"repos/{self.repository}/"
         assert path.startswith(prefix), path
         tail, _, query = path[len(prefix):].partition("?")
@@ -88,6 +94,10 @@ class FakeGitHub:
         (r"milestones/(\d+)", ("PATCH", "_patch_milestone")),
          (r"pulls", ("POST", "_create_pull")),
         (r"merges", ("POST", "_merge_branches")),
+        (r"rules/branches/(.+)", ("GET", "_branch_rules")),
+        (r"rulesets/(\d+)", ("GET", "_get_ruleset")),
+        (r"environments/([^/]+)", ("GET", "_get_environment")),
+        (r"environments/([^/]+)/deployment-branch-policies", ("GET", "_environment_branches")),
     ]
 
     def _page(self, items, params):
@@ -210,6 +220,21 @@ class FakeGitHub:
         self.deleted = getattr(self, "deleted", []) + ["refs/" + name]
         self.refs.pop("refs/" + name, None)
         return 204, None
+
+    def _branch_rules(self, params, payload, branch):
+        return 200, self._page(getattr(self, "branch_rules", {}).get(branch, []), params)
+
+    def _get_ruleset(self, params, payload, number):
+        ruleset = getattr(self, "rulesets", {}).get(int(number))
+        return (200, ruleset) if ruleset else (404, {"message": "Not Found"})
+
+    def _get_environment(self, params, payload, name):
+        environment = getattr(self, "environments", {}).get(name)
+        return (200, environment) if environment else (404, {"message": "Not Found"})
+
+    def _environment_branches(self, params, payload, name):
+        policies = getattr(self, "environment_branches", {}).get(name, [])
+        return 200, {"total_count": len(policies), "branch_policies": policies}
 
     def _list_pulls(self, params, payload):
         items = [pull for _, pull in sorted(self.pulls.items())

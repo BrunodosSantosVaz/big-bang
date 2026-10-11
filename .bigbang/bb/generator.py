@@ -85,6 +85,13 @@ def with_computed(config, root):
     context["gerado"] = {"dependabot": dependabot_entries(config["entrega"].get("ecossistemas", [])),
                          "matriz_compilado": pipeline.build_matrix(systems),
                          "modo_trabalho": (
+                             "**Modo autônomo.** Você conduz o trabalho de ponta a ponta, mas só dentro do contrato "
+                             "`autonomy.toml` (alvos, riscos, portões, flags, WIP, tentativas, custo e janela de "
+                             "publicação). Fora dele, o portão fica bloqueado para você e só a decisão registrada do "
+                             "dono libera; nunca amplie o contrato. Antes de começar, rode `bb autonomy check`. Testes "
+                             "antes do código, revisão independente, scanners e documentação continuam obrigatórios; "
+                             "todo recibo registra que quem aprovou foi um agente. Veja o ADR-0025."
+                             if config_module.get(config, "project.mode") == "autonomous" else
                              "**Modo Flash.** Escreva os testes antes do código e preserve a ordem teste → tarefas. "
                              "Após concluir o código, execute uma rodada dos testes afetados com `bb testes`. "
                              "Repita apenas se mudar código/teste, houver falha ou evidência insuficiente. "

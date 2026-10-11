@@ -144,6 +144,18 @@ def _has(labels, v3_label):
     return v3_label in labels or names.label(v3_label, "legacy") in labels
 
 
+def _owner_decided(client, config, number, label):
+    """The owner's decision recorded with bb decision (its comment by the trusted account) for this label."""
+    owner = config_module.get(config, "project.owner").casefold()
+    spellings = {label, names.label(label, "legacy")}
+    for comment in client.comments(number):
+        if (comment.get("user") or {}).get("login", "").casefold() != owner:
+            continue
+        if any(f"**Decisão do dono:** `{spelling}`" in comment.get("body", "") for spelling in spellings):
+            return True
+    return False
+
+
 def merge_pr(client, config, number):
     """Merge one PR into develop or a release branch when its rules, approval and gate are satisfied. Never main:
     main only receives a release (or maintenance) through the publish flows."""
@@ -163,6 +175,10 @@ def merge_pr(client, config, number):
             raise BbError("os testes de aceite são revisados pelo dono: falta approved:tests", EXIT_INVALID_STATE)
     elif not _has(labels, "pr:approved"):
         raise BbError("PR ainda não aprovado (pr:approved)", EXIT_INVALID_STATE)
+    elif (_has(labels, "review:human") or (issue and _has(set(issue["labels"]), "review:human"))) and \
+            not _owner_decided(client, config, number, "pr:approved"):
+        raise BbError("o PR tem review:human: a aprovação precisa ser a decisão registrada do dono "
+                      "(bb decision pr:approved, com as palavras dele)", EXIT_INVALID_STATE)
     runs = {run["name"]: run for run in client.check_runs(pull["sha"])}
     missing = [name for name in REQUIRED_CHECKS
                if runs.get(name, {}).get("status") != "completed" or runs[name].get("conclusion") != "success"]

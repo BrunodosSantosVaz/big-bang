@@ -107,13 +107,20 @@ def effective_risk(labels, floor):
     return max([floor, *[risk for risk in declared if risk in RISKS]], key=_rank)
 
 
-def limits(config):
+def limits(config, today=None):
     result = dict(DEFAULT_LIMITS)
     agents = config.get("agents") if isinstance(config.get("agents"), dict) else {}
     if isinstance(agents.get("tasks_per_agent"), int):
         result["tasks_per_session"] = agents["tasks_per_agent"]
     if isinstance(agents.get("lease_hours"), int):
         result["lease_hours"] = agents["lease_hours"]
+    contract = config.get("_autonomy") if mode(config) == "autonomous" else None
+    today = today or datetime.datetime.now(datetime.timezone.utc).date()
+    if isinstance(contract, dict) and not contract_problems(contract, today):  # a usable contract's own limits
+        for key, limit in (("attempts", "attempts"), ("wip", "epics_in_progress")):
+            value = contract.get(key)
+            if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+                result[limit] = value
     return result
 
 
@@ -143,16 +150,21 @@ def in_window(window, now):
 
 def contract_problems(contract, today):
     """Validation of autonomy.toml (already parsed). Empty list = usable contract."""
+    if not isinstance(contract, dict):
+        return ["autonomy.toml: o contrato precisa ser uma tabela TOML"]
     found = [f"autonomy.toml: chave desconhecida {key}" for key in sorted(set(contract) - CONTRACT_KEYS)]
-    if contract.get("version") != 1:
-        found.append("autonomy.toml: version deve ser 1")
-    if not isinstance(contract.get("targets"), list) or not contract.get("targets"):
-        found.append("autonomy.toml: targets deve listar os ambientes permitidos")
-    bad_risk = [risk for risk in contract.get("risk", []) if risk not in RISKS]
-    if not contract.get("risk") or bad_risk:
+    version = contract.get("version")
+    if type(version) is not int or version != 1:
+        found.append("autonomy.toml: version deve ser o inteiro 1")
+
+    def strings(key):
+        value = contract.get(key)
+        return value if isinstance(value, list) and value and all(isinstance(item, str) for item in value) else None
+    if strings("targets") is None:
+        found.append("autonomy.toml: targets deve listar os ambientes permitidos (textos)")
+    if strings("risk") is None or any(risk not in RISKS for risk in strings("risk")):
         found.append(f"autonomy.toml: risk deve listar classes de {', '.join(RISKS)}")
-    bad_gates = [gate for gate in contract.get("gates", []) if gate not in GATES]
-    if not contract.get("gates") or bad_gates:
+    if strings("gates") is None or any(gate not in GATES for gate in strings("gates")):
         found.append(f"autonomy.toml: gates deve listar portões de {', '.join(GATES)}")
     if contract.get("flags") not in ("agent", "owner"):
         found.append("autonomy.toml: flags deve ser agent ou owner")

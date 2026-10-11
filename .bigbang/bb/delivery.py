@@ -4,7 +4,7 @@ scripts (the same bytes of the candidate); these flows decide and record."""
 import datetime
 import re
 
-from . import board, flows, names, pipeline, states
+from . import autonomy, board, flows, names, pipeline, states
 from . import config as config_module
 from .errors import EXIT_INVALID_STATE, BbError
 from .locks import expired
@@ -117,6 +117,7 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
     branch = f"release/{version}"
     problems = flows.release_gate(client, config, root, [epic["number"] for epic in epics], today=today,
                                   pending=pending, project=project)
+    problems += autonomy.publish_problems(config, "production", now)
     published = f"v{version}" in client.tags()
     rc_tag = _latest_candidate(client, version)
     rc_sha = None
@@ -174,15 +175,15 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
             pending.append(number)  # lost its QA after the gate (decision withdrawn): never reported as dark
         else:
             dark.append(number)  # the gate let it through only with every flag off: shipped dark
+    for number in pending:
+        client.comment(number, f"**Big Bang** · a release {version} foi publicada com a flag deste épico ligada, mas "
+                               "ele não pôde ser concluído (a homologação mudou depois do portão). Confira a decisão "
+                               "e a flag com o dono.")
     client.close_milestone(milestone)
     _return_main(client, version)
     current = client.locks().current(f"version-{version}")
     if current:
         client.locks().release(f"version-{version}", current["session"], current["generation"], now=now)
-    for number in pending:
-        client.comment(number, f"**Big Bang** · a release {version} foi publicada com a flag deste épico ligada, mas "
-                               "ele não pôde ser concluído (a homologação mudou depois do portão). Confira a decisão "
-                               "e a flag com o dono.")
     return {"version": version, "pr": pull["number"], "done": done, "dark": dark, "pending": pending}
 
 

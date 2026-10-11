@@ -45,7 +45,7 @@ jobs:
         run: |
           [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::versão inválida: use x.y.z"; exit 1; }
           git fetch -q --tags origin "release/$VERSION"
-          content=$(git tag -l "v$VERSION-rc.*" --sort=-v:refname | head -n 1)  # the candidate's exact commit
+          content=$(git tag -l --sort=-v:refname | grep -E "^v${VERSION//./\\.}-rc\.[0-9]+$" | head -n 1 || true)
           git worktree add -q --detach "$RUNNER_TEMP/release" "${content:-origin/release/$VERSION}"
           python .bigbang/bin/bb.py checklist production --content-dir "$RUNNER_TEMP/release"
           python .bigbang/bin/bb.py pipeline docs --content-dir "$RUNNER_TEMP/release" --published --community
@@ -80,7 +80,7 @@ jobs:
           {{gerado.preparar_alvo}}
           [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::versão inválida: use x.y.z"; exit 1; }
           git fetch -q --tags origin "release/$VERSION"
-          content=$(git tag -l "v$VERSION-rc.*" --sort=-v:refname | head -n 1)  # the candidate's exact commit
+          content=$(git tag -l --sort=-v:refname | grep -E "^v${VERSION//./\\.}-rc\.[0-9]+$" | head -n 1 || true)
           git worktree add -q --detach "$RUNNER_TEMP/release" "${content:-origin/release/$VERSION}"
           python .bigbang/bin/bb.py release publish --version "$VERSION" --content-dir "$RUNNER_TEMP/release"
         env:

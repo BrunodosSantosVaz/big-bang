@@ -70,6 +70,31 @@ class GitHub:
                 return result
             page += 1
 
+    # --- repository controls ----------------------------------------------------------------------------------------
+
+    def repository_info(self):
+        status, body = self.api("GET", f"repos/{self.repository}", None)
+        return body if status == 200 else None
+
+    def user(self):
+        status, body = self.api("GET", "user", None)
+        return body if status == 200 else None
+
+    def branch_rules(self, branch):
+        return self.paginate(f"rules/branches/{branch}")
+
+    def ruleset(self, number):
+        status, body = self.call("GET", f"rulesets/{number}", accept=(200, 404))
+        return body if status == 200 else None
+
+    def environment(self, name):
+        status, body = self.call("GET", f"environments/{name}", accept=(200, 404))
+        return body if status == 200 else None
+
+    def environment_branch_policies(self, name):
+        _, body = self.call("GET", f"environments/{name}/deployment-branch-policies?per_page=100")
+        return (body or {}).get("branch_policies", [])
+
     # --- issues -----------------------------------------------------------------------------------------------------
 
     def issue(self, number):

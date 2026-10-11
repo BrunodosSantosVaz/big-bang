@@ -233,8 +233,12 @@ def v3_branch_problem(head, base):
 CLOSING = re.compile(r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#\d+", re.I)
 
 
+OWNER_FILES = ("autonomy.toml", "bigbang.toml", "PRODUTO.md", "STACK.md", "DESIGN.md", "flags.toml")  # iron rule 9
+NEVER_DELEGATED = ("autonomy.toml",)  # the contract that delegates can never be delegated
+
+
 def v3_pr_rules(head, base, title, body, labels, paths, diff, artifact_patterns, zones, marker, issue_labels,
-                epic_labels, mode="normal"):
+                epic_labels, mode="normal", flags_by_agent=False):
     """PR rules of the grouping workflow: (errors, labels to add, labels to remove). Labels may come in either
     language; the effects use the v3 names."""
     from . import acceptance, names
@@ -274,6 +278,11 @@ def v3_pr_rules(head, base, title, body, labels, paths, diff, artifact_patterns,
     if sensitive and not (has(labels, "owner:ai-review") or has(issue_labels, "owner:ai-review")) and (
             mode == "normal" or explicit_human):
         add.add("review:human")  # flash/autonomous delegate routine review; an explicit human review stays
+    owner_files = [path for path in paths if matches(path, OWNER_FILES)
+                   and not (flags_by_agent and matches(path, ("flags.toml",)))]
+    owner_ai = has(labels, "owner:ai-review") or has(issue_labels, "owner:ai-review")
+    if any(matches(path, NEVER_DELEGATED) for path in owner_files) or (owner_files and not owner_ai):
+        add.add("review:human")  # the owner's own files are the owner's decision in every mode
     return errors, add, remove - add
 
 
@@ -394,7 +403,7 @@ def changelog_has_version(changelog, version):
 # --- paths: artifact and sensitive zones (spec 5.4, 11.8) -------------------------------------------------------------
 
 ALWAYS_SENSITIVE = (".github/**", "tests/aceite/**", ".bigbang-docs.json", ".bigbang-producao.json", "STACK.md", "DESIGN.md", "PRODUTO.md", "bigbang.toml",
-                    "flags.toml")
+                    "flags.toml", "autonomy.toml")
 DEPENDENCY_FILES = ("package.json", "package-lock.json", "npm-shrinkwrap.json", "yarn.lock", "pnpm-lock.yaml",
                     "pyproject.toml", "requirements*.txt", "poetry.lock", "uv.lock", "Pipfile", "Pipfile.lock",
                     "go.mod", "go.sum", "Cargo.toml", "Cargo.lock", "pom.xml", "build.gradle", "build.gradle.kts",

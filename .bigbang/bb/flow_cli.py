@@ -3,7 +3,7 @@ import json
 
 from . import board, controller, gh
 from . import config as config_module
-from .errors import EXIT_OK, EXIT_USAGE, BbError
+from .errors import EXIT_INVALID_STATE, EXIT_OK, EXIT_USAGE, BbError
 
 
 def register(commands, pipeline_sub):
@@ -78,6 +78,11 @@ def register(commands, pipeline_sub):
     p.add_argument("--agent", required=True, help="nome do agente que homologou (de agents.names)")
     p.set_defaults(handler=_qa_verdict)
 
+    autonomy_parser = commands.add_parser("autonomy", help="v3: modo autonomous (contrato e controles)")
+    autonomy_sub = autonomy_parser.add_subparsers(dest="autonomy_command", metavar="<subcomando>")
+    autonomy_sub.add_parser("check", help="confere autonomy.toml e os controles exigidos (ruleset, production)"
+                            ).set_defaults(handler=_autonomy_check)
+
     p = commands.add_parser("cleanup", help="v3: faxina de branches concluídas; relata posses antigas")
     p.add_argument("--apply", action="store_true", help="apaga de verdade (padrão: só mostra o plano)")
     p.set_defaults(handler=_cleanup)
@@ -108,8 +113,14 @@ def register(commands, pipeline_sub):
     p.set_defaults(handler=_controller)
 
 
+def _load(root):
+    """The configuration plus the autonomy contract of this checkout (in the CI, the target branch)."""
+    from . import autonomy
+    return autonomy.attach(config_module.load(root), root)
+
+
 def _context(root):
-    config = config_module.load(root)
+    config = _load(root)
     if config_module.get(config, "board.model") != "single":
         raise BbError("este projeto ainda usa os três painéis (board.model = three-boards): rode bb migrate board",
                       EXIT_USAGE)
@@ -121,15 +132,17 @@ def _context(root):
 
 
 def _labels(args):
-    config = config_module.load(args.raiz)
+    config = _load(args.raiz)
     created = board.ensure_labels(gh.GitHub(config_module.get(config, "project.repository")))
     print(f"Labels da v3: {created} criada(s); as demais já existiam.")
     return EXIT_OK
 
 
 def _create(args):
-    config = config_module.load(args.raiz)
+    config = _load(args.raiz)
     repository = config_module.get(config, "project.repository")
+    if config_module.get(config, "project.mode") == "autonomous":
+        _refuse_autonomy(gh.GitHub(repository), config, contract=False)
     owner = config_module.get(config, "board.owner")
     number = board.create_project(gh.graphql, owner, args.title, repository)
     board.ensure_fields(board.ProjectGraphQL(owner, number, repository, gh.graphql))
@@ -137,6 +150,23 @@ def _create(args):
     print("No bigbang.toml, seção [board]: model = \"single\", number = " + str(number))
     print(f"Variáveis do repositório: gh variable set PROJECT_OWNER --repo {repository} --body {owner}")
     print(f"                          gh variable set PROJECT_NUMBER --repo {repository} --body {number}")
+    return EXIT_OK
+
+
+def _refuse_autonomy(client, config, *, contract=True):
+    from . import autonomy
+    import datetime
+    found = (autonomy.problems(config, _today()) if contract else []) + autonomy.bootstrap_problems(client)
+    if found:
+        raise BbError("o modo autonomous não pode ser ligado neste repositório:\n" +
+                      "\n".join(f"  - {item}" for item in found), EXIT_INVALID_STATE)
+
+
+def _autonomy_check(args):
+    config = _load(args.raiz)
+    _refuse_autonomy(gh.GitHub(config_module.get(config, "project.repository")), config)
+    print("Modo autonomous: contrato válido e controles do repositório no lugar (gate obrigatório na main e na "
+          "develop; production só a partir da main).")
     return EXIT_OK
 
 
@@ -186,7 +216,7 @@ def _sprint_start(args):
 
 def _branches(args):
     from . import flows
-    config = config_module.load(args.raiz)
+    config = _load(args.raiz)
     for name in flows.create_branches(gh.GitHub(config_module.get(config, "project.repository")), config, args.epic):
         print(f"branch criada: {name}")
     return EXIT_OK
@@ -194,7 +224,7 @@ def _branches(args):
 
 def _merge(args):
     from . import flows
-    config = config_module.load(args.raiz)
+    config = _load(args.raiz)
     created = flows.merge_pr(gh.GitHub(config_module.get(config, "project.repository")), config, args.pr)
     print(f"PR #{args.pr} mesclado." + (" Branches criadas: " + ", ".join(created) if created else ""))
     return EXIT_OK
@@ -202,7 +232,7 @@ def _merge(args):
 
 def _release_cut(args):
     from . import flows
-    config = config_module.load(args.raiz)
+    config = _load(args.raiz)
     release = flows.cut_release(gh.GitHub(config_module.get(config, "project.repository")), config,
                                 version=args.version)
     if release is None:
@@ -215,7 +245,7 @@ def _release_cut(args):
 
 def _release_items(args):
     from . import flows
-    config = config_module.load(args.raiz)
+    config = _load(args.raiz)
     for number, title, labels in flows.release_items(gh.GitHub(config_module.get(config, "project.repository")),
                                                      head=args.head):
         print(f"{number}\t{title}\t{','.join(labels)}")
@@ -263,9 +293,15 @@ def _flag_switch(args):
     return EXIT_OK
 
 
+def _flags_by_agent(config):
+    from . import autonomy
+    contract = autonomy.usable(config, _today())
+    return bool(contract) and contract.get("flags") == "agent"
+
+
 def _pr_rules(args):
     from . import pipeline
-    config = config_module.load(args.raiz)
+    config = _load(args.raiz)
     client = gh.GitHub(config_module.get(config, "project.repository"))
     pull = client.pull(args.pr)
     files = client.pull_files(args.pr)
@@ -282,7 +318,8 @@ def _pr_rules(args):
         pull["head"], pull["base"], pull["title"], pull["body"], set(pull["labels"]), paths, "\n".join(diffs),
         config_module.get(config, "delivery.artifact_paths"), config_module.get(config, "security.sensitive_paths"),
         config_module.get(config, "tests.pending_marker"), set(issue["labels"]) if issue else set(),
-        set(parent["labels"]) if parent else set(), mode=config_module.get(config, "project.mode"))
+        set(parent["labels"]) if parent else set(), mode=config_module.get(config, "project.mode"),
+        flags_by_agent=_flags_by_agent(config))
     if args.content_dir:
         errors += _content_problems(client, config, args.content_dir, paths, pull["head"])
     else:
@@ -374,7 +411,7 @@ def _release_publish(args):
 
 def _release_maintenance(args):
     from . import delivery
-    config = config_module.load(args.raiz)
+    config = _load(args.raiz)
     client = gh.GitHub(config_module.get(config, "project.repository"))
     paths = []
     for file in client.pull_files(args.pr):
@@ -412,7 +449,7 @@ def _qa_verdict(args):
 
 def _cleanup(args):
     from . import delivery
-    config = config_module.load(args.raiz)
+    config = _load(args.raiz)
     report = delivery.cleanup(gh.GitHub(config_module.get(config, "project.repository")), config,
                               dry_run=not args.apply)
     verb = "apagada" if args.apply else "seria apagada"
