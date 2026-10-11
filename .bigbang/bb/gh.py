@@ -83,6 +83,10 @@ class GitHub:
     def branch_rules(self, branch):
         return self.paginate(f"rules/branches/{branch}")
 
+    def ruleset(self, number):
+        status, body = self.call("GET", f"rulesets/{number}", accept=(200, 404))
+        return body if status == 200 else None
+
     def environment(self, name):
         status, body = self.call("GET", f"environments/{name}", accept=(200, 404))
         return body if status == 200 else None

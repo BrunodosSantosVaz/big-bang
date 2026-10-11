@@ -284,7 +284,7 @@ def _approval_problems(config, card_kind, current, target, gathered, decision):
     if evidence and (evidence in labels or names.label(evidence, "legacy") in labels):
         return []  # the owner's recorded decision passes any gate, also one outside the autonomy contract
     if who == "blocked":
-        reasons = autonomy.problems(config, datetime.datetime.now(datetime.timezone.utc).date())
+        reasons = autonomy.problems(config, gathered.get("today") or datetime.datetime.now(datetime.timezone.utc).date())
         return [f"portão {gate} fora do contrato do modo {mode} (risco {risk}): bloqueado para o agente; só a "
                 f"decisão registrada {evidence or 'do dono'} libera"] + [f"  {reason}" for reason in reasons]
     return [f"portão {gate} é do dono no modo {mode} (risco {risk}): falta a decisão registrada "
@@ -320,6 +320,14 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
         if verdict == "approved":
             gathered["qa_decision"] = "automatic"
         gathered["qa_agent_rejected"] = verdict == "rejected"
+    gathered["today"] = now.date()
+    if (card_kind, current, target) == ("epic", "Selected", "In Progress") and policy.mode(config) == "autonomous":
+        limit = policy.limits(config)["epics_in_progress"]
+        busy = [other["number"] for other in client.issues("open", labels=["type:epic"])
+                if other["number"] != number and current_state(client, other["number"], trusted) in ("In Progress", "QA")]
+        if len(busy) >= limit:
+            raise BbError(f"#{number}: WIP do contrato atingido ({limit} épico(s) em andamento: "
+                          + ", ".join(f"#{n}" for n in busy) + ")", EXIT_INVALID_STATE)
     found = states.problems(card_kind, current, target, gathered, reason=reason,
                             return_to=recorded_return if current == "Rejected" else return_to)
     found += [] if found else _approval_problems(config, card_kind, current, target, gathered, decision)

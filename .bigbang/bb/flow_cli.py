@@ -156,7 +156,7 @@ def _create(args):
 def _refuse_autonomy(client, config, *, contract=True):
     from . import autonomy
     import datetime
-    found = (autonomy.problems(config, datetime.date.today()) if contract else []) + autonomy.bootstrap_problems(client)
+    found = (autonomy.problems(config, _today()) if contract else []) + autonomy.bootstrap_problems(client)
     if found:
         raise BbError("o modo autonomous não pode ser ligado neste repositório:\n" +
                       "\n".join(f"  - {item}" for item in found), EXIT_INVALID_STATE)
@@ -293,6 +293,12 @@ def _flag_switch(args):
     return EXIT_OK
 
 
+def _flags_by_agent(config):
+    from . import autonomy
+    contract = autonomy.usable(config, _today())
+    return bool(contract) and contract.get("flags") == "agent"
+
+
 def _pr_rules(args):
     from . import pipeline
     config = _load(args.raiz)
@@ -312,7 +318,8 @@ def _pr_rules(args):
         pull["head"], pull["base"], pull["title"], pull["body"], set(pull["labels"]), paths, "\n".join(diffs),
         config_module.get(config, "delivery.artifact_paths"), config_module.get(config, "security.sensitive_paths"),
         config_module.get(config, "tests.pending_marker"), set(issue["labels"]) if issue else set(),
-        set(parent["labels"]) if parent else set(), mode=config_module.get(config, "project.mode"))
+        set(parent["labels"]) if parent else set(), mode=config_module.get(config, "project.mode"),
+        flags_by_agent=_flags_by_agent(config))
     if args.content_dir:
         errors += _content_problems(client, config, args.content_dir, paths, pull["head"])
     else:

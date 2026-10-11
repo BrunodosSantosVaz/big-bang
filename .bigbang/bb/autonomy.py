@@ -1,4 +1,4 @@
-"""The autonomous mode (ADR-0025/0027): it acts only inside autonomy.toml, read from the checkout that runs bb (in the
+"""The autonomous mode (ADR-0025): it acts only inside autonomy.toml, read from the checkout that runs bb (in the
 CI, the target branch: a PR cannot widen its own contract). Without a valid contract nothing is delegated; the
 bootstrap refuses an account that cannot enforce the controls the mode depends on."""
 import os
@@ -23,7 +23,7 @@ def attach(config, root):
     try:
         with open(path, "rb") as handle:
             result[KEY] = tomllib.load(handle)
-    except (tomllib.TOMLDecodeError, UnicodeDecodeError) as error:
+    except (tomllib.TOMLDecodeError, UnicodeDecodeError, OSError) as error:
         result[KEY] = {"_invalid": str(error)}
     return result
 
@@ -84,13 +84,24 @@ def bootstrap_problems(client):
         return ["repositório inacessível com o token atual"]
     found = []
     if repo.get("private") and (repo.get("owner") or {}).get("type") == "User":
-        plan = ((client.user() or {}).get("plan") or {}).get("name")
+        user = client.user() or {}
+        plan = (user.get("plan") or {}).get("name")
+        owner = (repo.get("owner") or {}).get("login", "")
         if plan == "free":
             found.append("repositório privado numa conta pessoal Free: rulesets e ambientes protegidos não são "
                          "aplicados; torne o repositório público ou use um plano pago")
+        elif not plan or user.get("login", "").casefold() != owner.casefold():
+            found.append("não foi possível confirmar o plano do dono do repositório privado (rode com o token "
+                         "do dono): sem isso, rulesets e ambientes protegidos podem não ser aplicados")
     for branch in ("main", "develop"):
-        if not _requires_gate(client.branch_rules(branch)):
+        rules = client.branch_rules(branch)
+        if not _requires_gate(rules):
             found.append(f"a branch {branch} não exige o check {GATE_CHECK} (ruleset)")
+        for ruleset_id in sorted({rule.get("ruleset_id") for rule in rules if rule.get("ruleset_id")}):
+            ruleset = client.ruleset(ruleset_id) or {}
+            if ruleset.get("bypass_actors"):
+                found.append(f"o ruleset {ruleset_id} da branch {branch} tem bypass_actors: quem está na lista "
+                             "contorna o check gate")
     environment = client.environment("production")
     if not environment:
         found.append("o ambiente production não existe")
@@ -99,7 +110,8 @@ def bootstrap_problems(client):
     if not deployment:
         found.append("o ambiente production aceita qualquer branch: restrinja à main")
     elif deployment.get("custom_branch_policies"):
-        names = sorted(item.get("name") for item in client.environment_branch_policies("production"))
+        names = sorted(f"{item.get('name')} ({item.get('type', 'branch')})" if item.get("type", "branch") != "branch"
+                       else item.get("name") for item in client.environment_branch_policies("production"))
         if names != ["main"]:
             found.append(f"o ambiente production deve aceitar só a main (hoje: {', '.join(names) or 'nenhuma'})")
     else:
