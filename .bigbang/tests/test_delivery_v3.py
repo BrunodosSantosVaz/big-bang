@@ -369,3 +369,19 @@ class QaVerdict(Base):
         with self.assertRaises(BbError):
             self.run_cli("qa", "verdict", "10", "--candidate", "v1.3.0-rc.1", "--digest", "sha256:aa",
                          "--verdict", "approved", "--agent", "intruso")
+
+
+class ContentAsData(unittest.TestCase):
+    def test_links_leaving_the_pr_content_are_refused_before_any_read(self):
+        from bb import flow_cli
+        with tempfile.TemporaryDirectory() as outside, tempfile.TemporaryDirectory() as content:
+            secret = os.path.join(outside, "token.txt")
+            with open(secret, "w", encoding="utf-8") as handle:
+                handle.write("SEGREDO_FAKE\n")
+            os.symlink(secret, os.path.join(content, "requirements.txt"))
+            os.makedirs(os.path.join(content, "docs"))
+            os.symlink("../README.md", os.path.join(content, "docs", "inside.md"))  # stays inside: allowed
+            found = flow_cli._content_problems(None, cfg(), content, [], "feature/12-x")
+            self.assertEqual(len(found), 1)
+            self.assertIn("requirements.txt", found[0])
+            self.assertNotIn("SEGREDO_FAKE", "".join(found))
