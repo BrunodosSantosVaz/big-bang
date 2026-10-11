@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "4ce92d581c36d5edc8c246c290b601efeb3ec9f4",
+    "commit": "68db662a067086316121e95f018826584b489376",
     "branch": "master",
     "proposta": "wiki/integration"
   },
@@ -254,7 +254,7 @@
     }
   },
   "codigo": {
-    "commit": "31437eb75aa492da1699eb4e285eabdd5eec3c47",
+    "commit": "b14db9b959cbcda561e8513f8fe749b26ace570a",
     "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
@@ -2521,8 +2521,8 @@
         ".bigbang/pipeline/core/files/.github/workflows/bb-publish.yml.tmpl": "sha256:24f768ba12430bb8e1980665f330b376dd8d6802a5472fe355600af16e14fe1e",
         ".bigbang/pipeline/core/files/.github/workflows/bb-qa-reject.yml": "sha256:b9f7b38d500bb620ed24e621db729ebd04d3041abd59e98208605eef2023281a",
         ".bigbang/pipeline/core/files/.github/workflows/bb-start-sprint.yml": "sha256:def03451f99bcc7fb1f52717ccd30d433371dcbe616fbf379a03cb3f22c0596c",
-        ".bigbang/pipeline/profiles/compiled/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:3fb1ffbabbb29d453615c58194af6b09d58fe5025ee6107c8a97c456772f81c2",
-        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:97d57b8e912c156743cecabbe652b7ea2b64ffe05ba9eccdff02acab4cc8524a",
+        ".bigbang/pipeline/profiles/compiled/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:c2bc95e8acc3da40b9a4da54f3281b8abd4bb5870ecb30ef69677d27d99a64c9",
+        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:d9e006c860077ec0d4e0b4e1c40b0f482faac452f7b9da639f1300fc1e1e5ed8",
         ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-rollback.yml.tmpl": "sha256:14a3c57fc67e866a2141c65310cf565462dfe81736b4d585cdd28787fff11698"
       },
       "descricao": "Árvore .bigbang/pipeline: workflows v3 com gate único, controlador, botões, formulários, instruções e perfis."
@@ -2646,11 +2646,11 @@
       "hashes": {
         ".bigbang/bb/framework.py": "sha256:1ecbe5ed20b6c26bc1c5de1c53cb71173002f1086f1020775549c6803b308f7a",
         ".bigbang/pipeline/framework/config.toml": "sha256:e8c3c7578b3d880ba05499eddf41b7251c276f6db15e62ae47038f5dc21e6fed",
-        ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:2785942b7b484776b0f70b72477a2bc525a01998aea2088120c0db282e96fadd",
+        ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:49709060fa19fa6c0e86e624df856dac13ec41e02eb64d3e4f763d6654b0f810",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:907afd6987d2626d0858be2e52943cb4905eae90d8b094da63dc0691db0eac59",
         ".bigbang/pipeline/framework/scripts/testes-candidata.sh": "sha256:b9cc01977794173b5dc2a2bec28b7ca53eb0f8fa91798f10148d25efae546a0e",
         ".github/workflows/bb-framework-board-report.yml": "sha256:fd1bca1eff4486906b393d36ddda2f9c61f120ebee8b9b8d7a8b4cb60f8d6c48",
-        ".github/workflows/bb-framework-candidate.yml": "sha256:1905419a60dab9038664799969a5055ee38c9df91c11c4dcf865f705e6652de7",
+        ".github/workflows/bb-framework-candidate.yml": "sha256:9208921c934809386e0c19d7ab8b474d7a9575f7575898db19651f90f02148af",
         ".github/workflows/bb-framework-cleanup.yml": "sha256:86bbaf52ce0e00595d9f58fa00262595cc3d889f18628318869b0b329e07fa66",
         ".github/workflows/bb-framework-codeql.yml": "sha256:d48adcfdc51211253d7be15911fbcbbad5cc38093f6c32c5931230f519e954cd",
         ".github/workflows/bb-framework-controller.yml": "sha256:8f3a86b1c7f79de0f2e82cb53965fd2c25f58882178fd2af45907e4b1aa9e29b",

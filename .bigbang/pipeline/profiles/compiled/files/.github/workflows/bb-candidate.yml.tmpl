@@ -31,6 +31,8 @@ jobs:
           python-version: '3.12'
       - name: Versão e número da candidata
         id: v
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: bash .bigbang/esteira/nucleo/scripts/candidata-preparar.sh
 
   testes:
