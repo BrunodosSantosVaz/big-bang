@@ -226,7 +226,8 @@ def _gate(card_kind, current, target):
 
 def _epic_paths(client, number, since=None):
     """Files changed by the merged PRs of an epic's sub-issues (the evidence of a QA or publication risk). Only the
-    PRs updated since the oldest sub-issue was created are read: its work cannot be older than that."""
+    PRs updated since the card or its oldest sub-issue was created are read (the card's own PRs included): its
+    work cannot be older than that."""
     children = {child["number"] for child in client.sub_issues(number)} | {number}
     paths = set()
     page = 1
