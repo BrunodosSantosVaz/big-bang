@@ -405,7 +405,9 @@ def _content_problems(client, config, content, paths, head):
             found.append(f"{location}: teste ainda marcado como pendente da #{issue}, que já foi concluída")
     pattern = config_module.get(config, "tests.test_pattern")
     found += [f"rastreabilidade: {problem}" for problem in traceability.problems(content, pattern, paths)]
-    found += [f"guarda da stack: {problem}" for problem in stack_guard.problems(content)]
+    from . import framework
+    guard = framework.stack_problems if config.get('_framework') else stack_guard.problems
+    found += [f"guarda da stack: {problem}" for problem in guard(content)]
     return found
 
 

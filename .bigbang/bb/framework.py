@@ -73,6 +73,18 @@ def problems(root):
     return []
 
 
+def stack_problems(root):
+    """Trusted framework policy: no Foundation table is needed while there are no runtime packages."""
+    from . import documentation, stack_guard
+    if documentation.is_public(root) and 'STACK.md' not in documentation.load(root)['paginas']:
+        dependencies, found = stack_guard.direct_runtime_dependencies(root)
+        if dependencies:
+            found.append('há dependências de execução no framework sem tabela aprovada no STACK.md; '
+                         'registre a decisão do dono e a documentação antes de adicioná-las')
+        return found
+    return stack_guard.problems(root)
+
+
 def prepare(root, version):
     """After write-version: regenerate the version, client snapshots, own workflows and integrity manifest."""
     from . import checksums, documentation, generator, init
