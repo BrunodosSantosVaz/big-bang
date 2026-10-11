@@ -26,12 +26,16 @@ concurrency:
 
 jobs:
   conferir:
+    outputs:
+      imagem: ${{ steps.imagem.outputs.imagem }}
     runs-on: ubuntu-24.04
     steps:
       - name: Imagem registrada na Release
+        id: imagem
         run: |
-          imagem=$(gh release download "$VERSAO" --repo "$GITHUB_REPOSITORY" --pattern imagem.txt --output - | tr -d '[:space:]')
-          [[ "$imagem" =~ @sha256:[0-9a-f]{64}$ ]] || { echo "::error::$VERSAO não registra um digest"; exit 1; }
+          imagem=$(gh release download "$VERSAO" --repo "$GITHUB_REPOSITORY" --pattern imagem.txt --output - | tr -d ' \t\r' | grep -v '^$' | paste -sd, -)
+          [[ -n "$imagem" ]] || { echo "::error::$VERSAO não registra uma imagem"; exit 1; }
+          echo "imagem=$imagem" >> "$GITHUB_OUTPUT"
           echo "Voltaria produção para $VERSAO: $imagem (migrações não são desfeitas)."
         env:
           GH_TOKEN: ${{ github.token }}

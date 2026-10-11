@@ -117,7 +117,6 @@ SCHEMA = {
         "script_publicar": _string(required=False), "script_migrar": _string(required=False),
         "script_saude": _string(required=False), "script_voltar": _string(required=False),
         "variaveis_personalizado": _string_list(re.compile(r"[A-Z][A-Z0-9_]*\Z"), non_empty=False, unique=True),
-        "segredos_personalizado": _string_list(re.compile(r"[A-Z][A-Z0-9_]*\Z"), non_empty=False, unique=True),
     },
     "comandos": {key: _string(required=False) for key in COMMAND_KEYS},
     "testes": {"cobertura_minima": _integer(0, 100), "marca_pendente": _string(), "padrao_teste": _regex,
@@ -156,7 +155,6 @@ OPTIONAL_KEYS = {
         "script_saude": "",
         "script_voltar": "",
         "variaveis_personalizado": [],
-        "segredos_personalizado": [],
     },
 }
 

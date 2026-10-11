@@ -24,7 +24,7 @@ KEYS = {
                "servico_checar": "check_service", "runner": "runner", "preparar_rede": "network_setup",
                "script_publicar": "custom_publish_script", "script_migrar": "custom_migrate_script",
                "script_saude": "custom_health_script", "script_voltar": "custom_rollback_script",
-               "variaveis_personalizado": "custom_variables", "segredos_personalizado": "custom_secrets"},
+               "variaveis_personalizado": "custom_variables"},
     "comandos": {"instalar": "install", "lint": "lint", "tipos": "types", "testes": "test",
                  "testes_aceite": "acceptance_test", "arquitetura": "architecture", "cobertura": "coverage",
                  "build": "build", "testes_alterados": "affected_tests"},

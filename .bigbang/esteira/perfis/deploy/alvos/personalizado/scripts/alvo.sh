@@ -54,7 +54,8 @@ manifesto="$tmp/imagem.txt"
 if [[ "$operacao" == voltar ]]; then
   versao="${3:?informe a versão publicada}"
   [[ "$versao" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::versão inválida"; exit 2; }
-  gh release download "$versao" --repo "${GITHUB_REPOSITORY:?}" --pattern imagem.txt --output "$manifesto"
+  manifesto_rollback="${4:?informe o manifesto conferido pela esteira}"
+  printf '%s\n' "$manifesto_rollback" | tr ',' '\n' > "$manifesto"
 else
   printf '%s\n' "${3:?informe o manifesto imutável}" | tr ',' '\n' >"$manifesto"
 fi

@@ -43,7 +43,6 @@ class AlvoPersonalizado(unittest.TestCase):
             lines.append(f'{key} = "{path}"')
         lines.extend([
             'variaveis_personalizado = ["CUSTOM_APP"]',
-            'segredos_personalizado = ["CUSTOM_TOKEN"]',
         ])
         path = self.root / "bigbang.toml"
         text = path.read_text(encoding="utf-8")
@@ -109,9 +108,13 @@ class AlvoPersonalizado(unittest.TestCase):
             for name in ("bb-candidata.yml", "bb-publicar-producao.yml", "bb-voltar-versao.yml")
         )
         self.assertIn("CUSTOM_APP: ${{ vars.CUSTOM_APP }}", workflows)
-        self.assertIn("CUSTOM_TOKEN: ${{ secrets.CUSTOM_TOKEN }}", workflows)
+        self.assertNotIn("CUSTOM_TOKEN", workflows)
         self.assertNotIn("VPS_HOST", workflows)
         self.assertNotIn("VPS_CHAVE_SSH", workflows)
+        candidate = plan.expected[".github/workflows/bb-candidata.yml"]
+        staging = candidate.split("  staging:", 1)[1].split("\n  publicar:", 1)[0]
+        self.assertNotIn("GH_TOKEN", staging)
+        self.assertNotIn("secrets.", staging)
 
     def test_production_custom_scripts_run_outside_tokenized_steps(self):
         self.configure_custom()
@@ -120,6 +123,10 @@ class AlvoPersonalizado(unittest.TestCase):
         self.assertIn("Preparar publicação personalizada", workflow)
         self.assertIn("Executar scripts personalizados sem credenciais", workflow)
         self.assertIn("Finalizar publicação personalizada", workflow)
+        self.assertLess(workflow.index("Preparar publicação personalizada"),
+                        workflow.index("Executar scripts personalizados sem credenciais"))
+        self.assertLess(workflow.index("Executar scripts personalizados sem credenciais"),
+                        workflow.index("Finalizar publicação personalizada"))
         custom_step = workflow.split("Executar scripts personalizados sem credenciais", 1)[1].split(
             "- name:", 1
         )[0]
@@ -128,6 +135,23 @@ class AlvoPersonalizado(unittest.TestCase):
         self.assertNotIn("secrets.CUSTOM_TOKEN", custom_step)
         self.assertIn("CUSTOM_APP: ${{ vars.CUSTOM_APP }}", custom_step)
         self.assertIn("persist-credentials: false", workflow)
+        rollback = plan.expected[".github/workflows/bb-voltar-versao.yml"]
+        rollback_step = rollback.split("Voltar produção pelo alvo personalizado sem credenciais", 1)[1].split(
+            "- name:", 1
+        )[0]
+        self.assertNotIn("GH_TOKEN", rollback_step)
+        self.assertNotIn("secrets.", rollback_step)
+        self.assertIn("needs.conferir.outputs.imagem", rollback_step)
+
+    def test_personalized_secret_variables_are_rejected(self):
+        self.configure_custom()
+        path = self.root / "bigbang.toml"
+        text = path.read_text(encoding="utf-8")
+        path.write_text(text.replace('variaveis_personalizado = ["CUSTOM_APP"]',
+                                     'variaveis_personalizado = ["CUSTOM_APP"]\n'
+                                     'segredos_personalizado = ["CUSTOM_TOKEN"]'), encoding="utf-8")
+        with self.assertRaisesRegex(BbError, "segredos_personalizado|chaves desconhecidas"):
+            generator.build_plan(self.root, install_pipeline=True)
 
     def test_custom_scripts_do_not_receive_publication_or_project_secrets(self):
         self.configure_custom()
@@ -167,7 +191,7 @@ class AlvoPersonalizado(unittest.TestCase):
             ("saude", ["producao"]),
             ("publicar", ["producao", MANIFEST]),
             ("migrar", ["producao", MANIFEST]),
-            ("voltar", ["producao", "v1.2.3"]),
+            ("voltar", ["producao", "v1.2.3", MANIFEST]),
         ):
             with self.subTest(operation=operation):
                 (self.root / "script-env").unlink(missing_ok=True)
@@ -182,6 +206,35 @@ class AlvoPersonalizado(unittest.TestCase):
                         self.assertIn(f"{name}=unset\n", script_environment)
                 self.assertIn("CUSTOM_APP=custom-app-sentinel\n", script_environment)
                 self.assertRegex(script_environment, r"(?m)^PATH=.+$")
+
+    def test_custom_publish_script_cannot_read_a_tokenized_step_ancestor(self):
+        self.configure_custom()
+        body = (
+            "#!/usr/bin/env bash\n"
+            "pid=$PPID\n"
+            "while [[ $pid -gt 1 ]]; do\n"
+            "  if tr '\\0' '\\n' < /proc/$pid/environ 2>/dev/null | "
+            "grep -q '^GH_TOKEN=gh-secret-sentinel$'; then exit 42; fi\n"
+            "  pid=$(awk '{print $4}' /proc/$pid/stat)\n"
+            "done\n"
+            "echo safe >> script-env\n"
+        )
+        for operation in SCRIPT_KEYS:
+            (self.root / f"scripts/deploy/{operation}.sh").write_text(body, encoding="utf-8")
+        preparer = subprocess.run(
+            ["bash", "-c", "test \"$GH_TOKEN\" = gh-secret-sentinel"],
+            env={**os.environ, "GH_TOKEN": "gh-secret-sentinel"}, capture_output=True, text=True,
+        )
+        self.assertEqual(preparer.returncode, 0, preparer.stderr)
+        env = self.runner_environment(
+            CUSTOM_APP="custom-app-sentinel", RC_TAG="v1.2.3-rc.1", TAG="v1.2.3",
+            TARGET_SHA="0" * 40, IMAGEM=MANIFEST,
+        )
+        for name in ("GH_TOKEN", "GITHUB_TOKEN", "ACTIONS_RUNTIME_TOKEN", "AWS_SECRET_ACCESS_KEY", "CUSTOM_TOKEN"):
+            env.pop(name, None)
+        result = self.run_deploy_script("scripts/publicar-personalizado.sh", env=env)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual((self.root / "script-env").read_text(encoding="utf-8"), "safe\n" * 3)
 
     def test_staging_runs_migration_before_publish_and_health(self):
         self.configure_custom()
@@ -272,23 +325,10 @@ class AlvoPersonalizado(unittest.TestCase):
 
     def test_rollback_uses_release_manifest_and_never_runs_migration(self):
         self.configure_custom()
-        fake_bin = self.root / "fake-bin"
-        fake_bin.mkdir(exist_ok=True)
-        gh = fake_bin / "gh"
-        gh.write_text(
-            "#!/usr/bin/env bash\n"
-            "output=''\n"
-            "while [ \"$#\" -gt 0 ]; do\n"
-            "  if [ \"$1\" = --output ]; then output=\"$2\"; shift 2; else shift; fi\n"
-            "done\n"
-            "printf '%s\\n' 'app=" + IMAGE + "' > \"$output\"\n",
-            encoding="utf-8",
-        )
-        gh.chmod(0o755)
         env = self.runner_environment()
         path = ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh"
         rollback = subprocess.run(
-            ["bash", path, "voltar", "producao", "v1.2.3"],
+            ["bash", path, "voltar", "producao", "v1.2.3", MANIFEST],
             cwd=self.root,
             env=env,
             capture_output=True,

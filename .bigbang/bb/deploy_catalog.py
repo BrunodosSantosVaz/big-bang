@@ -22,7 +22,7 @@ CUSTOM_SCRIPTS = {
     "saude": "script_saude",
     "voltar": "script_voltar",
 }
-CUSTOM_ENVIRONMENT_KEYS = ("variaveis_personalizado", "segredos_personalizado")
+CUSTOM_ENVIRONMENT_KEYS = ("variaveis_personalizado",)
 
 
 @dataclass(frozen=True)
@@ -176,14 +176,12 @@ def _customize_target(root, config, target):
     for operation, key in CUSTOM_SCRIPTS.items():
         _custom_script(root, operation, deploy.get(key))
     variables = _names(deploy, "variaveis_personalizado", ENV_NAME, non_empty=False)
-    secrets = _names(deploy, "segredos_personalizado", ENV_NAME, non_empty=False)
+    secrets = ()
     reserved = {"GH_TOKEN", "IMAGEM", "VERSAO", "SIMULAR", "RC_TAG", "TAG", "TARGET_SHA",
                 "BB", "PATH", "HOME", "PYTHONPATH", "PYTHONHOME", "NODE_OPTIONS", "BASH_ENV", "ENV"}
     if any(name in reserved or name.startswith(("BB_", "GITHUB_", "RUNNER_", "INPUT_", "LD_"))
            for name in variables + secrets):
         _fail("personalizado: variáveis e segredos não podem usar nomes reservados à esteira")
-    if set(variables) & set(secrets):
-        _fail("personalizado: variáveis e segredos não podem repetir o mesmo nome")
     return replace(target, variables=variables, secrets=secrets)
 
 

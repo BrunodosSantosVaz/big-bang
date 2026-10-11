@@ -52,7 +52,7 @@ class FlashCandidate(ComBb):
         self.assertIn('refs/remotes/origin/release/', script)
         self.assertIn('needs: [conferir, testes-producao]', text)
         self.assertIn('environment: producao', text)
-        self.assertIn('BB_SHA_TESTADO: ${{ needs.testes-producao.outputs.sha }}', text)
+        self.assertIn('{{gerado.publicar_producao}}', text)
 
     def test_completed_release_can_resume_without_deleted_release_branch(self):
         self.estado['releases'] = ['v1.4.2']
