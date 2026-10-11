@@ -198,3 +198,22 @@ class Commands(Bootstrap):
         with self.assertRaises(BbError) as error:
             self.run_cli(plain, "board", "create", "--title", "Sistema")
         self.assertIn("production", error.exception.message)
+
+
+class GeneratedMode(unittest.TestCase):
+    def test_autonomous_agents_md_explains_the_contract(self):
+        from test_grouping_v3 import GeneratedV3
+        from bb import generator
+        helper = GeneratedV3()
+        with tempfile.TemporaryDirectory() as folder:
+            root = helper.project(folder)
+            path = os.path.join(root, "bigbang.toml")
+            text = open(path, encoding="utf-8").read()
+            import re
+            text = re.sub(r'(?m)^mode = "[a-z]+"', 'mode = "autonomous"', text, count=1)
+            open(path, "w", encoding="utf-8").write(text)
+            generator.apply(generator.build_plan(root, install_pipeline=True), root)
+            agents = open(os.path.join(root, "AGENTS.md"), encoding="utf-8").read()
+            self.assertIn("Modo autônomo", agents)
+            self.assertIn("autonomy.toml", agents)
+            self.assertIn("bb autonomy check", agents)
