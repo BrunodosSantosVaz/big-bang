@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "dee6eab5dcbe66a2ef5e66884edd5b5f96b006b0",
-    "commit": "68db03035788ddb40e2835187b0df599f610284f",
+    "commit": "1e90be6fcf04664fe0f11f34fd12cd5fd8c9224a",
     "branch": "master",
     "proposta": "bigbang/proposta-303-autonomy"
   },
@@ -255,7 +255,7 @@
     }
   },
   "codigo": {
-    "commit": "ed5774740c4b416621ad516b35ed351495f6a0ed",
+    "commit": "c18d86f5e383ee2913175b70bb2abe967b8b1388",
     "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
@@ -2642,7 +2642,7 @@
       ],
       "hashes": {
         ".bigbang/bb/framework.py": "sha256:1ecbe5ed20b6c26bc1c5de1c53cb71173002f1086f1020775549c6803b308f7a",
-        ".bigbang/pipeline/framework/config.toml": "sha256:86e8f4405178dd302d6e6a9ef54403e96a49e43dc4a5fb751e76c331850aa0d9",
+        ".bigbang/pipeline/framework/config.toml": "sha256:72272280fbd612c8d4b605f2f2b2754def0588ce38b5f0a6e1eddf24001803be",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:49709060fa19fa6c0e86e624df856dac13ec41e02eb64d3e4f763d6654b0f810",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:0245df537e46101bd142701cd485913c8558ed61a262efdae7fd9a2e229dc8d4",
         ".bigbang/pipeline/framework/scripts/testes-candidata.sh": "sha256:b9cc01977794173b5dc2a2bec28b7ca53eb0f8fa91798f10148d25efae546a0e",
