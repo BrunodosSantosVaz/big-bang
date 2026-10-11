@@ -280,7 +280,7 @@ class Board(Base):
         self.old = {28: FakeProject(), 29: FakeProject(), 30: FakeProject()}
         for project in self.old.values():
             project.ensure_field("Status", "SINGLE_SELECT", ["Backlog Refinement", "Próxima sprint", "Code", "CI/PR",
-                                                             "Novo"])
+                                                             "Novo", "Concluída", "Homologação", "Pronto"])
         for number, column in ((10, "Backlog Refinement"), (12, "Próxima sprint"), (13, "Próxima sprint")):
             self.old[28].set(number, "Status", column)
         for number, column in ((14, "Code"), (15, "Code"), (17, "CI/PR")):
