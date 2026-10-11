@@ -477,3 +477,19 @@ class CliOutputs(Publish):
                                  "bb-publish.yml.tmpl"), encoding="utf-8").read()
         self.assertNotIn('git tag -l "v$VERSION-rc.*"', text)
         self.assertEqual(text.count("-rc\\.[0-9]+$"), 2)
+
+
+class CandidatePreparation(unittest.TestCase):
+    def test_every_v3_candidate_gives_the_preparation_step_a_token(self):
+        """Without GH_TOKEN `bb docs read` fails and the candidate is skipped as "CHANGELOG without the section"."""
+        import re
+        from _raiz import RAIZ
+        base = os.path.join(RAIZ, ".bigbang", "pipeline")
+        found = []
+        for folder in ("framework", os.path.join("profiles", "compiled"), os.path.join("profiles", "deploy")):
+            path = os.path.join(base, folder, "files", ".github", "workflows", "bb-candidate.yml.tmpl")
+            text = open(path, encoding="utf-8").read()
+            step = text[text.index("Versão e número da candidata"):]
+            step = step[:step.index("\n\n")]
+            found.append((folder, "GH_TOKEN: ${{ github.token }}" in step))
+        self.assertEqual(found, [(f, True) for f, _ in found])
