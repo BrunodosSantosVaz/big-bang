@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "68db662a067086316121e95f018826584b489376",
+    "commit": "fb269ba0e69fd0415c912705e7e4757cee56daf9",
     "branch": "master",
     "proposta": "wiki/integration"
   },
@@ -834,7 +834,7 @@
         ".bigbang/tests/test_launcher.py:test_compiled_profile_after_f2"
       ],
       "hashes": {
-        ".bigbang/bb/init.py": "sha256:484ab93c6cecea0769de790afc0e75f793bd837ca0b36d63b156cacc2f192d69"
+        ".bigbang/bb/init.py": "sha256:07ea59f34ac7626fe41c13615573f6d80929d98ffd6cc465082a1727ec96f97a"
       },
       "descricao": "Preparar F0 com identidade, modo padrão ou Flash, configuração e arquivos comunitários sem destruir conteúdo do projeto."
     },
