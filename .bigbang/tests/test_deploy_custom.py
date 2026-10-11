@@ -1,4 +1,4 @@
-"""Project-owned deployment scripts receive only the immutable artifact manifest."""
+"""Project-owned deployment scripts receive a clean environment and immutable manifest."""
 import os
 import subprocess
 import sys
@@ -35,15 +35,14 @@ class AlvoPersonalizado(unittest.TestCase):
                 script.write_text(
                     "#!/usr/bin/env bash\n"
                     "set -euo pipefail\n"
-                    f"printf '{operation}:%s\\n' \"$1\" >> \"$LOG\"\n"
-                    "if [ \"$#\" -gt 1 ]; then cat \"$2\" >> \"$MANIFEST_LOG\"; fi\n"
-                    f"[ \"${{FAIL_OPERATION:-}}\" != {operation} ]\n",
+                    f"printf '{operation}:%s\\n' \"$1\" >> calls\n"
+                    "if [ \"$#\" -gt 1 ]; then cat \"$2\" >> manifests; fi\n"
+                    f"[ ! -f fail-{operation} ]\n",
                     encoding="utf-8",
                 )
             lines.append(f'{key} = "{path}"')
         lines.extend([
             'variaveis_personalizado = ["CUSTOM_APP"]',
-            'segredos_personalizado = ["CUSTOM_TOKEN"]',
         ])
         path = self.root / "bigbang.toml"
         text = path.read_text(encoding="utf-8")
@@ -109,9 +108,133 @@ class AlvoPersonalizado(unittest.TestCase):
             for name in ("bb-candidata.yml", "bb-publicar-producao.yml", "bb-voltar-versao.yml")
         )
         self.assertIn("CUSTOM_APP: ${{ vars.CUSTOM_APP }}", workflows)
-        self.assertIn("CUSTOM_TOKEN: ${{ secrets.CUSTOM_TOKEN }}", workflows)
+        self.assertNotIn("CUSTOM_TOKEN", workflows)
         self.assertNotIn("VPS_HOST", workflows)
         self.assertNotIn("VPS_CHAVE_SSH", workflows)
+        candidate = plan.expected[".github/workflows/bb-candidata.yml"]
+        staging = candidate.split("  staging:", 1)[1].split("\n  publicar:", 1)[0]
+        self.assertNotIn("GH_TOKEN", staging)
+        self.assertNotIn("secrets.", staging)
+
+    def test_production_custom_scripts_run_outside_tokenized_steps(self):
+        self.configure_custom()
+        plan = generator.build_plan(self.root, install_pipeline=True)
+        workflow = plan.expected[".github/workflows/bb-publicar-producao.yml"]
+        self.assertIn("Preparar publicação personalizada", workflow)
+        self.assertIn("Executar scripts personalizados sem credenciais", workflow)
+        self.assertIn("Finalizar publicação personalizada", workflow)
+        self.assertLess(workflow.index("Preparar publicação personalizada"),
+                        workflow.index("Executar scripts personalizados sem credenciais"))
+        self.assertLess(workflow.index("Executar scripts personalizados sem credenciais"),
+                        workflow.index("Finalizar publicação personalizada"))
+        custom_step = workflow.split("Executar scripts personalizados sem credenciais", 1)[1].split(
+            "- name:", 1
+        )[0]
+        self.assertNotIn("GH_TOKEN", custom_step)
+        self.assertNotIn("GITHUB_TOKEN", custom_step)
+        self.assertNotIn("secrets.CUSTOM_TOKEN", custom_step)
+        self.assertIn("CUSTOM_APP: ${{ vars.CUSTOM_APP }}", custom_step)
+        self.assertIn("persist-credentials: false", workflow)
+        rollback = plan.expected[".github/workflows/bb-voltar-versao.yml"]
+        rollback_step = rollback.split("Voltar produção pelo alvo personalizado sem credenciais", 1)[1].split(
+            "- name:", 1
+        )[0]
+        self.assertNotIn("GH_TOKEN", rollback_step)
+        self.assertNotIn("secrets.", rollback_step)
+        self.assertIn("needs.conferir.outputs.imagem", rollback_step)
+
+    def test_personalized_secret_variables_are_rejected(self):
+        self.configure_custom()
+        path = self.root / "bigbang.toml"
+        text = path.read_text(encoding="utf-8")
+        path.write_text(text.replace('variaveis_personalizado = ["CUSTOM_APP"]',
+                                     'variaveis_personalizado = ["CUSTOM_APP"]\n'
+                                     'segredos_personalizado = ["CUSTOM_TOKEN"]'), encoding="utf-8")
+        with self.assertRaisesRegex(BbError, "segredos_personalizado|chaves desconhecidas"):
+            generator.build_plan(self.root, install_pipeline=True)
+
+    def test_custom_scripts_do_not_receive_publication_or_project_secrets(self):
+        self.configure_custom()
+        script_body = (
+            "#!/usr/bin/env bash\n"
+            "for name in GH_TOKEN GITHUB_TOKEN ACTIONS_RUNTIME_TOKEN AWS_SECRET_ACCESS_KEY "
+            "CUSTOM_TOKEN LOG MANIFEST_LOG HOME BB GITHUB_REPOSITORY IMAGEM; do\n"
+            "  if [[ -v $name ]]; then printf '%s=set\\n' \"$name\" >> script-env; "
+            "else printf '%s=unset\\n' \"$name\" >> script-env; fi\n"
+            "done\n"
+            "printf 'CUSTOM_APP=%s\\n' \"${CUSTOM_APP-unset}\" >> script-env\n"
+            "printf 'PATH=%s\\n' \"${PATH-unset}\" >> script-env\n"
+        )
+        for operation in SCRIPT_KEYS:
+            (self.root / f"scripts/deploy/{operation}.sh").write_text(script_body, encoding="utf-8")
+        gh = self.root / "fake-bin/gh"
+        gh.parent.mkdir(exist_ok=True)
+        gh.write_text(
+            "#!/usr/bin/env bash\n"
+            "while [ \"$#\" -gt 0 ]; do\n"
+            "  if [ \"$1\" = --output ]; then output=\"$2\"; shift 2; else shift; fi\n"
+            "done\n"
+            "printf '%s\\n' '" + MANIFEST + "' > \"$output\"\n",
+            encoding="utf-8",
+        )
+        gh.chmod(0o755)
+        env = self.runner_environment(
+            GH_TOKEN="gh-secret-sentinel",
+            GITHUB_TOKEN="github-secret-sentinel",
+            ACTIONS_RUNTIME_TOKEN="runtime-secret-sentinel",
+            AWS_SECRET_ACCESS_KEY="aws-secret-sentinel",
+            CUSTOM_APP="custom-app-sentinel",
+            CUSTOM_TOKEN="project-secret-sentinel",
+        )
+        wrapper = "alvos/personalizado/scripts/alvo.sh"
+        for operation, args in (
+            ("saude", ["producao"]),
+            ("publicar", ["producao", MANIFEST]),
+            ("migrar", ["producao", MANIFEST]),
+            ("voltar", ["producao", "v1.2.3", MANIFEST]),
+        ):
+            with self.subTest(operation=operation):
+                (self.root / "script-env").unlink(missing_ok=True)
+                result = self.run_deploy_script(wrapper, operation, *args, env=env)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                script_environment = (self.root / "script-env").read_text(encoding="utf-8")
+                for name in (
+                    "GH_TOKEN", "GITHUB_TOKEN", "ACTIONS_RUNTIME_TOKEN", "AWS_SECRET_ACCESS_KEY",
+                    "CUSTOM_TOKEN", "LOG", "MANIFEST_LOG", "HOME", "BB", "GITHUB_REPOSITORY", "IMAGEM",
+                ):
+                    with self.subTest(variable=name):
+                        self.assertIn(f"{name}=unset\n", script_environment)
+                self.assertIn("CUSTOM_APP=custom-app-sentinel\n", script_environment)
+                self.assertRegex(script_environment, r"(?m)^PATH=.+$")
+
+    def test_custom_publish_script_cannot_read_a_tokenized_step_ancestor(self):
+        self.configure_custom()
+        body = (
+            "#!/usr/bin/env bash\n"
+            "pid=$PPID\n"
+            "while [[ $pid -gt 1 ]]; do\n"
+            "  if tr '\\0' '\\n' < /proc/$pid/environ 2>/dev/null | "
+            "grep -q '^GH_TOKEN=gh-secret-sentinel$'; then exit 42; fi\n"
+            "  pid=$(awk '{print $4}' /proc/$pid/stat)\n"
+            "done\n"
+            "echo safe >> script-env\n"
+        )
+        for operation in SCRIPT_KEYS:
+            (self.root / f"scripts/deploy/{operation}.sh").write_text(body, encoding="utf-8")
+        preparer = subprocess.run(
+            ["bash", "-c", "test \"$GH_TOKEN\" = gh-secret-sentinel"],
+            env={**os.environ, "GH_TOKEN": "gh-secret-sentinel"}, capture_output=True, text=True,
+        )
+        self.assertEqual(preparer.returncode, 0, preparer.stderr)
+        env = self.runner_environment(
+            CUSTOM_APP="custom-app-sentinel", RC_TAG="v1.2.3-rc.1", TAG="v1.2.3",
+            TARGET_SHA="0" * 40, IMAGEM=MANIFEST,
+        )
+        for name in ("GH_TOKEN", "GITHUB_TOKEN", "ACTIONS_RUNTIME_TOKEN", "AWS_SECRET_ACCESS_KEY", "CUSTOM_TOKEN"):
+            env.pop(name, None)
+        result = self.run_deploy_script("scripts/publicar-personalizado.sh", env=env)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual((self.root / "script-env").read_text(encoding="utf-8"), "safe\n" * 3)
 
     def test_staging_runs_migration_before_publish_and_health(self):
         self.configure_custom()
@@ -129,22 +252,23 @@ class AlvoPersonalizado(unittest.TestCase):
 
     def test_migration_failure_stops_staging_before_publish(self):
         self.configure_custom()
-        result = self.run_deploy_script(
-            "scripts/staging.sh", env=self.runner_environment(FAIL_OPERATION="migrar")
-        )
+        self.configure_failure("migrar")
+        result = self.run_deploy_script("scripts/staging.sh", env=self.runner_environment())
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual((self.root / "calls").read_text(encoding="utf-8").splitlines(), ["migrar:staging"])
 
     def test_publish_failure_stops_staging_before_health(self):
         self.configure_custom()
-        result = self.run_deploy_script(
-            "scripts/staging.sh", env=self.runner_environment(FAIL_OPERATION="publicar")
-        )
+        self.configure_failure("publicar")
+        result = self.run_deploy_script("scripts/staging.sh", env=self.runner_environment())
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(
             (self.root / "calls").read_text(encoding="utf-8").splitlines(),
             ["migrar:staging", "publicar:staging"],
         )
+
+    def configure_failure(self, operation):
+        (self.root / f"fail-{operation}").touch()
 
     def test_mutable_image_reference_is_rejected_before_script_execution(self):
         self.configure_custom()
@@ -167,6 +291,7 @@ class AlvoPersonalizado(unittest.TestCase):
 
     def test_production_health_failure_stops_release_creation(self):
         self.configure_custom()
+        self.configure_failure("saude")
         gh = self.root / "fake-bin/gh"
         gh.parent.mkdir(exist_ok=True)
         gh.write_text(
@@ -190,7 +315,6 @@ class AlvoPersonalizado(unittest.TestCase):
                 RC_TAG="v1.2.3-rc.1",
                 TAG="v1.2.3",
                 TARGET_SHA="0" * 40,
-                FAIL_OPERATION="saude",
             ),
         )
         self.assertNotEqual(result.returncode, 0)
@@ -201,23 +325,10 @@ class AlvoPersonalizado(unittest.TestCase):
 
     def test_rollback_uses_release_manifest_and_never_runs_migration(self):
         self.configure_custom()
-        fake_bin = self.root / "fake-bin"
-        fake_bin.mkdir(exist_ok=True)
-        gh = fake_bin / "gh"
-        gh.write_text(
-            "#!/usr/bin/env bash\n"
-            "output=''\n"
-            "while [ \"$#\" -gt 0 ]; do\n"
-            "  if [ \"$1\" = --output ]; then output=\"$2\"; shift 2; else shift; fi\n"
-            "done\n"
-            "printf '%s\\n' 'app=" + IMAGE + "' > \"$output\"\n",
-            encoding="utf-8",
-        )
-        gh.chmod(0o755)
         env = self.runner_environment()
         path = ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh"
         rollback = subprocess.run(
-            ["bash", path, "voltar", "producao", "v1.2.3"],
+            ["bash", path, "voltar", "producao", "v1.2.3", MANIFEST],
             cwd=self.root,
             env=env,
             capture_output=True,

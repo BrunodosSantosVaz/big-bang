@@ -77,7 +77,6 @@ script_migrar = "scripts/deploy/migrar.sh"
 script_saude = "scripts/deploy/saude.sh"
 script_voltar = "scripts/deploy/voltar.sh"
 variaveis_personalizado = ["DEPLOY_APP"]
-segredos_personalizado = ["DEPLOY_TOKEN"]
 ```
 
 Os scripts recebem argumentos posicionais: `publicar` e `migrar` recebem `<ambiente> <manifesto>`, `saude` recebe
@@ -86,9 +85,11 @@ Os scripts recebem argumentos posicionais: `publicar` e `migrar` recebem `<ambie
 mutáveis, caminhos fora do projeto ou ausentes. No rollback, o framework baixa o `imagem.txt` da release escolhida
 e passa o manifesto verificado; não executa migração. Falha ou ausência em qualquer script impede o próximo passo.
 
-`variaveis_personalizado` e `segredos_personalizado` aceitam somente nomes, nunca valores. O framework injeta apenas
-essas referências nos jobs de deploy do GitHub. Os scripts devem promover o manifesto recebido sem reconstruir ou
-substituir a identidade imutável do artefato.
+`variaveis_personalizado` aceita somente nomes de variáveis públicas. Segredos não são aceitos para esse alvo. A
+publicação executa os scripts do projeto num passo separado, sem o token usado para operações no GitHub, sem credenciais
+persistidas no checkout e sem outros segredos da esteira. O framework passa apenas essas variáveis públicas por uma
+allowlist. Os scripts devem promover o manifesto recebido sem reconstruir ou substituir a identidade imutável do
+artefato.
 
 ## Contrato de um formato
 

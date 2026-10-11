@@ -25,8 +25,27 @@ script_real=$(realpath -e -- "$script")
 [[ "$script_real" == "$raiz/"* && "$script_real" != "$raiz/.bigbang/"* ]] \
   || { echo "::error::script fora da raiz do projeto"; exit 2; }
 
+project_environment=("PATH=${PATH:-/usr/bin:/bin}")
+for variable in LANG LC_ALL TZ TMPDIR TMP TEMP; do
+  if [[ -n "${!variable:-}" ]]; then
+    project_environment+=("$variable=${!variable}")
+  fi
+done
+variaveis_personalizado=$("${BB_CMD[@]}" config get deploy.variaveis_personalizado)
+while IFS= read -r variable; do
+  [[ -n "$variable" ]] || continue
+  [[ "$variable" =~ ^[A-Z][A-Z0-9_]*$ ]] \
+    || { echo "::error::nome de variável personalizada inválido"; exit 2; }
+  if [[ -v "$variable" ]]; then
+    project_environment+=("$variable=${!variable}")
+  fi
+done <<<"$variaveis_personalizado"
+run_project_script() {
+  env -i "${project_environment[@]}" bash "$@"
+}
+
 if [[ "$operacao" == saude ]]; then
-  exec bash "$script" "$ambiente"
+  exec env -i "${project_environment[@]}" bash "$script" "$ambiente"
 fi
 
 tmp=$(mktemp -d)
@@ -35,7 +54,8 @@ manifesto="$tmp/imagem.txt"
 if [[ "$operacao" == voltar ]]; then
   versao="${3:?informe a versão publicada}"
   [[ "$versao" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::versão inválida"; exit 2; }
-  gh release download "$versao" --repo "${GITHUB_REPOSITORY:?}" --pattern imagem.txt --output "$manifesto"
+  manifesto_rollback="${4:?informe o manifesto conferido pela esteira}"
+  printf '%s\n' "$manifesto_rollback" | tr ',' '\n' > "$manifesto"
 else
   printf '%s\n' "${3:?informe o manifesto imutável}" | tr ',' '\n' >"$manifesto"
 fi
@@ -73,8 +93,8 @@ done <"$manifesto"
   || { echo "::error::manifesto incompleto para deploy.servicos"; exit 2; }
 
 if [[ "$operacao" == voltar ]]; then
-  if bash "$script" "$ambiente" "$normalizado" "$versao"; then status=0; else status=$?; fi
+  if run_project_script "$script" "$ambiente" "$normalizado" "$versao"; then status=0; else status=$?; fi
 else
-  if bash "$script" "$ambiente" "$normalizado"; then status=0; else status=$?; fi
+  if run_project_script "$script" "$ambiente" "$normalizado"; then status=0; else status=$?; fi
 fi
 exit "$status"

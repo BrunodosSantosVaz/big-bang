@@ -67,8 +67,9 @@ repositório público (em privado exige GitHub Enterprise Cloud).
 | `bb-voltar-versao.yml` | botão + ambiente `producao` | reimplanta a imagem da tag anterior; nunca desfaz migração |
 
 Consulte `bb alvos` (somente leitura, disponível antes da Fundação) para distinguir alvos e formatos implementados
-das reservas. Hoje a entrega disponível é `vps-docker` + `imagem`; `aws`, `paas`, `tsuru`, `personalizado`, `pacote` e
-`estatico` estão reservados e o gerador recusa sua seleção. A configuração `deploy.artefato` é opcional e usa
+das reservas. Hoje `vps-docker`, `tsuru` e `personalizado` suportam `imagem`; `aws`, `paas`, `pacote` e `estatico`
+continuam reservados e o gerador recusa sua seleção. Scripts do alvo `personalizado` rodam num passo sem credenciais
+da publicação e recebem apenas variáveis públicas declaradas. A configuração `deploy.artefato` é opcional e usa
 `imagem` por padrão.
 
 Cada alvo implementado declara as operações `publicar <ambiente> <digest>`, `voltar <ambiente> <tag>`,
