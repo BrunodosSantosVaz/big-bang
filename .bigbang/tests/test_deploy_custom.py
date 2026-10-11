@@ -47,7 +47,7 @@ class AlvoPersonalizado(unittest.TestCase):
         ])
         path = self.root / "bigbang.toml"
         text = path.read_text(encoding="utf-8")
-        path.write_text(text.replace("[deploy]\n", "[deploy]\n" + "\n".join(lines) + "\n", 1),
+        path.write_text(text.replace("[deploy]", "[deploy]\n" + "\n".join(lines) + "\n", 1),
                         encoding="utf-8")
 
     def runner_environment(self, **extra):
@@ -91,6 +91,16 @@ class AlvoPersonalizado(unittest.TestCase):
                 with self.assertRaisesRegex(BbError, "script|caminho|arquivo|fora"):
                     generator.build_plan(self.root, install_pipeline=True)
 
+    def test_custom_script_symlink_cannot_escape_project(self):
+        self.configure_custom()
+        script = self.root / "scripts/deploy/voltar.sh"
+        script.unlink()
+        external = self.root.parent / "outside.sh"
+        external.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        script.symlink_to(external)
+        with self.assertRaisesRegex(BbError, "fora dos scripts do projeto"):
+            generator.build_plan(self.root, install_pipeline=True)
+
     def test_custom_target_is_generated_with_only_declared_credentials(self):
         self.configure_custom()
         plan = generator.build_plan(self.root, install_pipeline=True)
@@ -115,7 +125,7 @@ class AlvoPersonalizado(unittest.TestCase):
             (self.root / "calls").read_text(encoding="utf-8").splitlines(),
             ["migrar:staging", "publicar:staging", "saude:staging", "smoke", "zap"],
         )
-        self.assertEqual((self.root / "manifests").read_text(encoding="utf-8"), (IMAGE + "\n") * 2)
+        self.assertEqual((self.root / "manifests").read_text(encoding="utf-8"), (MANIFEST + "\n") * 2)
 
     def test_migration_failure_stops_staging_before_publish(self):
         self.configure_custom()
@@ -124,6 +134,18 @@ class AlvoPersonalizado(unittest.TestCase):
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual((self.root / "calls").read_text(encoding="utf-8").splitlines(), ["migrar:staging"])
+
+    def test_mutable_image_reference_is_rejected_before_script_execution(self):
+        self.configure_custom()
+        result = self.run_deploy_script(
+            "alvos/personalizado/scripts/alvo.sh",
+            "migrar",
+            "staging",
+            "app=ghcr.io/owner/app:latest",
+            env=self.runner_environment(),
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.root / "calls").exists())
 
     def test_rollback_uses_release_manifest_and_never_runs_migration(self):
         self.configure_custom()
@@ -155,7 +177,7 @@ class AlvoPersonalizado(unittest.TestCase):
         self.assertEqual(health.returncode, 0, health.stderr)
         self.assertEqual((self.root / "calls").read_text(encoding="utf-8").splitlines(),
                          ["voltar:producao", "saude:producao"])
-        self.assertEqual((self.root / "manifests").read_text(encoding="utf-8"), IMAGE + "\n")
+        self.assertEqual((self.root / "manifests").read_text(encoding="utf-8"), MANIFEST + "\n")
 
 
 if __name__ == "__main__":
