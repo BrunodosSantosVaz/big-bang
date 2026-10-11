@@ -47,11 +47,11 @@ jobs:
           branch=$(grep -o 'release/[0-9.]*' <<<"$out" | head -n 1)
           [ -n "$branch" ] || exit 0
           git fetch -q origin "$branch" && git switch -q "$branch"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           version="${branch#release/}"
           python .bigbang/bin/bb.py pipeline write-version "$version"
           python .bigbang/bin/bb.py release items --head "$branch" | python .bigbang/bin/bb.py pipeline changelog --release "$version"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -qm "chore(release): $version"
           git push -q origin "HEAD:$branch"
