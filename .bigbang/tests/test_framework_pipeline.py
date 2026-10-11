@@ -19,10 +19,14 @@ ORIGIN = 'BrunodosSantosVaz/big-bang'
 
 class FrameworkPipeline(unittest.TestCase):
     def setUp(self):
+        identity = patch.dict(os.environ, {"GITHUB_REPOSITORY": ""})
+        identity.start()
+        self.addCleanup(identity.stop)
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = os.path.join(self.tmp.name, 'repo')
         shutil.copytree(RAIZ, self.root, ignore=ignorar_para_copia())
+        shutil.copy2(os.path.join(RAIZ, '.bigbang-framework.toml'), self.root)
         subprocess.run(['git', 'init', '-q', self.root], check=True)
         subprocess.run(['git', '-C', self.root, 'remote', 'add', 'origin', f'https://github.com/{ORIGIN}.git'], check=True)
 
@@ -91,7 +95,8 @@ class FrameworkPipeline(unittest.TestCase):
         second, other = package.build(self.root, os.path.join(self.tmp.name, 'b'))
         self.assertEqual(os.path.basename(first), 'bigbang-v3.0.0.tar.gz')
         self.assertEqual(digest, other)
-        self.assertEqual(open(first, 'rb').read(), open(second, 'rb').read())
+        with open(first, 'rb') as a, open(second, 'rb') as b:
+            self.assertEqual(a.read(), b.read())
         with self.assertRaises(BbError):
             framework.prepare(self.root, '3.0.0-rc.1')
 
@@ -125,6 +130,18 @@ class FrameworkPipeline(unittest.TestCase):
         with patch('bb.framework.github.run', side_effect=gh), self.assertRaises(BbError):
             framework.promote(self.root, 'v2.0.1-rc.1', 'v2.0.1', 'a' * 40)
         self.assertFalse(any(args[:2] == ('release', 'create') for args in calls))
+
+    def test_framework_community_keeps_auditing_the_existing_boards(self):
+        from types import SimpleNamespace
+        from bb import pipeline_cli
+        args = SimpleNamespace(raiz=RAIZ, dados=None, visibilidade_remota=False,
+                               publicada=False, comunidade=True)
+        own = config.load(self.root)
+        with patch.object(pipeline_cli.docs_check, 'problems', return_value=[]), \
+                patch.object(pipeline_cli.config_module, 'load', return_value=own), \
+                patch.object(pipeline_cli.community_public, 'verify', return_value=[]) as audit:
+            self.assertEqual(pipeline_cli._docs(args), 0)
+        self.assertEqual(audit.call_args.args[1]['paineis']['planejamento'], 28)
 
     def test_cli_framework_and_pipeline_are_exclusive(self):
         output = io.StringIO()
