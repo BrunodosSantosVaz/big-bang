@@ -410,3 +410,70 @@ class ContentAsData(unittest.TestCase):
             self.assertEqual(len(found), 1)
             self.assertIn("requirements.txt", found[0])
             self.assertNotIn("SEGREDO_FAKE", "".join(found))
+
+
+class CliOutputs(Publish):
+    def run_cli(self, *argv):
+        import argparse
+        import contextlib
+        import io
+        from unittest import mock
+        from bb import flow_cli
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--raiz", default=".")
+        commands = parser.add_subparsers(dest="command")
+        flow_cli.register(commands, commands.add_parser("pipeline").add_subparsers(dest="pipeline_command"))
+        args = parser.parse_args(list(argv))
+        output = io.StringIO()
+        with mock.patch.object(flow_cli, "_context", return_value=(cfg(), self.client, self.project)), \
+                mock.patch.object(flow_cli, "_load", return_value=cfg()), \
+                mock.patch.object(flow_cli.gh, "GitHub", return_value=self.client), \
+                contextlib.redirect_stdout(output):
+            args.handler(args)
+        return output.getvalue()
+
+    def test_pending_epics_are_warned_by_the_publish_command(self):
+        from unittest import mock
+        result = {"version": "1.3.0", "pr": 1, "done": [11], "dark": [], "pending": [10]}
+        with mock.patch.object(delivery, "publish", return_value=result):
+            text = self.run_cli("release", "publish", "--version", "1.3.0", "--content-dir", self.root)
+        self.assertIn("::warning::épico #10", text)
+
+    def test_maintenance_dry_run_says_nothing_was_merged(self):
+        self.fake.add_pull(80, "maintenance/30-readme", "main", title="docs: readme", labels=["pr:approved"])
+        self.fake.pulls[80]["files"] = [{"filename": "README.md"}]
+        self.fake.checks[self.fake.pulls[80]["head"]["sha"]] = [
+            {"name": "gate", "status": "completed", "conclusion": "success"}]
+        text = self.run_cli("release", "maintenance", "--pr", "80", "--dry-run")
+        self.assertIn("nada foi mesclado", text)
+        self.assertFalse(self.fake.pulls[80]["merged"])
+
+    def test_pending_warnings_are_written_before_the_milestone_closes(self):
+        order = []
+        original_comment, original_close = self.client.comment, self.client.close_milestone
+        from unittest import mock
+        with mock.patch.object(self.client, "comment", side_effect=lambda n, b: (order.append("comment"),
+                                                                                  original_comment(n, b))[1]), \
+                mock.patch.object(self.client, "close_milestone",
+                                  side_effect=lambda m: (order.append("close"), original_close(m))[1]):
+            self.fake.issues[10]["labels"].append({"name": "qa:approved"})
+            from bb import flags
+            with open(os.path.join(self.root, "flags.toml"), "w", encoding="utf-8") as handle:
+                handle.write(flags.switch(FLAGS_V3, "novo-login", "production", True, TODAY))
+            original = delivery._green
+
+            def withdraw(client, sha):
+                result = original(client, sha)
+                self.fake.issues[10]["labels"] = [l for l in self.fake.issues[10]["labels"]
+                                                  if l["name"] != "qa:approved"]
+                return result
+            with mock.patch.object(delivery, "_green", side_effect=withdraw):
+                self.publish()
+        self.assertLess(len(order) - 1 - order[::-1].index("comment"), order.index("close"))
+
+    def test_publish_workflow_picks_only_numbered_candidates(self):
+        from _raiz import RAIZ
+        text = open(os.path.join(RAIZ, ".bigbang", "pipeline", "core", "files", ".github", "workflows",
+                                 "bb-publish.yml.tmpl"), encoding="utf-8").read()
+        self.assertNotIn('git tag -l "v$VERSION-rc.*"', text)
+        self.assertEqual(text.count("-rc\\.[0-9]+$"), 2)
