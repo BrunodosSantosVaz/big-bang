@@ -11,7 +11,7 @@ from . import config as config_module
 from .errors import EXIT_INVALID_STATE, EXIT_USAGE, BbError
 from .paths import config_path, read_text, write_text
 
-PARTS = ("config", "labels", "board", "workflow")
+PARTS = ("config", "board", "workflow", "labels")
 MIGRATION_ACTOR = "migration"
 # Inherited by systems founded before #236: the framework's own project section, without markers.
 FRAMEWORK_QUOTE = re.compile(r"(?ms)^> \*\*Se este é o repositório `BrunodosSantosVaz/big-bang`\*\*.*?(?=^\S|\Z)")
@@ -69,15 +69,24 @@ def _require(config, checks):
 
 def _save(snapshot, data):
     if snapshot:
-        with open(snapshot, "w", encoding="utf-8") as handle:
-            json.dump(data, handle, ensure_ascii=False, indent=2, sort_keys=True)
+        try:
+            with open(snapshot, "x", encoding="utf-8") as handle:
+                json.dump(data, handle, ensure_ascii=False, indent=2, sort_keys=True)
+        except OSError as exc:
+            raise BbError("não foi possível criar o snapshot (não sobrescrevemos backups): " + str(exc), EXIT_USAGE)
 
 
-def _load_snapshot(snapshot):
+def _load_snapshot(snapshot, part=None, repository=None):
     if not snapshot or not os.path.exists(snapshot):
         raise BbError("a volta precisa do snapshot gravado na migração (--snapshot)", EXIT_USAGE)
-    with open(snapshot, encoding="utf-8") as handle:
-        return json.load(handle)
+    try:
+        with open(snapshot, encoding="utf-8") as handle:
+            data = json.load(handle)
+    except (OSError, ValueError) as exc:
+        raise BbError("snapshot ilegível: " + str(exc), EXIT_USAGE)
+    if not isinstance(data, dict) or (part and (data.get("part") != part or data.get("repository") != repository)):
+        raise BbError("snapshot de outra parte ou repositório; não é seguro restaurar", EXIT_USAGE)
+    return data
 
 
 # --- config ----------------------------------------------------------------------------------------------------------
@@ -87,9 +96,17 @@ def clean_agents(text):
     return FRAMEWORK_MODE.sub("", FRAMEWORK_QUOTE.sub("", text)).replace("\n\n\n", "\n\n")
 
 
-def config_part(root, *, dry_run=False):
+def config_part(root, *, snapshot=None, dry_run=False, rollback=False):
     """bigbang.toml with the English names, same behavior (epic-branch, three boards, legacy labels)."""
     text = _config_text(root)
+    repository = config_module.get(config_module.load(root), "project.repository")
+    if rollback:
+        data = _load_snapshot(snapshot, "config", repository)
+        if not dry_run:
+            _write_config(root, data["config_before"])
+            if data["agents_before"] is not None:
+                write_text(os.path.join(root, "AGENTS.md"), data["agents_before"])
+        return {"part": "config", "rollback": True}
     changes = []
     migrated = text
     if config_module.dialect(config_module.parse(text)) == "legacy":
@@ -101,12 +118,15 @@ def config_part(root, *, dry_run=False):
     if agents is not None and cleaned != agents:
         changes.append("AGENTS.md sem o trecho do próprio framework herdado na Fundação")
     if not dry_run:
+        if changes:
+            _save(snapshot, {"part": "config", "repository": repository, "config_before": text,
+                             "agents_before": agents})
         if migrated != text:
             _write_config(root, migrated)
         if agents is not None and cleaned != agents:
             write_text(agents_path, cleaned)
     return {"part": "config", "changes": changes, "next": "rode bb generate, abra o PR e, depois do merge, "
-                                                           "bb migrate labels"}
+                                                           "bb migrate board"}
 
 
 # --- labels ----------------------------------------------------------------------------------------------------------
@@ -121,7 +141,7 @@ def labels_part(client, root, *, snapshot=None, dry_run=False, rollback=False):
     text = _config_text(root)
     config = config_module.load(root)
     if rollback:
-        data = _load_snapshot(snapshot)
+        data = _load_snapshot(snapshot, "labels", config_module.get(config, "project.repository"))
         if not dry_run:
             for legacy, v3 in data["renamed"].items():
                 client.call("PATCH", f"labels/{v3.replace(':', '%3A')}", {"new_name": legacy})
@@ -131,7 +151,11 @@ def labels_part(client, root, *, snapshot=None, dry_run=False, rollback=False):
             _write_config(root, set_key(text, "board", "labels", "legacy"))
         return {"part": "labels", "rollback": True, "renamed": data["renamed"], "copied": data["copied"]}
     _require(config, [(config_module.dialect(config_module.parse(text)) == "v3",
-                       "rode antes bb migrate config (bigbang.toml em inglês)")])
+                       "rode antes bb migrate config (bigbang.toml em inglês)"),
+                      (config_module.get(config, "workflow.model") == "grouping", "rode antes bb migrate workflow"),
+                      (config_module.get(config, "board.model") == "single", "rode antes bb migrate board")])
+    if config_module.get(config, "board.labels") == "v3":
+        return {"part": "labels", "changes": [], "next": "labels já migradas"}
     existing = _labels_of(client)
     renamed, copied = [], {}
     for legacy, v3 in sorted(names.LABELS.items()):
@@ -149,10 +173,10 @@ def labels_part(client, root, *, snapshot=None, dry_run=False, rollback=False):
         if legacy in existing:
             replaced[legacy] = [issue["number"] for issue in client.issues("open", labels=[legacy])]
     report = {"part": "labels", "renamed": renamed, "copied": copied, "replaced": replaced,
-              "next": "abra o PR com o bigbang.toml e, depois do merge, bb migrate board"}
+              "next": "abra o PR com o bigbang.toml; depois confira um ciclo completo antes de arquivar painéis antigos"}
     if dry_run:
         return report
-    _save(snapshot, {"part": "labels", "renamed": dict(renamed), "copied": copied, "replaced": replaced,
+    _save(snapshot, {"part": "labels", "repository": config_module.get(config, "project.repository"), "renamed": dict(renamed), "copied": copied, "replaced": replaced,
                      "labels_before": sorted(existing)})
     for legacy, v3 in renamed:
         client.call("PATCH", f"labels/{legacy.replace(':', '%3A')}", {"new_name": v3})
@@ -242,7 +266,7 @@ def board_part(client, root, *, open_project, create_project, snapshot=None, dry
     text = _config_text(root)
     config = config_module.load(root)
     if rollback:
-        data = _load_snapshot(snapshot)
+        data = _load_snapshot(snapshot, "board", config_module.get(config, "project.repository"))
         if not dry_run:
             restored = set_key(drop_key(text, "board", "number"), "board", "model", "three-boards")
             for role in (PLANNING, EXECUTION, BUGS):
@@ -250,7 +274,7 @@ def board_part(client, root, *, open_project, create_project, snapshot=None, dry
             _write_config(root, restored)
         return {"part": "board", "rollback": True, "boards": data["boards"]}
     _require(config, [(config_module.dialect(config_module.parse(text)) == "v3", "rode antes bb migrate config"),
-                      (config_module.get(config, "board.labels") == "v3", "rode antes bb migrate labels")])
+                      (config_module.get(config, "board.labels") == "legacy", "as labels mudam por último")])
     owner = config_module.get(config, "project.owner")
     if config_module.get(config, "board.model") == "single":
         return {"part": "board", "mapped": {}, "changes": [], "next": "quadro já migrado"}
@@ -274,7 +298,7 @@ def board_part(client, root, *, open_project, create_project, snapshot=None, dry
               "next": "abra o PR com o bigbang.toml; arquive os painéis antigos depois de um ciclo sem divergência"}
     if dry_run:
         return report
-    _save(snapshot, {"part": "board", "boards": boards, "items": items, "mapped": {str(k): v for k, v in mapped.items()},
+    _save(snapshot, {"part": "board", "repository": config_module.get(config, "project.repository"), "boards": boards, "items": items, "mapped": {str(k): v for k, v in mapped.items()},
                      "at": _iso(now)})
     number, project = create_project()
     board.ensure_fields(project)
@@ -284,10 +308,9 @@ def board_part(client, root, *, open_project, create_project, snapshot=None, dry
         if not any(r["kind"] in ("transition", "rejection") for r in history):
             card_kind = states.kind(set(client.issue(card)["labels"]))
             initial = board.INITIAL.get(card_kind, "Brainstorm")
-            if state != initial:
-                client.comment(card, receipts.render({
-                    "kind": "transition", "event_id": f"migrate-{card}", "issue": card, "actor": MIGRATION_ACTOR,
-                    "at": _iso(now), "from": initial, "to": state, "policy": policy_hash}))
+            client.comment(card, receipts.render({
+                "kind": "transition", "event_id": f"migrate-{card}", "issue": card, "actor": MIGRATION_ACTOR,
+                "at": _iso(now), "from": initial, "to": state, "policy": policy_hash}))
         project.add(card)
         project.set(card, "Status", board.current_state(client, card, {owner}))
     migrated = set_key(text, "board", "model", "single")
@@ -305,7 +328,9 @@ def owner_steps(config):
         f"Rulesets de main e develop em {repository}: troque os checks obrigatórios (check, regras, seguranca) pelo "
         "check único gate (Settings → Rules → Rulesets, ou gh api repos/" + repository + "/rulesets).",
         "Ambiente production: crie-o com os mesmos revisores obrigatórios e segredos do ambiente producao e restrito "
-        f"à branch main (gh api -X PUT repos/{repository}/environments/production); o producao antigo fica até a "
+        f"à branch main. Leia gh api repos/{repository}/environments/producao, prepare e revise production.json "
+        f"preservando reviewers, prevent_self_review e deployment_branch_policy; só então o dono executa "
+        f"gh api -X PUT repos/{repository}/environments/production --input production.json. O producao antigo fica até a "
         "primeira publicação conferida.",
         f"Segredo e variáveis: gh secret set PROJECT_TOKEN --repo {repository} (o mesmo token de PROJETO_TOKEN); "
         f"gh variable set PROJECT_OWNER --repo {repository} --body <dono>; gh variable set PROJECT_NUMBER --repo "
@@ -313,16 +338,17 @@ def owner_steps(config):
     ]
 
 
-def workflow_part(client, root, *, dry_run=False, rollback=False):
+def workflow_part(client, root, *, snapshot=None, dry_run=False, rollback=False):
     """Epic-branch → grouping, only between sprints: no epico/* branch may carry work not merged into develop."""
     text = _config_text(root)
     config = config_module.load(root)
     if rollback:
+        data = _load_snapshot(snapshot, "workflow", config_module.get(config, "project.repository")) if snapshot else None
         if not dry_run:
-            _write_config(root, set_key(text, "workflow", "model", "epic-branch"))
+            _write_config(root, data["config_before"] if data else set_key(text, "workflow", "model", "epic-branch"))
         return {"part": "workflow", "rollback": True}
     _require(config, [(config_module.dialect(config_module.parse(text)) == "v3", "rode antes bb migrate config"),
-                      (config_module.get(config, "board.labels") == "v3", "rode antes bb migrate labels"),
+                      (config_module.get(config, "board.labels") == "legacy", "as labels mudam por último"),
                       (config_module.get(config, "board.model") == "single", "rode antes bb migrate board")])
     pending = []
     for branch in client.branches("epico/"):
@@ -334,6 +360,8 @@ def workflow_part(client, root, *, dry_run=False, rollback=False):
                       "artefato) e rode de novo", EXIT_INVALID_STATE)
     report = {"part": "workflow", "owner_steps": owner_steps(config),
               "next": "rode bb generate, abra o PR e, depois do merge, faça os passos do dono no GitHub"}
-    if not dry_run:
+    if not dry_run and config_module.get(config, "workflow.model") != "grouping":
+        _save(snapshot, {"part": "workflow", "repository": config_module.get(config, "project.repository"),
+                         "config_before": text})
         _write_config(root, set_key(text, "workflow", "model", "grouping"))
     return report

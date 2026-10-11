@@ -1,12 +1,21 @@
 """CLI of the v3 board and controller (ADR-0023/0026): bb board …, bb move and bb pipeline controller."""
 import json
 
-from . import board, controller, gh
+from . import board, controller, gh, names
 from . import config as config_module
 from .errors import EXIT_INVALID_STATE, EXIT_OK, EXIT_USAGE, BbError
 
 
 def register(commands, pipeline_sub):
+    migration = commands.add_parser(**names.cli_name(None, "migrar"), help="migração opcional para a v3, em quatro PRs")
+    migration_sub = migration.add_subparsers(dest="migration_part", metavar="<parte>")
+    for part in ("config", "board", "workflow", "labels"):
+        p = migration_sub.add_parser(part, help=f"migra {part}, com plano e volta")
+        p.add_argument("--dry-run", action="store_true", help="só mostra o plano, sem gravar")
+        p.add_argument("--snapshot", help="arquivo protegido com o estado anterior (obrigatório para aplicar)")
+        p.add_argument("--rollback", action="store_true", help="restaura a parte pelo snapshot")
+        p.add_argument("--yes", action="store_true", help="confirma as escritas no GitHub desta parte")
+        p.set_defaults(handler=_migrate)
     board_parser = commands.add_parser("board", help="v3: quadro único (labels, Project, reconciliação)")
     sub = board_parser.add_subparsers(dest="board_command", metavar="<subcomando>")
     sub.add_parser("labels", help="cria as labels da v3 que faltam (idempotente)").set_defaults(handler=_labels)
@@ -111,6 +120,38 @@ def register(commands, pipeline_sub):
     p.add_argument("--event", required=True, help="nome do evento (issues, push, pull_request, schedule)")
     p.add_argument("--payload", help="arquivo JSON do evento (GITHUB_EVENT_PATH)")
     p.set_defaults(handler=_controller)
+
+
+def _migrate(args):
+    from . import migrate
+    part = args.migration_part
+    dry_run = args.dry_run or (part in ("board", "labels") and not args.yes)
+    if not dry_run and not args.snapshot:
+        raise BbError("para aplicar ou voltar, informe --snapshot <arquivo>; para planejar use --dry-run", EXIT_USAGE)
+    options = {"snapshot": args.snapshot, "dry_run": dry_run, "rollback": args.rollback}
+    if part == "config":
+        report = migrate.config_part(args.raiz, **options)
+    else:
+        config = config_module.load(args.raiz)
+        repository = config_module.get(config, "project.repository")
+        client = gh.GitHub(repository)
+        if part == "board":
+            owner = config_module.get(config, "board.owner")
+            def open_project(number):
+                return board.ProjectGraphQL(owner, number, repository, gh.graphql)
+            def create_project():
+                number = board.create_project(gh.graphql, owner, config_module.get(config, "project.name"), repository)
+                return number, open_project(number)
+            report = migrate.board_part(client, args.raiz, open_project=open_project,
+                                        create_project=create_project, **options)
+        else:
+            report = getattr(migrate, part + "_part")(client, args.raiz, **options)
+    if dry_run:
+        print("Plano de migração (nenhuma alteração aplicada).")
+        if part in ("board", "labels") and not args.yes:
+            print("Escritas no GitHub exigem --yes e --snapshot <arquivo> após revisar o plano.")
+    print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
+    return EXIT_OK
 
 
 def _load(root):
