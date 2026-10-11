@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "dee6eab5dcbe66a2ef5e66884edd5b5f96b006b0",
-    "commit": "0c86b5d654ec498078a96530c971b3439128850d",
+    "commit": "c175533c0bb5f8ef882d87b4c8062e214d27ef6d",
     "branch": "master",
     "proposta": "bigbang/proposta-177-alvo-personalizado"
   },
@@ -255,7 +255,7 @@
     }
   },
   "codigo": {
-    "commit": "dc78d7b8952f94d8852bad5eca879bbba26c85e7",
+    "commit": "653c9d162086af0cdd73868b3491ce7f0ae4104a",
     "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
@@ -583,6 +583,7 @@
         ".bigbang/tests/test_deploy_custom.py:test_custom_target_is_generated_with_only_declared_credentials",
         ".bigbang/tests/test_deploy_custom.py:test_staging_runs_migration_before_publish_and_health",
         ".bigbang/tests/test_deploy_custom.py:test_migration_failure_stops_staging_before_publish",
+        ".bigbang/tests/test_deploy_custom.py:test_publish_failure_stops_staging_before_health",
         ".bigbang/tests/test_deploy_custom.py:test_mutable_image_reference_is_rejected_before_script_execution",
         ".bigbang/tests/test_deploy_custom.py:test_production_health_failure_stops_release_creation",
         ".bigbang/tests/test_deploy_custom.py:test_rollback_uses_release_manifest_and_never_runs_migration"
