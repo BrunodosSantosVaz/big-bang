@@ -1991,7 +1991,7 @@
         ".bigbang/tests/test_release_framework.py:test_refuses_commit_outside_main"
       ],
       "hashes": {
-        ".github/workflows/bb-framework-ci.yml": "sha256:c492a05ce2e19e54e0ab6350cc0e7b2891ebab8c8758b991480e050f9ba121fd",
+        ".github/workflows/bb-framework-ci.yml": "sha256:d232c0662aba326fdea404b9987782c6f924df98ca6b56d2d6c6fd50f640cf19",
         ".github/workflows/bb-framework-faxina.yml": "sha256:8b9ae98415e336cb9e5b3e87bd779e3c45c53f80ee93968bd18c446bfe9d1638",
         ".github/workflows/bb-framework-release.yml": "sha256:5e18ba4512f8bad54119c9ed1a4c64f96c50181cbab4a5f0738d2117a1db9d16"
       },
