@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "dee6eab5dcbe66a2ef5e66884edd5b5f96b006b0",
-    "commit": "ced8dad503f9896e2fa260e1f8c332d40a2bbfb1",
+    "commit": "b5e7754e989fe054a2c9798e50fc69457251436b",
     "branch": "master",
     "proposta": "bigbang/proposta-301-release-3-0-1"
   },
@@ -255,8 +255,8 @@
     }
   },
   "codigo": {
-    "commit": "87ff729053d3bcb820d4246be971af7f028d5867",
-    "versao": "3.0.0",
+    "commit": "3716d0f808a1f8557f17345bf3aaebfc188a3a08",
+    "versao": "3.0.1",
     "raizes": [
       ".bigbang/",
       ".github/workflows/",
@@ -893,7 +893,7 @@
       ],
       "hashes": {
         ".bigbang/bb/package.py": "sha256:277954b69c243354a4d726708463293e874b13470081be68054aa8948fc98eff",
-        ".bigbang/MIGRACAO.md": "sha256:dca478f0ef6dfc129aad0035f0f1d2b1d824c7d71f48b6bf4244c59bd743f3ef",
+        ".bigbang/MIGRACAO.md": "sha256:ce5b2b406ce728c664595fd7b97f93b01b61624fb48e3175a270c244e699b523",
         ".bigbang/VERSION": "sha256:06e3fe4a7a1884d20d81cc7065ca8cfd4c394ec602c4d180ddc39bbd4f7da521"
       },
       "descricao": "Empacotar .bigbang com integridade e notas de migração que permitem atualização oficial verificável."
