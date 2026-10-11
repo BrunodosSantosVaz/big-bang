@@ -2146,7 +2146,7 @@
         ".bigbang/esteira/perfis/deploy/alvos/paas/README.md": "sha256:d8b52c4956fab996c303edcfbda6e162874b8311a23def757877de0aa272ad20",
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md": "sha256:bb04007d9e8e6977492685e35299a7801fdbd87b5fbeb4d5f78132d2cfc57411",
         ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md": "sha256:48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
-        "AGENTS.md": "sha256:55fef1393bcf7b330b2eeb3ce37821db2e27d0fc165e3b345586bc00bb1bc52f",
+        "AGENTS.md": "sha256:198220fcc68c024030fd1d01be9dc6e06c753553b8bb13162778a61dd4f47269",
         "CLAUDE.md": "sha256:336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
         ".bigbang/skills/bb-migrate/SKILL.md": "sha256:700dc19417dbfde4ef4e59cb30f40251ecf3ec77f131d2eec7c5c2f442034401"
       },
