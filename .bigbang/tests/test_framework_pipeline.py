@@ -143,6 +143,17 @@ class FrameworkPipeline(unittest.TestCase):
             self.assertEqual(pipeline_cli._docs(args), 0)
         self.assertEqual(audit.call_args.args[1]['paineis']['planejamento'], 28)
 
+    def test_callbacks_and_candidate_ci_use_the_framework_namespace(self):
+        plan = generator.build_plan(self.root, framework=True)
+        merge = plan.expected['.github/workflows/bb-framework-merge-pr.yml']
+        self.assertIn('workflows: [Framework gate]', merge)
+        candidate = plan.expected['.github/workflows/bb-framework-candidate.yml']
+        self.assertIn('.bigbang/pipeline/framework/scripts/testes-candidata.sh', candidate)
+        script = self.read('.bigbang/pipeline/framework/scripts/testes-candidata.sh')
+        self.assertIn('--workflow bb-framework-gate.yml --commit "$sha"', script)
+        legacy = self.read('.github/workflows/bb-framework-release.yml')
+        self.assertIn("startsWith(github.ref_name, 'v2.')", legacy)
+
     def test_cli_framework_and_pipeline_are_exclusive(self):
         output = io.StringIO()
         with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
