@@ -1,0 +1,46 @@
+{
+  "O backend sobe sem erro": [
+    "nao-se-aplica",
+    "O framework é um pacote de scripts e documentos: não tem serviço, front, banco nem rotas."
+  ],
+  "O front compila": [
+    "nao-se-aplica",
+    "O framework é um pacote de scripts e documentos: não tem serviço, front, banco nem rotas."
+  ],
+  "As migrações rodam do zero e a partir da versão anterior": [
+    "nao-se-aplica",
+    "Sem banco de dados; a atualização de projetos é coberta pelo MIGRACAO.md e pelos testes do bb update e do bb migrate."
+  ],
+  "O ambiente sobe pelo método de deploy do alvo": [
+    "portao",
+    "candidata"
+  ],
+  "Nenhum segredo no pacote do front": [
+    "portao",
+    "seguranca"
+  ],
+  "Rotas privadas exigem autenticação": [
+    "nao-se-aplica",
+    "O framework é um pacote de scripts e documentos: não tem serviço, front, banco nem rotas."
+  ],
+  "CORS de produção configurado por ambiente": [
+    "nao-se-aplica",
+    "O framework é um pacote de scripts e documentos: não tem serviço, front, banco nem rotas."
+  ],
+  "Testes de limite de requisições presentes e passando": [
+    "nao-se-aplica",
+    "O framework é um pacote de scripts e documentos: não tem serviço, front, banco nem rotas."
+  ],
+  "/api/health responde sem autenticação": [
+    "nao-se-aplica",
+    "O framework é um pacote de scripts e documentos: não tem serviço, front, banco nem rotas."
+  ],
+  "O README documenta as variáveis de ambiente sem valores": [
+    "portao",
+    "builtin"
+  ],
+  "A auditoria de segurança não tem achado crítico ou alto aberto": [
+    "portao",
+    "builtin"
+  ]
+}
