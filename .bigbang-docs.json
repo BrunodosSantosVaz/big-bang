@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "97dce9f1c7fe878c7d9654d0fb184c710357f91b",
-    "commit": "3d5ac338161ee0e520fac076ec638fae32758f1a",
+    "commit": "2b4a9602be445fe08ad18ccb9fcef46ffa974dfe",
     "branch": "master",
-    "proposta": "bigbang/proposta-296-codex-1-project-workflows"
+    "proposta": "bigbang/proposta-299-codex-1-pr-evidence"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -254,7 +254,7 @@
     }
   },
   "codigo": {
-    "commit": "57e319627957e7817bb558990c25a864a00c5563",
+    "commit": "bff42ded9b4d83b4327f4064cc352f49c7659dfa",
     "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
@@ -2295,7 +2295,7 @@
         ".bigbang/bb/receipts.py": "sha256:fc0ca5d774e4a2cadaf1036002a399e175d4af8806e5a79ee920a175e330b33a",
         ".bigbang/bb/locks.py": "sha256:90b249a7fe0678f7b1369f3d9bb20090ec5dba75907a8864f710a77d46293e1d",
         ".bigbang/bb/claims.py": "sha256:ce5b27f956941758c8da08bfb59c046b10415b039f336e4365ebd79f51766cf4",
-        ".bigbang/bb/gh.py": "sha256:fc7f4267d19b3654996dfb06aab2663c77c23ea225e19837bb05b6adc00d4a57"
+        ".bigbang/bb/gh.py": "sha256:d3be1466442072fc2ecd59457b06bb7929011edf87f075a178da33ba8396a0ca"
       },
       "descricao": "Máquina de estados do quadro único, política dos modos, recibos estruturados e travas atômicas em refs Git."
     },
@@ -2743,7 +2743,8 @@
       "fontes": [
         ".bigbang/bb/migrate.py",
         ".bigbang/bb/board.py",
-        ".bigbang/bb/flow_cli.py"
+        ".bigbang/bb/flow_cli.py",
+        ".bigbang/bb/gh.py"
       ],
       "testes": [
         ".bigbang/tests/test_migrate_v3.py:test_real_three_line_framework_quote_is_removed_and_rollback_is_exact",
@@ -2836,12 +2837,14 @@
         ".bigbang/tests/test_board_v3.py:test_reads_project_workflow_enabled_state",
         ".bigbang/tests/test_board_v3.py:test_fields_are_created_and_status_options_replaced_keeping_ids",
         ".bigbang/tests/test_board_v3.py:test_set_values_by_type",
-        ".bigbang/tests/test_board_v3.py:test_items_of_other_repositories_are_ignored"
+        ".bigbang/tests/test_board_v3.py:test_items_of_other_repositories_are_ignored",
+        ".bigbang/tests/test_migrate_v3.py:test_pr_evidence_api_calls_do_not_scale_with_board_cards"
       ],
       "hashes": {
-        ".bigbang/bb/migrate.py": "sha256:056c706514be533d37ef49874338921453efac32dda0cb6d89a4d63ed60a739c",
+        ".bigbang/bb/migrate.py": "sha256:96272aa98f056f53560b4f7fbab0b0aaf66f5ca730c152a800d2f8a918a07790",
         ".bigbang/bb/board.py": "sha256:680b8673e0f866085531aeff88476333f4aae045a04644eba60339ca139fca46",
-        ".bigbang/bb/flow_cli.py": "sha256:d567f67ba6e4a1c6072fef8429cd244ae39235850e123a5a1f12a6d78d078982"
+        ".bigbang/bb/flow_cli.py": "sha256:d567f67ba6e4a1c6072fef8429cd244ae39235850e123a5a1f12a6d78d078982",
+        ".bigbang/bb/gh.py": "sha256:d3be1466442072fc2ecd59457b06bb7929011edf87f075a178da33ba8396a0ca"
       },
       "descricao": "Migração guiada opcional com ordem segura, consentimento explícito de escrita no GitHub e preservação do legado."
     }
