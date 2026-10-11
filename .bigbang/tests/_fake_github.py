@@ -11,9 +11,10 @@ class FakeGitHub:
         self.issues, self.comments, self.labels = {}, {}, {}
         self.refs, self.commits = {}, {}
         self.parents, self.blockers = {}, {}
-        self.pulls = {}
+        self.pulls, self.checks, self.milestones, self.compares = {}, {}, {}, {}
         self.failures = set()  # (method, tail) answered with HTTP 500, to test partial failures
         self.author = "dona"  # login that authors new comments
+        self.merges, self.contained, self.conflicts = [], set(), set()
         self.calls = []
         self.next_comment = 1000
 
@@ -80,6 +81,13 @@ class FakeGitHub:
         (r"git/commits/([0-9a-f]+)", ("GET", "_get_commit")),
         (r"pulls/(\d+)", ("GET", "_get_pull")), (r"pulls", ("GET", "_list_pulls")),
         (r"pulls/(\d+)/files", ("GET", "_pull_files")),
+         (r"pulls/(\d+)/merge", ("PUT", "_merge_pull")),
+        (r"commits/([0-9a-z]+)/check-runs", ("GET", "_check_runs")),
+        (r"compare/(.+)\.\.\.(.+)", ("GET", "_compare")),
+        (r"milestones", ("GET", "_list_milestones")), (r"milestones", ("POST", "_create_milestone")),
+        (r"milestones/(\d+)", ("PATCH", "_patch_milestone")),
+         (r"pulls", ("POST", "_create_pull")),
+        (r"merges", ("POST", "_merge_branches")),
     ]
 
     def _page(self, items, params):
@@ -88,6 +96,11 @@ class FakeGitHub:
 
     def _list_issues(self, params, payload):
         state = params.get("state", "open")
+        if "milestone" in params:
+            items = [issue for _, issue in sorted(self.issues.items())
+                     if issue.get("milestone") == int(params["milestone"]) and
+                     (state == "all" or issue["state"] == state)]
+            return 200, self._page(items, params)
         from urllib.parse import unquote
         wanted = set(filter(None, unquote(params.get("labels", "")).split(",")))
         items = [issue for _, issue in sorted(self.issues.items())
@@ -105,11 +118,13 @@ class FakeGitHub:
         return (200, issue) if issue else (404, {"message": "Not Found"})
 
     def _patch_issue(self, params, payload, number):
+        if int(number) not in self.issues:
+            return 404, {"message": "Not Found"}
         self.issues[int(number)].update(payload)
         return 200, self.issues[int(number)]
 
     def _add_labels(self, params, payload, number):
-        issue = self.issues[int(number)]
+        issue = self.issues.get(int(number)) or self.pulls[int(number)]  # a PR is an issue for labels
         for name in payload["labels"]:
             self.labels.setdefault(name, {"name": name})
             if name not in {label["name"] for label in issue["labels"]}:
@@ -192,6 +207,7 @@ class FakeGitHub:
         return 200, {"ref": ref, "object": {"sha": payload["sha"]}}
 
     def _delete_ref(self, params, payload, name):
+        self.deleted = getattr(self, "deleted", []) + ["refs/" + name]
         self.refs.pop("refs/" + name, None)
         return 204, None
 
@@ -200,6 +216,8 @@ class FakeGitHub:
                  if (params.get("state", "open") == "all" or pull["state"] == params.get("state", "open")) and
                  (not params.get("head") or params["head"].split(":", 1)[-1] == pull["head"]["ref"]) and
                  (not params.get("base") or params["base"] == pull["base"]["ref"])]
+        if params.get("sort") == "updated":
+            items.sort(key=lambda pull: pull.get("updated_at", "9999"), reverse=params.get("direction") != "asc")
         return 200, self._page(items, params)
 
     def _pull_files(self, params, payload, number):
@@ -208,6 +226,57 @@ class FakeGitHub:
     def _get_pull(self, params, payload, number):
         pull = self.pulls.get(int(number))
         return (200, pull) if pull else (404, {"message": "Not Found"})
+
+    def _merge_pull(self, params, payload, number):
+        pull = self.pulls[int(number)]
+        if pull["state"] != "open":
+            return 405, {"message": "Pull Request is not mergeable"}
+        if payload.get("sha") and payload["sha"] != pull["head"]["sha"]:
+            return 409, {"message": "Head branch was modified"}
+        pull.update(state="closed", merged=True, merge_method=payload.get("merge_method"))
+        return 200, {"merged": True, "sha": "f" * 40}
+
+    def _check_runs(self, params, payload, sha):
+        runs = self.checks.get(sha, [])
+        return 200, {"total_count": len(runs), "check_runs": runs}
+
+    def _compare(self, params, payload, base, head):
+        commits = self.compares.get((base, head), [])
+        return 200, {"commits": [{"sha": f"{i:040x}", "commit": {"message": message}} for i, message in
+                                 enumerate(commits, start=1)], "total_commits": len(commits),
+                     "ahead_by": len(commits), "status": "ahead" if commits else "identical"}
+
+    def _list_milestones(self, params, payload):
+        return 200, self._page(list(self.milestones.values()), params)
+
+    def _create_milestone(self, params, payload):
+        if any(m["title"] == payload["title"] for m in self.milestones.values()):
+            return 422, {"message": "already_exists"}
+        number = len(self.milestones) + 1
+        self.milestones[number] = {"number": number, "title": payload["title"], "state": "open"}
+        return 201, self.milestones[number]
+
+    def _patch_milestone(self, params, payload, number):
+        self.milestones[int(number)].update(payload)
+        return 200, self.milestones[int(number)]
+
+    def _create_pull(self, params, payload):
+        if any(p["head"]["ref"] == payload["head"] and p["base"]["ref"] == payload["base"] and p["state"] == "open"
+               for p in self.pulls.values()):
+            return 422, {"message": "A pull request already exists"}
+        number = max(list(self.pulls) + list(self.issues), default=0) + 1
+        self.add_pull(number, payload["head"], payload["base"], title=payload["title"], body=payload.get("body", ""))
+        return 201, self.pulls[number]
+
+    def _merge_branches(self, params, payload):
+        key = (payload["base"], payload["head"])
+        if key in self.conflicts:
+            return 409, {"message": "Merge conflict"}
+        if key in self.contained:
+            return 204, None
+        self.merges.append(key)
+        self.contained.add(key)  # merging again finds nothing to merge (HTTP 204), as on GitHub
+        return 201, {"sha": "c" * 40}
 
     def _create_tree(self, params, payload):
         return 201, {"sha": "4b825dc642cb6eb9a060e54bf8d69288fbee4904"}

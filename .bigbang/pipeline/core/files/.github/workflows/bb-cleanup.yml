@@ -1,0 +1,40 @@
+# "Cleanup" (v3): daily and by button. Deletes merged branches whose issue is closed and has no open PR; reports
+# claims expired for more than a week and branches outside the model. main, develop, releases, tags and lock refs are
+# never touched.
+name: Cleanup
+
+on:
+  schedule:
+    - cron: '23 3 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only show the plan'
+        type: boolean
+        required: true
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    if: ${{ vars.PROJECT_OWNER != '' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Cleanup
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+        run: |
+          if [ "$DRY_RUN" = true ]; then python .bigbang/bin/bb.py cleanup; else python .bigbang/bin/bb.py cleanup --apply; fi

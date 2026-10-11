@@ -16,7 +16,7 @@ NOW = datetime.datetime(2026, 10, 10, 12, 0, tzinfo=UTC)
 
 def config(mode="normal"):
     return {"project": {"repository": "dono/repo", "owner": "dona", "mode": mode},
-            "agents": {"names": ["claude-1"], "tasks_per_agent": 2, "lease_hours": 2},
+            "agents": {"names": ["claude-1", "codex-1"], "tasks_per_agent": 2, "lease_hours": 2},
             "workflow": {"model": "grouping"}, "board": {"labels": "v3", "model": "single", "number": 7,
                                                            "owner": "dona"},
             "security": {"sensitive_paths": []}, "delivery": {"profile": "deploy"}}
@@ -162,6 +162,7 @@ class Moves(Base):
         self.fake.issues[12]["state"] = "closed"
         self.fake.add_pull(71, "feature/12-tela", "develop", state="closed", merged=True)
         self.fake.pulls[71]["files"] = [{"filename": path}]
+        self.project.set(10, "Candidate", "v1.2.0-rc.1")
         for target in ("Backlog", "Refinement", "Ready", "Selected", "In Progress"):
             previous = self.state(10)
             self.client.comment(10, r.render({"kind": "transition", "event_id": f"s-{target}", "issue": 10,
@@ -203,6 +204,40 @@ class Moves(Base):
             board.record_qa(self.client, config("flash"), 10, candidate="", digest="sha256:aa",
                             verdict="approved", approver="codex-1", now=NOW)
 
+    def test_qa_verdict_needs_a_declared_agent_and_the_current_candidate(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        for approver in ("intruso", "dona"):  # outside agents.names, or the owner pretending to be an agent
+            with self.assertRaises(BbError):
+                board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                                verdict="approved", approver=approver, now=NOW)
+        self.project.set(10, "Candidate", "v1.2.0-rc.2")
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="codex-1", now=NOW)
+        with self.assertRaises(BbError):  # homologated an older candidate
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.2", digest="sha256:bb",
+                        verdict="approved", approver="codex-1", now=NOW)
+        self.move(10, "Releasing", actor="claude-1", mode="flash")
+
+    def test_delegated_qa_rejection_needs_evidence_and_a_candidate(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        with self.assertRaises(BbError):  # nothing recorded: the button alone never rejects
+            self.move(10, "Rejected", actor="claude-1", mode="flash", reason="qa", return_to="In Progress")
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="rejected", approver="codex-1", now=NOW)
+        self.move(10, "Rejected", actor="claude-1", mode="flash", reason="qa", return_to="In Progress")
+
+    def test_without_a_current_candidate_no_verdict_counts(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")
+        self.project.values.get(10, {}).pop("Candidate", None)
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="codex-1", now=NOW)
+        with self.assertRaises(BbError):
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
+
     def test_going_back_without_rejection_also_withdraws_the_decisions(self):
         self.approve(10, "approved:backlog")
         self.move(10, "Backlog")
@@ -221,6 +256,49 @@ class Moves(Base):
         self.assertNotIn("approved:refinement", self.fake.label_names(10))
         with self.assertRaises(BbError):
             self.move(10, "Ready", actor="claude-1")
+
+    def test_delivery_paths_read_only_prs_updated_since_the_children_exist(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")
+        self.fake.issues[10]["created_at"] = "2026-10-10T09:00:00Z"
+        for child in (11, 12):  # the sub-issues were born at the sprint start
+            self.fake.issues[child]["created_at"] = "2026-10-10T10:00:00Z"
+        self.fake.pulls[71]["updated_at"] = "2026-10-10T11:30:00Z"
+        self.fake.add_pull(72, "feature/12-tela", "develop", state="closed", merged=True)
+        self.fake.pulls[72].update(files=[{"filename": "migrations/0001.sql"}], updated_at="2026-10-09T10:00:00Z")
+        for number in range(80, 300):  # older history: never read
+            self.fake.add_pull(number, f"feature/{number}-x", "develop", state="closed", merged=True)
+            self.fake.pulls[number]["updated_at"] = "2026-01-01T00:00:00Z"
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        self.fake.calls.clear()
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="codex-1", now=NOW)
+        self.move(10, "Releasing", actor="claude-1", mode="flash")  # updated before any child existed
+        self.assertLessEqual(sum(1 for method, path in self.fake.calls if path.startswith("pulls?")), 1)
+
+    def test_a_child_attached_late_still_counts_its_older_prs(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")
+        self.fake.issues[11]["created_at"] = "2026-10-01T10:00:00Z"  # an older issue attached as a sub-issue
+        self.fake.issues[12]["created_at"] = "2026-10-10T10:00:00Z"
+        self.fake.add_pull(73, "test/11-testes", "develop", state="closed", merged=True)
+        self.fake.pulls[73].update(files=[{"filename": "migrations/0003.sql"}], updated_at="2026-10-05T10:00:00Z")
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="codex-1", now=NOW)
+        with self.assertRaises(BbError):  # the migration makes the QA critical: the owner homologates
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
+
+    def test_prs_of_the_epic_itself_count_even_before_its_children(self):
+        self._epic_in_progress(["qa:agent"], "src/app.py")
+        self.fake.issues[10]["created_at"] = "2026-10-01T10:00:00Z"
+        for child in (11, 12):
+            self.fake.issues[child]["created_at"] = "2026-10-10T10:00:00Z"
+        self.fake.add_pull(74, "feature/10-login", "develop", state="closed", merged=True)
+        self.fake.pulls[74].update(files=[{"filename": "migrations/0004.sql"}], updated_at="2026-10-05T10:00:00Z")
+        self.move(10, "QA", actor="claude-1", mode="flash", facts={"candidate": True})
+        board.record_qa(self.client, config("flash"), 10, candidate="v1.2.0-rc.1", digest="sha256:aa",
+                        verdict="approved", approver="codex-1", now=NOW)
+        with self.assertRaises(BbError):
+            self.move(10, "Releasing", actor="claude-1", mode="flash")
 
     def test_effects_happen_before_the_receipt(self):
         self.fake.failures.add(("PATCH", "issues/11"))
@@ -321,6 +399,23 @@ class Controller(Base):
         self.event("issues", action="opened", issue={"number": 30})
         self.assertEqual(self.project.status(30), "Brainstorm")
 
+    def test_epic_form_answers_become_v3_labels_and_native_dependencies(self):
+        body = ("### Muda o artefato?\nNão: documentação, testes, esteira\n\n### Precisa de protótipo?\nNão\n\n"
+                "### Quem revisa os PRs?\nEu\n\n### Depende de outro épico ainda não publicado?\n#10\n")
+        self.fake.add_issue(31, "Guia", labels=["type:epic"], body=body)
+        self.event("issues", action="opened", issue={"number": 31})
+        labels = set(self.fake.label_names(31))
+        self.assertTrue({"no-release", "flag:waived", "prototype:waived", "review:human"} <= labels, labels)
+        self.assertNotIn("tem-dependencia", labels)
+        self.assertEqual([b["number"] for b in self.client.blocked_by(31)], [10])
+        edited = body.replace("Não: documentação, testes, esteira", "Sim")
+        self.fake.issues[31]["body"] = edited
+        self.event("issues", action="edited", issue={"number": 31}, changes={"body": {"from": body}})
+        labels = set(self.fake.label_names(31))
+        self.assertIn("flag:required", labels)
+        self.assertNotIn("no-release", labels)
+        self.assertIn("review:human", labels)  # unchanged answer keeps the later decision
+
     def test_pr_lifecycle_moves_the_task_and_closes_it_on_merge(self):
         claims.claim(self.client, config(), 11, "claude-1", now=NOW)
         self.fake.refs["refs/heads/test/11-testes"] = "a" * 40
@@ -395,6 +490,17 @@ class Controller(Base):
 
     def test_bugfix_branches_are_read_by_the_controller(self):
         self.assertEqual(controller._issue_of("bugfix/20-x"), 20)
+        self.fake.add_issue(20, "Bug", labels=["type:bug"])
+        from bb import receipts as r
+        for previous, target in (("Brainstorm", "Backlog"), ("Backlog", "Ready"), ("Ready", "Selected")):
+            self.client.comment(20, r.render({"kind": "transition", "event_id": f"b-{target}", "issue": 20,
+                                              "actor": "dona", "at": "2026-10-10T11:00:00Z", "from": previous,
+                                              "to": target, "policy": "x"}))
+        claims.claim(self.client, config(), 20, "claude-1", now=NOW)
+        self.fake.refs["refs/heads/bugfix/20-x"] = "b" * 40
+        pr = {"number": 57, "head": {"ref": "bugfix/20-x"}, "base": {"ref": "develop"}, "merged": False}
+        self.event("pull_request", action="opened", pull_request=pr)
+        self.assertEqual(self.state(20), "In Review")
 
     def test_late_closed_event_of_a_reopened_pr_is_ignored(self):
         claims.claim(self.client, config(), 11, "claude-1", now=NOW)

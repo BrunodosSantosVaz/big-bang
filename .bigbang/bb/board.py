@@ -141,7 +141,7 @@ def facts(client, config, number, *, now=None):
     labels = set(issue["labels"])
     lock = client.locks().current(f"issue-{number}")
     subissues = client.sub_issues(number)
-    branch_prefixes = [f"{kind}/{number}-" for kind in ("test", "feature", "docs", "fix", "hotfix")]
+    branch_prefixes = [f"{kind}/{number}-" for kind in ("test", "feature", "docs", "fix", "bugfix", "hotfix")]
     profile = config_module.get(config, "delivery.profile")
     delivery = {"repository"} if "no-release" in labels else {"package" if profile == "compiled" else "deploy"}
     return {"labels": {names.label(label, "v3") for label in labels} | labels,
@@ -180,6 +180,9 @@ def record_qa(client, config, number, *, candidate, digest, verdict, approver, n
     now = now or datetime.datetime.now(datetime.timezone.utc)
     if verdict not in ("approved", "rejected"):
         raise BbError("veredito de QA deve ser approved ou rejected", EXIT_USAGE)
+    agents = config_module.get(config, "agents.names") or []
+    if approver not in agents or approver.casefold() in {login.casefold() for login in _trusted(config)}:
+        raise BbError(f"veredito de QA só de um agente declarado em agents.names (recebido: {approver})", EXIT_USAGE)
     receipt = {"kind": "qa", "event_id": f"qa-{number}-{candidate}-{approver}-{_iso(now)}", "issue": number,
                "actor": approver, "at": _iso(now), "candidate": candidate, "digest": digest, "verdict": verdict,
                "approver": approver}
@@ -190,19 +193,29 @@ def record_qa(client, config, number, *, candidate, digest, verdict, approver, n
     return receipt
 
 
-def _independent_qa(client, number, receipts_now, actor, trusted):
-    """True when the last QA receipt after the card entered QA approves it and comes from an agent that neither
-    moves the card nor held any claim on the epic or its sub-issues (who delivers never homologates)."""
+def _independent_qa(client, number, receipts_now, actor, trusted, candidate=None):
+    """Verdict ('approved' | 'rejected') of the last QA receipt recorded after the card entered QA, for the current
+    candidate, by an agent that neither moves the card nor held any claim on the epic or its sub-issues (who
+    delivers never homologates); None when there is no such evidence."""
     entered = max((i for i, r in enumerate(receipts_now) if r["kind"] in ("transition", "rejection")
                    and r.get("to") == "QA"), default=None)
     verdicts = [r for r in receipts_now[entered + 1:] if r["kind"] == "qa"] if entered is not None else []
-    if not verdicts or verdicts[-1]["verdict"] != "approved":
-        return False
+    if not verdicts or not candidate or verdicts[-1]["candidate"] != candidate:
+        return None  # no candidate on the card, or another candidate homologated: the bytes going out were not seen
     delivered_by = {actor.casefold()}
     for issue in [number] + [child["number"] for child in client.sub_issues(number)]:
         found = receipts_now if issue == number else receipts.parse(client.comments(issue), trusted)
         delivered_by |= {r["actor"].casefold() for r in found if r["kind"] == "claim"}
-    return verdicts[-1]["approver"].casefold() not in delivered_by
+    if verdicts[-1]["approver"].casefold() in delivered_by:
+        return None
+    return verdicts[-1]["verdict"]
+
+
+def _born(client, number, issue):
+    """When the oldest piece of work of a card was created (the card itself or any sub-issue): no PR of that work
+    can be older. Unknown creation dates mean no bound."""
+    dates = [issue.get("created_at")] + [child.get("created_at") for child in client.sub_issues(number)]
+    return None if None in dates else min(dates)
 
 
 def _gate(card_kind, current, target):
@@ -211,23 +224,31 @@ def _gate(card_kind, current, target):
     return GATE_OF.get((current, target))
 
 
-def _epic_paths(client, number):
-    """Files changed by the merged PRs of an epic's sub-issues (the evidence of a QA or publication risk)."""
+def _epic_paths(client, number, since=None):
+    """Files changed by the merged PRs of an epic's sub-issues (the evidence of a QA or publication risk). Only the
+    PRs updated since the oldest sub-issue was created are read: its work cannot be older than that."""
     children = {child["number"] for child in client.sub_issues(number)} | {number}
     paths = set()
-    for raw in client.paginate("pulls?state=closed"):
-        if not raw.get("merged_at") and not raw.get("merged"):
-            continue
-        _, issue = pipeline.branch_issue(raw["head"]["ref"])
-        if issue in children:
-            for file in client.paginate(f"pulls/{raw['number']}/files"):
-                paths.add(file["filename"])
-                if file.get("previous_filename"):
-                    paths.add(file["previous_filename"])
-    return sorted(paths)
+    page = 1
+    while True:
+        _, items = client.call("GET", f"pulls?state=closed&sort=updated&direction=desc&per_page=100&page={page}")
+        for raw in items or []:
+            if since and raw.get("updated_at") and raw["updated_at"] < since:
+                return sorted(paths)
+            if not raw.get("merged_at") and not raw.get("merged"):
+                continue
+            _, issue = pipeline.branch_issue(raw["head"]["ref"])
+            if issue in children:
+                for file in client.paginate(f"pulls/{raw['number']}/files"):
+                    paths.add(file["filename"])
+                    if file.get("previous_filename"):
+                        paths.add(file["previous_filename"])
+        if len(items or []) < 100:
+            return sorted(paths)
+        page += 1
 
 
-def _gate_decision(config, client, number, card_kind, current, target, labels):
+def _gate_decision(config, client, number, card_kind, current, target, labels, since=None):
     """(gate, approver, risk) of a move, or (None, None, None) when no gate applies."""
     gate = _gate(card_kind, current, target)
     if gate is None:
@@ -235,7 +256,7 @@ def _gate_decision(config, client, number, card_kind, current, target, labels):
     if gate in PLANNING_GATES:
         risk = policy.planning_risk(labels)
     else:
-        risk = policy.delivery_risk(labels, _epic_paths(client, number),
+        risk = policy.delivery_risk(labels, _epic_paths(client, number, since),
                                     config_module.get(config, "security.sensitive_paths"))
     who = policy.approver(policy.mode(config), gate, risk)
     if gate == "qa" and who == "agent" and "qa:human" in labels:
@@ -252,6 +273,10 @@ def _approval_problems(config, card_kind, current, target, gathered, decision):
     if who == "blocked":
         return [f"portão {gate} fora do contrato do modo {mode} (risco {risk}): bloqueado"]
     if who == "agent":
+        if (current, target) == ("QA", "Rejected") and not gathered.get("qa_agent_rejected") and \
+                "qa:rejected" not in labels and names.label("qa:rejected", "legacy") not in labels:
+            return ["reprovação de QA delegada sem evidência: registre o veredito rejected de um agente "
+                    "independente (bb qa verdict) ou a decisão qa:rejected do dono"]
         return []
     if gate == "publish" and gathered.get("delivered"):
         return []  # the publish job only runs after the owner approved the production environment
@@ -263,8 +288,9 @@ def _approval_problems(config, card_kind, current, target, gathered, decision):
 
 
 def move(client, project, config, number, target, actor, *, reason=None, return_to=None, facts=None,
-         event_id=None, sha=None, now=None):
-    """Validate and apply one transition; returns the receipt written (or found, on replay)."""
+         event_id=None, sha=None, now=None, dry_run=False):
+    """Validate and apply one transition; returns the receipt written (or found, on replay). With dry_run, only
+    validates: returns the receipt that would be written and changes nothing."""
     now = now or datetime.datetime.now(datetime.timezone.utc)
     trusted = _trusted(config)
     issue = client.issue(number)
@@ -282,11 +308,14 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
     gathered = globals()["facts"](client, config, number, now=now)
     gathered.update(facts or {})
     gathered["accepted"] = gathered["selected"] = True  # the approval check below is their evidence
-    decision = _gate_decision(config, client, number, card_kind, current, target, gathered["labels"])
+    decision = _gate_decision(config, client, number, card_kind, current, target, gathered["labels"],
+                              since=_born(client, number, issue))
     gathered["gate_delegated"] = decision[1] == "agent"
-    if decision[0] == "qa" and decision[1] == "agent" and _independent_qa(client, number, receipts_now, actor,
-                                                                          trusted):
-        gathered["qa_decision"] = "automatic"
+    if decision[0] == "qa" and decision[1] == "agent":
+        verdict = _independent_qa(client, number, receipts_now, actor, trusted, project.get(number, "Candidate"))
+        if verdict == "approved":
+            gathered["qa_decision"] = "automatic"
+        gathered["qa_agent_rejected"] = verdict == "rejected"
     found = states.problems(card_kind, current, target, gathered, reason=reason,
                             return_to=recorded_return if current == "Rejected" else return_to)
     found += [] if found else _approval_problems(config, card_kind, current, target, gathered, decision)
@@ -303,6 +332,8 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
                        evidence=[f"reprovado em {current} por {actor}"])
     else:
         receipt["kind"] = "transition"
+    if dry_run:
+        return receipt
     done_attempts = attempts(client, number, trusted) + (1 if target == "Rejected" else 0)
     _effects(client, project, number, issue, card_kind, current, target, receipt, done_attempts)
     client.comment(number, receipts.render(receipt))  # recorded only after the effects happened

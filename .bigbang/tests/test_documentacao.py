@@ -43,7 +43,7 @@ class Markdown(unittest.TestCase):
         for caminho in arquivos_markdown():
             if os.path.basename(caminho) in ("CLAUDE.md", "RN.md", "AGENTS.projeto.md"):
                 continue  # an import line; a key: value header; a fragment appended to AGENTS.md
-            if caminho.startswith(SAIDAS_GERADAS) or f"{os.sep}arquivos{os.sep}" in caminho:
+            if caminho.startswith(SAIDAS_GERADAS) or (f"{os.sep}arquivos{os.sep}" in caminho or f"{os.sep}files{os.sep}" in caminho):
                 continue  # generator templates and expected outputs follow the format of their destination
             with self.subTest(arquivo=os.path.relpath(caminho, RAIZ)):
                 with open(caminho, encoding="utf-8") as arquivo:
