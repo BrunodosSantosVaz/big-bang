@@ -35,9 +35,9 @@ class AlvoPersonalizado(unittest.TestCase):
                 script.write_text(
                     "#!/usr/bin/env bash\n"
                     "set -euo pipefail\n"
-                    f"printf '{operation}:%s\\n' \"$1\" >> \"$LOG\"\n"
-                    "if [ \"$#\" -gt 1 ]; then cat \"$2\" >> \"$MANIFEST_LOG\"; fi\n"
-                    f"[ \"${{FAIL_OPERATION:-}}\" != {operation} ]\n",
+                    f"printf '{operation}:%s\\n' \"$1\" >> calls\n"
+                    "if [ \"$#\" -gt 1 ]; then cat \"$2\" >> manifests; fi\n"
+                    f"[ ! -f fail-{operation} ]\n",
                     encoding="utf-8",
                 )
             lines.append(f'{key} = "{path}"')
@@ -113,6 +113,41 @@ class AlvoPersonalizado(unittest.TestCase):
         self.assertNotIn("VPS_HOST", workflows)
         self.assertNotIn("VPS_CHAVE_SSH", workflows)
 
+    def test_custom_scripts_do_not_receive_publication_or_project_secrets(self):
+        self.configure_custom()
+        script = self.root / "scripts/deploy/saude.sh"
+        script.write_text(
+            "#!/usr/bin/env bash\n"
+            "for name in GH_TOKEN GITHUB_TOKEN ACTIONS_RUNTIME_TOKEN AWS_SECRET_ACCESS_KEY "
+            "CUSTOM_TOKEN LOG; do\n"
+            "  if [[ -v $name ]]; then printf '%s=set\\n' \"$name\" >> script-env; "
+            "else printf '%s=unset\\n' \"$name\" >> script-env; fi\n"
+            "done\n"
+            "printf 'PATH=%s\\n' \"${PATH-unset}\" >> script-env\n",
+            encoding="utf-8",
+        )
+        result = self.run_deploy_script(
+            "alvos/personalizado/scripts/alvo.sh",
+            "saude",
+            "producao",
+            env=self.runner_environment(
+                GH_TOKEN="gh-secret-sentinel",
+                GITHUB_TOKEN="github-secret-sentinel",
+                ACTIONS_RUNTIME_TOKEN="runtime-secret-sentinel",
+                AWS_SECRET_ACCESS_KEY="aws-secret-sentinel",
+                CUSTOM_TOKEN="project-secret-sentinel",
+            ),
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        script_environment = (self.root / "script-env").read_text(encoding="utf-8")
+        for name in (
+            "GH_TOKEN", "GITHUB_TOKEN", "ACTIONS_RUNTIME_TOKEN", "AWS_SECRET_ACCESS_KEY",
+            "CUSTOM_TOKEN", "LOG",
+        ):
+            with self.subTest(variable=name):
+                self.assertIn(f"{name}=unset\n", script_environment)
+        self.assertRegex(script_environment, r"(?m)^PATH=.+$")
+
     def test_staging_runs_migration_before_publish_and_health(self):
         self.configure_custom()
         path = self.root / "bigbang.toml"
@@ -129,22 +164,23 @@ class AlvoPersonalizado(unittest.TestCase):
 
     def test_migration_failure_stops_staging_before_publish(self):
         self.configure_custom()
-        result = self.run_deploy_script(
-            "scripts/staging.sh", env=self.runner_environment(FAIL_OPERATION="migrar")
-        )
+        self.configure_failure("migrar")
+        result = self.run_deploy_script("scripts/staging.sh", env=self.runner_environment())
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual((self.root / "calls").read_text(encoding="utf-8").splitlines(), ["migrar:staging"])
 
     def test_publish_failure_stops_staging_before_health(self):
         self.configure_custom()
-        result = self.run_deploy_script(
-            "scripts/staging.sh", env=self.runner_environment(FAIL_OPERATION="publicar")
-        )
+        self.configure_failure("publicar")
+        result = self.run_deploy_script("scripts/staging.sh", env=self.runner_environment())
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(
             (self.root / "calls").read_text(encoding="utf-8").splitlines(),
             ["migrar:staging", "publicar:staging"],
         )
+
+    def configure_failure(self, operation):
+        (self.root / f"fail-{operation}").touch()
 
     def test_mutable_image_reference_is_rejected_before_script_execution(self):
         self.configure_custom()
@@ -167,6 +203,7 @@ class AlvoPersonalizado(unittest.TestCase):
 
     def test_production_health_failure_stops_release_creation(self):
         self.configure_custom()
+        self.configure_failure("saude")
         gh = self.root / "fake-bin/gh"
         gh.parent.mkdir(exist_ok=True)
         gh.write_text(
@@ -190,7 +227,6 @@ class AlvoPersonalizado(unittest.TestCase):
                 RC_TAG="v1.2.3-rc.1",
                 TAG="v1.2.3",
                 TARGET_SHA="0" * 40,
-                FAIL_OPERATION="saude",
             ),
         )
         self.assertNotEqual(result.returncode, 0)
