@@ -448,7 +448,7 @@ def load(root, required=True):
     path = config_path(root)
     if not os.path.exists(path):
         from . import framework
-        own = framework.load(root)
+        own = framework.load(root, bootstrap=required)
         if own is not None:
             return own
         if required:

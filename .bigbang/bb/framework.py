@@ -25,9 +25,13 @@ def repository(root):
     return match[1] if match else None
 
 
-def load(root, *, required=False):
+def load(root, *, required=False, bootstrap=False):
     from . import config
     path = os.path.join(root, CONFIG)
+    if bootstrap and not os.path.isfile(path) and repository(root) == ORIGIN:
+        # The trusted base must validate the activation PR before the exclusive root file exists.
+        # Optional template reads and explicit generation never use this bootstrap fixture.
+        path = os.path.join(root, '.bigbang/pipeline/framework/config.toml')
     if not os.path.isfile(path):
         if required:
             raise BbError(f'falta {CONFIG}', EXIT_INVALID_CONFIG)
