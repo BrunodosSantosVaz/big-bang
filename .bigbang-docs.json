@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "a97d7acc74a061b36f0889d41f63bbc120da3b3c",
+    "commit": "7fba2e57ef0fc09fe41c993f15fdfdb93640286b",
     "branch": "master",
     "proposta": "wiki/251-framework-bootstrap"
   },
@@ -254,7 +254,7 @@
     }
   },
   "codigo": {
-    "commit": "26511b9bd8d1decf60f043bfdf73a4a16cddb085",
+    "commit": "97d921e924b0f60350009e4db9575ec482165a70",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -2333,7 +2333,7 @@
       "hashes": {
         ".bigbang/bb/board.py": "sha256:b56463151ae793e86be92b70d0670fb1b98713aaef42ff35bc13efb3f193c4b8",
         ".bigbang/bb/controller.py": "sha256:8c70bec7e79ad6786f7320c719e424d593f77fad6a006c8459a222d45e12200f",
-        ".bigbang/bb/flow_cli.py": "sha256:2d9a3f0442f244d28e027343725ce3c4cf46393943ccfcca83a1d43cd3ff3a0b"
+        ".bigbang/bb/flow_cli.py": "sha256:9f5caeafcd84dd3fe03711284f36283fed289c6a79367d2f9fbde55ba768aa30"
       },
       "descricao": "Catálogo de labels v3, Project com 15 estados e campos, bb move validado, reconciliação e controlador de eventos."
     },
