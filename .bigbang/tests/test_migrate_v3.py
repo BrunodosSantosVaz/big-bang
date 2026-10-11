@@ -247,6 +247,18 @@ class Board(Base):
         self.old[29].set(17, 'Status', 'Pronto')
         self.assertEqual(self.run_part()['mapped'][17], 'In Review')
 
+    def test_bug_without_claim_uses_a_state_allowed_by_the_runtime(self):
+        self.ready()
+        self.old[30].ensure_field("Status", "SINGLE_SELECT", ["Novo", "Em correção", "CI/PR"])
+        for column in ("Em correção", "CI/PR"):
+            with self.subTest(column=column):
+                self.old[30].set(16, "Status", column)
+                report = self.run_part(dry_run=True)
+                target = report["mapped"][16]
+                self.assertEqual(target, "Selected")
+                from bb import states
+                self.assertIn("bug", states.ALLOWED[target])
+
     def test_initial_cards_also_receive_a_migration_receipt(self):
         self.ready()
         self.run_part()
