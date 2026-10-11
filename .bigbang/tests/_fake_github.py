@@ -74,6 +74,7 @@ class FakeGitHub:
         (r"issues/(\d+)/labels", ("POST", "_add_labels")),
         (r"issues/(\d+)/labels/(.+)", ("DELETE", "_remove_label")),
         (r"labels", ("POST", "_create_label")),
+        (r"labels", ("GET", "_list_labels")), (r"labels/(.+)", ("PATCH", "_rename_label")),
         (r"issues/(\d+)/comments", ("GET", "_list_comments")), (r"issues/(\d+)/comments", ("POST", "_add_comment")),
         (r"issues/(\d+)/sub_issues", ("GET", "_list_sub")), (r"issues/(\d+)/sub_issues", ("POST", "_add_sub")),
         (r"issues/(\d+)/parent", ("GET", "_get_parent")),
@@ -147,6 +148,24 @@ class FakeGitHub:
         before = len(issue["labels"])
         issue["labels"] = [label for label in issue["labels"] if label["name"] != name]
         return (200, issue["labels"]) if len(issue["labels"]) < before else (404, {"message": "Label does not exist"})
+
+    def _list_labels(self, params, payload):
+        return 200, self._page([dict(label) for label in self.labels.values()], params)
+
+    def _rename_label(self, params, payload, name):
+        from urllib.parse import unquote
+        name = unquote(name)
+        if name not in self.labels:
+            return 404, {"message": "Not Found"}
+        new = payload["new_name"]
+        if new in self.labels:
+            return 422, {"message": "already_exists"}
+        self.labels[new] = dict(self.labels.pop(name), name=new)
+        for issue in self.issues.values():
+            for label in issue["labels"]:
+                if label["name"] == name:
+                    label["name"] = new
+        return 200, self.labels[new]
 
     def _create_label(self, params, payload):
         if payload["name"] in self.labels:
