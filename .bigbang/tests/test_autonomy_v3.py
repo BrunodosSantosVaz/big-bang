@@ -1,4 +1,4 @@
-"""v3 modes in the gates (epic #232, ADR-0025/0027): normal keeps every gate with the owner, Flash delegates common
+"""v3 modes in the gates (epic #232, ADR-0025): normal keeps every gate with the owner, Flash delegates common
 work, autonomous acts only inside a valid autonomy.toml read from the trusted branch; the bootstrap refuses an
 account that cannot enforce the controls; every gated receipt says who approved. In-memory GitHub."""
 import datetime
@@ -294,3 +294,38 @@ class WipAndBootstrap(Bootstrap):
         self.fake.rulesets = {5: {"id": 5, "bypass_actors": [{"actor_type": "Integration", "actor_id": 1}]}}
         found = autonomy.bootstrap_problems(self.client)
         self.assertTrue(any("bypass" in item for item in found))
+
+
+class ReviewOfOwnerFiles(unittest.TestCase):
+    def blockers(self, paths, pr_labels=(), issue_labels=(), mode="flash", **kwargs):
+        from bb import decisions
+        return decisions.review_blockers(set(pr_labels), set(issue_labels), "feature/12-x", list(paths), "", [],
+                                         "test.failing", mode, **kwargs)
+
+    def test_the_contract_is_never_approved_by_an_agent(self):
+        for labels in ((), ("owner:ai-review",), ("dono:revisao-ia",)):
+            for mode in ("padrao", "flash"):
+                self.assertTrue(self.blockers(["autonomy.toml"], pr_labels=labels, mode=mode), (labels, mode))
+
+    def test_owner_files_of_a_v3_project_need_the_owner_unless_he_delegated_this_pr(self):
+        self.assertTrue(self.blockers(["STACK.md"], owner_files=True))
+        self.assertTrue(self.blockers(["STACK.md"], issue_labels=("owner:ai-review",), owner_files=True))  # inherited
+        self.assertEqual(self.blockers(["STACK.md"], pr_labels=("owner:ai-review",), owner_files=True), [])
+        self.assertEqual(self.blockers(["flags.toml"], owner_files=True, flags_by_agent=True), [])
+        self.assertEqual(self.blockers(["STACK.md"]), [])  # legacy flash projects keep their behavior
+
+    def test_merge_with_human_review_needs_the_recorded_owner_decision(self):
+        from _fake_github import FakeGitHub as Fake
+        from bb import flows
+        fake = Fake()
+        client = gh.GitHub("dono/repo", api=fake)
+        fake.add_pull(60, "feature/30-tarefa", "develop", title="feat: tarefa", labels=["pr:approved", "review:human"])
+        fake.checks[fake.pulls[60]["head"]["sha"]] = [{"name": "gate", "status": "completed", "conclusion": "success"}]
+        cfg = config(mode="normal")
+        with self.assertRaises(BbError) as error:
+            flows.merge_pr(client, cfg, 60)
+        self.assertIn("review:human", error.exception.message)
+        fake.author = "dona"
+        client.comment(60, "**Decisão do dono:** `pr:approved`\n\n> pode mesclar\n\nRegistrada por `claude-1`.")
+        flows.merge_pr(client, cfg, 60)
+        self.assertTrue(fake.pulls[60]["merged"])
