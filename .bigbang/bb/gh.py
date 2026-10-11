@@ -29,6 +29,13 @@ def _milestone(value):
     return value
 
 
+def _normalize_pull(raw):
+    return {"number": raw["number"], "title": raw.get("title", ""), "body": raw.get("body") or "",
+            "state": raw.get("state"), "merged": bool(raw.get("merged")), "draft": bool(raw.get("draft")),
+            "labels": _labels(raw), "head": raw["head"]["ref"], "sha": raw["head"]["sha"],
+            "base": raw["base"]["ref"]}
+
+
 def graphql(query, variables=None):
     """data of a GitHub GraphQL call through `gh api graphql`; GraphQL errors become BbError."""
     command = github.gh_command() + ["api", "graphql", "--input", "-"]
@@ -171,10 +178,7 @@ class GitHub:
         status, raw = self.call("GET", f"pulls/{number}", accept=(200, 404))
         if status == 404:
             return None
-        return {"number": raw["number"], "title": raw.get("title", ""), "body": raw.get("body") or "",
-                "state": raw.get("state"), "merged": bool(raw.get("merged")), "draft": bool(raw.get("draft")),
-                "labels": _labels(raw), "head": raw["head"]["ref"], "sha": raw["head"]["sha"],
-                "base": raw["base"]["ref"]}
+        return _normalize_pull(raw)
 
     def merge_pull(self, number, sha):
         """Merge commit, guarded by the exact head SHA (a newer push makes GitHub refuse)."""
@@ -226,7 +230,7 @@ class GitHub:
     def pulls(self, head=None, base=None, state="open"):
         owner = self.repository.split("/")[0]
         tail = f"pulls?state={state}" + (f"&head={owner}:{head}" if head else "") + (f"&base={base}" if base else "")
-        return [self.pull(raw["number"]) for raw in self.paginate(tail)]
+        return [_normalize_pull(raw) for raw in self.paginate(tail)]
 
     def create_pull(self, head, base, title, body):
         status, raw = self.call("POST", "pulls", {"head": head, "base": base, "title": title, "body": body},

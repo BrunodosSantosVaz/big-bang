@@ -281,6 +281,31 @@ class Labels(Base):
 
 
 class Board(Base):
+    def test_pr_evidence_api_calls_do_not_scale_with_board_cards(self):
+        self.ready()
+        small_cards = 0
+
+        def dry_run(extra_cards):
+            first = 30
+            for offset in range(extra_cards):
+                number = first + offset
+                self.fake.add_issue(number, f"Tarefa {number}", labels=["type:task"])
+                self.old[29].set(number, "Status", "CI/PR")
+            before = len(self.fake.calls)
+            report = self.run_part(dry_run=True)
+            pr_calls = [path for _, path in self.fake.calls[before:]
+                        if "/pulls" in path.split("?", 1)[0]]
+            return report, pr_calls
+
+        small_report, small_pr_calls = dry_run(small_cards)
+        large_report, large_pr_calls = dry_run(28)
+
+        self.assertEqual(len(small_pr_calls), len(large_pr_calls), large_pr_calls)
+        self.assertEqual(len(large_pr_calls), 1, large_pr_calls)
+        self.assertEqual(large_report["mapped"][17], "In Review")
+        self.assertEqual({n: large_report["mapped"][n] for n in small_report["mapped"]},
+                         small_report["mapped"])
+
     def test_remigration_after_rollback_uses_current_legacy_evidence(self):
         self.ready()
         self.run_part()
