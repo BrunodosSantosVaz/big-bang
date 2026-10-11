@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v3.0.0 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-cut-release.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v3.0.1 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-cut-release.yml. Não edite: personalize em bigbang.toml.
 # Button "Cut release" (ADR-0022): release/x.y.z from develop with everything merged since main, version from the
 # PR titles, version lock and milestone; then the version file and CHANGELOG are committed on the release branch,
 # whose push starts the candidate.

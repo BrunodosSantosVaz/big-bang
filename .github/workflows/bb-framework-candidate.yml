@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v3.0.0 a partir de .bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v3.0.1 a partir de .bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl. Não edite: personalize em bigbang.toml.
 # Candidate of the v3 grouping workflow (ADR-0022): the same build, scan and publication steps of the
 # profile; then the epics of the release go to QA (bb pipeline candidate-ready) and the release PR opens.
 name: Candidate
