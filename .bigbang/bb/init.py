@@ -201,9 +201,10 @@ def run(root, options, with_github=True, today=None):
                                                         {"projeto": options}, source))
     if license_text:
         write_text(os.path.join(root, "LICENSE"), license_text)
-    framework_config = os.path.join(root, ".bigbang-framework.toml")
-    if os.path.isfile(framework_config):
-        os.remove(framework_config)
+    for name in (".bigbang-framework.toml", ".bigbang-producao.json"):  # the framework's own, never the system's
+        framework_file = os.path.join(root, name)
+        if os.path.isfile(framework_file):
+            os.remove(framework_file)
     write_text(config_path(root), config_text)
     manifest = os.path.join(root, documentation.MANIFEST)
     if wiki:
