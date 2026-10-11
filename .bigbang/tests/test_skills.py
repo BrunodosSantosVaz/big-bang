@@ -15,7 +15,7 @@ NAMES = {
     "bb-iniciar-projeto", "bb-entrevista-produto", "bb-escolher-stack", "bb-design-kit", "bb-montar-github",
     "bb-gerar", "bb-refinar-backlog", "bb-prototipar", "bb-rodar-sprint", "bb-escrever-testes-aceite",
     "bb-codar-tarefa", "bb-documentar-epico", "bb-corrigir-bug", "bb-entregar-epico", "bb-triar-issue",
-    "bb-nova-tecnologia", "bb-status", "bb-atualizar", "bb-retrospectiva", "bb-auditar-seguranca",
+    "bb-nova-tecnologia", "bb-status", "bb-atualizar", "bb-retrospectiva", "bb-auditar-seguranca", "bb-migrate",
 }
 HEADINGS = ("Quando usar", "Antes de começar", "Passos", "Pare e pergunte quando", "Nunca", "Pronto quando")
 

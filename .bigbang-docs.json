@@ -886,7 +886,7 @@
       ],
       "hashes": {
         ".bigbang/bb/package.py": "sha256:277954b69c243354a4d726708463293e874b13470081be68054aa8948fc98eff",
-        ".bigbang/MIGRACAO.md": "sha256:9434f80edd5b9686885f3c5e0635114a12f1de04eafe58fab1402b61894067ad",
+        ".bigbang/MIGRACAO.md": "sha256:a0d26290c08e0f57ace27cf2c8f6897130b8567043d7f869c734cbcf205acda1",
         ".bigbang/VERSION": "sha256:fe840f52fb5578d3f77eb497115eb02c6036601c3a53e60df7995c7276baa77a"
       },
       "descricao": "Empacotar .bigbang com integridade e notas de migração que permitem atualização oficial verificável."
@@ -2026,13 +2026,15 @@
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md",
         ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md",
         "AGENTS.md",
-        "CLAUDE.md"
+        "CLAUDE.md",
+        ".bigbang/skills/bb-migrate/SKILL.md"
       ],
       "testes": [
         ".bigbang/tests/test_skills.py:test_catalogo_e_formato_agent_skills",
         ".bigbang/tests/test_skills.py:test_skills_descobertas_antes_do_init_sem_esteira",
         ".bigbang/tests/test_skills.py:test_edicao_de_uma_copia_reprova_e_gerador_repara",
-        ".bigbang/tests/test_skills.py:test_skill_do_projeto_e_preservada"
+        ".bigbang/tests/test_skills.py:test_skill_do_projeto_e_preservada",
+        ".bigbang/tests/test_skills.py:test_catalogo_e_formato_agent_skills"
       ],
       "hashes": {
         ".bigbang/AGENTS.base.md": "sha256:9d909eb509ba772c9a08550746476ea7c006adbe15cf6bb49e956679c26a1d40",
@@ -2119,7 +2121,8 @@
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md": "sha256:bb04007d9e8e6977492685e35299a7801fdbd87b5fbeb4d5f78132d2cfc57411",
         ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md": "sha256:48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
         "AGENTS.md": "sha256:cdb54ffea7561dcb0290fee3dbf8141a3b776e6e791a5398c0930c092375f3ca",
-        "CLAUDE.md": "sha256:336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49"
+        "CLAUDE.md": "sha256:336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
+        ".bigbang/skills/bb-migrate/SKILL.md": "sha256:7c03894d6beaf34a40c695c8ac95e1b2c3b48864095040c99febf189d2e281c6"
       },
       "descricao": "Orientar Fundação, planejamento, execução, revisão, entrega e manutenção com contratos compartilhados entre as IAs."
     },
