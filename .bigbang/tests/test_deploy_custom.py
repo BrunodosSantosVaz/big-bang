@@ -122,6 +122,7 @@ class AlvoPersonalizado(unittest.TestCase):
             "  if [[ -v $name ]]; then printf '%s=set\\n' \"$name\" >> script-env; "
             "else printf '%s=unset\\n' \"$name\" >> script-env; fi\n"
             "done\n"
+            "printf 'CUSTOM_APP=%s\\n' \"${CUSTOM_APP-unset}\" >> script-env\n"
             "printf 'PATH=%s\\n' \"${PATH-unset}\" >> script-env\n"
         )
         for operation in SCRIPT_KEYS:
@@ -142,6 +143,7 @@ class AlvoPersonalizado(unittest.TestCase):
             GITHUB_TOKEN="github-secret-sentinel",
             ACTIONS_RUNTIME_TOKEN="runtime-secret-sentinel",
             AWS_SECRET_ACCESS_KEY="aws-secret-sentinel",
+            CUSTOM_APP="custom-app-sentinel",
             CUSTOM_TOKEN="project-secret-sentinel",
         )
         wrapper = "alvos/personalizado/scripts/alvo.sh"
@@ -162,6 +164,7 @@ class AlvoPersonalizado(unittest.TestCase):
                 ):
                     with self.subTest(variable=name):
                         self.assertIn(f"{name}=unset\n", script_environment)
+                self.assertIn("CUSTOM_APP=custom-app-sentinel\n", script_environment)
                 self.assertRegex(script_environment, r"(?m)^PATH=.+$")
 
     def test_staging_runs_migration_before_publish_and_health(self):
