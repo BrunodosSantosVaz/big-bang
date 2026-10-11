@@ -92,6 +92,7 @@ class FakeGitHub:
          (r"pulls", ("POST", "_create_pull")),
         (r"merges", ("POST", "_merge_branches")),
         (r"rules/branches/(.+)", ("GET", "_branch_rules")),
+        (r"rulesets/(\d+)", ("GET", "_get_ruleset")),
         (r"environments/([^/]+)", ("GET", "_get_environment")),
         (r"environments/([^/]+)/deployment-branch-policies", ("GET", "_environment_branches")),
     ]
@@ -219,6 +220,10 @@ class FakeGitHub:
 
     def _branch_rules(self, params, payload, branch):
         return 200, self._page(getattr(self, "branch_rules", {}).get(branch, []), params)
+
+    def _get_ruleset(self, params, payload, number):
+        ruleset = getattr(self, "rulesets", {}).get(int(number))
+        return (200, ruleset) if ruleset else (404, {"message": "Not Found"})
 
     def _get_environment(self, params, payload, name):
         environment = getattr(self, "environments", {}).get(name)

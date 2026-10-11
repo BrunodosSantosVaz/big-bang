@@ -217,3 +217,80 @@ class GeneratedMode(unittest.TestCase):
             self.assertIn("Modo autônomo", agents)
             self.assertIn("autonomy.toml", agents)
             self.assertIn("bb autonomy check", agents)
+
+
+class Hardening(unittest.TestCase):
+    def rules(self, paths, mode="autonomous", labels=(), flags_by_agent=False):
+        from bb import pipeline
+        return pipeline.v3_pr_rules("feature/12-x", "develop", "chore: x", "Refs #12", set(labels), list(paths), "",
+                                    ["src/"], [], "test.failing", {"type:task"}, {"type:epic", "flag:waived"},
+                                    mode, flags_by_agent=flags_by_agent)
+
+    def test_owner_files_always_need_the_owner_review(self):
+        for mode in ("normal", "flash", "autonomous"):
+            for path in ("autonomy.toml", "bigbang.toml", "PRODUTO.md", "STACK.md", "DESIGN.md", "flags.toml"):
+                _, add, _ = self.rules([path], mode=mode)
+                self.assertIn("review:human", add, f"{mode} {path}")
+        _, add, _ = self.rules(["autonomy.toml"], labels=["owner:ai-review"])
+        self.assertIn("review:human", add)  # the contract itself is never delegated
+
+    def test_contract_flags_agent_lets_the_agent_switch_flags(self):
+        _, add, _ = self.rules(["flags.toml"], flags_by_agent=True)
+        self.assertNotIn("review:human", add)
+
+    def test_wrong_types_block_with_a_message_instead_of_crashing(self):
+        for bad in ('risk = 5', 'gates = 5', 'targets = [1]', 'version = true', 'version = 1.0'):
+            key = bad.split(" = ")[0]
+            text = "\n".join(line for line in CONTRACT.splitlines() if not line.startswith(key + " ")) + "\n" + bad
+            cfg = config(contract=text)
+            self.assertTrue(autonomy.problems(cfg, TODAY), bad)
+            self.assertIsNone(autonomy.usable(cfg, TODAY))
+            self.assertTrue(autonomy.publish_problems(cfg, "production", NOW), bad)
+
+    def test_unreadable_contract_blocks(self):
+        root = tempfile.mkdtemp()
+        os.makedirs(os.path.join(root, "autonomy.toml"))
+        cfg = autonomy.attach({k: v for k, v in config(contract=None).items() if k != autonomy.KEY}, root)
+        self.assertTrue(autonomy.problems(cfg, TODAY))
+
+    def test_limits_come_only_from_a_usable_contract(self):
+        from bb import policy
+        expired = config(contract=CONTRACT.replace("2026-12-31", "2026-01-01").replace("wip = 1", "wip = 99"))
+        self.assertEqual(policy.limits(expired)["epics_in_progress"], 2)
+
+
+class WipAndBootstrap(Bootstrap):
+    def test_wip_of_the_contract_limits_epics_in_progress(self):
+        project = FakeProject()
+        board.ensure_fields(project)
+        for number in (10, 11):
+            self.fake.add_issue(number, f"Épico {number}", labels=["type:epic"])
+            self.fake.add_issue(number + 10, "Tarefa", labels=["type:task"], parent=number)
+            previous = "Brainstorm"
+            for target in ("Backlog", "Refinement", "Ready", "Selected"):
+                self.client.comment(number, receipts.render({
+                    "kind": "transition", "event_id": f"s-{number}-{target}", "issue": number, "actor": "dona",
+                    "at": "2026-10-10T11:00:00Z", "from": previous, "to": target, "policy": "x"}))
+                previous = target
+        cfg = config()  # wip = 1
+        board.move(self.client, project, cfg, 10, "In Progress", "claude-1", now=NOW)
+        with self.assertRaises(BbError) as error:
+            board.move(self.client, project, cfg, 11, "In Progress", "claude-1", now=NOW)
+        self.assertIn("WIP", error.exception.message)
+
+    def test_unknown_plan_of_a_private_repository_refuses(self):
+        self.fake.repo = {"private": True, "visibility": "private", "owner": {"login": "dona", "type": "User"}}
+        self.fake.user = {"login": "outra"}  # token of someone else, or no plan visible
+        self.assertTrue(any("plano" in item for item in autonomy.bootstrap_problems(self.client)))
+
+    def test_a_tag_policy_named_main_is_not_the_main_branch(self):
+        self.fake.environment_branches["production"] = [{"name": "main", "type": "tag"}]
+        self.assertTrue(any("production" in item for item in autonomy.bootstrap_problems(self.client)))
+
+    def test_a_ruleset_with_bypass_actors_does_not_count(self):
+        for branch in ("main", "develop"):
+            for rule in self.fake.branch_rules[branch]:
+                rule["ruleset_id"] = 5
+        self.fake.rulesets = {5: {"id": 5, "bypass_actors": [{"actor_type": "Integration", "actor_id": 1}]}}
+        found = autonomy.bootstrap_problems(self.client)
+        self.assertTrue(any("bypass" in item for item in found))
