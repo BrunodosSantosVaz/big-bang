@@ -140,7 +140,7 @@ def _validate(args):
     found = documentation.validate(args.raiz, args.wiki, published=args.publicada)
     if args.comunidade:
         config = config_module.load(args.raiz, required=False)
-        if config is None:
+        if config is None or config.get('_framework'):
             config = documentation.load(args.raiz).get("configuracao_comunidade")
         if not config:
             found.append("configuração dos painéis do framework ausente")
