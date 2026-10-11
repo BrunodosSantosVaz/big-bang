@@ -3,10 +3,10 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "6b6093a535cf858a2fa955ab58ddcaad9d5feb7b",
-    "commit": "97dce9f1c7fe878c7d9654d0fb184c710357f91b",
+    "base": "97dce9f1c7fe878c7d9654d0fb184c710357f91b",
+    "commit": "a8f0006cb10f11c6c3ae210e53598d643152ac6a",
     "branch": "master",
-    "proposta": "wiki/integration"
+    "proposta": "bigbang/proposta-291-documentation-hash-version-stamp"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -637,6 +637,7 @@
         ".bigbang/tests/test_wiki.py:test_public_stack_guard_uses_approved_table_from_wiki",
         ".bigbang/tests/test_wiki.py:test_business_rules_survive_migration_without_changing_acceptance_tests",
         ".bigbang/tests/test_wiki.py:test_changed_behavior_without_doc_refresh_blocks_delivery",
+        ".bigbang/tests/test_wiki.py:test_framework_version_stamp_does_not_invalidate_public_documentation",
         ".bigbang/tests/test_wiki.py:test_algorithm_tagged_source_hash_is_validated_and_tampering_blocks",
         ".bigbang/tests/test_wiki.py:test_missing_test_symbol_or_functional_flow_blocks",
         ".bigbang/tests/test_wiki.py:test_broken_image_wikilink_and_anchor_are_detected",
@@ -649,7 +650,7 @@
         ".bigbang/tests/test_framework_pipeline.py:test_prepare_refuses_untracked_sources_in_all_declared_roots"
       ],
       "hashes": {
-        ".bigbang/bb/documentation.py": "sha256:f87f3352060c89b26898952740d80f34a2de2d1d38906f9f6b2debf153843168"
+        ".bigbang/bb/documentation.py": "sha256:7d87b0078cf02dc21d76bd2db38d2232564902ea690bfbe64cd155b8955c9870"
       },
       "descricao": "Resolver identificadores documentais conforme a visibilidade e publicar somente o snapshot revisado sem perder alterações concorrentes."
     },
@@ -690,7 +691,7 @@
         ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected"
       ],
       "hashes": {
-        ".bigbang/bb/documentation_cli.py": "sha256:830596662eecba15abfa22608ee821e52cff2d030247afd38d3a99ba1d09dcab"
+        ".bigbang/bb/documentation_cli.py": "sha256:dfd45cfbe4dfcf69f6e0dd53bc5a7f384b508a26bcc6e25f066face2e6c13893"
       },
       "descricao": "Preparar, ler, propor, validar e publicar documentação; orientar Discussions, auditoria de painéis e Social preview."
     },
@@ -891,7 +892,7 @@
       ],
       "hashes": {
         ".bigbang/bb/package.py": "sha256:277954b69c243354a4d726708463293e874b13470081be68054aa8948fc98eff",
-        ".bigbang/MIGRACAO.md": "sha256:a0d26290c08e0f57ace27cf2c8f6897130b8567043d7f869c734cbcf205acda1",
+        ".bigbang/MIGRACAO.md": "sha256:dca478f0ef6dfc129aad0035f0f1d2b1d824c7d71f48b6bf4244c59bd743f3ef",
         ".bigbang/VERSION": "sha256:2985be8b28d3ade858e8d8fb4bc22f565b1bf6020dff982dce141f7721b9999c"
       },
       "descricao": "Empacotar .bigbang com integridade e notas de migração que permitem atualização oficial verificável."
@@ -1222,7 +1223,7 @@
         ".bigbang/tests/test_atualizar.py:test_arvore_suja_recusa"
       ],
       "hashes": {
-        ".bigbang/bb/update.py": "sha256:220f77fb9e615dff143f5a6166e9461781c8aa79f74e275888e6fecdbd52f9f4"
+        ".bigbang/bb/update.py": "sha256:e50d061b7a5652dbaab341cb26bbff6f761e5f6c7491d7a7f14c5d32c24d9831"
       },
       "descricao": "Instalar release do framework com SHA-256 e atestação de origem, preservando configurações e abrindo PR específico."
     },
@@ -2119,7 +2120,7 @@
         ".bigbang/processo/README.md": "sha256:bbdd88a75546f006f841bb80c1e76be9374d211a4bedd49efe767ee3f56601c3",
         ".bigbang/processo/18-documentacao.md": "sha256:8888ffab4184e2d5b747f47ffdd6ef900d7e8bd20bdad4026beb455d993dddef",
         ".bigbang/skills/README.md": "sha256:54bd926098535f1c5a3f61340668b65696f50936e8f15ca4ffd15c59aac030ac",
-        ".bigbang/skills/bb-atualizar/SKILL.md": "sha256:8ed414b75f9a302bdae54e7e4879e66a0dd1948b33d158c67e5477b4f1c8714e",
+        ".bigbang/skills/bb-atualizar/SKILL.md": "sha256:5dd487b8246286e8a83d8768dd31addca63be32f4916f95bf550f60ca73bd7b6",
         ".bigbang/skills/bb-auditar-seguranca/SKILL.md": "sha256:5fa9479334ef5b2b7218a5aa91ced11662449ba86d792a7768bc44243c0dffdb",
         ".bigbang/skills/bb-codar-tarefa/SKILL.md": "sha256:c295ee6b4d1cbf7a7dfad0bd2b17ea76d5b36c3b9ed08a9f3bbc5af24c0c0dff",
         ".bigbang/skills/bb-corrigir-bug/SKILL.md": "sha256:fdf0d9f830a42831b7168aa2a0ac40c4d0b00f4f936aa1fa217655538426e4d4",

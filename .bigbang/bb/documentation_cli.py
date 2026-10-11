@@ -159,9 +159,8 @@ def _publish(args):
 
 
 def _inventory(args):
-    import hashlib
     data = documentation.load(args.raiz)
-    print(json.dumps({path: hashlib.sha256(Path(args.raiz, path).read_bytes()).hexdigest()
+    print(json.dumps({path: documentation.source_digest(Path(args.raiz, path))
                       for path in documentation.inventory(args.raiz, data)}, ensure_ascii=False, indent=2))
     return EXIT_OK
 

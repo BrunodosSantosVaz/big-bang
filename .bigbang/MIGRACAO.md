@@ -18,6 +18,11 @@ controles do GitHub conferidos. Testes continuam escritos antes do código, a re
 scanners permanecem obrigatórios. `bb init` funda sistemas novos já na v3; `--fluxo epic-branch` preserva o
 fluxo anterior quando escolhido. Sistemas existentes continuam com seu comportamento após `bb update`.
 
+Em projetos públicos com Wiki que atualizam diretamente para a v3.0.0, os arquivos gerados ainda carregam o
+carimbo da versão no hash documental. Depois de `bb atualizar`, crie e proponha a atualização documental no mesmo
+PR com `bb documentacao gravar` e `bb documentacao propor`; não publique a Wiki sem revisão. A v3.0.1 normaliza
+esse carimbo, mas mudanças funcionais continuam exigindo documentação revisada.
+
 ### O que o projeto precisa fazer
 
 Nada.
