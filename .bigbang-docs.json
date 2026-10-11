@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "036abdfbf8251dfd7363ad22e5100f19763fbd79",
+    "commit": "b53851b2e4a59ecb90f419e0779b994b52307354",
     "branch": "master",
     "proposta": "bigbang/proposta-220-v3"
   },
@@ -248,7 +248,7 @@
     }
   },
   "codigo": {
-    "commit": "791cb3115bf1da53207c00ade6b5c75a260ad4f1",
+    "commit": "7163744dd11c0c379404a8be797e6c3bf406da39",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -2449,7 +2449,7 @@
         ".bigbang/tests/test_grouping_v3.py:test_clean_task_pr"
       ],
       "hashes": {
-        ".bigbang/pipeline/AGENTS.base.md": "sha256:fbcf8982004f0b6befc76d2d29f2f9cd45fc220b83578846e30d856a50d4010b",
+        ".bigbang/pipeline/AGENTS.base.md": "sha256:37182439f6c9f8b3801fab7916a6616e6fb42040e6524262505a92f9c07c24d0",
         ".bigbang/pipeline/core/files/.github/dependabot.yml.tmpl": "sha256:34ab41c900e502b5e964c35d01fb97ca64f29b11c4c3c29e2bff3a6d718f2470",
         ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-bug.yml": "sha256:a106896eef75aee654f73c09b2ec1d793d387ba0331c44c9982a90b5ac314840",
         ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-docs.yml": "sha256:7330b1a0f1bd69d66711e66c1179a88327f6e38fea9940e5125e99f03fc96fd4",
@@ -2557,24 +2557,26 @@
         ".bigbang/tests/test_skills_v3.py:test_v3_project_gets_the_v3_skills",
         ".bigbang/tests/test_skills_v3.py:test_legacy_project_keeps_the_current_skills",
         ".bigbang/tests/test_skills_v3.py:test_every_process_reference_of_the_v3_layer_exists",
-        ".bigbang/tests/test_skills_v3.py:test_v3_agents_md_points_to_the_v3_process"
+        ".bigbang/tests/test_skills_v3.py:test_v3_agents_md_points_to_the_v3_process",
+        ".bigbang/tests/test_skills_v3.py:test_a_bug_fix_pull_request_goes_to_develop_or_a_release_never_to_main",
+        ".bigbang/tests/test_skills_v3.py:test_every_bb_command_in_the_v3_text_exists_in_the_cli"
       ],
       "hashes": {
-        ".bigbang/pipeline/process/README.md": "sha256:24670693dd4db673219072a719d3e7b920a3f7be256bc6647bd38d2ecc3f5923",
+        ".bigbang/pipeline/process/README.md": "sha256:563c93bb12e74264d620ffad936c2039cf3ed231f4e0a66090f27063e9bb6d03",
         ".bigbang/pipeline/process/board.md": "sha256:db8b4f489cbd4f8b08ced195f6da10719095cc85a6d394f2511ebd2b920ab349",
-        ".bigbang/pipeline/process/bugs.md": "sha256:05c392804d45d1da7eb9d404d7f25c5b76ad9927295739cbcfc0bfecfe4e84cc",
+        ".bigbang/pipeline/process/bugs.md": "sha256:2f13beb591518a5039b46ed34720c7fc27302b30ccc19277990099f9395dbf78",
         ".bigbang/pipeline/process/delivery.md": "sha256:f3b680f176b722843a8d9eafe8165e8c89cd90e5a99e222618a10bcc3fbd5715",
         ".bigbang/pipeline/process/execution.md": "sha256:a53d9677df320fdbacc75e4c054a3c87e4c915effa3d8338cf57a9fa2c7f51b9",
-        ".bigbang/pipeline/process/modes.md": "sha256:9f473ca730c38a970bbc4567b2188e05ccb9fca654dd093bd5c210615fff12f3",
+        ".bigbang/pipeline/process/modes.md": "sha256:d1630b5c4aad2e0c36343f67c689669526a1f3299a7acf24f80fafea35cc3eef",
         ".bigbang/pipeline/process/planning.md": "sha256:14e761b28252ecdf754028721f193a6391d05e73e9079b21cd92219916ab6874",
         ".bigbang/pipeline/process/sprint.md": "sha256:97901470697eb6d8311c4d127f145241c0ac70b7e6d142e68b0a59f29f6ac44a",
         ".bigbang/pipeline/skills/bb-atualizar/SKILL.md": "sha256:7c2f6c79a75a01f6726f496f0e5efad9ef2a84febafc76254352181f4dc36fe9",
         ".bigbang/pipeline/skills/bb-codar-tarefa/SKILL.md": "sha256:166ae8f3b59e05f392fe1e4e5e83ce1fd55bc39745a0ddeb8107b72d9ea887ec",
-        ".bigbang/pipeline/skills/bb-corrigir-bug/SKILL.md": "sha256:f9aec8354f2d4d3fa558ccaacd65a86f6195396c986ca6e861624fff612b03cc",
+        ".bigbang/pipeline/skills/bb-corrigir-bug/SKILL.md": "sha256:d348962ed082094905f600e5ce08e450ce2ad0e4c0a9cdb69b5ef7126d79e46c",
         ".bigbang/pipeline/skills/bb-documentar-epico/SKILL.md": "sha256:d0b48f7cf545f7076ae28ec43d55d6eecaa65580a358605da100f4b0e7359f57",
         ".bigbang/pipeline/skills/bb-entregar-epico/SKILL.md": "sha256:e6607b325d04616aee9b3f591334cd78d9535a203a798c401ae0d4991c92b9bb",
         ".bigbang/pipeline/skills/bb-escrever-testes-aceite/SKILL.md": "sha256:6a5cb576cfa6a2c8c4018fafe33c5ca349d34ce5498bf09183ff530e95fdcd9e",
-        ".bigbang/pipeline/skills/bb-montar-github/SKILL.md": "sha256:cfe353abe3b1f4f11fab0406df38c259958078d9d7af472bdf4e62297be3b9b2",
+        ".bigbang/pipeline/skills/bb-montar-github/SKILL.md": "sha256:ca0e2569034c01baf0eab12f57acf4f0cf54f95bfe35f486d5abd1a40a82f715",
         ".bigbang/pipeline/skills/bb-refinar-backlog/SKILL.md": "sha256:37075fb483dbcfe96858d4114aa3f200ce7542e3cd72496a6dd06486c17137f0",
         ".bigbang/pipeline/skills/bb-reject/SKILL.md": "sha256:495c38706e39433d2ce572756dc29a232b6085738eac36c33c9f05a2eac140a9",
         ".bigbang/pipeline/skills/bb-rodar-sprint/SKILL.md": "sha256:347f87eb83c6aee9d8134793cd2f221413032105549a57c70cad69d343de56ed",
