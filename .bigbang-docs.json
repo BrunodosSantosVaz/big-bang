@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "fb269ba0e69fd0415c912705e7e4757cee56daf9",
+    "commit": "6b6093a535cf858a2fa955ab58ddcaad9d5feb7b",
     "branch": "master",
     "proposta": "wiki/integration"
   },
@@ -254,7 +254,7 @@
     }
   },
   "codigo": {
-    "commit": "b14db9b959cbcda561e8513f8fe749b26ace570a",
+    "commit": "73aeb15734aada45ef9bed3537d704c9e96b993d",
     "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
@@ -2647,7 +2647,7 @@
         ".bigbang/bb/framework.py": "sha256:1ecbe5ed20b6c26bc1c5de1c53cb71173002f1086f1020775549c6803b308f7a",
         ".bigbang/pipeline/framework/config.toml": "sha256:e8c3c7578b3d880ba05499eddf41b7251c276f6db15e62ae47038f5dc21e6fed",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:49709060fa19fa6c0e86e624df856dac13ec41e02eb64d3e4f763d6654b0f810",
-        ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:907afd6987d2626d0858be2e52943cb4905eae90d8b094da63dc0691db0eac59",
+        ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:0245df537e46101bd142701cd485913c8558ed61a262efdae7fd9a2e229dc8d4",
         ".bigbang/pipeline/framework/scripts/testes-candidata.sh": "sha256:b9cc01977794173b5dc2a2bec28b7ca53eb0f8fa91798f10148d25efae546a0e",
         ".github/workflows/bb-framework-board-report.yml": "sha256:fd1bca1eff4486906b393d36ddda2f9c61f120ebee8b9b8d7a8b4cb60f8d6c48",
         ".github/workflows/bb-framework-candidate.yml": "sha256:9208921c934809386e0c19d7ab8b474d7a9575f7575898db19651f90f02148af",
@@ -2656,7 +2656,7 @@
         ".github/workflows/bb-framework-controller.yml": "sha256:8f3a86b1c7f79de0f2e82cb53965fd2c25f58882178fd2af45907e4b1aa9e29b",
         ".github/workflows/bb-framework-create-branches.yml": "sha256:d00c1c279ccd743faf524fc99d5770391882ed610158dd378a1137a08b5c2a95",
         ".github/workflows/bb-framework-cut-release.yml": "sha256:94d91e26326d5dbe6326c3a953128f6c37646da2e30a87a95b30930d96e2ebb5",
-        ".github/workflows/bb-framework-gate.yml": "sha256:c5deff29c39f6941e2bd372242221a1ab3f8e9a5616520d8a514df9430bf6b40",
+        ".github/workflows/bb-framework-gate.yml": "sha256:c5414ed0d5199a6277b1a4532e082b44521eed9dc16218c9e2182247844fe3d5",
         ".github/workflows/bb-framework-merge-pr.yml": "sha256:ad55131c97002c8807eae1cddf53732ba9e62f97d09fd27d6abd91f2e93393a3",
         ".github/workflows/bb-framework-publish-maintenance.yml": "sha256:6b16a750d30e065c8b0124ab3f76277a222226ff31ea5989c42cc3ed4a066491",
         ".github/workflows/bb-framework-publish.yml": "sha256:23f4dca0f67161c6d9213e57ef35dd303b070873e96d8b749e554abe7cc3b19a",
