@@ -820,6 +820,8 @@
         ".bigbang/tests/test_launcher.py:test_every_root_entry_has_a_foundation_decision",
         ".bigbang/tests/test_launcher.py:test_private_default_mode",
         ".bigbang/tests/test_launcher.py:test_private_flash_mode",
+        ".bigbang/tests/test_launcher.py:test_autonomous_mode_needs_the_v3_workflow",
+        ".bigbang/tests/test_launcher.py:test_previous_workflow_stays_available",
         ".bigbang/tests/test_launcher.py:test_public_gets_its_own_manifest",
         ".bigbang/tests/test_launcher.py:test_compiled_profile_after_f2"
       ],
@@ -2164,7 +2166,7 @@
         ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect"
       ],
       "hashes": {
-        ".bigbang/bb/names.py": "sha256:4f85d33dad30685fe6f8926c3deb08d30683e99d4098b6a6ddf9c3cbe68df999"
+        ".bigbang/bb/names.py": "sha256:851859520af667d7f2599d6625f3bfab47a5305777aaed86d439e91eff0d8db1"
       },
       "descricao": "Tabela única de nomes v2 ↔ v3 (configuração, valores, CLI, labels, branches, workflows, checks, ambiente, segredos)."
     },
@@ -2450,7 +2452,7 @@
         ".bigbang/tests/test_grouping_v3.py:test_clean_task_pr"
       ],
       "hashes": {
-        ".bigbang/pipeline/AGENTS.base.md": "sha256:194602c8ea5bcbb77f174a5aa62decedbfd922bb1e439af5158b64a757a7c65e",
+        ".bigbang/pipeline/AGENTS.base.md": "sha256:37182439f6c9f8b3801fab7916a6616e6fb42040e6524262505a92f9c07c24d0",
         ".bigbang/pipeline/core/files/.github/dependabot.yml.tmpl": "sha256:34ab41c900e502b5e964c35d01fb97ca64f29b11c4c3c29e2bff3a6d718f2470",
         ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-bug.yml": "sha256:a106896eef75aee654f73c09b2ec1d793d387ba0331c44c9982a90b5ac314840",
         ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-docs.yml": "sha256:7330b1a0f1bd69d66711e66c1179a88327f6e38fea9940e5125e99f03fc96fd4",
