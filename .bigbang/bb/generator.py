@@ -103,6 +103,10 @@ def with_computed(config, root):
                              "**Modo padrão.** Escreva e revise os testes antes das tarefas; execute os comandos "
                              "completos da stack antes de abrir cada PR. Veja `.bigbang/processo/06-execucao.md`."
                          )}
+    if is_v3_pipeline(config):  # the v3 layer cites the v3 process, never the epic-branch documents
+        for legacy, current in ((".bigbang/processo/17-flash.md", ".bigbang/pipeline/process/modes.md"),
+                                (".bigbang/processo/06-execucao.md", ".bigbang/pipeline/process/execution.md")):
+            context["gerado"]["modo_trabalho"] = context["gerado"]["modo_trabalho"].replace(legacy, current)
     context['gerado'].update(env_alvo='          # Perfil compilado: sem credenciais de deploy.', runner_deploy='ubuntu-24.04', preparar_alvo=':')
     if config['entrega']['perfil'] == 'deploy':
         target, artifact = deploy_catalog.resolve(root, config)

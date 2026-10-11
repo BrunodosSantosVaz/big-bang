@@ -23,6 +23,9 @@ revisão e publicação confirmada da Wiki valem em todos os modos.
 - **Posse:** `bb claim <issue> <nome>` adquire a trava atômica (`refs/bigbang/locks/issue-<n>`) e abre a pasta
   própria; renove com `bb renew <issue>`; libere com `bb unclaim <issue>`. Sessão vencida não conclui trabalho.
 
+O processo completo da v3 está em `.bigbang/pipeline/process/` (quadro, planejamento, sprint, execução, entrega,
+bugs e modos).
+
 ## Como reconhecer o que o dono pede
 
 | O dono diz (ou algo parecido) | Use a skill |
