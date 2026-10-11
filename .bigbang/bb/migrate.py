@@ -17,7 +17,8 @@ from .paths import config_path, read_text, write_text
 PARTS = ("config", "board", "workflow", "labels")
 MIGRATION_ACTOR = "migration"
 # Inherited by systems founded before #236: the framework's own project section, without markers.
-FRAMEWORK_QUOTE = re.compile(r"(?ms)^> \*\*Se este é o repositório `BrunodosSantosVaz/big-bang`\*\*.*?(?=^\S|\Z)")
+FRAMEWORK_QUOTE = re.compile(
+    r"(?m)^> \*\*Se este é o repositório `BrunodosSantosVaz/big-bang`\*\*[^\n]*(?:\n>[^\n]*)*(?:\n|$)")
 FRAMEWORK_MODE = re.compile(r"(?ms)^### Modo do próprio framework\n.*?(?=^#{1,3} |\Z)")
 
 
