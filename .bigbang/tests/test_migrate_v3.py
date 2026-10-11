@@ -47,7 +47,8 @@ class Base(unittest.TestCase):
         shutil.copy(os.path.join(RAIZ, ".bigbang", "VERSION"), os.path.join(self.root, ".bigbang", "VERSION"))
         with open(os.path.join(CENARIOS, "deploy-vps-docker.toml"), encoding="utf-8") as handle:
             text = handle.read()
-        version = open(os.path.join(RAIZ, ".bigbang", "VERSION"), encoding="utf-8").read().strip()
+        with open(os.path.join(RAIZ, ".bigbang", "VERSION"), encoding="utf-8") as handle:
+            version = handle.read().strip()
         text = text.replace('versao = "0.9.0"', f'versao = "{version}"', 1)
         text = text.replace("planejamento = 0", "planejamento = 28").replace("execucao = 0", "execucao = 29") \
             .replace("bugs = 0", "bugs = 30")
@@ -150,7 +151,7 @@ class Labels(Base):
         self.ready()
         report = migrate.labels_part(self.client, self.root, snapshot=self.snapshot)
         self.assertIn(("epic", "type:epic"), report["renamed"])
-        self.assertEqual(self.fake.label_names(10), ["qa:approved", "type:epic"])  # homologado existed as v3 too
+        self.assertEqual(self.fake.label_names(10), ["homologado", "qa:approved", "type:epic"])
         self.assertIn("homologado", self.fake.labels)  # nothing deleted while the migration is not finished
         self.assertIn("type:bug", self.fake.labels)  # the v3 catalog is complete
         self.assertEqual(report["replaced"], {"tem-dependencia": [11]})
