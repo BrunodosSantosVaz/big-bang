@@ -271,10 +271,6 @@ def _approval_problems(config, card_kind, current, target, gathered, decision):
         return []
     mode = policy.mode(config)
     labels = gathered["labels"]
-    if who == "blocked":
-        reasons = autonomy.problems(config, datetime.datetime.now(datetime.timezone.utc).date())
-        return [f"portão {gate} fora do contrato do modo {mode} (risco {risk}): bloqueado"] + \
-            [f"  {reason}" for reason in reasons]
     if who == "agent":
         if (current, target) == ("QA", "Rejected") and not gathered.get("qa_agent_rejected") and \
                 "qa:rejected" not in labels and names.label("qa:rejected", "legacy") not in labels:
@@ -285,7 +281,11 @@ def _approval_problems(config, card_kind, current, target, gathered, decision):
         return []  # the publish job only runs after the owner approved the production environment
     evidence = "qa:rejected" if (current, target) == ("QA", "Rejected") else DECISION_OF.get(gate)
     if evidence and (evidence in labels or names.label(evidence, "legacy") in labels):
-        return []
+        return []  # the owner's recorded decision passes any gate, also one outside the autonomy contract
+    if who == "blocked":
+        reasons = autonomy.problems(config, datetime.datetime.now(datetime.timezone.utc).date())
+        return [f"portão {gate} fora do contrato do modo {mode} (risco {risk}): bloqueado para o agente; só a "
+                f"decisão registrada {evidence or 'do dono'} libera"] + [f"  {reason}" for reason in reasons]
     return [f"portão {gate} é do dono no modo {mode} (risco {risk}): falta a decisão registrada "
             f"{evidence or ''} (bb decision, com as palavras dele)".replace(" )", ")")]
 
