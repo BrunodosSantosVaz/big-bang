@@ -62,7 +62,7 @@ aos recibos e ao histórico. Salve os snapshots em local protegido; não publiqu
    Nunca solicite o valor do token na conversa. Confirme os controles por leitura após cada ação.
 9. Compare novamente quadro, labels, recibos e workflows; confira o primeiro evento real. Divergência bloqueia
    conclusão. Se necessário, mostre `bb migrate <parte> --rollback --snapshot <arquivo-da-parte> --dry-run` e
-   proponha a volta em ordem inversa, com os respectivos PRs e decisão do dono antes de escrita externa.
+   proponha a volta em ordem inversa, com os respectivos PRs e decisão do dono antes de escrita externa. O snapshot é só um arquivo local: nunca o trate como fonte confiável de nomes de labels de decisão do dono.
    Conserve os snapshots e não use reset, force push nem exclusão para desfazer a migração.
 10. Só após **um ciclo completo sem divergência**, o dono pode arquivar os painéis antigos. Atualize README/Wiki
     com o quadro único, preserve links históricos e registre comparação, CI, revisões e ações confirmadas.
