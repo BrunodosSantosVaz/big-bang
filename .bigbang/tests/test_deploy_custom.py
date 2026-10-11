@@ -147,6 +147,40 @@ class AlvoPersonalizado(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse((self.root / "calls").exists())
 
+    def test_production_health_failure_stops_release_creation(self):
+        self.configure_custom()
+        gh = self.root / "fake-bin/gh"
+        gh.parent.mkdir(exist_ok=True)
+        gh.write_text(
+            "#!/usr/bin/env bash\n"
+            "if [ \"$2\" = view ]; then exit 1; fi\n"
+            "if [ \"$2\" = download ]; then\n"
+            "  while [ \"$#\" -gt 0 ]; do\n"
+            "    if [ \"$1\" = --dir ]; then directory=\"$2\"; shift 2; else shift; fi\n"
+            "  done\n"
+            "  printf '%s\\n' '" + MANIFEST + "' > \"$directory/imagem.txt\"\n"
+            "  printf '{}\\n' > \"$directory/sbom-app.json\"\n"
+            "  exit 0\n"
+            "fi\n"
+            "echo release-create >> \"$LOG\"\n",
+            encoding="utf-8",
+        )
+        gh.chmod(0o755)
+        result = self.run_deploy_script(
+            "scripts/promover.sh",
+            env=self.runner_environment(
+                RC_TAG="v1.2.3-rc.1",
+                TAG="v1.2.3",
+                TARGET_SHA="0" * 40,
+                FAIL_OPERATION="saude",
+            ),
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(
+            (self.root / "calls").read_text(encoding="utf-8").splitlines(),
+            ["migrar:producao", "publicar:producao", "saude:producao"],
+        )
+
     def test_rollback_uses_release_manifest_and_never_runs_migration(self):
         self.configure_custom()
         fake_bin = self.root / "fake-bin"
