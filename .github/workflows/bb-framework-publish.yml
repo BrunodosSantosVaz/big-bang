@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v3.0.0 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-publish.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v3.0.1 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-publish.yml.tmpl. Não edite: personalize em bigbang.toml.
 # Button "Publish" (v3, ADR-0022/0025): the gate (every epic approved or dark behind its flag, pending acceptance
 # only for dark epics, no blocking issue, candidate equal to the release head, green release PR) and the production
 # checklist, documentation and CHANGELOG of the release run first and change nothing. The publication runs only
