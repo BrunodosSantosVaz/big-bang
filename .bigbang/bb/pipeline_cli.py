@@ -305,7 +305,10 @@ def _traceability(args):
 
 
 def _stack_guard(args):
-    return _report(stack_guard.problems(args.dados or args.raiz),
+    from . import framework
+    own = framework.load(args.raiz, bootstrap=True)
+    guard = framework.stack_problems if own else stack_guard.problems
+    return _report(guard(args.dados or args.raiz),
                    "Guarda da stack: todas as dependências de execução estão aprovadas no STACK.md.")
 
 
