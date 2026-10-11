@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "4b8c78c375034eabe0c0b59b9b76f885add7eb81",
+    "commit": "f3defcc0dd99fdc342c5f2b620d603fc30438f4b",
     "branch": "master",
     "proposta": "wiki/251-framework-pipeline"
   },
@@ -251,7 +251,7 @@
     }
   },
   "codigo": {
-    "commit": "e11df5142759ba88b8c270a7a97a407b0ffe10ed",
+    "commit": "6dd7a41b5f5ee8522dcbac0821fba4ef6e753d91",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
