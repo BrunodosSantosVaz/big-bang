@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "dee6eab5dcbe66a2ef5e66884edd5b5f96b006b0",
-    "commit": "1e90be6fcf04664fe0f11f34fd12cd5fd8c9224a",
+    "commit": "71d6f4f2007dbeaf0f700eaec352e1f21f8fcefd",
     "branch": "master",
     "proposta": "bigbang/proposta-303-autonomy"
   },
@@ -255,7 +255,7 @@
     }
   },
   "codigo": {
-    "commit": "c18d86f5e383ee2913175b70bb2abe967b8b1388",
+    "commit": "afd3331485152095c9e495d63082185186085c19",
     "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
@@ -836,7 +836,7 @@
         ".bigbang/tests/test_launcher.py:test_compiled_profile_after_f2"
       ],
       "hashes": {
-        ".bigbang/bb/init.py": "sha256:07ea59f34ac7626fe41c13615573f6d80929d98ffd6cc465082a1727ec96f97a"
+        ".bigbang/bb/init.py": "sha256:f339c986dbc250be0582d7b0265b68a60f82ec87bb9e72abefa654598a936db7"
       },
       "descricao": "Preparar F0 com identidade, modo padrão ou Flash, configuração e arquivos comunitários sem destruir conteúdo do projeto."
     },
