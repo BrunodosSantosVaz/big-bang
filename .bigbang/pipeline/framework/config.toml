@@ -59,7 +59,7 @@ sensitive_paths = [".bigbang/**"]
 model = "single"
 labels = "v3"
 owner = "BrunodosSantosVaz"
-number = 0
+number = 31
 
 [agents]
 names = ["claude-1", "claude-2", "codex-1", "copilot-1"]
