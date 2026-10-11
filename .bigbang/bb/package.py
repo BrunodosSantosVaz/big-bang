@@ -90,12 +90,30 @@ def manual_steps(section):
     return "" if text.rstrip(".").lower() in ("nada", "") else text
 
 
-def release_notes(root, version):
+def release_notes(root, version, target_sha=None):
     path = os.path.join(framework_dir(root), "MIGRACAO.md")
-    section = migration_sections(read_text(path)).get(version)
-    if not section:
-        raise BbError(f"MIGRACAO.md não tem a seção [{version}]", EXIT_INVALID_STATE)
-    return section
+    if os.path.isfile(path):
+        section = migration_sections(read_text(path)).get(version)
+        if section:
+            return section
+    if target_sha:
+        import subprocess
+        for rel in (".bigbang/MIGRACAO.md", "MIGRACAO.md"):
+            try:
+                git_dir = os.path.exists(os.path.join(root, ".git")) if root else False
+                out = subprocess.check_output(
+                    ["git", "show", f"{target_sha}:{rel}"],
+                    cwd=root if git_dir else None,
+                    stderr=subprocess.DEVNULL, text=True
+                )
+                section = migration_sections(out).get(version)
+                if section:
+                    return section
+            except Exception:
+                pass
+    if not os.path.isfile(path) and not target_sha:
+        raise BbError("MIGRACAO.md inexistente", EXIT_INVALID_STATE)
+    raise BbError(f"MIGRACAO.md não tem a seção [{version}]", EXIT_INVALID_STATE)
 
 
 def tarball_members_ok(tar):

@@ -3,10 +3,10 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "dee6eab5dcbe66a2ef5e66884edd5b5f96b006b0",
-    "commit": "b5e7754e989fe054a2c9798e50fc69457251436b",
+    "base": "b5e7754e989fe054a2c9798e50fc69457251436b",
+    "commit": "ce543a0090222418a80fa83bf96ba630903f57f2",
     "branch": "master",
-    "proposta": "bigbang/proposta-301-release-3-0-1"
+    "proposta": "bigbang/proposta-314-release-publish-idempotency"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -911,10 +911,11 @@
         ".bigbang/tests/test_pacote.py:test_secoes_entre_versoes",
         ".bigbang/tests/test_pacote.py:test_migracao_do_framework_tem_a_versao_atual",
         ".bigbang/tests/test_pacote.py:test_versoes_publicadas_sem_passo_manual",
-        ".bigbang/tests/test_pacote.py:test_toda_secao_tem_as_duas_partes"
+        ".bigbang/tests/test_pacote.py:test_toda_secao_tem_as_duas_partes",
+        ".bigbang/tests/test_pacote.py:test_migracao_lida_do_target_sha_quando_root_desatualizado"
       ],
       "hashes": {
-        ".bigbang/bb/package.py": "sha256:277954b69c243354a4d726708463293e874b13470081be68054aa8948fc98eff",
+        ".bigbang/bb/package.py": "sha256:8e87231013938d732ebfe3123872e2231f3564030f3264960ba85c4259784197",
         ".bigbang/MIGRACAO.md": "sha256:ce5b2b406ce728c664595fd7b97f93b01b61624fb48e3175a270c244e699b523",
         ".bigbang/VERSION": "sha256:06e3fe4a7a1884d20d81cc7065ca8cfd4c394ec602c4d180ddc39bbd4f7da521"
       },
@@ -2314,7 +2315,7 @@
         ".bigbang/bb/receipts.py": "sha256:fc0ca5d774e4a2cadaf1036002a399e175d4af8806e5a79ee920a175e330b33a",
         ".bigbang/bb/locks.py": "sha256:90b249a7fe0678f7b1369f3d9bb20090ec5dba75907a8864f710a77d46293e1d",
         ".bigbang/bb/claims.py": "sha256:ce5b27f956941758c8da08bfb59c046b10415b039f336e4365ebd79f51766cf4",
-        ".bigbang/bb/gh.py": "sha256:d3be1466442072fc2ecd59457b06bb7929011edf87f075a178da33ba8396a0ca"
+        ".bigbang/bb/gh.py": "sha256:7509ffc1fe4bf4abc00b5ef6edbfaec144780673b0d2b05d82b411d1b672ef06"
       },
       "descricao": "Máquina de estados do quadro único, política dos modos, recibos estruturados e travas atômicas em refs Git."
     },
@@ -2393,7 +2394,7 @@
       "hashes": {
         ".bigbang/bb/board.py": "sha256:680b8673e0f866085531aeff88476333f4aae045a04644eba60339ca139fca46",
         ".bigbang/bb/controller.py": "sha256:8c70bec7e79ad6786f7320c719e424d593f77fad6a006c8459a222d45e12200f",
-        ".bigbang/bb/flow_cli.py": "sha256:d567f67ba6e4a1c6072fef8429cd244ae39235850e123a5a1f12a6d78d078982"
+        ".bigbang/bb/flow_cli.py": "sha256:fe9092a7b8292ada18f1371efe21bc02999b41b9dd1dfb03f435942ba672651f"
       },
       "descricao": "Catálogo de labels v3, Project com 15 estados e campos, bb move validado, reconciliação e controlador de eventos."
     },
@@ -2472,7 +2473,8 @@
         ".bigbang/tests/test_delivery_v3.py:test_pending_epics_are_warned_by_the_publish_command",
         ".bigbang/tests/test_delivery_v3.py:test_maintenance_dry_run_says_nothing_was_merged",
         ".bigbang/tests/test_delivery_v3.py:test_pending_warnings_are_written_before_the_milestone_closes",
-        ".bigbang/tests/test_delivery_v3.py:test_publish_workflow_picks_only_numbered_candidates"
+        ".bigbang/tests/test_delivery_v3.py:test_publish_workflow_picks_only_numbered_candidates",
+        ".bigbang/tests/test_delivery_v3.py:test_publish_check_accepts_already_merged_pull"
       ],
       "hashes": {
         ".bigbang/bb/flags.py": "sha256:06f715aa74201dfd6c9a23de9427155e45bfd570cb8383e59a85c7a3b563ff77",
@@ -2667,7 +2669,7 @@
         ".bigbang/tests/test_framework_pipeline.py:test_cut_release_sets_git_identity_before_documentation_commands"
       ],
       "hashes": {
-        ".bigbang/bb/framework.py": "sha256:1ecbe5ed20b6c26bc1c5de1c53cb71173002f1086f1020775549c6803b308f7a",
+        ".bigbang/bb/framework.py": "sha256:7cff1ea3c3d74119834ea524e06fd7fb18739a351c6e63fc6b0db86b74e1af98",
         ".bigbang/pipeline/framework/config.toml": "sha256:a95b68be77686e6c30e1a56ed0e9efbaf0a26e02314df302c9667ca2d9372c59",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:49709060fa19fa6c0e86e624df856dac13ec41e02eb64d3e4f763d6654b0f810",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:0245df537e46101bd142701cd485913c8558ed61a262efdae7fd9a2e229dc8d4",
@@ -2864,8 +2866,8 @@
       "hashes": {
         ".bigbang/bb/migrate.py": "sha256:96272aa98f056f53560b4f7fbab0b0aaf66f5ca730c152a800d2f8a918a07790",
         ".bigbang/bb/board.py": "sha256:680b8673e0f866085531aeff88476333f4aae045a04644eba60339ca139fca46",
-        ".bigbang/bb/flow_cli.py": "sha256:d567f67ba6e4a1c6072fef8429cd244ae39235850e123a5a1f12a6d78d078982",
-        ".bigbang/bb/gh.py": "sha256:d3be1466442072fc2ecd59457b06bb7929011edf87f075a178da33ba8396a0ca"
+        ".bigbang/bb/flow_cli.py": "sha256:fe9092a7b8292ada18f1371efe21bc02999b41b9dd1dfb03f435942ba672651f",
+        ".bigbang/bb/gh.py": "sha256:7509ffc1fe4bf4abc00b5ef6edbfaec144780673b0d2b05d82b411d1b672ef06"
       },
       "descricao": "Migração guiada opcional com ordem segura, consentimento explícito de escrita no GitHub e preservação do legado."
     }

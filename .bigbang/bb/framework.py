@@ -173,7 +173,7 @@ def promote(root, rc_tag, tag, target_sha):
             raise BbError('SHA-256 da candidata não confere; nada foi publicado', EXIT_INVALID_STATE)
         notes = os.path.join(folder, 'notes.md')
         write_text(notes, f'Os mesmos bytes de `{rc_tag}`. SHA-256: `{digest}`.\n\n' +
-                   package.release_notes(root, tag[1:]))
+                   package.release_notes(root, tag[1:], target_sha=target_sha))
         assets = [archive, checksum]
         sbom = os.path.join(folder, 'sbom-cyclonedx.json')
         if os.path.isfile(sbom):
