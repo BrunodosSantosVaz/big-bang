@@ -113,6 +113,22 @@ class AlvoPersonalizado(unittest.TestCase):
         self.assertNotIn("VPS_HOST", workflows)
         self.assertNotIn("VPS_CHAVE_SSH", workflows)
 
+    def test_production_custom_scripts_run_outside_tokenized_steps(self):
+        self.configure_custom()
+        plan = generator.build_plan(self.root, install_pipeline=True)
+        workflow = plan.expected[".github/workflows/bb-publicar-producao.yml"]
+        self.assertIn("Preparar publicação personalizada", workflow)
+        self.assertIn("Executar scripts personalizados sem credenciais", workflow)
+        self.assertIn("Finalizar publicação personalizada", workflow)
+        custom_step = workflow.split("Executar scripts personalizados sem credenciais", 1)[1].split(
+            "- name:", 1
+        )[0]
+        self.assertNotIn("GH_TOKEN", custom_step)
+        self.assertNotIn("GITHUB_TOKEN", custom_step)
+        self.assertNotIn("secrets.CUSTOM_TOKEN", custom_step)
+        self.assertIn("CUSTOM_APP: ${{ vars.CUSTOM_APP }}", custom_step)
+        self.assertIn("persist-credentials: false", workflow)
+
     def test_custom_scripts_do_not_receive_publication_or_project_secrets(self):
         self.configure_custom()
         script_body = (
