@@ -204,14 +204,16 @@ class Launcher(unittest.TestCase):
 
     # --- after the Foundation ----------------------------------------------------------------------------------
 
-    def assert_founded_cleanly(self, mode):
-        with open(self.path("bigbang.toml"), "rb") as handle:
-            config = tomllib.load(handle)
-        self.assertEqual(config["projeto"]["repositorio"], "dona-teste/sistema-novo")
-        self.assertEqual(config["projeto"]["modo"], mode)
+    def assert_founded_cleanly(self, mode, workflow="grouping"):
+        from bb import config as config_module
+        config = config_module.load(self.root)
+        self.assertEqual(config_module.get(config, "project.repository"), "dona-teste/sistema-novo")
+        self.assertEqual(config_module.get(config, "project.mode"), mode)
+        self.assertEqual(config_module.get(config, "workflow.model"), workflow)
         agents = self.read("AGENTS.md")
         self.assertNotIn("ainda não foi fundado", agents)
-        self.assertIn("a partir de .bigbang/AGENTS.base.md", agents)
+        base = ".bigbang/pipeline/AGENTS.base.md" if workflow == "grouping" else ".bigbang/AGENTS.base.md"
+        self.assertIn(f"a partir de {base}", agents)
         project_part = agents.split("<!-- bigbang:fim -->", 1)[1]
         self.assertNotIn(FRAMEWORK_REPOSITORY, project_part, "instruções do próprio framework herdadas pelo sistema")
         self.assertNotIn("Modo do próprio framework", project_part)
@@ -222,13 +224,26 @@ class Launcher(unittest.TestCase):
         self.assertRegex(self.read("README.md"), r"(?m)^# Sistema Novo$")
         for name in ("CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "SECURITY.md"):
             self.assertIn("dona-teste/sistema-novo", self.read(name))
+        workflows = sorted(os.listdir(self.path(".github/workflows")))
+        if workflow == "grouping":
+            self.assertIn("bb-ci.yml", workflows)
+            self.assertIn("bb-controller.yml", workflows)
+            self.assertNotIn("bb-kanban.yml", workflows)
+            with open(self.path("bigbang.toml"), "rb") as handle:
+                raw = tomllib.load(handle)
+            self.assertIn("project", raw, "um sistema v3 nasce com o bigbang.toml em inglês")
+            self.assertEqual(raw["board"], {"model": "single", "number": 0, "labels": "v3", "owner": "dona-teste"})
+            self.assertTrue(os.path.exists(self.path(".claude/skills/bb-reject/SKILL.md")))
+        else:
+            self.assertIn("bb-kanban.yml", workflows)
+            self.assertNotIn("bb-controller.yml", workflows)
         self.assertEqual(verify.run(self.root), [])
         self.assertEqual(generator.changes(generator.build_plan(self.root), self.root), [],
                          "a segunda geração precisa ser idempotente")
 
     def test_private_default_mode(self):
         self.found()
-        self.assert_founded_cleanly("padrao")
+        self.assert_founded_cleanly("normal")
         self.assertFalse(os.path.exists(self.path(".bigbang-docs.json")),
                          "manifesto da Wiki do framework herdado por um sistema privado")
 
@@ -236,6 +251,21 @@ class Launcher(unittest.TestCase):
         self.found("--modo", "flash")
         self.assert_founded_cleanly("flash")
         self.assertIn("Modo Flash", self.read("AGENTS.md"))
+
+    def test_autonomous_mode_needs_the_v3_workflow(self):
+        self.found("--mode", "autonomous")
+        self.assert_founded_cleanly("autonomous")
+        self.assertIn("Modo autônomo", self.read("AGENTS.md"))
+        code, output = self.bb("init", "--nome", "Outro", "--dono", "d", "--repositorio", "d/o", "--sem-github",
+                               "--modo", "autonomous", "--fluxo", "epic-branch", "--simular")
+        self.assertNotEqual(code, EXIT_OK)
+        self.assertIn("autonomous", output)
+
+    def test_previous_workflow_stays_available(self):
+        self.found("--workflow", "epic-branch")
+        self.assert_founded_cleanly("normal", workflow="epic-branch")
+        with open(self.path("bigbang.toml"), "rb") as handle:
+            self.assertIn("projeto", tomllib.load(handle), "o fluxo anterior mantém o bigbang.toml em português")
 
     def test_public_gets_its_own_manifest(self):
         environment = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t", GIT_COMMITTER_NAME="t",
@@ -245,7 +275,7 @@ class Launcher(unittest.TestCase):
         head = subprocess.run(["git", "-C", self.root, "rev-parse", "HEAD"], check=True, capture_output=True,
                               text=True).stdout.strip()
         self.found(visibility="publico")
-        self.assert_founded_cleanly("padrao")
+        self.assert_founded_cleanly("normal")
         with open(self.path(".bigbang-docs.json"), encoding="utf-8") as handle:
             manifest = json.load(handle)
         self.assertEqual(manifest["repositorio"], "dona-teste/sistema-novo")
@@ -256,14 +286,14 @@ class Launcher(unittest.TestCase):
     def test_compiled_profile_after_f2(self):
         self.found()
         text = self.read("bigbang.toml")
-        text = init.set_value(text, "entrega", "perfil", "compilado")
-        text = init.set_value(text, "entrega", "alvo", "")
+        text = init.set_value(text, "delivery", "profile", "compiled")
+        text = init.set_value(text, "delivery", "target", "")
         with open(self.path("bigbang.toml"), "w", encoding="utf-8") as handle:
             handle.write(text)
-        code, output = self.bb("gerar")
+        code, output = self.bb("generate")
         self.assertEqual(code, EXIT_OK, output)
-        self.assertTrue(os.path.exists(self.path(".github/workflows/bb-candidata.yml")))
-        self.assertFalse(os.path.exists(self.path(".github/workflows/bb-voltar-versao.yml")))
+        self.assertTrue(os.path.exists(self.path(".github/workflows/bb-candidate.yml")))
+        self.assertFalse(os.path.exists(self.path(".github/workflows/bb-rollback.yml")))
         self.assertEqual(verify.run(self.root), [])
 
 

@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "11d9ba7a5cdbd068a124215fcfdf404aed0fff2d",
+    "commit": "e820a0375996268f179575133418a182b68916b2",
     "branch": "master",
-    "proposta": "wiki/252-migrate-guide"
+    "proposta": "wiki/248-foundation-fixes"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -242,10 +242,13 @@
     },
     "RF-BB-054": {
       "pagina": "Requisitos"
+    },
+    "RF-BB-055": {
+      "pagina": "Requisitos"
     }
   },
   "codigo": {
-    "commit": "94155836a981e9912a59f2c826afcff7baa4f073",
+    "commit": "5d6593b65706f21413a3f604648c701ae8ac1e9e",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -383,7 +386,7 @@
         ".bigbang/tests/test_names_config.py:test_pipeline_subcommands_by_either_name"
       ],
       "hashes": {
-        ".bigbang/bb/cli.py": "sha256:41ac36fba57507edee884e39414c37bf712c96fd851f5b5604b74b8a580fff37",
+        ".bigbang/bb/cli.py": "sha256:a7e92612ae10308942116e0d0e71df156021f359a2f9543fa0e5e0c159b65105",
         ".bigbang/bb/__init__.py": "sha256:9eafc1c524def17452aeb77d49ee0aca1a8c40c7e69d52c3c6dba384e78732eb",
         ".bigbang/bin/bb.py": "sha256:af864bf4452b5aad7c6e90ba6ed7f81cf9cb2fbb8c60f2a5e7e5e4e17372abb4",
         ".bigbang/bin/bb": "sha256:04bf9a43393503416a9307e7272d697afcd9327a0a5b388a451873a70c45e112"
@@ -750,7 +753,7 @@
         ".bigbang/tests/test_grouping_v3.py:test_v3_tree_is_generated_and_verified"
       ],
       "hashes": {
-        ".bigbang/bb/generator.py": "sha256:e7c83961e303b6e1bfe1d3541bea1e4a1af76ed4da602e02d3f40c81d2fae57a"
+        ".bigbang/bb/generator.py": "sha256:0931cf4e1f2c8dd7e28b9188979e518a04c8dd8896b535a3cd7ad348cae1320a"
       },
       "descricao": "Gerar instruções e Actions a partir da configuração, preservando a camada do projeto e removendo saídas obsoletas."
     },
@@ -817,11 +820,13 @@
         ".bigbang/tests/test_launcher.py:test_every_root_entry_has_a_foundation_decision",
         ".bigbang/tests/test_launcher.py:test_private_default_mode",
         ".bigbang/tests/test_launcher.py:test_private_flash_mode",
+        ".bigbang/tests/test_launcher.py:test_autonomous_mode_needs_the_v3_workflow",
+        ".bigbang/tests/test_launcher.py:test_previous_workflow_stays_available",
         ".bigbang/tests/test_launcher.py:test_public_gets_its_own_manifest",
         ".bigbang/tests/test_launcher.py:test_compiled_profile_after_f2"
       ],
       "hashes": {
-        ".bigbang/bb/init.py": "sha256:fcbaf1f4e3f462df84bcc0fe3fbc88d036760b7fd0b7ffd23d93558bff57a35e"
+        ".bigbang/bb/init.py": "sha256:f46dc3df8b29231963dcda714d4fcb106bfb1166e78ec1cfb99f4161c82d83dc"
       },
       "descricao": "Preparar F0 com identidade, modo padrão ou Flash, configuração e arquivos comunitários sem destruir conteúdo do projeto."
     },
@@ -2161,7 +2166,7 @@
         ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect"
       ],
       "hashes": {
-        ".bigbang/bb/names.py": "sha256:4f85d33dad30685fe6f8926c3deb08d30683e99d4098b6a6ddf9c3cbe68df999"
+        ".bigbang/bb/names.py": "sha256:851859520af667d7f2599d6625f3bfab47a5305777aaed86d439e91eff0d8db1"
       },
       "descricao": "Tabela única de nomes v2 ↔ v3 (configuração, valores, CLI, labels, branches, workflows, checks, ambiente, segredos)."
     },
@@ -2447,7 +2452,7 @@
         ".bigbang/tests/test_grouping_v3.py:test_clean_task_pr"
       ],
       "hashes": {
-        ".bigbang/pipeline/AGENTS.base.md": "sha256:194602c8ea5bcbb77f174a5aa62decedbfd922bb1e439af5158b64a757a7c65e",
+        ".bigbang/pipeline/AGENTS.base.md": "sha256:37182439f6c9f8b3801fab7916a6616e6fb42040e6524262505a92f9c07c24d0",
         ".bigbang/pipeline/core/files/.github/dependabot.yml.tmpl": "sha256:34ab41c900e502b5e964c35d01fb97ca64f29b11c4c3c29e2bff3a6d718f2470",
         ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-bug.yml": "sha256:a106896eef75aee654f73c09b2ec1d793d387ba0331c44c9982a90b5ac314840",
         ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-docs.yml": "sha256:7330b1a0f1bd69d66711e66c1179a88327f6e38fea9940e5125e99f03fc96fd4",
@@ -2521,6 +2526,73 @@
         ".bigbang/bb/autonomy.py": "sha256:a1f063483bc5a4db93d499c0d475befabbda04287e4c67e4f4dbf2f6d650f654"
       },
       "descricao": "Contrato autonomy.toml nos portões e na publicação, checagem do bootstrap e identidade da aprovação nos recibos."
+    },
+    {
+      "id": "BB-F-055",
+      "requisitos": [
+        "RF-BB-055"
+      ],
+      "pagina": "Funcionalidade-skills-processo-v3",
+      "fontes": [
+        ".bigbang/pipeline/process/README.md",
+        ".bigbang/pipeline/process/board.md",
+        ".bigbang/pipeline/process/bugs.md",
+        ".bigbang/pipeline/process/delivery.md",
+        ".bigbang/pipeline/process/execution.md",
+        ".bigbang/pipeline/process/modes.md",
+        ".bigbang/pipeline/process/planning.md",
+        ".bigbang/pipeline/process/sprint.md",
+        ".bigbang/pipeline/skills/bb-atualizar/SKILL.md",
+        ".bigbang/pipeline/skills/bb-codar-tarefa/SKILL.md",
+        ".bigbang/pipeline/skills/bb-corrigir-bug/SKILL.md",
+        ".bigbang/pipeline/skills/bb-documentar-epico/SKILL.md",
+        ".bigbang/pipeline/skills/bb-entregar-epico/SKILL.md",
+        ".bigbang/pipeline/skills/bb-escrever-testes-aceite/SKILL.md",
+        ".bigbang/pipeline/skills/bb-montar-github/SKILL.md",
+        ".bigbang/pipeline/skills/bb-refinar-backlog/SKILL.md",
+        ".bigbang/pipeline/skills/bb-reject/SKILL.md",
+        ".bigbang/pipeline/skills/bb-rodar-sprint/SKILL.md",
+        ".bigbang/pipeline/skills/bb-status/SKILL.md",
+        ".bigbang/pipeline/skills/bb-triar-issue/SKILL.md",
+        ".bigbang/pipeline/skills/bb-iniciar-projeto/SKILL.md",
+        ".bigbang/pipeline/skills/bb-prototipar/SKILL.md"
+      ],
+      "testes": [
+        ".bigbang/tests/test_skills_v3.py:test_every_override_has_a_legacy_skill_or_is_v3_only",
+        ".bigbang/tests/test_skills_v3.py:test_v3_project_gets_the_v3_skills",
+        ".bigbang/tests/test_skills_v3.py:test_legacy_project_keeps_the_current_skills",
+        ".bigbang/tests/test_skills_v3.py:test_every_process_reference_of_the_v3_layer_exists",
+        ".bigbang/tests/test_skills_v3.py:test_v3_agents_md_points_to_the_v3_process",
+        ".bigbang/tests/test_skills_v3.py:test_a_bug_fix_pull_request_goes_to_develop_or_a_release_never_to_main",
+        ".bigbang/tests/test_skills_v3.py:test_installed_foundation_instructions_agree_with_v3_branch_policy",
+        ".bigbang/tests/test_skills_v3.py:test_installed_prototype_instructions_follow_v3_states_and_decisions",
+        ".bigbang/tests/test_skills_v3.py:test_every_bb_command_in_the_v3_text_exists_in_the_cli"
+      ],
+      "hashes": {
+        ".bigbang/pipeline/process/README.md": "sha256:563c93bb12e74264d620ffad936c2039cf3ed231f4e0a66090f27063e9bb6d03",
+        ".bigbang/pipeline/process/board.md": "sha256:db8b4f489cbd4f8b08ced195f6da10719095cc85a6d394f2511ebd2b920ab349",
+        ".bigbang/pipeline/process/bugs.md": "sha256:2f13beb591518a5039b46ed34720c7fc27302b30ccc19277990099f9395dbf78",
+        ".bigbang/pipeline/process/delivery.md": "sha256:f3b680f176b722843a8d9eafe8165e8c89cd90e5a99e222618a10bcc3fbd5715",
+        ".bigbang/pipeline/process/execution.md": "sha256:a53d9677df320fdbacc75e4c054a3c87e4c915effa3d8338cf57a9fa2c7f51b9",
+        ".bigbang/pipeline/process/modes.md": "sha256:d1630b5c4aad2e0c36343f67c689669526a1f3299a7acf24f80fafea35cc3eef",
+        ".bigbang/pipeline/process/planning.md": "sha256:14e761b28252ecdf754028721f193a6391d05e73e9079b21cd92219916ab6874",
+        ".bigbang/pipeline/process/sprint.md": "sha256:97901470697eb6d8311c4d127f145241c0ac70b7e6d142e68b0a59f29f6ac44a",
+        ".bigbang/pipeline/skills/bb-atualizar/SKILL.md": "sha256:7c2f6c79a75a01f6726f496f0e5efad9ef2a84febafc76254352181f4dc36fe9",
+        ".bigbang/pipeline/skills/bb-codar-tarefa/SKILL.md": "sha256:166ae8f3b59e05f392fe1e4e5e83ce1fd55bc39745a0ddeb8107b72d9ea887ec",
+        ".bigbang/pipeline/skills/bb-corrigir-bug/SKILL.md": "sha256:d348962ed082094905f600e5ce08e450ce2ad0e4c0a9cdb69b5ef7126d79e46c",
+        ".bigbang/pipeline/skills/bb-documentar-epico/SKILL.md": "sha256:d0b48f7cf545f7076ae28ec43d55d6eecaa65580a358605da100f4b0e7359f57",
+        ".bigbang/pipeline/skills/bb-entregar-epico/SKILL.md": "sha256:e6607b325d04616aee9b3f591334cd78d9535a203a798c401ae0d4991c92b9bb",
+        ".bigbang/pipeline/skills/bb-escrever-testes-aceite/SKILL.md": "sha256:6a5cb576cfa6a2c8c4018fafe33c5ca349d34ce5498bf09183ff530e95fdcd9e",
+        ".bigbang/pipeline/skills/bb-montar-github/SKILL.md": "sha256:ca0e2569034c01baf0eab12f57acf4f0cf54f95bfe35f486d5abd1a40a82f715",
+        ".bigbang/pipeline/skills/bb-refinar-backlog/SKILL.md": "sha256:37075fb483dbcfe96858d4114aa3f200ce7542e3cd72496a6dd06486c17137f0",
+        ".bigbang/pipeline/skills/bb-reject/SKILL.md": "sha256:495c38706e39433d2ce572756dc29a232b6085738eac36c33c9f05a2eac140a9",
+        ".bigbang/pipeline/skills/bb-rodar-sprint/SKILL.md": "sha256:347f87eb83c6aee9d8134793cd2f221413032105549a57c70cad69d343de56ed",
+        ".bigbang/pipeline/skills/bb-status/SKILL.md": "sha256:05aeb51e495fc4a6d6a01bc43f620413efdb202fb2d61dfb01ce171c6c5c2162",
+        ".bigbang/pipeline/skills/bb-triar-issue/SKILL.md": "sha256:964ffa303e729662db316a96b34d281c00cedbf80e32b4017d3cc40165aff6ea",
+        ".bigbang/pipeline/skills/bb-iniciar-projeto/SKILL.md": "sha256:9bf40870be7c5def100be722a4fdf90d9741fa225aa239abdcf70c43570f49a1",
+        ".bigbang/pipeline/skills/bb-prototipar/SKILL.md": "sha256:c4e1c0ce10fc5948f46ae9a00b127a560b8f2aab53ea86801a8f524b3154d850"
+      },
+      "descricao": "Versões v3 das skills adaptadas, a skill bb-reject e os documentos de processo da v3, instalados só em projetos com workflow.model = grouping."
     }
   ],
   "arquivos_funcionais": [
