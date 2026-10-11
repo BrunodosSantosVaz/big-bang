@@ -185,17 +185,20 @@ PARSERS = {"package.json": _package_json, "pyproject.toml": _pyproject, "go.mod"
 GRADLE_FILES = ("build.gradle", "build.gradle.kts")
 
 
-def dependency_files(root):
+def dependency_files(root, *, include_framework=False):
     for current, folders, names in os.walk(root):
-        folders[:] = sorted(f for f in folders if f not in SKIPPED_FOLDERS)
+        folders[:] = sorted(f for f in folders if f not in SKIPPED_FOLDERS or
+                            (include_framework and f == '.bigbang'))
+        if include_framework and to_posix(os.path.relpath(current, root)) == '.bigbang':
+            folders[:] = [f for f in folders if f != 'tests']  # development fixtures, never runtime packages
         for name in sorted(names):
             yield os.path.join(current, name), name
 
 
-def direct_runtime_dependencies(root):
+def direct_runtime_dependencies(root, *, include_framework=False):
     """([(ecosystem, name, file)], [problems of unreadable or unsupported files])."""
     deps, problems = [], []
-    for path, name in dependency_files(root):
+    for path, name in dependency_files(root, include_framework=include_framework):
         relative = to_posix(os.path.relpath(path, root))
         parser = PARSERS.get(name)
         if parser is None and name.endswith(".csproj"):
@@ -226,9 +229,9 @@ def direct_runtime_dependencies(root):
     return deps, problems
 
 
-def problems(root):
+def problems(root, *, include_framework=False):
     approved = allowed(root)
-    deps, result = direct_runtime_dependencies(root)
+    deps, result = direct_runtime_dependencies(root, include_framework=include_framework)
     if approved is None:
         if deps:
             result.append("há dependências de execução, mas o STACK.md (com a tabela de dependências) ainda não "
