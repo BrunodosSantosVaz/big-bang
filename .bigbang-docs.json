@@ -254,7 +254,7 @@
     }
   },
   "codigo": {
-    "commit": "bff42ded9b4d83b4327f4064cc352f49c7659dfa",
+    "commit": "f56cd9f5d34d4510358e130275976310c799f865",
     "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
