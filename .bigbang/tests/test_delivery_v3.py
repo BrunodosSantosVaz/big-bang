@@ -49,6 +49,14 @@ class Base(unittest.TestCase):
         return board.current_state(self.client, number, {"dona"})
 
 
+class PullResponseNormalization(unittest.TestCase):
+    def test_pull_list_uses_merged_at_when_merged_is_not_returned(self):
+        raw = {"number": 31, "title": "release", "state": "closed", "merged_at": "2026-10-11T12:00:00Z",
+               "head": {"ref": "release/1.3.0", "sha": "r" * 40}, "base": {"ref": "main"}}
+
+        self.assertTrue(gh._normalize_pull(raw)["merged"])
+
+
 class CandidateReady(Base):
     def test_epics_go_to_qa_or_releasing_and_the_release_pr_opens_once(self):
         result = delivery.candidate_ready(self.client, self.project, cfg(), "release/1.3.0", "v1.3.0-rc.1", now=NOW)
@@ -87,9 +95,9 @@ class Publish(Base):
     def promote(self, rc_tag, tag, target_sha):
         self.promoted.append((rc_tag, tag, target_sha))
 
-    def publish(self):
+    def publish(self, dry_run=False):
         return delivery.publish(self.client, self.project, cfg(), "1.3.0", self.root, today=TODAY, now=NOW,
-                                pending={}, promote=self.promote)
+                                pending={}, promote=self.promote, dry_run=dry_run)
 
     def test_the_same_candidate_is_promoted_after_the_merge(self):
         self.fake.refs["refs/tags/v1.3.0-rc.2"] = "r" * 40
@@ -152,9 +160,61 @@ class Publish(Base):
                             for p in self.fake.pulls.values()))
 
     def test_publishing_twice_is_harmless(self):
+        api = self.fake
+
+        def list_shape(method, path, payload):
+            status, body = api(method, path, payload)
+            if method == "GET" and path.startswith("repos/dono/repo/pulls?") and isinstance(body, list):
+                body = [{**{key: value for key, value in pull.items() if key != "merged"},
+                         "merged_at": "2026-10-11T12:00:00Z" if pull.get("merged") else None}
+                        for pull in body]
+            return status, body
+
+        self.client = gh.GitHub("dono/repo", api=list_shape)
         self.publish()
         self.publish()
         self.assertEqual(self.fake.merges.count(("develop", "main")), 1)
+
+    def test_publish_check_accepts_already_merged_pull(self):
+        api = self.fake
+
+        def list_shape(method, path, payload):
+            status, body = api(method, path, payload)
+            if method == "GET" and path.startswith("repos/dono/repo/pulls?") and isinstance(body, list):
+                body = [{**{key: value for key, value in pull.items() if key != "merged"},
+                         "merged_at": "2026-10-11T12:00:00Z" if pull.get("merged") else None}
+                        for pull in body]
+            return status, body
+
+        self.client = gh.GitHub("dono/repo", api=list_shape)
+        self.publish()
+        result = self.publish(dry_run=True)
+        self.assertTrue(result.get("dry_run"))
+        self.assertEqual(result.get("pr"), self.pr)
+
+
+class ReleaseNotesSource(unittest.TestCase):
+    def test_framework_promotion_reads_notes_from_release_content_dir(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from bb import flow_cli
+
+        root = "/checkout/main"
+        content = "/runner/release-candidate"
+        config = cfg()
+        config["_framework"] = True
+        promoted = []
+
+        def publish(_client, _project, _config, _version, _root, *, promote, **_kwargs):
+            promote("v1.3.0-rc.1", "v1.3.0", "m" * 40)
+            return {"pr": 31, "done": [], "dark": [], "pending": []}
+
+        with patch.object(flow_cli, "_context", return_value=(config, object(), object())), \
+                patch("bb.delivery.publish", side_effect=publish), \
+                patch("bb.framework.promote", side_effect=lambda *args: promoted.append(args[0])):
+            flow_cli._release_publish(SimpleNamespace(raiz=root, content_dir=content, version="1.3.0", dry_run=False))
+
+        self.assertEqual(promoted, [content])
 
 
 class GateHardening(Publish):

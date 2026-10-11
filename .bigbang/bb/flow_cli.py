@@ -442,7 +442,7 @@ def _release_publish(args):
     def promote(rc_tag, tag, target_sha):
         if config.get("_framework"):
             from . import framework
-            framework.promote(args.raiz, rc_tag, tag, target_sha)
+            framework.promote(content, rc_tag, tag, target_sha)
             return
         completed = subprocess.run(["bash", script], cwd=args.raiz, check=False,
                                    env={**os.environ, "RC_TAG": rc_tag, "TAG": tag, "TARGET_SHA": target_sha})
