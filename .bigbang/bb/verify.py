@@ -16,7 +16,8 @@ CHANGE_MESSAGES = {
 
 def run(root):
     """Return the list of problems; empty means the project is consistent."""
-    result = list(checksums.problems(root))
+    from . import framework
+    result = list(checksums.problems(root)) + framework.problems(root)
     result += deploy_catalog.problems(root)
     try:
         config = config_module.load(root, required=False)
