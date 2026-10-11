@@ -137,15 +137,22 @@ class AlvoPersonalizado(unittest.TestCase):
 
     def test_mutable_image_reference_is_rejected_before_script_execution(self):
         self.configure_custom()
-        result = self.run_deploy_script(
-            "alvos/personalizado/scripts/alvo.sh",
-            "migrar",
-            "staging",
+        sentinel = self.root / "unexpected-command"
+        for manifest in (
             "app=ghcr.io/owner/app:latest",
-            env=self.runner_environment(),
-        )
-        self.assertNotEqual(result.returncode, 0)
+            f"$(touch {sentinel})=ghcr.io/owner/app@sha256:{'b' * 64}",
+        ):
+            with self.subTest(manifest=manifest):
+                result = self.run_deploy_script(
+                    "alvos/personalizado/scripts/alvo.sh",
+                    "migrar",
+                    "staging",
+                    manifest,
+                    env=self.runner_environment(),
+                )
+                self.assertNotEqual(result.returncode, 0)
         self.assertFalse((self.root / "calls").exists())
+        self.assertFalse(sentinel.exists())
 
     def test_production_health_failure_stops_release_creation(self):
         self.configure_custom()
