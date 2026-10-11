@@ -29,6 +29,8 @@ class FrameworkPipeline(unittest.TestCase):
         shutil.copy2(os.path.join(RAIZ, '.bigbang/pipeline/framework/config.toml'), os.path.join(self.root, '.bigbang-framework.toml'))
         subprocess.run(['git', 'init', '-q', self.root], check=True)
         subprocess.run(['git', '-C', self.root, 'remote', 'add', 'origin', f'https://github.com/{ORIGIN}.git'], check=True)
+        shutil.copy2(os.path.join(RAIZ, '.bigbang-docs.json'), self.root)
+        subprocess.run(['git', '-C', self.root, 'add', '.'], check=True)
 
     def read(self, path):
         with open(os.path.join(self.root, path), encoding='utf-8') as handle:
@@ -130,6 +132,41 @@ class FrameworkPipeline(unittest.TestCase):
         with open(os.path.join(self.root, '.bigbang/bb/config.py'), 'a', encoding='utf-8') as handle:
             handle.write('\n# unreviewed runtime change\n')
         before = self.read('.bigbang/VERSION')
+        with self.assertRaises(BbError):
+            framework.prepare(self.root, '3.0.0')
+        self.assertEqual(self.read('.bigbang/VERSION'), before)
+
+    def test_prepare_requires_the_documentation_manifest_before_any_write(self):
+        from bb import framework
+        os.remove(os.path.join(self.root, '.bigbang-docs.json'))
+        files = ('.bigbang/VERSION', '.bigbang/CHECKSUMS', '.bigbang-framework.toml',
+                 '.bigbang/modelos/bigbang.toml.exemplo')
+        before = {path: self.read(path) for path in files}
+        with self.assertRaises(BbError):
+            framework.prepare(self.root, '3.0.0')
+        self.assertEqual({path: self.read(path) for path in files}, before)
+
+    def test_prepare_refuses_new_sources_without_documentary_coverage(self):
+        from bb import framework
+        files = ('.bigbang/VERSION', '.bigbang/CHECKSUMS', '.bigbang-framework.toml')
+        before = {path: self.read(path) for path in files}
+        probe = '.bigbang/bb/undocumented_review_probe.py'
+        with open(os.path.join(self.root, probe), 'w', encoding='utf-8') as handle:
+            handle.write('# new runtime source without a documented feature\n')
+        # CHECKSUMS inventories untracked runtime files too: both forms must fail closed.
+        for tracked in (False, True):
+            with self.subTest(tracked=tracked):
+                if tracked:
+                    subprocess.run(['git', '-C', self.root, 'add', probe], check=True)
+                with self.assertRaises(BbError):
+                    framework.prepare(self.root, '3.0.0')
+                self.assertEqual({path: self.read(path) for path in files}, before)
+
+    def test_prepare_rejects_an_invalid_documentation_manifest_before_any_write(self):
+        from bb import framework
+        before = self.read('.bigbang/VERSION')
+        with open(os.path.join(self.root, '.bigbang-docs.json'), 'w', encoding='utf-8') as handle:
+            handle.write('{invalid')
         with self.assertRaises(BbError):
             framework.prepare(self.root, '3.0.0')
         self.assertEqual(self.read('.bigbang/VERSION'), before)
