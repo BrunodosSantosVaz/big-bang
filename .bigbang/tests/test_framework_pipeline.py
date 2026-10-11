@@ -207,12 +207,14 @@ class FrameworkPipeline(unittest.TestCase):
         from bb import framework
         from bb import checksums
         checksums.write(self.root)
+        version = self.read('.bigbang/VERSION').strip()
+        tag = f'v{version}'
         assets = os.path.join(self.tmp.name, 'assets')
         tar, _ = framework.candidate(self.root, assets)
         calls = []
         def gh(*args):
             calls.append(args)
-            if args[:3] == ('release', 'view', 'v2.0.1'):
+            if args[:3] == ('release', 'view', tag):
                 raise BbError('not found', 6)
             if args[:2] == ('release', 'download'):
                 destination = args[args.index('--dir') + 1]
@@ -220,18 +222,18 @@ class FrameworkPipeline(unittest.TestCase):
                     shutil.copy2(os.path.join(assets, name), destination)
             return ''
         with patch('bb.framework.github.run', side_effect=gh):
-            framework.promote(self.root, 'v2.0.1-rc.1', 'v2.0.1', 'a' * 40)
+            framework.promote(self.root, f'{tag}-rc.1', tag, 'a' * 40)
         creation = next(args for args in calls if args[:2] == ('release', 'create'))
         names = [os.path.basename(arg) for arg in creation]
-        self.assertIn('bigbang-v2.0.1.tar.gz', names)
-        self.assertIn('bigbang-v2.0.1.tar.gz.sha256', names)
+        self.assertIn(f'bigbang-{tag}.tar.gz', names)
+        self.assertIn(f'bigbang-{tag}.tar.gz.sha256', names)
         self.assertFalse(any('-rc.' in name for name in names))
         # A tampered candidate must fail before creation.
         with open(tar, 'ab') as handle:
             handle.write(b'corrupt')
         calls.clear()
         with patch('bb.framework.github.run', side_effect=gh), self.assertRaises(BbError):
-            framework.promote(self.root, 'v2.0.1-rc.1', 'v2.0.1', 'a' * 40)
+            framework.promote(self.root, f'{tag}-rc.1', tag, 'a' * 40)
         self.assertFalse(any(args[:2] == ('release', 'create') for args in calls))
 
     def test_framework_community_keeps_auditing_the_existing_boards(self):
