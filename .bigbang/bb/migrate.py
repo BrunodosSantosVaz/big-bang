@@ -301,14 +301,27 @@ def map_card(role, column, card_kind, facts):
     return states.INITIAL.get(card_kind, "Brainstorm") if hasattr(states, "INITIAL") else "Brainstorm"
 
 
-def _facts(client, issue, candidate_tags, config, now):
+def _pull_evidence(client):
+    """Fetch pull requests once and index the board facts by the issue in each PR branch."""
+    open_issues, merged_issues = set(), set()
+    for pull in client.pulls(state="all"):
+        match = re.match(r"^[a-z]+/(\d+)-", pull["head"])
+        if not match:
+            continue
+        issue_number = int(match[1])
+        if pull["state"] == "open":
+            open_issues.add(issue_number)
+        if pull["merged"]:
+            merged_issues.add(issue_number)
+    return {"open": open_issues, "merged": merged_issues}
+
+
+def _facts(client, issue, candidate_tags, config, now, pull_evidence):
     number = issue["number"]
     children = client.sub_issues(number)
-    pulls = client.pulls(state="open")
     milestone = issue.get("milestone")
     matched = re.fullmatch(r"v?(\d+\.\d+\.\d+)", milestone) if isinstance(milestone, str) else None
     version = matched[1] if matched else None
-    all_pulls = client.pulls(state="all")
     recorded = receipts.parse(client.comments(number), {config_module.get(config, "project.owner")})
     published = bool(version and f"v{version}" in candidate_tags) or any(
         r["kind"] == "publication" and r["result"] == "success"
@@ -317,12 +330,12 @@ def _facts(client, issue, candidate_tags, config, now):
         for r in recorded)
     return {"claimed": _claimed(client, issue, config, now), "published": published,
             "grouping": config_module.get(config, "workflow.model") == "grouping",
-            "merged_pr": any(pull["merged"] and re.match(rf"^[a-z]+/{number}-", pull["head"]) for pull in all_pulls),
+            "merged_pr": number in pull_evidence["merged"],
             "labels": set(issue["labels"]), "closed": issue["state"] == "closed",
             "open_children": any(child["state"] == "open" for child in children),
             "epic_branch": bool(client.branches(f"epico/{number}-")),
             "candidate": bool(version and any(tag.startswith(f"v{version}-rc.") for tag in candidate_tags)),
-            "open_pr": any(re.match(rf"^[a-z]+/{number}-", pull["head"]) for pull in pulls)}
+            "open_pr": number in pull_evidence["open"]}
 
 
 def board_part(client, root, *, open_project, create_project, snapshot=None, dry_run=False, rollback=False,
@@ -347,7 +360,7 @@ def board_part(client, root, *, open_project, create_project, snapshot=None, dry
     if config_module.get(config, "board.model") == "single":
         return {"part": "board", "mapped": {}, "changes": [], "next": "quadro já migrado"}
     boards = {role: config_module.get(config, f"board.{role}") for role in (PLANNING, EXECUTION, BUGS)}
-    items, mapped = {}, {}
+    items, mapped, pull_evidence = {}, {}, None
     tags = client.tags()
     for role, number in boards.items():
         if not number:
@@ -361,7 +374,10 @@ def board_part(client, root, *, open_project, create_project, snapshot=None, dry
             card_kind = states.kind(set(issue["labels"]))
             if card_kind is None:
                 continue
-            mapped[card] = map_card(role, values.get("Status"), card_kind, _facts(client, issue, tags, config, now))
+            if pull_evidence is None:
+                pull_evidence = _pull_evidence(client)
+            mapped[card] = map_card(role, values.get("Status"), card_kind,
+                                    _facts(client, issue, tags, config, now, pull_evidence))
     report = {"part": "board", "mapped": mapped, "boards": boards,
               "next": "abra o PR com o bigbang.toml; arquive os painéis antigos depois de um ciclo sem divergência"}
     if dry_run:
