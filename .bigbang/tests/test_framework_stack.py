@@ -124,3 +124,11 @@ class FrameworkStack(unittest.TestCase):
         self.write('.bigbang/requirements.txt', 'framework-only-package==1.0.0\n')
         self.write('bigbang.toml', '[projeto]\nvisibilidade = "privado"\n')
         self.assertEqual(self.problems({k: v for k, v in self.trusted.items() if k != '_framework'}), [])
+
+    def test_packaged_framework_directories_are_not_skipped_as_system_build_outputs(self):
+        for folder in ('bin', 'build', 'dist', 'vendor', 'node_modules', 'target', 'obj'):
+            with self.subTest(folder=folder):
+                name = '.bigbang/' + folder + '/requirements.txt'
+                self.write(name, 'unapproved-package==1.0.0\n')
+                self.assertTrue(any('dependências de execução' in p for p in self.problems()))
+                Path(self.root, name).unlink()
