@@ -115,8 +115,11 @@ def with_computed(config, root):
     return context
 
 
-def build_plan(root, install_pipeline=False):
-    config = config_module.load(root, required=False)
+def build_plan(root, install_pipeline=False, framework=False):
+    from . import framework as own
+    config = own.load(root, required=True) if framework else config_module.load(root, required=False)
+    if config is not None and config.get("_framework"):
+        return framework_plan(root, config)
     if install_pipeline and config is None:
         raise BbError("a esteira só pode ser gerada depois do bb init (falta o bigbang.toml)", EXIT_INVALID_STATE)
     installed = config is not None and (install_pipeline or pipeline_installed(root))
@@ -137,6 +140,57 @@ def build_plan(root, install_pipeline=False):
     if config is not None:
         _add_stack_md(plan, root, config, version)
     plan.stale = sorted(set(_generated_candidates(root, installed)) - set(plan.expected))
+    return plan
+
+
+def framework_plan(root, config):
+    """Same v3 layers, namespaced workflows only; the three transitional workflows remain owned by Git."""
+    from . import framework
+    plan = Plan(False)
+    context = with_computed(config, root)
+    version = framework_version(root)
+    _add_tree(plan, root, os.path.join(framework_dir(root), "esteira/sempre/arquivos"), "", context, version)
+    _add_skills(plan, root, context, version)
+    _add_agents_md(plan, root, initial_context(root), version, founded=False)
+    for layer in ("pipeline/core", "pipeline/profiles/compiled", "pipeline/framework"):
+        folder = os.path.join(framework_dir(root), layer, "files/.github/workflows")
+        temporary = Plan(False)
+        _add_tree(temporary, root, folder, ".github/workflows/", context, version)
+        for path, content in temporary.expected.items():
+            name = os.path.basename(path)
+            if name == "bb-ci.yml":
+                continue  # Framework CI preserves Docker, shellcheck and gitleaks, aggregated by gate.
+            destination = ".github/workflows/" + name.replace("bb-", FRAMEWORK_WORKFLOW_PREFIX, 1)
+            content = content.replace("group: bb-", "group: bb-framework-")
+            content = content.replace("workflows: [CI]", "workflows: [Framework gate]")
+            if not re.search(r"^concurrency:", content, re.M):
+                group = os.path.basename(destination).removesuffix(".yml")
+                content = content.replace("\njobs:\n", f"\nconcurrency:\n  group: {group}\n  cancel-in-progress: false\n\njobs:\n")
+            # Put the repository check on every job's own condition (including always() jobs).
+            jobs = content.index("\njobs:\n") + len("\njobs:\n")
+            header, body = content[:jobs], content[jobs:]
+            marks = list(re.finditer(r"^  [\w-]+:[ \t]*(?:#.*)?$", body, re.M))
+            sections = []
+            for mark, following in zip(marks, marks[1:] + [None]):
+                section = body[mark.start():following.start() if following else len(body)]
+                found = re.search(r"^    if: (.+)$", section, re.M)
+                condition = "github.repository == '" + framework.ORIGIN + "'"
+                if found:
+                    value = found[1].strip()
+                    if value.startswith("${{") and value.endswith("}}"):
+                        value = value[3:-2].strip()
+                    condition += " && (" + value + ")"
+                    section = section[:found.start()] + "    if: " + condition + section[found.end():]
+                else:
+                    section = section.replace("\n", "\n    if: " + condition + "\n", 1)
+                sections.append(section)
+            content = header + "".join(sections)
+            plan.add(destination, content, temporary.sources[path])
+    legacy = {".github/workflows/" + name for name in
+              ("bb-framework-ci.yml", "bb-framework-faxina.yml", "bb-framework-release.yml")}
+    candidates = {path for path in _generated_candidates(root, installed=True)
+                  if path not in legacy}
+    plan.stale = sorted(candidates - set(plan.expected))
     return plan
 
 

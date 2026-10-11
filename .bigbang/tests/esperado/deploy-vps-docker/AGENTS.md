@@ -119,5 +119,5 @@ Esta seção pertence ao projeto e é preenchida na Fundação: comandos da stac
 Flash aprovado pelo dono em 06/10/2026 (ADR-0017). Continue o plano autorizado sem pedir outro aceite de execução
 por tarefa. Escreva testes antes do código, execute-os após concluir as alterações e use a CI do mesmo SHA na
 revisão independente. Mudanças do framework/esteira são estruturais e exigem CI completa. Não rode Fundação
-no próprio framework. Prioridade: Tsuru existente e conclusão do Snake; AWS e outros formatos ficam para depois.
+no próprio framework: use `bb generate --framework` e os botões `bb-framework-*`. Prioridade: Tsuru existente e conclusão do Snake; AWS e outros formatos ficam para depois.
 <!-- bigbang:framework:fim -->

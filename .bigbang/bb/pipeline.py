@@ -511,7 +511,7 @@ def only_own_marks_released(diff, issue, marker):
 
 RUNNERS = {"windows-x64": "windows-2025", "windows-arm64": "windows-11-arm", "linux-x64": "ubuntu-24.04",
            "linux-arm64": "ubuntu-24.04-arm", "macos-x64": "macos-15-intel", "macos-arm64": "macos-15",
-           "android": "ubuntu-24.04"}  # android: APK/AAB built on Linux (the runner has the Android SDK and a JDK)
+           "android": "ubuntu-24.04", "universal": "ubuntu-24.04"}  # android: APK/AAB built on Linux (the runner has the Android SDK and a JDK)
 
 
 def build_matrix(systems):

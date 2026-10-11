@@ -19,3 +19,6 @@ A documentação oficial deste repositório público está na **[Wiki](https://g
 Painéis públicos, com leitura para visitantes: [Planejamento](https://github.com/users/BrunodosSantosVaz/projects/28), [Execução](https://github.com/users/BrunodosSantosVaz/projects/29) e [Bugs](https://github.com/users/BrunodosSantosVaz/projects/30). Escrita exige permissão explícita.
 
 [Design e Social preview](https://github.com/BrunodosSantosVaz/big-bang/wiki/Design) registram identidade, arquivos e situação do upload da imagem. [Segurança](SECURITY.md), [contribuição](CONTRIBUTING.md) e [código de conduta](CODE_OF_CONDUCT.md) apresentam os canais da comunidade. Licença [MIT](LICENSE).
+
+A esteira própria da v3 é gerada com `bb generate --framework` no repositório de origem. Os botões
+`bb-framework-*` usam o fluxo agrupador; os workflows atuais permanecem obrigatórios durante a transição.

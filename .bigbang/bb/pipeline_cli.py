@@ -344,7 +344,8 @@ def _docs(args):
             problems += documentation.validate(root, published=True)
         if args.comunidade:
             config = config_module.load(root, required=False)
-            config = config or documentation.load(root).get("configuracao_comunidade")
+            if config is None or config.get("_framework"):
+                config = documentation.load(root).get("configuracao_comunidade")
             if config:
                 problems += community_public.verify(root, config)
             else:
@@ -372,7 +373,13 @@ def _community(args):
 
 
 def _write_version(args):
-    relative = config_module.load(args.raiz)["entrega"].get("arquivo_versao", "")
+    config = config_module.load(args.raiz)
+    if config.get("_framework"):
+        from . import framework
+        framework.prepare(args.raiz, args.versao)
+        print(f"Framework e snapshots: versão {args.versao}")
+        return EXIT_OK
+    relative = config["entrega"].get("arquivo_versao", "")
     if not relative:
         raise BbError("entrega.arquivo_versao não definido no bigbang.toml (definido em F2)", EXIT_USAGE)
     path = os.path.join(args.raiz, relative)

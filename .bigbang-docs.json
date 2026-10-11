@@ -242,6 +242,9 @@
     },
     "RF-BB-054": {
       "pagina": "Requisitos"
+    },
+    "RF-BB-056": {
+      "pagina": "Requisitos"
     }
   },
   "codigo": {
@@ -383,7 +386,7 @@
         ".bigbang/tests/test_names_config.py:test_pipeline_subcommands_by_either_name"
       ],
       "hashes": {
-        ".bigbang/bb/cli.py": "sha256:41ac36fba57507edee884e39414c37bf712c96fd851f5b5604b74b8a580fff37",
+        ".bigbang/bb/cli.py": "sha256:82ec176707e163c73526f8a46734ed9a7d7c54b496d4ff7c77ca21e667684522",
         ".bigbang/bb/__init__.py": "sha256:9eafc1c524def17452aeb77d49ee0aca1a8c40c7e69d52c3c6dba384e78732eb",
         ".bigbang/bin/bb.py": "sha256:af864bf4452b5aad7c6e90ba6ed7f81cf9cb2fbb8c60f2a5e7e5e4e17372abb4",
         ".bigbang/bin/bb": "sha256:04bf9a43393503416a9307e7272d697afcd9327a0a5b388a451873a70c45e112"
@@ -481,7 +484,7 @@
         ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect"
       ],
       "hashes": {
-        ".bigbang/bb/config.py": "sha256:b933c72d121ffb06ddb12a348e4c4dfa28c7790e2c0eab31bf44ec07c5fc5434",
+        ".bigbang/bb/config.py": "sha256:e730392ee3e49e85f500ec6a2c47e8cba66ef7edbe64fa92d715134b0e12c961",
         ".bigbang/modelos/bigbang.toml.exemplo": "sha256:778ba08e5498600441fc495f8aa4f60d6df3fb995022aec32c6c75221cf8a702",
         ".bigbang/modelos/flags.toml": "sha256:3f4bf065d88d1b4b344e2ec8d24e536ef7433333bacb2cf974fc4194703a47ba"
       },
@@ -750,7 +753,7 @@
         ".bigbang/tests/test_grouping_v3.py:test_v3_tree_is_generated_and_verified"
       ],
       "hashes": {
-        ".bigbang/bb/generator.py": "sha256:e7c83961e303b6e1bfe1d3541bea1e4a1af76ed4da602e02d3f40c81d2fae57a"
+        ".bigbang/bb/generator.py": "sha256:f6122e4879b85d3c8a48021dd7e04deccf00e99ea4d1137da7188f4c3736abb5"
       },
       "descricao": "Gerar instruções e Actions a partir da configuração, preservando a camada do projeto e removendo saídas obsoletas."
     },
@@ -821,7 +824,7 @@
         ".bigbang/tests/test_launcher.py:test_compiled_profile_after_f2"
       ],
       "hashes": {
-        ".bigbang/bb/init.py": "sha256:fcbaf1f4e3f462df84bcc0fe3fbc88d036760b7fd0b7ffd23d93558bff57a35e"
+        ".bigbang/bb/init.py": "sha256:a0284145e701d14e0f21c7dd3a57f3d45ce1afb24f081674b914d13fe596f9ad"
       },
       "descricao": "Preparar F0 com identidade, modo padrão ou Flash, configuração e arquivos comunitários sem destruir conteúdo do projeto."
     },
@@ -957,7 +960,7 @@
         ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls"
       ],
       "hashes": {
-        ".bigbang/bb/pipeline.py": "sha256:fc4647e2122ffa1ce29b9d6e7249e3fcd84e0b47dd733e1d72b6332462993c3c"
+        ".bigbang/bb/pipeline.py": "sha256:ac8f26fe0495a8ce7b013904f0e44b179b875d3330a8a08f876af0b10b320677"
       },
       "descricao": "Calcular prontidão, branches, revisão, SemVer, changelog, matriz e nomes de artefatos sem executar deploy."
     },
@@ -1002,7 +1005,7 @@
         ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls"
       ],
       "hashes": {
-        ".bigbang/bb/pipeline_cli.py": "sha256:5c3982a65fe4d5593ff75e02c23c3a463bb82fa350e74855125d40639fa13512"
+        ".bigbang/bb/pipeline_cli.py": "sha256:c1fc5b908e67e2533858716ebdb7e2247c9b9392bc812de131c17d119880898b"
       },
       "descricao": "Expor regras verificáveis a scripts sem duplicar lógica de negócio entre Bash e Python."
     },
@@ -1216,7 +1219,7 @@
         ".bigbang/tests/test_bb_verificar.py:test_pull_request_target_sem_checkout_do_pr_passa"
       ],
       "hashes": {
-        ".bigbang/bb/verify.py": "sha256:9e21a8c8f4884025d3b78c9fe6f3125c814a1861923d79254b87c42cb756fa7e"
+        ".bigbang/bb/verify.py": "sha256:b2085fd3d8dbe57eeb2a5fef3336f2407d1cd88568898dce1e0b4c3f97644e38"
       },
       "descricao": "Detectar adulteração, geração fora de sincronia e workflows que violam as regras do framework."
     },
@@ -1923,7 +1926,7 @@
       "hashes": {
         ".github/workflows/bb-framework-ci.yml": "sha256:c492a05ce2e19e54e0ab6350cc0e7b2891ebab8c8758b991480e050f9ba121fd",
         ".github/workflows/bb-framework-faxina.yml": "sha256:8b9ae98415e336cb9e5b3e87bd779e3c45c53f80ee93968bd18c446bfe9d1638",
-        ".github/workflows/bb-framework-release.yml": "sha256:8a5261f1e0d3237795de7c2d094f198b1ee1c0a080b2081dea1e48a537a53b92"
+        ".github/workflows/bb-framework-release.yml": "sha256:5e18ba4512f8bad54119c9ed1a4c64f96c50181cbab4a5f0738d2117a1db9d16"
       },
       "descricao": "Validar a fonte e distribuir pacote oficial com origem verificável e limpeza após sincronização."
     },
@@ -2110,7 +2113,7 @@
         ".bigbang/esteira/perfis/deploy/alvos/paas/README.md": "sha256:d8b52c4956fab996c303edcfbda6e162874b8311a23def757877de0aa272ad20",
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md": "sha256:bb04007d9e8e6977492685e35299a7801fdbd87b5fbeb4d5f78132d2cfc57411",
         ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md": "sha256:48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
-        "AGENTS.md": "sha256:cdb54ffea7561dcb0290fee3dbf8141a3b776e6e791a5398c0930c092375f3ca",
+        "AGENTS.md": "sha256:fc1133acaadd780072b09ec90bbf0502b27727242103f8b9a33630afda020c8b",
         "CLAUDE.md": "sha256:336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49"
       },
       "descricao": "Orientar Fundação, planejamento, execução, revisão, entrega e manutenção com contratos compartilhados entre as IAs."
@@ -2318,7 +2321,7 @@
       "hashes": {
         ".bigbang/bb/board.py": "sha256:b56463151ae793e86be92b70d0670fb1b98713aaef42ff35bc13efb3f193c4b8",
         ".bigbang/bb/controller.py": "sha256:8c70bec7e79ad6786f7320c719e424d593f77fad6a006c8459a222d45e12200f",
-        ".bigbang/bb/flow_cli.py": "sha256:eb7ea171d1301e2aa0858e51f8371312387a98a4a9cd1d2e66442132a9217b11"
+        ".bigbang/bb/flow_cli.py": "sha256:2d9a3f0442f244d28e027343725ce3c4cf46393943ccfcca83a1d43cd3ff3a0b"
       },
       "descricao": "Catálogo de labels v3, Project com 15 estados e campos, bb move validado, reconciliação e controlador de eventos."
     },
@@ -2518,6 +2521,63 @@
         ".bigbang/bb/autonomy.py": "sha256:a1f063483bc5a4db93d499c0d475befabbda04287e4c67e4f4dbf2f6d650f654"
       },
       "descricao": "Contrato autonomy.toml nos portões e na publicação, checagem do bootstrap e identidade da aprovação nos recibos."
+    },
+    {
+      "id": "BB-F-056",
+      "requisitos": [
+        "RF-BB-056"
+      ],
+      "pagina": "Funcionalidade-framework-pipeline",
+      "fontes": [
+        ".bigbang/bb/framework.py",
+        ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl",
+        ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml",
+        ".bigbang/pipeline/framework/scripts/testes-candidata.sh",
+        ".github/workflows/bb-framework-board-report.yml",
+        ".github/workflows/bb-framework-candidate.yml",
+        ".github/workflows/bb-framework-cleanup.yml",
+        ".github/workflows/bb-framework-codeql.yml",
+        ".github/workflows/bb-framework-controller.yml",
+        ".github/workflows/bb-framework-create-branches.yml",
+        ".github/workflows/bb-framework-cut-release.yml",
+        ".github/workflows/bb-framework-gate.yml",
+        ".github/workflows/bb-framework-merge-pr.yml",
+        ".github/workflows/bb-framework-publish-maintenance.yml",
+        ".github/workflows/bb-framework-publish.yml",
+        ".github/workflows/bb-framework-qa-reject.yml",
+        ".github/workflows/bb-framework-start-sprint.yml"
+      ],
+      "testes": [
+        ".bigbang/tests/test_framework_pipeline.py:test_framework_config_is_v3_grouping_flash_and_universal",
+        ".bigbang/tests/test_framework_pipeline.py:test_generate_framework_is_idempotent_guarded_and_preserves_legacy",
+        ".bigbang/tests/test_framework_pipeline.py:test_foreign_repository_refuses_the_framework_configuration",
+        ".bigbang/tests/test_framework_pipeline.py:test_init_removes_framework_file_and_f5_removes_its_workflows",
+        ".bigbang/tests/test_framework_pipeline.py:test_prepare_version_rewrites_version_checksums_and_expected",
+        ".bigbang/tests/test_framework_pipeline.py:test_candidate_and_promotion_keep_updater_names",
+        ".bigbang/tests/test_framework_pipeline.py:test_framework_community_keeps_auditing_the_existing_boards",
+        ".bigbang/tests/test_framework_pipeline.py:test_callbacks_and_candidate_ci_use_the_framework_namespace",
+        ".bigbang/tests/test_framework_pipeline.py:test_cli_framework_and_pipeline_are_exclusive"
+      ],
+      "hashes": {
+        ".bigbang/bb/framework.py": "sha256:a3aa54426487f5e496fc39a95d06fe2c31098d0832a551bbd56baf34cbdb0a20",
+        ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:fe2258f8489b5d490d3aef6b381068a743917d94b723162d285ef8c00db0b89b",
+        ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:907afd6987d2626d0858be2e52943cb4905eae90d8b094da63dc0691db0eac59",
+        ".bigbang/pipeline/framework/scripts/testes-candidata.sh": "sha256:b9cc01977794173b5dc2a2bec28b7ca53eb0f8fa91798f10148d25efae546a0e",
+        ".github/workflows/bb-framework-board-report.yml": "sha256:fdf21975274f0435b160985acf046a059a21f4cc9c1d81c9de3534533f461570",
+        ".github/workflows/bb-framework-candidate.yml": "sha256:c70a6aea4115745226400e18b1af997fda9402e404267dbf38a1b1130e9b10d5",
+        ".github/workflows/bb-framework-cleanup.yml": "sha256:66780bb097764c62f51cf9b185be998e672770680f4c5a228e446ab675048f8f",
+        ".github/workflows/bb-framework-codeql.yml": "sha256:9fe01b4710f75f10ddde17a0a7cd2ef5873280cbdf32e2c1ff3e79a94eb90a56",
+        ".github/workflows/bb-framework-controller.yml": "sha256:86450c3a42d4db1c0f88003084f33d707ba30a0b194b4ab6464bc53873b74cc4",
+        ".github/workflows/bb-framework-create-branches.yml": "sha256:43fad8954a79f0b9bd047d31dce63b35c49df659741055a2b0aef53b40b9b1b1",
+        ".github/workflows/bb-framework-cut-release.yml": "sha256:5cc9884f91111d9dfeef47fd270afe0710ff26b19e9868ab5c4a9857bbb20cd0",
+        ".github/workflows/bb-framework-gate.yml": "sha256:b963838bbdd9488ac6497a58c9699f8edf88c41dca5e0eb5fd61dd32c33cdfc7",
+        ".github/workflows/bb-framework-merge-pr.yml": "sha256:f26ba32cbd850b3d834011ba3b1962029c7dec08b94535aa91157cc62c6a4623",
+        ".github/workflows/bb-framework-publish-maintenance.yml": "sha256:250c23c7d9d1d9e159740d11f0a0c3e568cb5a39a75f0e06cd884f2f82dcde82",
+        ".github/workflows/bb-framework-publish.yml": "sha256:3e540871f8e22f94347f6e9bc542cb3d030c154f58b6c017422c78c03b47ff50",
+        ".github/workflows/bb-framework-qa-reject.yml": "sha256:499efc108101ee021df36644edd205689a5cee21b6108566b3b4cb020e1bcbb9",
+        ".github/workflows/bb-framework-start-sprint.yml": "sha256:0701d220ddb29a8ab08222f7b0dc21ac59634c183010a5a491049959818f08e7"
+      },
+      "descricao": "Esteira própria do framework com isolamento do lançador, pacote reprodutível e promoção dos mesmos assets."
     }
   ],
   "arquivos_funcionais": [
