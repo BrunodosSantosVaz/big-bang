@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "bffcf3a556c4041d79f9aaf2c7899d35e7c5b30d",
+    "commit": "f5740036723cd1c2b5de117af3abfd6f5b37a485",
     "branch": "master",
     "proposta": "wiki/250-guided-migration"
   },
@@ -251,7 +251,7 @@
     }
   },
   "codigo": {
-    "commit": "84aa7291d1b0d04e9961fddbd9c004a36f21314b",
+    "commit": "567df87e62c6a84e03d32c57c302cf0b331f0655",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -2613,11 +2613,20 @@
         ".bigbang/tests/test_migrate_v3.py:test_rewrites_in_english_keeping_the_behavior",
         ".bigbang/tests/test_migrate_v3.py:test_removes_the_inherited_framework_section_and_keeps_the_project_part",
         ".bigbang/tests/test_migrate_v3.py:test_second_run_is_a_no_op",
+        ".bigbang/tests/test_migrate_v3.py:test_rollback_after_a_partial_rename_is_idempotent",
+        ".bigbang/tests/test_migrate_v3.py:test_copying_existing_labels_includes_pull_requests",
         ".bigbang/tests/test_migrate_v3.py:test_foreign_snapshot_refuses_before_any_write",
         ".bigbang/tests/test_migrate_v3.py:test_needs_the_workflow_part_first",
         ".bigbang/tests/test_migrate_v3.py:test_renames_keeping_the_issues_copies_when_both_exist_and_creates_the_catalog",
         ".bigbang/tests/test_migrate_v3.py:test_rollback_restores_the_names",
         ".bigbang/tests/test_migrate_v3.py:test_dry_run_changes_nothing",
+        ".bigbang/tests/test_migrate_v3.py:test_remigration_after_rollback_uses_current_legacy_evidence",
+        ".bigbang/tests/test_migrate_v3.py:test_closed_epic_without_release_does_not_advance_to_done",
+        ".bigbang/tests/test_migrate_v3.py:test_closed_epic_with_its_stable_tag_is_done",
+        ".bigbang/tests/test_migrate_v3.py:test_bug_without_candidate_does_not_advance_to_qa",
+        ".bigbang/tests/test_migrate_v3.py:test_stale_or_unverified_claim_does_not_advance_to_coding",
+        ".bigbang/tests/test_migrate_v3.py:test_ready_task_waits_for_workflow_migration_even_with_merged_pr",
+        ".bigbang/tests/test_migrate_v3.py:test_bug_without_claim_uses_a_state_allowed_by_the_runtime",
         ".bigbang/tests/test_migrate_v3.py:test_initial_cards_also_receive_a_migration_receipt",
         ".bigbang/tests/test_migrate_v3.py:test_legacy_labels_are_mapped_before_the_label_migration",
         ".bigbang/tests/test_migrate_v3.py:test_needs_the_config_part_first",
@@ -2635,7 +2644,7 @@
         ".bigbang/tests/test_migrate_v3.py:test_config_roundtrip_from_cli"
       ],
       "hashes": {
-        ".bigbang/bb/migrate.py": "sha256:720ba0f8571b80aac5d87e35087b28d25575db4d11d5af293674bf0c41442945"
+        ".bigbang/bb/migrate.py": "sha256:f5aef0b077bf015cf40a06da321c15857b49af2529aee6150d4e86006f2dd348"
       },
       "descricao": "Migração guiada opcional com ordem segura, consentimento explícito de escrita no GitHub e preservação do legado."
     }
