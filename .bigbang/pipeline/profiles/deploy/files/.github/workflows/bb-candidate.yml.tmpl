@@ -140,4 +140,6 @@ jobs:
       - name: Epics of the candidate into QA and the release PR
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
-        run: python .bigbang/bin/bb.py pipeline candidate-ready --branch "${{ github.ref_name }}" --rc-tag "${{ needs.preparar.outputs.tag }}"
+          BRANCH: ${{ github.ref_name }}
+          RC_TAG: ${{ needs.preparar.outputs.tag }}
+        run: python .bigbang/bin/bb.py pipeline candidate-ready --branch "$BRANCH" --rc-tag "$RC_TAG"

@@ -13,6 +13,11 @@ on:
         description: 'Reason, in the owner words'
         required: true
         type: string
+      dry_run:
+        description: 'Only check (changes nothing)'
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -36,4 +41,5 @@ jobs:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
           EPIC: ${{ inputs.epic }}
           REASON: ${{ inputs.reason }}
-        run: python .bigbang/bin/bb.py qa reject "$EPIC" --reason "$REASON"
+          DRY_RUN: ${{ inputs.dry_run && '1' || '' }}
+        run: python .bigbang/bin/bb.py qa reject "$EPIC" --reason "$REASON" ${DRY_RUN:+--dry-run}

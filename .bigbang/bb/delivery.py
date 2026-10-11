@@ -71,11 +71,12 @@ def candidate_ready(client, project, config, branch, rc_tag, *, now=None):
 
 
 def _flags(root, today):
-    import os
     from . import flags
-    path = os.path.join(root, "flags.toml")
-    return {flag["epic"]: flag for flag in flags.parse(open(path, encoding="utf-8").read(), today)} \
-        if os.path.exists(path) else {}
+    text = flows.read_content(root, "flags.toml")
+    by_epic = {}
+    for flag in (flags.parse(text, today) if text is not None else []):
+        by_epic.setdefault(flag["epic"], []).append(flag)
+    return by_epic
 
 
 def _green(client, sha):
@@ -105,7 +106,7 @@ def _latest_candidate(client, version):
     return max(candidates)[1] if candidates else None
 
 
-def publish(client, project, config, version, root, *, today, now=None, pending=None, promote=None):
+def publish(client, project, config, version, root, *, today, now=None, pending=None, promote=None, dry_run=False):
     """Publish a release behind its gate: every epic approved or dark behind its flag, pending acceptance only for
     dark epics, a candidate exists and the PR release → main is green on its exact head. Then merge, conclude the
     epics that are delivered, close the milestone and return main to develop. Running again is harmless."""
@@ -115,7 +116,7 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
     trusted = _trusted(config)
     branch = f"release/{version}"
     problems = flows.release_gate(client, config, root, [epic["number"] for epic in epics], today=today,
-                                  pending=pending)
+                                  pending=pending, project=project)
     published = f"v{version}" in client.tags()
     rc_tag = _latest_candidate(client, version)
     if rc_tag is None and not published:
@@ -124,6 +125,8 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
         rc_sha = client.call("GET", f"git/ref/tags/{rc_tag}")[1]["object"]["sha"]
         if client.branch_sha(branch) not in (None, rc_sha):
             problems.append(f"a {branch} mudou depois da candidata {rc_tag}: gere uma candidata nova")
+    else:
+        rc_sha = None
     blocking = [issue["number"] for issue in client.issues("open")
                 if "blocks-production" in issue["labels"] or "bloqueia-producao" in issue["labels"]]
     if blocking:
@@ -134,8 +137,12 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
         problems.append(f"PR {branch} → main inexistente")
     elif not pull["merged"] and not _green(client, pull["sha"]):
         problems.append(f"PR #{pull['number']} sem o check gate verde no SHA {pull['sha'][:10]}")
+    elif not pull["merged"] and rc_sha and pull["sha"] != rc_sha:
+        problems.append(f"o PR #{pull['number']} não está na candidata {rc_tag}: gere uma candidata nova")
     if problems:
         raise BbError("publicação recusada:\n" + "\n".join(f"  - {p}" for p in problems), EXIT_INVALID_STATE)
+    if dry_run:
+        return {"version": version, "pr": pull["number"], "done": [], "dark": [], "dry_run": True}
     if not pull["merged"]:
         client.merge_pull(pull["number"], pull["sha"])
     if promote and not published:
@@ -146,12 +153,15 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
         number = epic["number"]
         labels = set(client.issue(number)["labels"])
         state = board.current_state(client, number, trusted)
-        if state == "QA" and _has(labels, "qa:approved"):
-            board.move(client, project, config, number, "Releasing", CONTROLLER, now=now,
-                       event_id=f"publish-{number}-{version}-releasing")
-            state = "Releasing"
-        flag = flags_by_epic.get(number)
-        flag_on = bool(flag and flag["production"])
+        if state == "QA":
+            try:  # QA passed by the owner's decision or an independent agent's verdict: the rules decide
+                board.move(client, project, config, number, "Releasing", CONTROLLER, now=now,
+                           event_id=f"publish-{number}-{version}-releasing")
+                state = "Releasing"
+            except BbError as error:
+                if error.code != EXIT_INVALID_STATE:
+                    raise
+        flag_on = any(flag["production"] for flag in flags_by_epic.get(number, []))
         if state == "Releasing":
             try:
                 board.move(client, project, config, number, "Done", CONTROLLER, now=now,
@@ -159,8 +169,10 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
                 done.append(number)
             except BbError:
                 dark.append(number)
-        elif state == "QA":
-            dark.append(number)
+        elif state == "Done":
+            done.append(number)
+        else:
+            dark.append(number)  # the gate let it through only with every flag off: shipped dark
     client.close_milestone(milestone)
     _return_main(client, version)
     current = client.locks().current(f"version-{version}")
@@ -169,7 +181,7 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
     return {"version": version, "pr": pull["number"], "done": done, "dark": dark}
 
 
-def publish_maintenance(client, config, number, *, changed_paths):
+def publish_maintenance(client, config, number, *, changed_paths, dry_run=False):
     """maintenance/* → main when nothing of the artifact changed, then main back to develop."""
     pull = client.pull(number)
     if not pull or pull["state"] != "open" or not pull["head"].startswith("maintenance/") or pull["base"] != "main":
@@ -182,17 +194,23 @@ def publish_maintenance(client, config, number, *, changed_paths):
                       EXIT_INVALID_STATE)
     if not _green(client, pull["sha"]):
         raise BbError(f"PR #{number} sem o check gate verde", EXIT_INVALID_STATE)
+    if dry_run:
+        return "simulação: nada mesclado"
     client.merge_pull(number, pull["sha"])
     return _return_main(client, f"maintenance-{number}")
 
 
-def correction_task(client, project, config, epic, reason, *, actor, now=None):
+def correction_task(client, project, config, epic, reason, *, actor, now=None, dry_run=False):
     """QA rejected: the epic passes through Rejected back to In Progress, and one correction task is born from the
     release branch (fix/<n>) in the same milestone; its PR goes into the release, and a new candidate follows."""
     now = _now(now)
     if not reason or not reason.strip():
         raise BbError("a reprovação exige o motivo", EXIT_INVALID_STATE)
     issue = client.issue(epic)
+    if dry_run:  # the same rules decide (the owner's qa:rejected, or an independent agent's rejected verdict)
+        board.move(client, project, config, epic, "Rejected", actor, reason="qa", return_to="In Progress", now=now,
+                   dry_run=True)
+        return None
     board.move(client, project, config, epic, "Rejected", actor, reason="qa", return_to="In Progress", now=now)
     board.move(client, project, config, epic, "In Progress", actor, now=now)
     inherited = sorted(label for label in issue["labels"] if label.startswith(flows.INHERITED))

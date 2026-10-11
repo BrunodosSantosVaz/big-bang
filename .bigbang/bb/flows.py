@@ -233,15 +233,34 @@ def cut_release(client, config, *, version=None, now=None):
             "epics": sorted(epics), "issues": sorted(issues), "pulls": [pull["number"] for pull in pulls]}
 
 
-def release_gate(client, config, root, epics, *, today, pending=None):
-    """Why the release cannot ship: every epic approved or dark behind its flag; pending acceptance tests only
-    for dark epics. `pending` maps issue -> marks (acceptance.pending_marks when None)."""
-    path = os.path.join(root, "flags.toml")
-    registered = flags.parse(open(path, encoding="utf-8").read(), today) if os.path.exists(path) else []
+def read_content(root, relative):
+    """Text of a file of PR or release content read as data: absent, or a link leaving the folder, reads as None."""
+    base = os.path.realpath(root)
+    path = os.path.join(base, *relative.split("/"))
+    if os.path.islink(path) or not os.path.realpath(path).startswith(base + os.sep) or not os.path.isfile(path):
+        return None
+    with open(path, encoding="utf-8") as handle:
+        return handle.read()
+
+
+def release_gate(client, config, root, epics, *, today, pending=None, project=None):
+    """Why the release cannot ship: every epic passed its QA (Releasing, or already Done) or ships dark with every
+    flag off; pending acceptance tests only for dark epics. `root` is the release content, read as data; `pending`
+    maps issue -> marks (acceptance.pending_marks when None)."""
+    text = read_content(root, "flags.toml")
+    registered = flags.parse(text, today) if text is not None else []
+    trusted = {config_module.get(config, "project.owner")}
     decisions = {}
     for epic in epics:
-        labels = set(client.issue(epic)["labels"])
-        decisions[epic] = "approved" if _has(labels, "qa:approved") or _has(labels, "qa:not-applicable") else "pending"
+        state = board.current_state(client, epic, trusted)
+        if state == "QA" and project is not None:
+            try:  # QA → Releasing allowed now (owner's decision or independent verdict) counts as passed
+                board.move(client, project, config, epic, "Releasing", "controller", dry_run=True)
+                state = "Releasing"
+            except BbError as error:
+                if error.code != EXIT_INVALID_STATE:
+                    raise
+        decisions[epic] = "approved" if state in ("Releasing", "Done") else "pending"
     if pending is None:
         marker = config_module.get(config, "tests.pending_marker")
         pending = {}
@@ -251,4 +270,4 @@ def release_gate(client, config, root, epics, *, today, pending=None):
     for issue in pending:
         parent = client.parent(issue)
         owners[issue] = parent["number"] if parent else None
-    return flags.release_problems(decisions, registered) + flags.pending_problems(owners, registered)
+    return flags.release_problems(decisions, registered, today) + flags.pending_problems(owners, registered)

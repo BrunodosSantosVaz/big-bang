@@ -19,6 +19,7 @@ def normalize_issue(raw):
     return {"number": raw["number"], "id": raw.get("id"), "title": raw.get("title", ""), "body": raw.get("body") or "",
             "state": raw.get("state", "open").lower(), "state_reason": raw.get("state_reason"),
             "labels": _labels(raw), "pull_request": "pull_request" in raw, "comments": raw.get("comments", 0),
+            "created_at": raw.get("created_at"),
             "milestone": _milestone(raw.get("milestone"))}
 
 

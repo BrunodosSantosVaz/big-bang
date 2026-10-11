@@ -77,13 +77,17 @@ jobs:
         with:
           python-version: '3.12'
       - name: PR content as data (never executed with this token)
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          git fetch -q origin "+refs/pull/${{ github.event.pull_request.number }}/head:refs/remotes/origin/pr-head"
-          git worktree add -q --detach "$RUNNER_TEMP/pr" "${{ github.event.pull_request.head.sha }}"
+          git fetch -q origin "+refs/pull/$PR_NUMBER/head:refs/remotes/origin/pr-head"
+          git worktree add -q --detach "$RUNNER_TEMP/pr" "$PR_HEAD_SHA"
       - name: PR rules (branch, title, Refs, acceptance lock, flag, sensitive paths)
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python .bigbang/bin/bb.py pipeline pr-rules --pr "${{ github.event.pull_request.number }}" --content-dir "$RUNNER_TEMP/pr"
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python .bigbang/bin/bb.py pipeline pr-rules --pr "$PR_NUMBER" --content-dir "$RUNNER_TEMP/pr"
 
   security:
     name: security

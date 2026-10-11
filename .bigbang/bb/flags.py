@@ -78,20 +78,28 @@ def switch(text, name, environment, value, today):
 
 
 def _by_epic(flags):
-    return {flag["epic"]: flag for flag in flags}
+    result = {}
+    for flag in flags:
+        result.setdefault(flag["epic"], []).append(flag)
+    return result
 
 
-def release_problems(epic_decisions, flags):
-    """Why a release cannot ship: {epic: 'approved'|'pending'} → every epic is approved, or ships dark."""
+def release_problems(epic_decisions, flags, today=None):
+    """Why a release cannot ship: {epic: 'approved'|'pending'} → every epic is approved, or ships dark (every flag
+    of the epic off in production); an expired flag is renewed with the owner or removed first."""
     found, by_epic = [], _by_epic(flags)
+    if today is not None:
+        found += [f"flag {flag['name']} vencida em {flag['expires']}: renove (com o dono) ou remova antes da release"
+                  for flag in flags if flag["expires"] < today]
     for epic, decision in sorted(epic_decisions.items()):
         if decision in ("approved", "automatic"):
             continue
-        flag = by_epic.get(epic)
-        if flag is None:
+        own = by_epic.get(epic, [])
+        if not own:
             found.append(f"épico #{epic} sem homologação e sem feature flag: não pode entrar na release")
-        elif flag["production"]:
-            found.append(f"épico #{epic} sem homologação com a flag {flag['name']} ligada em produção")
+        for flag in own:
+            if flag["production"]:
+                found.append(f"épico #{epic} sem homologação com a flag {flag['name']} ligada em produção")
     return found
 
 
@@ -99,7 +107,7 @@ def pending_problems(pending_issue_epics, flags):
     """{issue with pending acceptance marks: its epic (or None)} → only dark epics may ship pending tests."""
     found, by_epic = [], _by_epic(flags)
     for issue, epic in sorted(pending_issue_epics.items()):
-        flag = by_epic.get(epic) if epic else None
-        if flag is None or flag["production"]:
+        own = by_epic.get(epic, []) if epic else []
+        if not own or any(flag["production"] for flag in own):
             found.append(f"teste de aceite pendente da #{issue} numa release sem a flag do épico desligada")
     return found

@@ -32,28 +32,33 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: main
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
-      - name: Release content (checklist, documentation, CHANGELOG)
+      - name: Release content as data (checklist, documentation, CHANGELOG)
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
           VERSION: ${{ inputs.version }}
         run: |
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::versão inválida: use x.y.z"; exit 1; }
           git fetch -q origin "release/$VERSION"
           git worktree add -q --detach "$RUNNER_TEMP/release" "origin/release/$VERSION"
           python .bigbang/bin/bb.py checklist production --content-dir "$RUNNER_TEMP/release"
           python .bigbang/bin/bb.py pipeline docs --content-dir "$RUNNER_TEMP/release" --published --community
           python .bigbang/bin/bb.py --root "$RUNNER_TEMP/release" docs read CHANGELOG.md | grep -F "## [$VERSION]"
-      - name: Gate (changes nothing)
+      - name: Gate (changes nothing; flags and pending tests come from the release)
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
-        run: python .bigbang/bin/bb.py release publish --version "${{ inputs.version }}" --dry-run
+          VERSION: ${{ inputs.version }}
+        run: python .bigbang/bin/bb.py release publish --version "$VERSION" --dry-run --content-dir "$RUNNER_TEMP/release"
       - name: How to approve (link and steps for the approver)
         if: ${{ !inputs.dry_run }}
-        run: bash .bigbang/esteira/nucleo/scripts/link-aprovacao.sh --resumo "Publish (version ${{ inputs.version }})"
+        env:
+          VERSION: ${{ inputs.version }}
+        run: bash .bigbang/esteira/nucleo/scripts/link-aprovacao.sh --resumo "Publish (version $VERSION)"
 
   publish:
     needs: check
@@ -72,8 +77,12 @@ jobs:
       - name: Publish ({{delivery.profile}})
         run: |
           {{gerado.preparar_alvo}}
-          python .bigbang/bin/bb.py release publish --version "${{ inputs.version }}"
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::versão inválida: use x.y.z"; exit 1; }
+          git fetch -q origin "release/$VERSION"
+          git worktree add -q --detach "$RUNNER_TEMP/release" "origin/release/$VERSION"
+          python .bigbang/bin/bb.py release publish --version "$VERSION" --content-dir "$RUNNER_TEMP/release"
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          VERSION: ${{ inputs.version }}
           # deploy profile: the production server (variables and secrets of the production environment)
 {{gerado.env_alvo}}

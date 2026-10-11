@@ -9,6 +9,11 @@ on:
         description: 'Number of the maintenance/* PR into main'
         required: true
         type: string
+      dry_run:
+        description: 'Only check (changes nothing)'
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -32,4 +37,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
           PR: ${{ inputs.pr }}
-        run: python .bigbang/bin/bb.py release maintenance --pr "$PR"
+          DRY_RUN: ${{ inputs.dry_run && '1' || '' }}
+        run: python .bigbang/bin/bb.py release maintenance --pr "$PR" ${DRY_RUN:+--dry-run}

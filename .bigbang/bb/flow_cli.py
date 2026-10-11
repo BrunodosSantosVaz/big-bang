@@ -49,14 +49,18 @@ def register(commands, pipeline_sub):
     p.set_defaults(handler=_release_items)
     p = release_sub.add_parser("gate", help="confere flags e testes pendentes dos épicos da release")
     p.add_argument("--epic", type=int, action="append", required=True)
+    p.add_argument("--content-dir", dest="content_dir", help="conteúdo da release lido como dado (padrão: --raiz)")
     p.set_defaults(handler=_release_gate)
 
     p = release_sub.add_parser("publish", help="portão e publicação da release (merge na main, épicos, sync)")
     p.add_argument("--version", required=True)
     p.add_argument("--dry-run", dest="dry_run", action="store_true", help="só confere o portão")
+    p.add_argument("--content-dir", dest="content_dir",
+                   help="conteúdo da release (flags.toml, testes pendentes) lido como dado (padrão: --raiz)")
     p.set_defaults(handler=_release_publish)
     p = release_sub.add_parser("maintenance", help="publica um PR maintenance/* na main (sem mudar o artefato)")
     p.add_argument("--pr", type=int, required=True)
+    p.add_argument("--dry-run", dest="dry_run", action="store_true", help="só confere o portão")
     p.set_defaults(handler=_release_maintenance)
 
     qa = commands.add_parser("qa", help="v3: homologação")
@@ -64,6 +68,7 @@ def register(commands, pipeline_sub):
     p = qa_sub.add_parser("reject", help="reprovação registrada: épico de volta e tarefa de correção na release")
     p.add_argument("epic", type=int)
     p.add_argument("--reason", required=True, help="motivo nas palavras do dono")
+    p.add_argument("--dry-run", dest="dry_run", action="store_true", help="só confere a reprovação registrada")
     p.set_defaults(handler=_qa_reject)
     p = qa_sub.add_parser("verdict", help="QA delegado: o agente independente registra o veredito da candidata")
     p.add_argument("epic", type=int)
@@ -219,9 +224,9 @@ def _release_items(args):
 
 def _release_gate(args):
     from . import flows
-    config = config_module.load(args.raiz)
-    problems = flows.release_gate(gh.GitHub(config_module.get(config, "project.repository")), config, args.raiz,
-                                  args.epic, today=_today())
+    config, client, project = _context(args.raiz)
+    problems = flows.release_gate(client, config, args.content_dir or args.raiz, args.epic, today=_today(),
+                                  project=project)
     for problem in problems:
         print(problem)
     if problems:
@@ -294,9 +299,27 @@ def _pr_rules(args):
     return EXIT_OK
 
 
+def _escaping_links(content):
+    import os
+    base = os.path.realpath(content)
+    found = []
+    for folder, dirs, files in os.walk(content):
+        dirs[:] = [d for d in dirs if d != ".git"]
+        for name in dirs + files:
+            path = os.path.join(folder, name)
+            if os.path.islink(path):
+                target = os.path.realpath(path)
+                if target != base and not target.startswith(base + os.sep):
+                    found.append(os.path.relpath(path, content).replace(os.sep, "/"))
+    return sorted(found)
+
+
 def _content_problems(client, config, content, paths, head):
     """Checks on the PR head content, read as data by the target branch's code."""
     from . import acceptance, stack_guard, traceability
+    escaping = _escaping_links(content)
+    if escaping:  # nothing is read from a PR that points outside itself (runner files, secrets)
+        return [f"link simbólico para fora do conteúdo do PR: {path}" for path in escaping]
     found = []
     for issue, location in acceptance.pending_marks(content, config_module.get(config, "tests.pending_marker")):
         current = client.issue(issue)
@@ -324,15 +347,11 @@ def _candidate_ready(args):
 def _release_publish(args):
     from . import delivery, flows
     config, client, project = _context(args.raiz)
+    content = args.content_dir or args.raiz
     if args.dry_run:
-        milestone = client.milestone_number(f"v{args.version}")
-        epics = [i["number"] for i in client.milestone_issues(milestone)
-                 if board.states.kind(set(i["labels"])) == "epic"] if milestone else []
-        problems = flows.release_gate(client, config, args.raiz, epics, today=_today())
-        for problem in problems:
-            print(problem)
-        print("Portão: " + ("recusado." if problems else "em ordem."))
-        return EXIT_USAGE if problems else EXIT_OK
+        result = delivery.publish(client, project, config, args.version, content, today=_today(), dry_run=True)
+        print(f"Portão da release {args.version} em ordem (PR #{result['pr']}).")
+        return EXIT_OK
     import os
     import subprocess
     profile_dir = config_module.get(config, "entrega.perfil")  # compilado | deploy (the shared profile scripts)
@@ -344,7 +363,7 @@ def _release_publish(args):
         if completed.returncode:
             raise BbError(f"promoção de {rc_tag} como {tag} falhou (veja o log acima)", EXIT_USAGE)
 
-    result = delivery.publish(client, project, config, args.version, args.raiz, today=_today(), promote=promote)
+    result = delivery.publish(client, project, config, args.version, content, today=_today(), promote=promote)
     print(f"Release {args.version} publicada (PR #{result['pr']}); concluídos: "
           + (", ".join(f"#{n}" for n in result["done"]) or "nenhum")
           + "; com a flag desligada: " + (", ".join(f"#{n}" for n in result["dark"]) or "nenhum") + ".")
@@ -358,7 +377,7 @@ def _release_maintenance(args):
     paths = []
     for file in client.pull_files(args.pr):
         paths.extend({file.get("previous_filename", file["filename"]), file["filename"]})
-    result = delivery.publish_maintenance(client, config, args.pr, changed_paths=paths)
+    result = delivery.publish_maintenance(client, config, args.pr, changed_paths=paths, dry_run=args.dry_run)
     print(f"Manutenção #{args.pr} publicada na main; devolução para a develop: {result}.")
     return EXIT_OK
 
@@ -366,7 +385,11 @@ def _release_maintenance(args):
 def _qa_reject(args):
     from . import delivery
     config, client, project = _context(args.raiz)
-    task = delivery.correction_task(client, project, config, args.epic, args.reason, actor=_actor(client))
+    task = delivery.correction_task(client, project, config, args.epic, args.reason, actor=_actor(client),
+                                    dry_run=args.dry_run)
+    if args.dry_run:
+        print(f"Simulação: a reprovação do épico #{args.epic} está registrada; nada foi alterado.")
+        return EXIT_OK
     print(f"Épico #{args.epic} reprovado; tarefa de correção #{task} criada a partir da release.")
     return EXIT_OK
 

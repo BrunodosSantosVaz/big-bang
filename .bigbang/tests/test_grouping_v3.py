@@ -274,7 +274,15 @@ class MergeAndRelease(Flows):
             self.fake.add_issue(42, "Outro épico", labels=["type:epic"])
             self.assertEqual(flows.release_gate(self.client, cfg(), root, [10], today=TODAY, pending={}), [])
             self.assertTrue(flows.release_gate(self.client, cfg(), root, [10, 42], today=TODAY, pending={}))
-            self.fake.issues[42]["labels"].append({"name": "qa:approved"})
+            self.fake.issues[42]["labels"].append({"name": "qa:approved"})  # a label alone is not the passed QA
+            self.assertTrue(flows.release_gate(self.client, cfg(), root, [10, 42], today=TODAY, pending={}))
+            from bb import receipts
+            previous = "Brainstorm"
+            for target in ("Backlog", "Refinement", "Ready", "Selected", "In Progress", "QA", "Releasing"):
+                self.client.comment(42, receipts.render({
+                    "kind": "transition", "event_id": f"s-{target}", "issue": 42, "actor": "dona",
+                    "at": "2026-10-10T11:00:00Z", "from": previous, "to": target, "policy": "x"}))
+                previous = target
             self.assertEqual(flows.release_gate(self.client, cfg(), root, [10, 42], today=TODAY, pending={}), [])
             self.fake.add_issue(43, "Testes do 42", labels=["type:test"], parent=42)
             self.assertTrue(flows.release_gate(self.client, cfg(), root, [10, 42], today=TODAY, pending={43: ["x"]}))

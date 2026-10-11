@@ -194,20 +194,29 @@ def record_qa(client, config, number, *, candidate, digest, verdict, approver, n
 
 
 def _independent_qa(client, number, receipts_now, actor, trusted, candidate=None):
-    """True when the last QA receipt after the card entered QA approves the current candidate and comes from an agent
-    that neither moves the card nor held any claim on the epic or its sub-issues (who delivers never homologates)."""
+    """Verdict ('approved' | 'rejected') of the last QA receipt recorded after the card entered QA, for the current
+    candidate, by an agent that neither moves the card nor held any claim on the epic or its sub-issues (who
+    delivers never homologates); None when there is no such evidence."""
     entered = max((i for i, r in enumerate(receipts_now) if r["kind"] in ("transition", "rejection")
                    and r.get("to") == "QA"), default=None)
     verdicts = [r for r in receipts_now[entered + 1:] if r["kind"] == "qa"] if entered is not None else []
-    if not verdicts or verdicts[-1]["verdict"] != "approved":
-        return False
-    if candidate and verdicts[-1]["candidate"] != candidate:
-        return False  # homologated another candidate: the bytes going out were not seen
+    if not verdicts or not candidate or verdicts[-1]["candidate"] != candidate:
+        return None  # no candidate on the card, or another candidate homologated: the bytes going out were not seen
     delivered_by = {actor.casefold()}
     for issue in [number] + [child["number"] for child in client.sub_issues(number)]:
         found = receipts_now if issue == number else receipts.parse(client.comments(issue), trusted)
         delivered_by |= {r["actor"].casefold() for r in found if r["kind"] == "claim"}
-    return verdicts[-1]["approver"].casefold() not in delivered_by
+    if verdicts[-1]["approver"].casefold() in delivered_by:
+        return None
+    return verdicts[-1]["verdict"]
+
+
+def _born(client, number, issue):
+    """When the oldest piece of work of a card was created (its sub-issues, or the card itself without them): no PR
+    of that work can be older. Unknown creation dates mean no bound."""
+    children = client.sub_issues(number)
+    dates = [child.get("created_at") for child in children] if children else [issue.get("created_at")]
+    return None if not dates or None in dates else min(dates)
 
 
 def _gate(card_kind, current, target):
@@ -218,7 +227,7 @@ def _gate(card_kind, current, target):
 
 def _epic_paths(client, number, since=None):
     """Files changed by the merged PRs of an epic's sub-issues (the evidence of a QA or publication risk). Only the
-    PRs updated since the card was first selected are read: its work cannot be older than that."""
+    PRs updated since the oldest sub-issue was created are read: its work cannot be older than that."""
     children = {child["number"] for child in client.sub_issues(number)} | {number}
     paths = set()
     page = 1
@@ -265,6 +274,10 @@ def _approval_problems(config, card_kind, current, target, gathered, decision):
     if who == "blocked":
         return [f"portão {gate} fora do contrato do modo {mode} (risco {risk}): bloqueado"]
     if who == "agent":
+        if (current, target) == ("QA", "Rejected") and not gathered.get("qa_agent_rejected") and \
+                "qa:rejected" not in labels and names.label("qa:rejected", "legacy") not in labels:
+            return ["reprovação de QA delegada sem evidência: registre o veredito rejected de um agente "
+                    "independente (bb qa verdict) ou a decisão qa:rejected do dono"]
         return []
     if gate == "publish" and gathered.get("delivered"):
         return []  # the publish job only runs after the owner approved the production environment
@@ -276,8 +289,9 @@ def _approval_problems(config, card_kind, current, target, gathered, decision):
 
 
 def move(client, project, config, number, target, actor, *, reason=None, return_to=None, facts=None,
-         event_id=None, sha=None, now=None):
-    """Validate and apply one transition; returns the receipt written (or found, on replay)."""
+         event_id=None, sha=None, now=None, dry_run=False):
+    """Validate and apply one transition; returns the receipt written (or found, on replay). With dry_run, only
+    validates: returns the receipt that would be written and changes nothing."""
     now = now or datetime.datetime.now(datetime.timezone.utc)
     trusted = _trusted(config)
     issue = client.issue(number)
@@ -295,13 +309,14 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
     gathered = globals()["facts"](client, config, number, now=now)
     gathered.update(facts or {})
     gathered["accepted"] = gathered["selected"] = True  # the approval check below is their evidence
-    selected = [r["at"] for r in moves if r.get("to") == "Selected"]
     decision = _gate_decision(config, client, number, card_kind, current, target, gathered["labels"],
-                              since=selected[0] if selected else None)
+                              since=_born(client, number, issue))
     gathered["gate_delegated"] = decision[1] == "agent"
-    if decision[0] == "qa" and decision[1] == "agent" and _independent_qa(client, number, receipts_now, actor,
-                                                                          trusted, project.get(number, "Candidate")):
-        gathered["qa_decision"] = "automatic"
+    if decision[0] == "qa" and decision[1] == "agent":
+        verdict = _independent_qa(client, number, receipts_now, actor, trusted, project.get(number, "Candidate"))
+        if verdict == "approved":
+            gathered["qa_decision"] = "automatic"
+        gathered["qa_agent_rejected"] = verdict == "rejected"
     found = states.problems(card_kind, current, target, gathered, reason=reason,
                             return_to=recorded_return if current == "Rejected" else return_to)
     found += [] if found else _approval_problems(config, card_kind, current, target, gathered, decision)
@@ -318,6 +333,8 @@ def move(client, project, config, number, target, actor, *, reason=None, return_
                        evidence=[f"reprovado em {current} por {actor}"])
     else:
         receipt["kind"] = "transition"
+    if dry_run:
+        return receipt
     done_attempts = attempts(client, number, trusted) + (1 if target == "Rejected" else 0)
     _effects(client, project, number, issue, card_kind, current, target, receipt, done_attempts)
     client.comment(number, receipts.render(receipt))  # recorded only after the effects happened
