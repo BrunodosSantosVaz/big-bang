@@ -18,7 +18,7 @@ concurrency:
 jobs:
   release:
     name: pacote e release
-    if: github.repository == 'BrunodosSantosVaz/big-bang'
+    if: github.repository == 'BrunodosSantosVaz/big-bang' && (startsWith(github.ref_name, 'v0.') || startsWith(github.ref_name, 'v1.') || startsWith(github.ref_name, 'v2.'))
     runs-on: ubuntu-24.04
     permissions:
       contents: write

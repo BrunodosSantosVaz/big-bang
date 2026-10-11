@@ -1,0 +1,38 @@
+# Gerado pelo Big Bang v3.0.0 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-merge-pr.yml. Não edite: personalize em bigbang.toml.
+# "Merge PR" (ADR-0022): merges an approved PR whose gate is green on the exact head, into develop or a release
+# branch, never into main. Triggered by the approval labels and by the end of CI.
+name: Merge PR
+
+on:
+  pull_request:
+    types: [labeled]
+  workflow_run:
+    workflows: [Framework gate]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-framework-merge-pr-${{ github.event.pull_request.number || github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    if: github.repository == 'BrunodosSantosVaz/big-bang' && ((github.event_name == 'pull_request' && contains(fromJSON('["pr:approved","pr-aprovado","approved:tests","testes-aprovados"]'), github.event.label.name)) || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'))
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Merge when approved and green
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          PR: ${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number }}
+        run: |
+          [ -n "$PR" ] || { echo "Nenhum PR neste evento."; exit 0; }
+          python .bigbang/bin/bb.py merge "$PR" || echo "::notice::PR #$PR ainda não pode ser mesclado (veja acima)."

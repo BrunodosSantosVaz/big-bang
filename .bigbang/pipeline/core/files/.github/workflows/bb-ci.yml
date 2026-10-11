@@ -1,0 +1,128 @@
+# CI of the v3 grouping workflow (ADR-0022/0023): stack commands, PR rules and security, aggregated by the single
+# required check `gate`, which fails when a required job failed, was cancelled or was skipped without reason.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop, 'release/**']
+  schedule:
+    - cron: '17 6 * * 1'
+
+permissions:
+  contents: read
+  discussions: read
+
+concurrency:
+  group: bb-ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: check
+    if: ${{ github.event_name != 'schedule' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: bb verify (framework, generated layer and workflows)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python .bigbang/bin/bb.py verify
+      - name: Install
+        run: bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
+      - name: Lint
+        run: bash .bigbang/esteira/nucleo/scripts/comando.sh lint
+      - name: Types
+        run: bash .bigbang/esteira/nucleo/scripts/comando.sh tipos
+      - name: Architecture
+        run: bash .bigbang/esteira/nucleo/scripts/comando.sh arquitetura
+      - name: Build
+        run: bash .bigbang/esteira/nucleo/scripts/comando.sh build
+      - name: Tests and coverage (full or affected, by mode)
+        run: bash .bigbang/esteira/nucleo/scripts/testes.sh
+        env:
+          BB_BASE_TESTES: ${{ github.event.pull_request.base.sha || github.event.before }}
+      - name: Regression order (bug PR)
+        if: ${{ startsWith(github.head_ref, 'fix/') || startsWith(github.head_ref, 'hotfix/') }}
+        run: bash .bigbang/esteira/nucleo/scripts/regressao.sh
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      - name: Documentation (Markdown and links)
+        run: python .bigbang/bin/bb.py pipeline docs --community --remote-visibility
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  rules:
+    name: rules
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: PR content as data (never executed with this token)
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git fetch -q origin "+refs/pull/$PR_NUMBER/head:refs/remotes/origin/pr-head"
+          git worktree add -q --detach "$RUNNER_TEMP/pr" "$PR_HEAD_SHA"
+      - name: PR rules (branch, title, Refs, acceptance lock, flag, sensitive paths)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python .bigbang/bin/bb.py pipeline pr-rules --pr "$PR_NUMBER" --content-dir "$RUNNER_TEMP/pr"
+
+  security:
+    name: security
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Security scans
+        run: bash .bigbang/esteira/nucleo/scripts/seguranca.sh
+        env:
+          EVENTO: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+  gate:
+    name: gate
+    if: ${{ always() }}
+    needs: [check, rules, security]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Every required job is green (a skipped job only counts when not applicable)
+        env:
+          EVENT: ${{ github.event_name }}
+          CHECK: ${{ needs.check.result }}
+          RULES: ${{ needs.rules.result }}
+          SECURITY: ${{ needs.security.result }}
+        run: |
+          fail=0
+          expect() { if [ "$2" != "$3" ]; then echo "::error::$1: $2 (esperado $3)"; fail=1; fi; }
+          if [ "$EVENT" = schedule ]; then expect check "$CHECK" skipped; else expect check "$CHECK" success; fi
+          if [ "$EVENT" = pull_request ]; then expect rules "$RULES" success; else expect rules "$RULES" skipped; fi
+          expect security "$SECURITY" success
+          exit "$fail"

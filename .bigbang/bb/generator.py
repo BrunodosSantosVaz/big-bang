@@ -6,6 +6,7 @@ Sources, in composition order (a later layer may replace a file of an earlier on
   .bigbang/esteira/perfis/<perfil>/arquivos/        idem
   .bigbang/esteira/perfis/deploy/alvos/<alvo>/arquivos/   idem, deploy profile only
   .bigbang/skills/bb-*/                             always, written to .agents/skills/ and .claude/skills/
+  .bigbang/pipeline/skills/bb-*/                    v3 projects only: replaces the legacy folder of the same name
 plus the marked blocks of AGENTS.md (always) and STACK.md (when it exists).
 """
 import difflib
@@ -85,6 +86,13 @@ def with_computed(config, root):
     context["gerado"] = {"dependabot": dependabot_entries(config["entrega"].get("ecossistemas", [])),
                          "matriz_compilado": pipeline.build_matrix(systems),
                          "modo_trabalho": (
+                             "**Modo autônomo.** Você conduz o trabalho de ponta a ponta, mas só dentro do contrato "
+                             "`autonomy.toml` (alvos, riscos, portões, flags, WIP, tentativas, custo e janela de "
+                             "publicação). Fora dele, o portão fica bloqueado para você e só a decisão registrada do "
+                             "dono libera; nunca amplie o contrato. Antes de começar, rode `bb autonomy check`. Testes "
+                             "antes do código, revisão independente, scanners e documentação continuam obrigatórios; "
+                             "todo recibo registra que quem aprovou foi um agente. Veja o ADR-0025."
+                             if config_module.get(config, "project.mode") == "autonomous" else
                              "**Modo Flash.** Escreva os testes antes do código e preserve a ordem teste → tarefas. "
                              "Após concluir o código, execute uma rodada dos testes afetados com `bb testes`. "
                              "Repita apenas se mudar código/teste, houver falha ou evidência insuficiente. "
@@ -95,6 +103,10 @@ def with_computed(config, root):
                              "**Modo padrão.** Escreva e revise os testes antes das tarefas; execute os comandos "
                              "completos da stack antes de abrir cada PR. Veja `.bigbang/processo/06-execucao.md`."
                          )}
+    if is_v3_pipeline(config):  # the v3 layer cites the v3 process, never the epic-branch documents
+        for legacy, current in ((".bigbang/processo/17-flash.md", ".bigbang/pipeline/process/modes.md"),
+                                (".bigbang/processo/06-execucao.md", ".bigbang/pipeline/process/execution.md")):
+            context["gerado"]["modo_trabalho"] = context["gerado"]["modo_trabalho"].replace(legacy, current)
     context['gerado'].update(env_alvo='          # Perfil compilado: sem credenciais de deploy.', runner_deploy='ubuntu-24.04', preparar_alvo=':')
     if config['entrega']['perfil'] == 'deploy':
         target, artifact = deploy_catalog.resolve(root, config)
@@ -108,8 +120,11 @@ def with_computed(config, root):
     return context
 
 
-def build_plan(root, install_pipeline=False):
-    config = config_module.load(root, required=False)
+def build_plan(root, install_pipeline=False, framework=False):
+    from . import framework as own
+    config = own.load(root, required=True) if framework else config_module.load(root, required=False)
+    if config is not None and config.get("_framework"):
+        return framework_plan(root, config)
     if install_pipeline and config is None:
         raise BbError("a esteira só pode ser gerada depois do bb init (falta o bigbang.toml)", EXIT_INVALID_STATE)
     installed = config is not None and (install_pipeline or pipeline_installed(root))
@@ -120,20 +135,81 @@ def build_plan(root, install_pipeline=False):
     plan = Plan(installed)
 
     for layer in _layers(config, installed):
-        _add_tree(plan, root, os.path.join(framework_dir(root), *layer.split("/"), "arquivos"), "", context, version)
+        folder = "files" if layer.startswith("pipeline/") else "arquivos"
+        _add_tree(plan, root, os.path.join(framework_dir(root), *layer.split("/"), folder), "", context, version)
         if layer == "esteira/sempre" and any(path.startswith(".github/") for path in plan.expected):
             raise BbError(".bigbang/esteira/sempre/ não pode gerar arquivos em .github/ (só a esteira gera)",
                           EXIT_INVALID_STATE)
-    _add_skills(plan, root, context, version)
-    _add_agents_md(plan, root, context, version, founded=config is not None)
+    _add_skills(plan, root, context, version, v3=is_v3_pipeline(config))
+    _add_agents_md(plan, root, context, version, founded=config is not None, v3=is_v3_pipeline(config))
     if config is not None:
         _add_stack_md(plan, root, config, version)
     plan.stale = sorted(set(_generated_candidates(root, installed)) - set(plan.expected))
     return plan
 
 
+def framework_plan(root, config):
+    """Same v3 layers, namespaced workflows only; the three transitional workflows remain owned by Git."""
+    from . import framework
+    plan = Plan(False)
+    context = with_computed(config, root)
+    version = framework_version(root)
+    _add_tree(plan, root, os.path.join(framework_dir(root), "esteira/sempre/arquivos"), "", context, version)
+    _add_skills(plan, root, context, version)
+    _add_agents_md(plan, root, initial_context(root), version, founded=False)
+    for layer in ("pipeline/core", "pipeline/profiles/compiled", "pipeline/framework"):
+        folder = os.path.join(framework_dir(root), layer, "files/.github/workflows")
+        temporary = Plan(False)
+        _add_tree(temporary, root, folder, ".github/workflows/", context, version)
+        for path, content in temporary.expected.items():
+            name = os.path.basename(path)
+            if name == "bb-ci.yml":
+                continue  # Framework CI preserves Docker, shellcheck and gitleaks, aggregated by gate.
+            destination = ".github/workflows/" + name.replace("bb-", FRAMEWORK_WORKFLOW_PREFIX, 1)
+            content = content.replace("group: bb-", "group: bb-framework-")
+            content = content.replace("workflows: [CI]", "workflows: [Framework gate]")
+            if not re.search(r"^concurrency:", content, re.M):
+                group = os.path.basename(destination).removesuffix(".yml")
+                content = content.replace("\njobs:\n", f"\nconcurrency:\n  group: {group}\n  cancel-in-progress: false\n\njobs:\n")
+            # Put the repository check on every job's own condition (including always() jobs).
+            jobs = content.index("\njobs:\n") + len("\njobs:\n")
+            header, body = content[:jobs], content[jobs:]
+            marks = list(re.finditer(r"^  [\w-]+:[ \t]*(?:#.*)?$", body, re.M))
+            sections = []
+            for mark, following in zip(marks, marks[1:] + [None]):
+                section = body[mark.start():following.start() if following else len(body)]
+                found = re.search(r"^    if: (.+)$", section, re.M)
+                condition = "github.repository == '" + framework.ORIGIN + "'"
+                if found:
+                    value = found[1].strip()
+                    if value.startswith("${{") and value.endswith("}}"):
+                        value = value[3:-2].strip()
+                    condition += " && (" + value + ")"
+                    section = section[:found.start()] + "    if: " + condition + section[found.end():]
+                else:
+                    section = section.replace("\n", "\n    if: " + condition + "\n", 1)
+                sections.append(section)
+            content = header + "".join(sections)
+            plan.add(destination, content, temporary.sources[path])
+    legacy = {".github/workflows/" + name for name in
+              ("bb-framework-ci.yml", "bb-framework-faxina.yml", "bb-framework-release.yml")}
+    candidates = {path for path in _generated_candidates(root, installed=True)
+                  if path not in legacy}
+    plan.stale = sorted(candidates - set(plan.expected))
+    return plan
+
+
+def is_v3_pipeline(config):
+    """The v3 tree (.bigbang/pipeline) is generated for the grouping workflow (ADR-0022)."""
+    return config is not None and config_module.get(config, "workflow.model") == "grouping"
+
+
 def _layers(config, installed):
     layers = ["esteira/sempre"]
+    if installed and is_v3_pipeline(config):
+        layers.append("pipeline/core")
+        layers.append(f"pipeline/profiles/{config_module.get(config, 'delivery.profile')}")
+        return layers
     if installed:
         perfil = config["entrega"]["perfil"]
         layers += ["esteira/nucleo", f"esteira/perfis/{perfil}"]
@@ -164,27 +240,37 @@ def _add_tree(plan, root, folder, destination_prefix, context, version):
         plan.add(destination, add_notice(content, destination, version, source), source)
 
 
-def _add_skills(plan, root, context, version):
-    skills = os.path.join(framework_dir(root), "skills")
-    for name in sorted(os.listdir(skills)):
-        folder = os.path.join(skills, name)
-        if not os.path.isdir(folder) or name in IGNORED_NAMES:
-            continue
-        if not name.startswith("bb-"):
-            raise BbError(f".bigbang/skills/{name}: skills do framework precisam do prefixo bb-", EXIT_INVALID_STATE)
+def _add_skills(plan, root, context, version, v3=False):
+    """Framework skills for every project; a v3 project gets the v3 version of the adapted ones and the v3-only
+    skills from .bigbang/pipeline/skills/ (a folder there replaces the legacy folder of the same name)."""
+    sources = {}
+    bases = [os.path.join(framework_dir(root), "skills")]
+    if v3:
+        bases.append(os.path.join(framework_dir(root), "pipeline", "skills"))
+    for base in bases:
+        for name in sorted(os.listdir(base)):
+            folder = os.path.join(base, name)
+            if not os.path.isdir(folder) or name in IGNORED_NAMES:
+                continue
+            if not name.startswith("bb-"):
+                raise BbError(f"{os.path.relpath(folder, root)}: skills do framework precisam do prefixo bb-",
+                              EXIT_INVALID_STATE)
+            sources[name] = folder
+    for name, folder in sorted(sources.items()):
         for target in SKILL_TARGETS:
             _add_tree(plan, root, folder, f"{target}/{name}/", context, version)
 
 
-def agents_block(root, context, version, founded):
-    source = ".bigbang/AGENTS.base.md" if founded else ".bigbang/AGENTS.inicial.md"
+def agents_block(root, context, version, founded, v3=False):
+    source = (".bigbang/pipeline/AGENTS.base.md" if v3 else ".bigbang/AGENTS.base.md") if founded else \
+        ".bigbang/AGENTS.inicial.md"
     body = substitute(read_text(os.path.join(root, *source.split("/"))), context, source)
     return (f"<!-- bigbang:inicio v{version} -->\n<!-- {notice_text(version, source)} -->\n\n"
             f"{body.rstrip()}\n\n<!-- bigbang:fim -->")
 
 
-def _add_agents_md(plan, root, context, version, founded):
-    block = agents_block(root, context, version, founded)
+def _add_agents_md(plan, root, context, version, founded, v3=False):
+    block = agents_block(root, context, version, founded, v3)
     path = os.path.join(root, AGENTS_FILE)
     if os.path.exists(path):
         current = read_text(path)

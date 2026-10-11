@@ -155,7 +155,8 @@ def readiness_problems(body, labels):
 SLUG_MAX = 40
 CONVENTIONAL = re.compile(r"^(feat|fix|docs|test|refactor|build|ci|chore|perf|style|revert)(\(([\w./-]+)\))?(!)?: (\S.*)$")
 SEMVER = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
-ISSUE_BRANCH = re.compile(r"^(feature|teste|docs|bugfix|hotfix|epico|fundacao)/(\d+)-[a-z0-9]+(?:-[a-z0-9]+)*$")
+ISSUE_BRANCH = re.compile(r"^(feature|teste|test|docs|bugfix|fix|hotfix|epico|fundacao|foundation|maintenance)/"
+                          r"(\d+)-[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
 def slug(text):
@@ -200,6 +201,89 @@ def branch_problem(head, base):
         return (f"branch '{head}' fora do padrão: use feature|teste|docs|bugfix|hotfix|fundacao/<n>-<slug>, "
                 "epico/<n>-<slug>, release/x.y.z, framework/vX.Y.Z ou sync/<n>-<slug>")
     return None if ok else f"'{head}' deve abrir PR para {expected}, não para '{base}'"
+
+
+RELEASE = re.compile(r"^release/\d+\.\d+\.\d+$")
+
+
+def v3_branch_problem(head, base):
+    """Branch model of the grouping workflow (ADR-0022): tasks into develop, fixes into develop or a release,
+    maintenance into main, releases into main; there are no epic branches."""
+    kind, _ = branch_issue(head)
+    if kind in ("test", "feature", "docs", "foundation"):
+        expected, ok = "develop", base == "develop"
+    elif kind in ("fix", "hotfix"):
+        expected, ok = "develop ou release/x.y.z", base == "develop" or bool(RELEASE.match(base))
+    elif kind == "maintenance":
+        expected, ok = "main", base == "main"
+    elif RELEASE.match(head):
+        expected, ok = "main", base == "main"
+    elif re.match(r"^framework/v\d+\.\d+\.\d+$", head) or head.startswith("dependabot/github_actions/"):
+        expected, ok = "develop", base == "develop"
+    elif re.match(r"^sync/[a-z0-9-]+$", head):
+        expected, ok = "develop ou release/x.y.z", base == "develop" or bool(RELEASE.match(base))
+    elif head.startswith("dependabot/"):
+        expected, ok = "main", base == "main"
+    else:
+        return (f"branch '{head}' fora do padrão v3: use test|feature|docs|fix|hotfix|maintenance|foundation/"
+                "<n>-<slug>, release/x.y.z, framework/vX.Y.Z ou sync/<nome>")
+    return None if ok else f"'{head}' deve abrir PR para {expected}, não para '{base}'"
+
+
+CLOSING = re.compile(r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#\d+", re.I)
+
+
+OWNER_FILES = ("autonomy.toml", "bigbang.toml", "PRODUTO.md", "STACK.md", "DESIGN.md", "flags.toml")  # iron rule 9
+NEVER_DELEGATED = ("autonomy.toml",)  # the contract that delegates can never be delegated
+
+
+def v3_pr_rules(head, base, title, body, labels, paths, diff, artifact_patterns, zones, marker, issue_labels,
+                epic_labels, mode="normal", flags_by_agent=False):
+    """PR rules of the grouping workflow: (errors, labels to add, labels to remove). Labels may come in either
+    language; the effects use the v3 names."""
+    from . import acceptance, names
+    def has(collection, v3_label):
+        return v3_label in collection or names.label(v3_label, "legacy") in collection
+    errors, add, remove = [], set(), set()
+    problem = v3_branch_problem(head, base)
+    if problem:
+        errors.append(problem)
+    problem = title_problem(title)
+    if problem:
+        errors.append(problem)
+    kind, issue = branch_issue(head)
+    if issue is not None:
+        if not re.search(rf"\bRefs\s+#{issue}\b", body or "", re.I):
+            errors.append(f"o corpo do PR precisa de 'Refs #{issue}' (a issue da branch)")
+        if CLOSING.search(body or ""):
+            errors.append("use 'Refs #n', nunca Closes/Fixes/Resolves: o controlador fecha a issue no merge")
+    legacy_kind = {"test": "teste", "fix": "bugfix"}.get(kind, kind)
+    if not RELEASE.match(head):  # a release only carries changes that already passed these rules
+        errors += acceptance.lock_problems(diff, legacy_kind, issue, marker, has(labels, "approved:test-change"))
+    artifact = artifact_paths(paths, artifact_patterns)
+    if artifact:
+        remove.add("no-release")
+        if kind in ("feature", "test", "docs") and has(epic_labels, "no-release"):
+            errors.append("o épico desta tarefa é no-release, mas o PR muda o artefato: tire no-release do épico com "
+                          "o dono e refaça o planejamento")
+        if base == "develop" and kind in ("feature", "test", "docs") and not (
+                has(epic_labels, "flag:required") or has(epic_labels, "flag:waived")):
+            errors.append("código do artefato na develop exige a decisão de feature flag do épico "
+                          "(flag:required ou flag:waived)")
+    else:
+        add.add("no-release")
+    own_marks = issue is not None and only_own_marks_released(diff, issue, marker)
+    sensitive = sensitive_paths(paths, zones, acceptance_allowed=kind == "test" or own_marks)
+    explicit_human = has(labels, "review:human") or has(issue_labels, "review:human")
+    if sensitive and not (has(labels, "owner:ai-review") or has(issue_labels, "owner:ai-review")) and (
+            mode == "normal" or explicit_human):
+        add.add("review:human")  # flash/autonomous delegate routine review; an explicit human review stays
+    owner_files = [path for path in paths if matches(path, OWNER_FILES)
+                   and not (flags_by_agent and matches(path, ("flags.toml",)))]
+    owner_ai = has(labels, "owner:ai-review") or has(issue_labels, "owner:ai-review")
+    if any(matches(path, NEVER_DELEGATED) for path in owner_files) or (owner_files and not owner_ai):
+        add.add("review:human")  # the owner's own files are the owner's decision in every mode
+    return errors, add, remove - add
 
 
 def title_problem(title):
@@ -319,7 +403,7 @@ def changelog_has_version(changelog, version):
 # --- paths: artifact and sensitive zones (spec 5.4, 11.8) -------------------------------------------------------------
 
 ALWAYS_SENSITIVE = (".github/**", "tests/aceite/**", ".bigbang-docs.json", ".bigbang-producao.json", "STACK.md", "DESIGN.md", "PRODUTO.md", "bigbang.toml",
-                    "flags.toml")
+                    "flags.toml", "autonomy.toml")
 DEPENDENCY_FILES = ("package.json", "package-lock.json", "npm-shrinkwrap.json", "yarn.lock", "pnpm-lock.yaml",
                     "pyproject.toml", "requirements*.txt", "poetry.lock", "uv.lock", "Pipfile", "Pipfile.lock",
                     "go.mod", "go.sum", "Cargo.toml", "Cargo.lock", "pom.xml", "build.gradle", "build.gradle.kts",
@@ -427,7 +511,7 @@ def only_own_marks_released(diff, issue, marker):
 
 RUNNERS = {"windows-x64": "windows-2025", "windows-arm64": "windows-11-arm", "linux-x64": "ubuntu-24.04",
            "linux-arm64": "ubuntu-24.04-arm", "macos-x64": "macos-15-intel", "macos-arm64": "macos-15",
-           "android": "ubuntu-24.04"}  # android: APK/AAB built on Linux (the runner has the Android SDK and a JDK)
+           "android": "ubuntu-24.04", "universal": "ubuntu-24.04"}  # android: APK/AAB built on Linux (the runner has the Android SDK and a JDK)
 
 
 def build_matrix(systems):

@@ -84,11 +84,12 @@ class Init(unittest.TestCase):
         self.assertEqual(codigo, EXIT_OK, saida)
         with open(os.path.join(self.raiz, "bigbang.toml"), "rb") as arquivo:
             config = tomllib.load(arquivo)
-        self.assertEqual(config["projeto"], {"nome": "Sistema Ação X", "slug": "sistema-acao-x", "dono": "dona-teste",
-                                             "repositorio": "dona-teste/sistema-x", "visibilidade": "privado",
-                                             "licenca": "", "modo": "padrao"})
-        self.assertEqual(config["deploy"]["imagem"], "ghcr.io/dona-teste/sistema-acao-x")
-        self.assertEqual(config["paineis"]["owner"], "dona-teste")
+        self.assertEqual(config["project"], {"name": "Sistema Ação X", "slug": "sistema-acao-x", "owner": "dona-teste",
+                                             "repository": "dona-teste/sistema-x", "visibility": "private",
+                                             "license": "", "mode": "normal"})
+        self.assertEqual(config["deploy"]["image"], "ghcr.io/dona-teste/sistema-acao-x")
+        self.assertEqual(config["board"]["owner"], "dona-teste")
+        self.assertEqual(config["workflow"]["model"], "grouping")
         self.assertIn("# versão do framework instalada", self.ler("bigbang.toml"))  # comments kept
         self.assertEqual(self.ler(".bigbang/README.md"), readme_framework)
         self.assertTrue(self.ler(".bigbang/LICENSE").startswith("MIT License"))
@@ -98,14 +99,44 @@ class Init(unittest.TestCase):
         for nome in ("CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "SECURITY.md"):  # DOC-16
             self.assertIn("dona-teste/sistema-x", self.ler(nome))
             self.assertNotIn("{{", self.ler(nome))
-        self.assertIn("a partir de .bigbang/AGENTS.base.md", self.ler("AGENTS.md"))
+        self.assertIn("a partir de .bigbang/pipeline/AGENTS.base.md", self.ler("AGENTS.md"))
         self.assertIn("# Instruções para IAs — Sistema Ação X", self.ler("AGENTS.md"))
         self.assertIn("Issue de F0: https://github.com/dona-teste/sistema-x/issues/1", saida)
         self.assertEqual(verify.run(self.raiz), [])
         chamadas = self.chamadas()
-        self.assertEqual(chamadas[0][:3], ["label", "create", "fundacao"])
+        self.assertEqual(chamadas[0][:3], ["label", "create", "type:foundation"])
         self.assertEqual(chamadas[-1][:2], ["issue", "create"])
         self.assertIn(init.F0_TITLE, chamadas[-1])
+
+    def test_retira_so_o_trecho_exclusivo_do_framework(self):
+        texto = self.ler("AGENTS.md")
+        self.assertIn("<!-- bigbang:framework:inicio -->", texto)
+        proprio = "\nNota própria: atualizações vêm de BrunodosSantosVaz/big-bang.\n"
+        with open(os.path.join(self.raiz, "AGENTS.md"), "a", encoding="utf-8") as arquivo:
+            arquivo.write(proprio)
+        codigo, saida = self.rodar("--nome", "Sistema X", "--sem-github")
+        self.assertEqual(codigo, EXIT_OK, saida)
+        depois = self.ler("AGENTS.md")
+        self.assertNotIn("Modo do próprio framework", depois)
+        self.assertNotIn("bigbang:framework", depois)
+        self.assertIn("Esta seção pertence ao projeto", depois)
+        self.assertIn(proprio.strip(), depois)  # the project's own text survives, even citing the origin
+
+    def test_simulacao_mostra_a_retirada_do_trecho_do_framework(self):
+        codigo, saida = self.rodar("--nome", "Sistema X", "--simular")
+        self.assertEqual(codigo, EXIT_OK, saida)
+        self.assertIn("retirar do AGENTS.md as instruções exclusivas do framework", saida)
+
+    def test_sem_marcador_a_secao_do_projeto_fica_intacta(self):
+        projeto = "## Projeto\n\nTexto do projeto que cita BrunodosSantosVaz/big-bang e fica.\n"
+        caminho = os.path.join(self.raiz, "AGENTS.md")
+        texto = self.ler("AGENTS.md")
+        bloco = texto[:texto.index("<!-- bigbang:fim -->") + len("<!-- bigbang:fim -->")]
+        with open(caminho, "w", encoding="utf-8") as arquivo:
+            arquivo.write(bloco + "\n\n" + projeto)
+        codigo, saida = self.rodar("--nome", "Sistema X", "--sem-github")
+        self.assertEqual(codigo, EXIT_OK, saida)
+        self.assertTrue(self.ler("AGENTS.md").endswith(projeto))
 
     def test_publico_cria_licenca_do_sistema(self):
         with patch.object(init.documentation, "preflight", return_value={"commit": "a" * 40, "branch": "master"}):

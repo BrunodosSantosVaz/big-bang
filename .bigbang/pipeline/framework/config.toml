@@ -1,0 +1,74 @@
+# Framework only. bb init removes this file; never a Foundation marker.
+# Configuração do projeto no Big Bang. Fonte única de tudo que as ferramentas precisam.
+# Criado por `bb init` (F0) e completado na Fundação. Mudar este arquivo é zona sensível (revisão humana).
+# O gerador valida o esquema e recusa chaves desconhecidas. Depois de mudar, rode `bb gerar`.
+
+[bigbang]
+version = "3.0.0"                       # versão do framework instalada (igual a .bigbang/VERSION)
+origin = "BrunodosSantosVaz/big-bang"  # de onde vêm as atualizações
+
+[project]
+mode = "flash"                         # padrao | flash; pode mudar depois, com decisão do dono e bb gerar
+name = "Big Bang"
+slug = "bigbang"
+owner = "BrunodosSantosVaz"             # login do GitHub do dono
+repository = "BrunodosSantosVaz/big-bang"
+visibility = "public"                # privado | publico
+license = "MIT"                        # obrigatório se publico (identificador SPDX, ex.: "MIT")
+
+[delivery]
+profile = "compiled"                    # deploy | compilado
+target = ""                              # deploy: alvo implementado em `bb alvos`; compilado: ""
+artifact_paths = [".bigbang/"]
+version_file = ".bigbang-framework.toml" # único arquivo com a versão do artefato (definido em F2)
+ecosystems = []                          # pacotes da stack para o Dependabot (definido em F2)
+
+[compiled]                            # só no perfil compilado
+# Cada build_<sistema> deixa exatamente um arquivo em $BB_SAIDA (lê BB_VERSAO, BB_RC, BB_SISTEMA). ADR-0009.
+# Sistemas: windows-x64, windows-arm64, linux-x64, linux-arm64, macos-x64, macos-arm64, android (APK/AAB).
+systems = ["universal"]
+build_universal = "python .bigbang/bin/bb.py package --output $BB_OUTPUT"
+
+[commands]                             # definidos em F2 para a stack escolhida
+# Flash: unidade/integração/aceite afetados e cobertura. Vazio = suíte completa.
+# Recebe BB_BASE_TESTES (SHA) e BB_ARQUIVOS_ALTERADOS (caminho de arquivo JSON com os caminhos).
+affected_tests = ""
+install = ""
+lint = ""
+types = ""
+test = "python -m unittest discover -s .bigbang/tests -q"
+acceptance_test = ""
+architecture = ""
+coverage = ""
+build = ""
+
+[tests]
+min_coverage = 80                  # % nas camadas de domínio e aplicação
+pending_marker = "test.failing"        # como a stack marca teste com falha esperada (xfail strict, test.failing…)
+test_pattern = "(it|test)\\("          # regex que identifica a declaração de um teste na stack
+
+[security]
+asvs_level = "L2"                      # L1 | L2 (L2 obrigatório com dado pessoal ou dinheiro)
+browser_database = false             # true só com ADR (SEG-IA-01)
+sensitive_paths = [".bigbang/**"]
+# Sempre sensíveis, além da lista: .github/**, tests/aceite/** (exceto no PR de teste do épico, cuja revisão
+# segue as labels testes-revisao-*), STACK.md, DESIGN.md, PRODUTO.md, bigbang.toml, flags.toml e os arquivos
+# de dependência da stack.
+
+[board]
+model = "single"
+labels = "v3"
+owner = "BrunodosSantosVaz"
+number = 0
+
+[agents]
+names = ["claude-1", "claude-2", "codex-1", "copilot-1"]
+tasks_per_agent = 1
+lease_hours = 24
+confirm_seconds = 10
+
+[flags]
+max_age_days = 30
+
+[workflow]
+model = "grouping"

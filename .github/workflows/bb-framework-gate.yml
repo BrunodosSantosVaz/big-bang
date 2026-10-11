@@ -1,0 +1,151 @@
+# Gerado pelo Big Bang v3.0.0 a partir de .bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml. Não edite: personalize em bigbang.toml.
+# CI do proprio Big Bang. Roda so no repositorio BrunodosSantosVaz/big-bang: em sistemas criados a partir do
+# template, todos os jobs sao pulados, e a Fundacao (F5) remove este arquivo. Decisoes: .bigbang/docs/decisoes/ADR-0006.
+name: Framework gate
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop, 'release/**']
+
+permissions:
+  contents: read
+  discussions: read
+
+concurrency:
+  group: bb-framework-framework-ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  testes:
+    if: github.repository == 'BrunodosSantosVaz/big-bang'
+    name: testes (Python ${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Wiki proposta, rastreabilidade e comunidade pública
+        run: python .bigbang/bin/bb.py pipeline docs --community --remote-visibility
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Testes do framework (estrutura, workflows, Markdown e links)
+        run: python -m unittest discover -s .bigbang/tests -v
+      - name: bb verificar (CHECKSUMS, camada gerada e workflows)
+        run: python .bigbang/bin/bb.py verificar
+
+  alvo-docker:
+    if: github.repository == 'BrunodosSantosVaz/big-bang'
+    name: alvo vps-docker (Docker de verdade)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: publicar, migrar, saude e voltar contra um servidor em contêiner
+        run: python -m unittest discover -s .bigbang/tests -p 'test_alvo_vps.py' -v
+        env:
+          BB_TESTE_DOCKER: '1'
+
+  shellcheck:
+    if: github.repository == 'BrunodosSantosVaz/big-bang'
+    name: shellcheck
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Shellcheck em todos os scripts Bash
+        run: |
+          shellcheck --version
+          mapfile -t scripts < <(git ls-files '*.sh' '.bigbang/bin/bb')
+          if [ "${#scripts[@]}" -eq 0 ]; then
+            echo "Nenhum script Bash ainda."
+            exit 0
+          fi
+          shellcheck --severity=style "${scripts[@]}"
+
+  gitleaks:
+    if: github.repository == 'BrunodosSantosVaz/big-bang'
+    name: gitleaks
+    runs-on: ubuntu-24.04
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Instalar o Gitleaks (versao e hash fixos)
+        run: |
+          arquivo="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/$arquivo" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$arquivo"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/$arquivo" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$arquivo" -C "$RUNNER_TEMP" gitleaks
+      - name: Gitleaks no historico completo
+        run: '"$RUNNER_TEMP/gitleaks" git --redact --verbose --exit-code 1 .'
+
+  rules:
+    name: rules
+    if: github.repository == 'BrunodosSantosVaz/big-bang' && (github.event_name == 'pull_request')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # PRs into main (only releases and maintenance) run the trusted v3 code of develop: until the first v3
+          # release, main still has the v2 bb, which lacks the pipeline commands.
+          ref: ${{ github.event.pull_request.base.ref == 'main' && 'develop' || github.event.pull_request.base.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: PR content as data (never executed with this token)
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git fetch -q origin "+refs/pull/$PR_NUMBER/head:refs/remotes/origin/pr-head"
+          git worktree add -q --detach "$RUNNER_TEMP/pr" "$PR_HEAD_SHA"
+      - name: PR rules (branch, title, Refs, acceptance lock, flag, sensitive paths)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python .bigbang/bin/bb.py pipeline pr-rules --pr "$PR_NUMBER" --content-dir "$RUNNER_TEMP/pr"
+
+  gate:
+    name: gate
+    if: github.repository == 'BrunodosSantosVaz/big-bang' && (always())
+    needs: [testes, alvo-docker, shellcheck, gitleaks, rules]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Required framework checks
+        env:
+          EVENT: ${{ github.event_name }}
+          TESTS: ${{ needs.testes.result }}
+          DOCKER: ${{ needs.alvo-docker.result }}
+          SHELLCHECK: ${{ needs.shellcheck.result }}
+          GITLEAKS: ${{ needs.gitleaks.result }}
+          RULES: ${{ needs.rules.result }}
+        run: |
+          for result in "$TESTS" "$DOCKER" "$SHELLCHECK" "$GITLEAKS"; do
+            [ "$result" = success ] || exit 1
+          done
+          if [ "$EVENT" = pull_request ]; then [ "$RULES" = success ]; else [ "$RULES" = skipped ]; fi

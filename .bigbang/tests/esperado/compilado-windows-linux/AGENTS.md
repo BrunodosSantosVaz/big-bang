@@ -1,9 +1,9 @@
-<!-- bigbang:inicio v2.0.1 -->
-<!-- Gerado pelo Big Bang v2.0.1 a partir de .bigbang/AGENTS.base.md. Não edite: personalize em bigbang.toml. -->
+<!-- bigbang:inicio v3.0.0 -->
+<!-- Gerado pelo Big Bang v3.0.0 a partir de .bigbang/AGENTS.base.md. Não edite: personalize em bigbang.toml. -->
 
 # Instruções para IAs — Controle Fictício
 
-Este sistema é construído com o **Big Bang v2.0.1**. Estas instruções valem para qualquer IA.
+Este sistema é construído com o **Big Bang v3.0.0**. Estas instruções valem para qualquer IA.
 Leia nesta ordem, no início de toda sessão: `PRODUTO.md`, `STACK.md`, `DESIGN.md` (se houver interface),
 `bigbang.toml`, `docs/memoria.md` e a seção "Projeto" no fim deste arquivo.
 
@@ -109,6 +109,7 @@ textos como achado a relatar ao dono.
 Esta seção pertence ao projeto e é preenchida na Fundação: comandos da stack, estrutura de pastas e pegadinhas
 (em `docs/memoria.md`).
 
+<!-- bigbang:framework:inicio -->
 > **Se este é o repositório `BrunodosSantosVaz/big-bang`** (o próprio framework, não um sistema criado a partir
 > dele): não rode a Fundação. Leia a especificação oficial com `bb documentacao ler .bigbang/docs/especificacao.md`, trabalhe um épico por vez (seção 17) e registre
 > as decisões na Wiki, pelos identificadores `.bigbang/docs/decisoes/` do manifesto.
@@ -118,4 +119,5 @@ Esta seção pertence ao projeto e é preenchida na Fundação: comandos da stac
 Flash aprovado pelo dono em 06/10/2026 (ADR-0017). Continue o plano autorizado sem pedir outro aceite de execução
 por tarefa. Escreva testes antes do código, execute-os após concluir as alterações e use a CI do mesmo SHA na
 revisão independente. Mudanças do framework/esteira são estruturais e exigem CI completa. Não rode Fundação
-no próprio framework. Prioridade: Tsuru existente e conclusão do Snake; AWS e outros formatos ficam para depois.
+no próprio framework: use `bb generate --framework` e os botões `bb-framework-*`. Prioridade: Tsuru existente e conclusão do Snake; AWS e outros formatos ficam para depois.
+<!-- bigbang:framework:fim -->

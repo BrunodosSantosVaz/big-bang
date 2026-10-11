@@ -3,10 +3,10 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "b19883dc38964bc48e465d2999df03985300b2ba",
-    "commit": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
+    "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
+    "commit": "6b6093a535cf858a2fa955ab58ddcaad9d5feb7b",
     "branch": "master",
-    "proposta": "bigbang/proposta-99-ensaio-externo"
+    "proposta": "wiki/integration"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -38,7 +38,12 @@
     "CHANGELOG.md": "Changelog",
     "README.md": "Guia-de-inicio",
     "docs/relatorios/2026-10-07-entrega-flash-tsuru.md": "Historico-docs-relatorios-2026-10-07-entrega-flash-tsuru",
-    ".bigbang/docs/decisoes/ADR-0021-documentacao-publica-wiki.md": "ADR-0021-documentacao-publica-wiki"
+    ".bigbang/docs/decisoes/ADR-0021-documentacao-publica-wiki.md": "ADR-0021-documentacao-publica-wiki",
+    ".bigbang/docs/decisoes/ADR-0022-esteira-propria-e-modelo-agrupador.md": "ADR-0022-esteira-propria-e-modelo-agrupador",
+    ".bigbang/docs/decisoes/ADR-0023-quadro-unico-e-estado.md": "ADR-0023-quadro-unico-e-estado",
+    ".bigbang/docs/decisoes/ADR-0024-identificadores-em-ingles.md": "ADR-0024-identificadores-em-ingles",
+    ".bigbang/docs/decisoes/ADR-0025-modos-e-autonomia.md": "ADR-0025-modos-e-autonomia",
+    ".bigbang/docs/decisoes/ADR-0026-orquestracao-em-python.md": "ADR-0026-orquestracao-em-python"
   },
   "categorias": {
     "produto": {
@@ -219,17 +224,45 @@
     },
     "RF-BB-048": {
       "pagina": "Requisitos"
+    },
+    "RF-BB-049": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-050": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-051": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-052": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-053": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-054": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-056": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-055": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-057": {
+      "pagina": "Requisitos"
     }
   },
   "codigo": {
-    "commit": "9c73feb3e357a1216011eaf64bf4b5d944827087",
-    "versao": "2.0.1",
+    "commit": "73aeb15734aada45ef9bed3537d704c9e96b993d",
+    "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
       ".github/workflows/",
       "AGENTS.md",
       "CLAUDE.md",
-      ".gitleaksignore"
+      ".gitleaksignore",
+      ".bigbang-framework.toml"
     ],
     "excluir": [
       ".bigbang/tests/",
@@ -354,10 +387,13 @@
         ".bigbang/tests/test_bb_config.py:test_valores",
         ".bigbang/tests/test_bb_config.py:test_codigos_de_saida",
         ".bigbang/tests/test_bb_config.py:test_config_invalida",
-        ".bigbang/tests/test_bb_config.py:test_toml_quebrado"
+        ".bigbang/tests/test_bb_config.py:test_toml_quebrado",
+        ".bigbang/tests/test_names_config.py:test_config_get_in_both_languages_and_both_option_spellings",
+        ".bigbang/tests/test_names_config.py:test_generate_and_verify_by_either_name",
+        ".bigbang/tests/test_names_config.py:test_pipeline_subcommands_by_either_name"
       ],
       "hashes": {
-        ".bigbang/bb/cli.py": "sha256:8920d58ba31a2a8519efd7f4e79ac0d566b4c382ecb3c2366bfccd41b322b322",
+        ".bigbang/bb/cli.py": "sha256:348e3f797eeedf2343c6f8139796a5f87f48c74b973a9c59602f0f115c897cbf",
         ".bigbang/bb/__init__.py": "sha256:9eafc1c524def17452aeb77d49ee0aca1a8c40c7e69d52c3c6dba384e78732eb",
         ".bigbang/bin/bb.py": "sha256:af864bf4452b5aad7c6e90ba6ed7f81cf9cb2fbb8c60f2a5e7e5e4e17372abb4",
         ".bigbang/bin/bb": "sha256:04bf9a43393503416a9307e7272d697afcd9327a0a5b388a451873a70c45e112"
@@ -419,11 +455,44 @@
         ".bigbang/tests/test_bb_config.py:test_valores",
         ".bigbang/tests/test_bb_config.py:test_codigos_de_saida",
         ".bigbang/tests/test_bb_config.py:test_config_invalida",
-        ".bigbang/tests/test_bb_config.py:test_toml_quebrado"
+        ".bigbang/tests/test_bb_config.py:test_toml_quebrado",
+        ".bigbang/tests/test_names_config.py:test_every_key_round_trips",
+        ".bigbang/tests/test_names_config.py:test_values_round_trip",
+        ".bigbang/tests/test_names_config.py:test_v3_only_keys_have_no_legacy_name",
+        ".bigbang/tests/test_names_config.py:test_decision_labels_in_both_dialects",
+        ".bigbang/tests/test_names_config.py:test_every_legacy_cli_command_has_one_v3_name",
+        ".bigbang/tests/test_names_config.py:test_scenarios_translate_and_validate",
+        ".bigbang/tests/test_names_config.py:test_both_files_load_into_the_same_views",
+        ".bigbang/tests/test_names_config.py:test_v3_file_generates_exactly_the_expected_layer",
+        ".bigbang/tests/test_names_config.py:test_get_answers_in_both_dialects",
+        ".bigbang/tests/test_names_config.py:test_get_translates_plain_mappings",
+        ".bigbang/tests/test_names_config.py:test_autonomous_mode_is_v3_only_and_reads_as_flash_in_the_legacy_view",
+        ".bigbang/tests/test_names_config.py:test_mixed_file_is_refused",
+        ".bigbang/tests/test_names_config.py:test_errors_use_v3_names",
+        ".bigbang/tests/test_names_config.py:test_legacy_values_are_refused_in_v3_files",
+        ".bigbang/tests/test_names_config.py:test_single_board_needs_its_number_and_fills_the_legacy_view",
+        ".bigbang/tests/test_names_config.py:test_workflow_model_values",
+        ".bigbang/tests/test_names_config.py:test_already_v3_text_is_not_translated_again",
+        ".bigbang/tests/test_names_config.py:test_missing_legacy_key_reports_the_key_that_was_asked",
+        ".bigbang/tests/test_names_config.py:test_mixed_language_keys_and_internal_keys_are_refused",
+        ".bigbang/tests/test_names_config.py:test_consistent_keys_answer_in_both_languages",
+        ".bigbang/tests/test_names_config.py:test_documentation_reads_a_v3_public_file",
+        ".bigbang/tests/test_names_config.py:test_target_mode_reads_both_dialects",
+        ".bigbang/tests/test_names_config.py:test_review_blockers_see_v3_labels",
+        ".bigbang/tests/test_names_config.py:test_set_config_value_in_each_dialect",
+        ".bigbang/tests/test_names_config.py:test_legacy_value_in_a_v3_file_is_reported_once",
+        ".bigbang/tests/test_names_config.py:test_non_text_mode_on_the_target_is_a_clean_refusal",
+        ".bigbang/tests/test_names_config.py:test_legacy_workflow_needs_legacy_labels",
+        ".bigbang/tests/test_names_config.py:test_approval_label_follows_the_target_dialect",
+        ".bigbang/tests/test_names_config.py:test_v3_errors_do_not_hide_structural_ones",
+        ".bigbang/tests/test_names_config.py:test_config_get_in_both_languages_and_both_option_spellings",
+        ".bigbang/tests/test_names_config.py:test_generate_and_verify_by_either_name",
+        ".bigbang/tests/test_names_config.py:test_pipeline_subcommands_by_either_name",
+        ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect"
       ],
       "hashes": {
-        ".bigbang/bb/config.py": "sha256:93aa511d040ad4f866008129c0697f777c6e6cad291930c47a664f8a72222794",
-        ".bigbang/modelos/bigbang.toml.exemplo": "sha256:778ba08e5498600441fc495f8aa4f60d6df3fb995022aec32c6c75221cf8a702",
+        ".bigbang/bb/config.py": "sha256:cbf986d3cd253040fc5f074292c96bbb8b873fab7b23ce926d0aef73415352d2",
+        ".bigbang/modelos/bigbang.toml.exemplo": "sha256:8df479056156ded0d6a45ebb717a1f9f14b129a74b76c4121b4e272133dda63f",
         ".bigbang/modelos/flags.toml": "sha256:3f4bf065d88d1b4b344e2ec8d24e536ef7433333bacb2cf974fc4194703a47ba"
       },
       "descricao": "Ler bigbang.toml sem aceitar erros de digitação que silenciem controles do projeto."
@@ -439,6 +508,7 @@
       ],
       "testes": [
         ".bigbang/tests/test_decisao_revisao.py:test_comenta_a_frase_e_depois_poe_a_label",
+        ".bigbang/tests/test_decisao_revisao.py:test_decisao_em_ingles_gravada_no_idioma_do_projeto",
         ".bigbang/tests/test_decisao_revisao.py:test_recusa_label_que_nao_e_decisao_e_frase_vazia",
         ".bigbang/tests/test_decisao_revisao.py:test_large_review_uses_paginated_files_without_diff_endpoint",
         ".bigbang/tests/test_decisao_revisao.py:test_renamed_sensitive_path_still_requires_owner",
@@ -449,15 +519,19 @@
         ".bigbang/tests/test_decisao_revisao.py:test_local_flash_cannot_change_target_review_policy",
         ".bigbang/tests/test_decisao_revisao.py:test_target_flash_is_used_even_when_local_config_is_standard",
         ".bigbang/tests/test_decisao_revisao.py:test_destination_config_is_fetched_from_github",
+        ".bigbang/tests/test_decisao_revisao.py:test_v3_destination_and_english_labels",
         ".bigbang/tests/test_decisao_revisao.py:test_testes_com_revisao_humana",
         ".bigbang/tests/test_decisao_revisao.py:test_teste_primeiro_depois_a_correcao",
         ".bigbang/tests/test_decisao_revisao.py:test_recusa_correcao_junto_com_o_teste",
         ".bigbang/tests/test_decisao_revisao.py:test_recusa_teste_que_nao_falha",
         ".bigbang/tests/test_decisao_revisao.py:test_teste_em_layout_gradle_conta_como_teste",
-        ".bigbang/tests/test_decisao_revisao.py:test_recusa_um_commit_so"
+        ".bigbang/tests/test_decisao_revisao.py:test_recusa_um_commit_so",
+        ".bigbang/tests/test_names_config.py:test_review_blockers_see_v3_labels",
+        ".bigbang/tests/test_names_config.py:test_target_mode_reads_both_dialects",
+        ".bigbang/tests/test_names_config.py:test_approval_label_follows_the_target_dialect"
       ],
       "hashes": {
-        ".bigbang/bb/decisions.py": "sha256:bf37f1f6d177103dfbbb8ce7cde3fcd8e0a82b850cdb2bbb37c342eff7e3446c"
+        ".bigbang/bb/decisions.py": "sha256:09b62b3e2b8dbef35e1f296bd74d1993129d85ed3adb005cddb845dcef6bcd4f"
       },
       "descricao": "Registrar a decisão autorizada do dono e impedir aprovação automática de PR que exija revisão humana."
     },
@@ -571,10 +645,11 @@
         ".bigbang/tests/test_wiki.py:test_traversal_manifest_cannot_read_outside_wiki",
         ".bigbang/tests/test_wiki.py:test_uninitialized_wiki_does_not_modify_local_documents",
         ".bigbang/tests/test_wiki.py:test_publish_fast_forwards_and_rerun_is_idempotent",
-        ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected"
+        ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected",
+        ".bigbang/tests/test_framework_pipeline.py:test_prepare_refuses_untracked_sources_in_all_declared_roots"
       ],
       "hashes": {
-        ".bigbang/bb/documentation.py": "sha256:bdd76dd73b77c9552ce66fc0ee6e67707c51c5133aa4fbc6181abc0c9021fdea"
+        ".bigbang/bb/documentation.py": "sha256:f87f3352060c89b26898952740d80f34a2de2d1d38906f9f6b2debf153843168"
       },
       "descricao": "Resolver identificadores documentais conforme a visibilidade e publicar somente o snapshot revisado sem perder alterações concorrentes."
     },
@@ -615,7 +690,7 @@
         ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected"
       ],
       "hashes": {
-        ".bigbang/bb/documentation_cli.py": "sha256:e6b30bc4607579645207ddff6ca77ea4ff0ce88baf41a77459efc1402a8f7834"
+        ".bigbang/bb/documentation_cli.py": "sha256:830596662eecba15abfa22608ee821e52cff2d030247afd38d3a99ba1d09dcab"
       },
       "descricao": "Preparar, ler, propor, validar e publicar documentação; orientar Discussions, auditoria de painéis e Social preview."
     },
@@ -682,10 +757,11 @@
         ".bigbang/tests/test_bb_gerar.py:test_marcador_sem_valor",
         ".bigbang/tests/test_bb_gerar.py:test_aviso_por_tipo",
         ".bigbang/tests/test_bb_gerar.py:test_reconhece_aviso",
-        ".bigbang/tests/test_bb_gerar.py:test_template_em_dia"
+        ".bigbang/tests/test_bb_gerar.py:test_template_em_dia",
+        ".bigbang/tests/test_grouping_v3.py:test_v3_tree_is_generated_and_verified"
       ],
       "hashes": {
-        ".bigbang/bb/generator.py": "sha256:0c40e0a8dad1347595bf69aaf6e8bbd9f85b041db7f5b56f9a923ebe6ac6ace3"
+        ".bigbang/bb/generator.py": "sha256:01f4ba6e0034bcbcf96fea20dfa4a7f2b69066be888235212b814cce208dec54"
       },
       "descricao": "Gerar instruções e Actions a partir da configuração, preservando a camada do projeto e removendo saídas obsoletas."
     },
@@ -730,6 +806,9 @@
       ],
       "testes": [
         ".bigbang/tests/test_bb_init.py:test_privado",
+        ".bigbang/tests/test_bb_init.py:test_retira_so_o_trecho_exclusivo_do_framework",
+        ".bigbang/tests/test_bb_init.py:test_simulacao_mostra_a_retirada_do_trecho_do_framework",
+        ".bigbang/tests/test_bb_init.py:test_sem_marcador_a_secao_do_projeto_fica_intacta",
         ".bigbang/tests/test_bb_init.py:test_publico_cria_licenca_do_sistema",
         ".bigbang/tests/test_bb_init.py:test_publico_sem_licenca",
         ".bigbang/tests/test_bb_init.py:test_nao_roda_duas_vezes",
@@ -742,10 +821,20 @@
         ".bigbang/tests/test_bb_init.py:test_set_value_mantem_a_coluna_do_comentario",
         ".bigbang/tests/test_bb_init.py:test_sem_python",
         ".bigbang/tests/test_bb_init.py:test_python_antigo",
-        ".bigbang/tests/test_bb_init.py:test_python_certo"
+        ".bigbang/tests/test_bb_init.py:test_python_certo",
+        ".bigbang/tests/test_launcher.py:test_template_is_not_founded",
+        ".bigbang/tests/test_launcher.py:test_template_ships_only_guarded_framework_workflows",
+        ".bigbang/tests/test_launcher.py:test_guard_check_rejects_unguarded_jobs",
+        ".bigbang/tests/test_launcher.py:test_every_root_entry_has_a_foundation_decision",
+        ".bigbang/tests/test_launcher.py:test_private_default_mode",
+        ".bigbang/tests/test_launcher.py:test_private_flash_mode",
+        ".bigbang/tests/test_launcher.py:test_autonomous_mode_needs_the_v3_workflow",
+        ".bigbang/tests/test_launcher.py:test_previous_workflow_stays_available",
+        ".bigbang/tests/test_launcher.py:test_public_gets_its_own_manifest",
+        ".bigbang/tests/test_launcher.py:test_compiled_profile_after_f2"
       ],
       "hashes": {
-        ".bigbang/bb/init.py": "sha256:0d87a32cba35f99046651c0be984238f26db5f10647585f6507faf13cce1e974"
+        ".bigbang/bb/init.py": "sha256:07ea59f34ac7626fe41c13615573f6d80929d98ffd6cc465082a1727ec96f97a"
       },
       "descricao": "Preparar F0 com identidade, modo padrão ou Flash, configuração e arquivos comunitários sem destruir conteúdo do projeto."
     },
@@ -802,8 +891,8 @@
       ],
       "hashes": {
         ".bigbang/bb/package.py": "sha256:277954b69c243354a4d726708463293e874b13470081be68054aa8948fc98eff",
-        ".bigbang/MIGRACAO.md": "sha256:9434f80edd5b9686885f3c5e0635114a12f1de04eafe58fab1402b61894067ad",
-        ".bigbang/VERSION": "sha256:fe840f52fb5578d3f77eb497115eb02c6036601c3a53e60df7995c7276baa77a"
+        ".bigbang/MIGRACAO.md": "sha256:a0d26290c08e0f57ace27cf2c8f6897130b8567043d7f869c734cbcf205acda1",
+        ".bigbang/VERSION": "sha256:2985be8b28d3ade858e8d8fb4bc22f565b1bf6020dff982dce141f7721b9999c"
       },
       "descricao": "Empacotar .bigbang com integridade e notas de migração que permitem atualização oficial verificável."
     },
@@ -881,7 +970,7 @@
         ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls"
       ],
       "hashes": {
-        ".bigbang/bb/pipeline.py": "sha256:0ba569bc0425496bdb778e4610ba6d4b80d3c9772540484cde98e0e61c111f07"
+        ".bigbang/bb/pipeline.py": "sha256:ac8f26fe0495a8ce7b013904f0e44b179b875d3330a8a08f876af0b10b320677"
       },
       "descricao": "Calcular prontidão, branches, revisão, SemVer, changelog, matriz e nomes de artefatos sem executar deploy."
     },
@@ -923,10 +1012,23 @@
         ".bigbang/tests/test_bb_esteira.py:test_nomes_da_candidata_e_de_producao",
         ".bigbang/tests/test_bb_esteira.py:test_android",
         ".bigbang/tests/test_bb_esteira.py:test_osv_so_alta_e_critica",
-        ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls"
+        ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls",
+        ".bigbang/tests/test_framework_stack.py:test_public_framework_without_runtime_packages_passes_the_content_gate",
+        ".bigbang/tests/test_framework_stack.py:test_framework_runtime_package_without_an_approved_table_is_refused",
+        ".bigbang/tests/test_framework_stack.py:test_framework_unreadable_dependency_ecosystem_is_still_refused",
+        ".bigbang/tests/test_framework_stack.py:test_pr_content_cannot_select_the_framework_policy_for_a_system_base",
+        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_page_is_required_even_for_the_framework",
+        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_keeps_the_normal_approved_package_table",
+        ".bigbang/tests/test_framework_stack.py:test_standalone_framework_stack_guard_uses_the_same_checks",
+        ".bigbang/tests/test_framework_stack.py:test_framework_runtime_manifests_inside_bigbang_are_refused_by_both_gates",
+        ".bigbang/tests/test_framework_stack.py:test_framework_unsupported_ecosystem_inside_bigbang_is_refused",
+        ".bigbang/tests/test_framework_stack.py:test_framework_test_fixtures_are_not_runtime_dependency_declarations",
+        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_checks_approved_and_unapproved_framework_packages",
+        ".bigbang/tests/test_framework_stack.py:test_normal_system_stack_guard_keeps_ignoring_the_inherited_framework",
+        ".bigbang/tests/test_framework_stack.py:test_packaged_framework_directories_are_not_skipped_as_system_build_outputs"
       ],
       "hashes": {
-        ".bigbang/bb/pipeline_cli.py": "sha256:b71ed18e8fe639d81a46bec98d6d6d1326526cf245e8c171b1c2b3a456a804fd"
+        ".bigbang/bb/pipeline_cli.py": "sha256:74ffaa0a5618841ec84f7d01fbf6416c11d5654abbd938e1ff66db4eb2896c1e"
       },
       "descricao": "Expor regras verificáveis a scripts sem duplicar lógica de negócio entre Bash e Python."
     },
@@ -990,10 +1092,23 @@
         ".bigbang/tests/test_rastreio_guarda.py:test_dependencia_do_catalogo_fora_da_tabela",
         ".bigbang/tests/test_rastreio_guarda.py:test_linha_que_a_guarda_nao_entende_falha_explicitamente",
         ".bigbang/tests/test_rastreio_guarda.py:test_catalogo_sem_arquivo_falha_explicitamente",
-        ".bigbang/tests/test_rastreio_guarda.py:test_groovy_com_aspas_simples"
+        ".bigbang/tests/test_rastreio_guarda.py:test_groovy_com_aspas_simples",
+        ".bigbang/tests/test_framework_stack.py:test_public_framework_without_runtime_packages_passes_the_content_gate",
+        ".bigbang/tests/test_framework_stack.py:test_framework_runtime_package_without_an_approved_table_is_refused",
+        ".bigbang/tests/test_framework_stack.py:test_framework_unreadable_dependency_ecosystem_is_still_refused",
+        ".bigbang/tests/test_framework_stack.py:test_pr_content_cannot_select_the_framework_policy_for_a_system_base",
+        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_page_is_required_even_for_the_framework",
+        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_keeps_the_normal_approved_package_table",
+        ".bigbang/tests/test_framework_stack.py:test_standalone_framework_stack_guard_uses_the_same_checks",
+        ".bigbang/tests/test_framework_stack.py:test_framework_runtime_manifests_inside_bigbang_are_refused_by_both_gates",
+        ".bigbang/tests/test_framework_stack.py:test_framework_unsupported_ecosystem_inside_bigbang_is_refused",
+        ".bigbang/tests/test_framework_stack.py:test_framework_test_fixtures_are_not_runtime_dependency_declarations",
+        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_checks_approved_and_unapproved_framework_packages",
+        ".bigbang/tests/test_framework_stack.py:test_normal_system_stack_guard_keeps_ignoring_the_inherited_framework",
+        ".bigbang/tests/test_framework_stack.py:test_packaged_framework_directories_are_not_skipped_as_system_build_outputs"
       ],
       "hashes": {
-        ".bigbang/bb/stack_guard.py": "sha256:da4952a77d272fd878057e5484b42fa7ea241b57efec0766b0fc21f5de67a89b"
+        ".bigbang/bb/stack_guard.py": "sha256:a0cee994bee6565edf936d90b64214bce5525f46042f634340ad3eea5cb8e2ac"
       },
       "descricao": "Impedir dependências diretas de execução que não estejam na tabela aprovada da stack."
     },
@@ -1107,7 +1222,7 @@
         ".bigbang/tests/test_atualizar.py:test_arvore_suja_recusa"
       ],
       "hashes": {
-        ".bigbang/bb/update.py": "sha256:568608c3a7d450ce21ccd99cd4b094f10e96c8a5c2aacd6a0ddbd9874b4cd0c9"
+        ".bigbang/bb/update.py": "sha256:220f77fb9e615dff143f5a6166e9461781c8aa79f74e275888e6fecdbd52f9f4"
       },
       "descricao": "Instalar release do framework com SHA-256 e atestação de origem, preservando configurações e abrindo PR específico."
     },
@@ -1140,7 +1255,7 @@
         ".bigbang/tests/test_bb_verificar.py:test_pull_request_target_sem_checkout_do_pr_passa"
       ],
       "hashes": {
-        ".bigbang/bb/verify.py": "sha256:9e21a8c8f4884025d3b78c9fe6f3125c814a1861923d79254b87c42cb756fa7e"
+        ".bigbang/bb/verify.py": "sha256:b2085fd3d8dbe57eeb2a5fef3336f2407d1cd88568898dce1e0b4c3f97644e38"
       },
       "descricao": "Detectar adulteração, geração fora de sincronia e workflows que violam as regras do framework."
     },
@@ -1230,20 +1345,25 @@
         ".bigbang/bb/workspaces.py"
       ],
       "testes": [
-        ".bigbang/tests/test_status_posses.py:test_status_le_so_e_marcacao_e_idempotente",
-        ".bigbang/tests/test_status_posses.py:test_push_renova_mesmo_quando_commit_foi_escrito_antes",
-        ".bigbang/tests/test_status_posses.py:test_push_concorrente_com_liberacao_nao_reabre_sessao",
-        ".bigbang/tests/test_status_posses.py:test_push_entre_conferencia_e_marcacao_nao_deixa_label_parada",
-        ".bigbang/tests/test_status_posses.py:test_push_durante_retomada_preserva_a_sessao_renovada",
-        ".bigbang/tests/test_status_posses.py:test_forcar_exige_ordem_e_posse_vencida",
-        ".bigbang/tests/test_status_posses.py:test_sem_nome_valido_nao_deve_revogar_a_posse",
-        ".bigbang/tests/test_status_posses.py:test_bb_status_e_somente_leitura",
-        ".bigbang/tests/test_status_posses.py:test_vencida_producao_antiga_e_ativa",
-        ".bigbang/tests/test_status_posses.py:test_flag_invalida_nao_desaparece_do_relatorio",
-        ".bigbang/tests/test_status_posses.py:test_merge_libera_label_e_preserva_comentario"
+        ".bigbang/tests/test_posse.py:test_assume_libera_e_preserva_historico",
+        ".bigbang/tests/test_posse.py:test_recusa_nome_issue_fechada_e_posse_existente",
+        ".bigbang/tests/test_posse.py:test_limite_e_comentario_sem_label_ainda_bloqueiam",
+        ".bigbang/tests/test_posse.py:test_recusa_bloqueio_mas_aceita_pr_de_teste_mesclado",
+        ".bigbang/tests/test_posse.py:test_outra_sessao_nao_libera",
+        ".bigbang/tests/test_posse.py:test_falha_na_confirmacao_remove_so_a_propria_marca",
+        ".bigbang/tests/test_posse.py:test_desempate_e_rollback_nao_apagam_label_do_mesmo_nome",
+        ".bigbang/tests/test_posse.py:test_comentario_de_terceiro_nao_e_posse",
+        ".bigbang/tests/test_posse.py:test_recusa_espera_zero",
+        ".bigbang/tests/test_posse.py:test_resposta_perdida_do_post_reconcilia_por_uuid",
+        ".bigbang/tests/test_posse.py:test_dois_processos_so_um_dono_e_uma_pasta",
+        ".bigbang/tests/test_posse.py:test_bug_ganha_a_branch_a_partir_da_main",
+        ".bigbang/tests/test_posse.py:test_falha_no_worktree_desfaz_a_posse",
+        ".bigbang/tests/test_posse.py:test_worktree_usa_avanco_remoto_e_recusa_divergencia",
+        ".bigbang/tests/test_posse.py:test_v3_kinds_find_the_test_branch",
+        ".bigbang/tests/test_posse.py:test_v3_bug_gets_a_fix_branch_from_main"
       ],
       "hashes": {
-        ".bigbang/bb/workspaces.py": "sha256:22f2c10bd6c9a765e8f10a88965fd214220052f178fb413867a00baa2a88f3f7"
+        ".bigbang/bb/workspaces.py": "sha256:4f776fee8d339d48d10f52db53705bd56e9e8aedb9e1f97d28df9d4bc5cd8c45"
       },
       "descricao": "Criar worktree próprio somente depois de confirmar posse da tarefa e guardar recibos em metadados Git."
     },
@@ -1723,6 +1843,7 @@
         ".bigbang/tests/test_hooks.py:test_branch_propria_e_leituras_nao_sao_aprovadas_automaticamente",
         ".bigbang/tests/test_hooks.py:test_reset_e_tags_negados",
         ".bigbang/tests/test_hooks.py:test_labels_de_decisao_negadas_em_cli_e_api",
+        ".bigbang/tests/test_hooks.py:test_labels_de_decisao_em_ingles_tambem_negadas",
         ".bigbang/tests/test_hooks.py:test_composto_nao_e_isentado_por_bb",
         ".bigbang/tests/test_hooks.py:test_formas_dinamicas_pedem_conferencia",
         ".bigbang/tests/test_hooks.py:test_opcoes_globais_do_gh_nao_isentam_decisoes",
@@ -1733,7 +1854,7 @@
       "hashes": {
         ".bigbang/hooks/_common.py": "sha256:3f7ac4fa2517566df674c4c79b5727b17760b50c6051cef397365825dbef00b4",
         ".bigbang/hooks/proteger_arquivos.py": "sha256:abb2d5dbabd8ba2608bd7e027095b747e46206a2e9290bfca41f041da2c60e5b",
-        ".bigbang/hooks/proteger_comandos.py": "sha256:09d3b367eea71de92619fb061b8505d943574a944363ed1162b42c1b2459a4c2",
+        ".bigbang/hooks/proteger_comandos.py": "sha256:c3db9efd5ce24e0be441759d6e737fa4f86e3a3662e7fcc70d16f183bd7e5d42",
         ".bigbang/esteira/sempre/arquivos/.claude/settings.json": "sha256:24ef26bf42154bed9edf3be6cde9f25af4cf2adb2bf7a176d365d96f47e7a630"
       },
       "descricao": "Bloquear comandos e edições proibidos pelo contrato da sessão antes que alterem trabalho ou arquivos sensíveis."
@@ -1841,7 +1962,7 @@
       "hashes": {
         ".github/workflows/bb-framework-ci.yml": "sha256:c492a05ce2e19e54e0ab6350cc0e7b2891ebab8c8758b991480e050f9ba121fd",
         ".github/workflows/bb-framework-faxina.yml": "sha256:8b9ae98415e336cb9e5b3e87bd779e3c45c53f80ee93968bd18c446bfe9d1638",
-        ".github/workflows/bb-framework-release.yml": "sha256:8a5261f1e0d3237795de7c2d094f198b1ee1c0a080b2081dea1e48a537a53b92"
+        ".github/workflows/bb-framework-release.yml": "sha256:5e18ba4512f8bad54119c9ed1a4c64f96c50181cbab4a5f0738d2117a1db9d16"
       },
       "descricao": "Validar a fonte e distribuir pacote oficial com origem verificável e limpeza após sincronização."
     },
@@ -1936,13 +2057,15 @@
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md",
         ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md",
         "AGENTS.md",
-        "CLAUDE.md"
+        "CLAUDE.md",
+        ".bigbang/skills/bb-migrate/SKILL.md"
       ],
       "testes": [
         ".bigbang/tests/test_skills.py:test_catalogo_e_formato_agent_skills",
         ".bigbang/tests/test_skills.py:test_skills_descobertas_antes_do_init_sem_esteira",
         ".bigbang/tests/test_skills.py:test_edicao_de_uma_copia_reprova_e_gerador_repara",
-        ".bigbang/tests/test_skills.py:test_skill_do_projeto_e_preservada"
+        ".bigbang/tests/test_skills.py:test_skill_do_projeto_e_preservada",
+        ".bigbang/tests/test_skills.py:test_catalogo_e_formato_agent_skills"
       ],
       "hashes": {
         ".bigbang/AGENTS.base.md": "sha256:9d909eb509ba772c9a08550746476ea7c006adbe15cf6bb49e956679c26a1d40",
@@ -2028,10 +2151,641 @@
         ".bigbang/esteira/perfis/deploy/alvos/paas/README.md": "sha256:d8b52c4956fab996c303edcfbda6e162874b8311a23def757877de0aa272ad20",
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md": "sha256:bb04007d9e8e6977492685e35299a7801fdbd87b5fbeb4d5f78132d2cfc57411",
         ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md": "sha256:48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
-        "AGENTS.md": "sha256:3afdb46379e68f5f0b713ede912b8ec5a2c8f2631335b107811ce07970eb9694",
-        "CLAUDE.md": "sha256:336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49"
+        "AGENTS.md": "sha256:198220fcc68c024030fd1d01be9dc6e06c753553b8bb13162778a61dd4f47269",
+        "CLAUDE.md": "sha256:336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
+        ".bigbang/skills/bb-migrate/SKILL.md": "sha256:700dc19417dbfde4ef4e59cb30f40251ecf3ec77f131d2eec7c5c2f442034401"
       },
       "descricao": "Orientar Fundação, planejamento, execução, revisão, entrega e manutenção com contratos compartilhados entre as IAs."
+    },
+    {
+      "id": "BB-F-049",
+      "requisitos": [
+        "RF-BB-049"
+      ],
+      "pagina": "Funcionalidade-names",
+      "fontes": [
+        ".bigbang/bb/names.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_names_config.py:test_every_key_round_trips",
+        ".bigbang/tests/test_names_config.py:test_values_round_trip",
+        ".bigbang/tests/test_names_config.py:test_v3_only_keys_have_no_legacy_name",
+        ".bigbang/tests/test_names_config.py:test_decision_labels_in_both_dialects",
+        ".bigbang/tests/test_names_config.py:test_every_legacy_cli_command_has_one_v3_name",
+        ".bigbang/tests/test_names_config.py:test_scenarios_translate_and_validate",
+        ".bigbang/tests/test_names_config.py:test_both_files_load_into_the_same_views",
+        ".bigbang/tests/test_names_config.py:test_v3_file_generates_exactly_the_expected_layer",
+        ".bigbang/tests/test_names_config.py:test_get_answers_in_both_dialects",
+        ".bigbang/tests/test_names_config.py:test_get_translates_plain_mappings",
+        ".bigbang/tests/test_names_config.py:test_autonomous_mode_is_v3_only_and_reads_as_flash_in_the_legacy_view",
+        ".bigbang/tests/test_names_config.py:test_mixed_file_is_refused",
+        ".bigbang/tests/test_names_config.py:test_errors_use_v3_names",
+        ".bigbang/tests/test_names_config.py:test_legacy_values_are_refused_in_v3_files",
+        ".bigbang/tests/test_names_config.py:test_single_board_needs_its_number_and_fills_the_legacy_view",
+        ".bigbang/tests/test_names_config.py:test_workflow_model_values",
+        ".bigbang/tests/test_names_config.py:test_already_v3_text_is_not_translated_again",
+        ".bigbang/tests/test_names_config.py:test_missing_legacy_key_reports_the_key_that_was_asked",
+        ".bigbang/tests/test_names_config.py:test_mixed_language_keys_and_internal_keys_are_refused",
+        ".bigbang/tests/test_names_config.py:test_consistent_keys_answer_in_both_languages",
+        ".bigbang/tests/test_names_config.py:test_documentation_reads_a_v3_public_file",
+        ".bigbang/tests/test_names_config.py:test_target_mode_reads_both_dialects",
+        ".bigbang/tests/test_names_config.py:test_review_blockers_see_v3_labels",
+        ".bigbang/tests/test_names_config.py:test_set_config_value_in_each_dialect",
+        ".bigbang/tests/test_names_config.py:test_legacy_workflow_needs_legacy_labels",
+        ".bigbang/tests/test_names_config.py:test_approval_label_follows_the_target_dialect",
+        ".bigbang/tests/test_names_config.py:test_v3_errors_do_not_hide_structural_ones",
+        ".bigbang/tests/test_names_config.py:test_config_get_in_both_languages_and_both_option_spellings",
+        ".bigbang/tests/test_names_config.py:test_generate_and_verify_by_either_name",
+        ".bigbang/tests/test_names_config.py:test_pipeline_subcommands_by_either_name",
+        ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect"
+      ],
+      "hashes": {
+        ".bigbang/bb/names.py": "sha256:c273678f0f14d36e3bd9690058d759d954f6f76e49f522f839838bf89c92c9cf"
+      },
+      "descricao": "Tabela única de nomes v2 ↔ v3 (configuração, valores, CLI, labels, branches, workflows, checks, ambiente, segredos)."
+    },
+    {
+      "id": "BB-F-050",
+      "requisitos": [
+        "RF-BB-050"
+      ],
+      "pagina": "Funcionalidade-nucleo-v3",
+      "fontes": [
+        ".bigbang/bb/states.py",
+        ".bigbang/bb/policy.py",
+        ".bigbang/bb/receipts.py",
+        ".bigbang/bb/locks.py",
+        ".bigbang/bb/claims.py",
+        ".bigbang/bb/gh.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_core_v3.py:test_fifteen_states_and_types",
+        ".bigbang/tests/test_core_v3.py:test_kind_from_labels_in_both_dialects",
+        ".bigbang/tests/test_core_v3.py:test_unknown_or_wrong_type_state",
+        ".bigbang/tests/test_core_v3.py:test_epic_planning_route",
+        ".bigbang/tests/test_core_v3.py:test_legacy_decision_labels_count",
+        ".bigbang/tests/test_core_v3.py:test_selection_and_plan",
+        ".bigbang/tests/test_core_v3.py:test_delivery_routes",
+        ".bigbang/tests/test_core_v3.py:test_qa_and_release",
+        ".bigbang/tests/test_core_v3.py:test_task_route",
+        ".bigbang/tests/test_core_v3.py:test_bug_route",
+        ".bigbang/tests/test_core_v3.py:test_bug_without_qa_but_with_publication_goes_to_releasing",
+        ".bigbang/tests/test_core_v3.py:test_leaving_rejected_respects_impediments",
+        ".bigbang/tests/test_core_v3.py:test_impediments_block_forward_but_not_reject_or_cancel",
+        ".bigbang/tests/test_core_v3.py:test_rejection_needs_reason_and_allowed_return",
+        ".bigbang/tests/test_core_v3.py:test_leaving_rejected_only_to_the_recorded_return",
+        ".bigbang/tests/test_core_v3.py:test_terminal_states",
+        ".bigbang/tests/test_core_v3.py:test_allowed_targets",
+        ".bigbang/tests/test_core_v3.py:test_modes",
+        ".bigbang/tests/test_core_v3.py:test_normal_owner_decides_every_gate",
+        ".bigbang/tests/test_core_v3.py:test_flash_delegates_common_work_but_not_critical_or_selection",
+        ".bigbang/tests/test_core_v3.py:test_autonomous_needs_a_contract_and_never_widens_it",
+        ".bigbang/tests/test_core_v3.py:test_risk_floor_cannot_be_lowered",
+        ".bigbang/tests/test_core_v3.py:test_contract_validation",
+        ".bigbang/tests/test_core_v3.py:test_snapshot_is_canonical",
+        ".bigbang/tests/test_core_v3.py:test_limits",
+        ".bigbang/tests/test_core_v3.py:test_promotion_reuses_valid_evidence",
+        ".bigbang/tests/test_core_v3.py:test_round_trip_and_comment_safety",
+        ".bigbang/tests/test_core_v3.py:test_only_trusted_authors",
+        ".bigbang/tests/test_core_v3.py:test_malformed_and_incomplete_are_ignored",
+        ".bigbang/tests/test_core_v3.py:test_transition_without_a_known_sha",
+        ".bigbang/tests/test_core_v3.py:test_required_fields_per_kind",
+        ".bigbang/tests/test_core_v3.py:test_idempotency",
+        ".bigbang/tests/test_core_v3.py:test_test_receipt_reuse",
+        ".bigbang/tests/test_core_v3.py:test_resource_names",
+        ".bigbang/tests/test_core_v3.py:test_one_winner_and_the_loser_learns_the_holder",
+        ".bigbang/tests/test_core_v3.py:test_expired_lock_is_taken_over_only_on_request",
+        ".bigbang/tests/test_core_v3.py:test_take_over_needs_the_same_mark_for_an_expired_lock",
+        ".bigbang/tests/test_core_v3.py:test_listing_only_the_requested_locks",
+        ".bigbang/tests/test_core_v3.py:test_take_over_refuses_a_live_lock",
+        ".bigbang/tests/test_core_v3.py:test_release_keeps_a_tombstone_so_a_late_release_cannot_delete_another_lock",
+        ".bigbang/tests/test_core_v3.py:test_expired_lock_cannot_be_renewed",
+        ".bigbang/tests/test_core_v3.py:test_unexpected_422_is_an_error_not_a_loop",
+        ".bigbang/tests/test_core_v3.py:test_lock_commits_use_the_empty_tree_constant",
+        ".bigbang/tests/test_core_v3.py:test_concurrent_takeover_has_one_winner",
+        ".bigbang/tests/test_core_v3.py:test_renew_only_by_the_holder_and_generation",
+        ".bigbang/tests/test_core_v3.py:test_expired_session_cannot_renew_after_takeover",
+        ".bigbang/tests/test_core_v3.py:test_release_only_by_the_holder",
+        ".bigbang/tests/test_core_v3.py:test_listing_and_expiry",
+        ".bigbang/tests/test_core_v3.py:test_foreign_ref_content_is_never_trusted_as_a_lock",
+        ".bigbang/tests/test_core_v3.py:test_status_and_body",
+        ".bigbang/tests/test_core_v3.py:test_no_http_status_is_an_error",
+        ".bigbang/tests/test_claims_v3.py:test_agent_claim_locks_labels_and_records",
+        ".bigbang/tests/test_claims_v3.py:test_person_claim_uses_the_login",
+        ".bigbang/tests/test_claims_v3.py:test_unknown_agent_and_closed_or_pr_issues_are_refused",
+        ".bigbang/tests/test_claims_v3.py:test_blocked_task_is_refused_until_the_blocker_closes",
+        ".bigbang/tests/test_claims_v3.py:test_second_claim_on_the_same_issue_loses_with_the_holder_named",
+        ".bigbang/tests/test_claims_v3.py:test_capacity_per_session",
+        ".bigbang/tests/test_claims_v3.py:test_capacity_counts_the_locks_even_without_the_projection_label",
+        ".bigbang/tests/test_claims_v3.py:test_epic_stages_can_be_claimed",
+        ".bigbang/tests/test_claims_v3.py:test_renew_extends_the_lease",
+        ".bigbang/tests/test_claims_v3.py:test_unclaim_releases_lock_and_label",
+        ".bigbang/tests/test_claims_v3.py:test_expired_claim_of_another_needs_the_owner_order",
+        ".bigbang/tests/test_claims_v3.py:test_people_and_agents_never_collide",
+        ".bigbang/tests/test_claims_v3.py:test_expired_session_cannot_renew",
+        ".bigbang/tests/test_claims_v3.py:test_failed_force_leaves_no_owner_order_comment",
+        ".bigbang/tests/test_claims_v3.py:test_live_lock_cannot_be_forced",
+        ".bigbang/tests/test_claims_v3.py:test_expired_lock_is_forced_with_the_owner_order_and_fences_the_old_session",
+        ".bigbang/tests/test_claims_v3.py:test_stale_report_lists_expired_claims",
+        ".bigbang/tests/test_claims_v3.py:test_v3_when_the_workflow_or_labels_are_v3"
+      ],
+      "hashes": {
+        ".bigbang/bb/states.py": "sha256:5fd33c7b3659a563c47378332b9bfa0bd699224d77f34b29a6ca8fa39f8e6cdb",
+        ".bigbang/bb/policy.py": "sha256:879c19f0789e0a50bed137fc74192cd7a79966c3f6ec4fed4a854dc9a6d6be27",
+        ".bigbang/bb/receipts.py": "sha256:fc0ca5d774e4a2cadaf1036002a399e175d4af8806e5a79ee920a175e330b33a",
+        ".bigbang/bb/locks.py": "sha256:90b249a7fe0678f7b1369f3d9bb20090ec5dba75907a8864f710a77d46293e1d",
+        ".bigbang/bb/claims.py": "sha256:ce5b27f956941758c8da08bfb59c046b10415b039f336e4365ebd79f51766cf4",
+        ".bigbang/bb/gh.py": "sha256:fc7f4267d19b3654996dfb06aab2663c77c23ea225e19837bb05b6adc00d4a57"
+      },
+      "descricao": "Máquina de estados do quadro único, política dos modos, recibos estruturados e travas atômicas em refs Git."
+    },
+    {
+      "id": "BB-F-051",
+      "requisitos": [
+        "RF-BB-051"
+      ],
+      "pagina": "Funcionalidade-quadro-unico",
+      "fontes": [
+        ".bigbang/bb/board.py",
+        ".bigbang/bb/controller.py",
+        ".bigbang/bb/flow_cli.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_board_v3.py:test_catalog_covers_every_v3_label_the_rules_read",
+        ".bigbang/tests/test_board_v3.py:test_labels_command_is_idempotent",
+        ".bigbang/tests/test_board_v3.py:test_project_fields_and_fifteen_states",
+        ".bigbang/tests/test_board_v3.py:test_initial_state_by_kind",
+        ".bigbang/tests/test_board_v3.py:test_owner_moves_epic_through_planning_with_receipts_and_board",
+        ".bigbang/tests/test_board_v3.py:test_agent_cannot_pass_an_owner_gate_in_normal_mode",
+        ".bigbang/tests/test_board_v3.py:test_claiming_to_be_the_owner_is_not_an_approval",
+        ".bigbang/tests/test_board_v3.py:test_flash_sensitive_refinement_goes_to_the_owner",
+        ".bigbang/tests/test_board_v3.py:test_qa_rejection_and_epic_cancellation_need_the_owner_decision",
+        ".bigbang/tests/test_board_v3.py:test_a_rejection_withdraws_the_decisions_from_the_return_stage_on",
+        ".bigbang/tests/test_board_v3.py:test_qa_and_publish_risk_come_from_the_changed_paths",
+        ".bigbang/tests/test_board_v3.py:test_flash_qa_human_stays_with_the_owner_at_any_risk",
+        ".bigbang/tests/test_board_v3.py:test_flash_delegated_qa_needs_an_independent_qa_receipt",
+        ".bigbang/tests/test_board_v3.py:test_qa_verdict_needs_a_declared_agent_and_the_current_candidate",
+        ".bigbang/tests/test_board_v3.py:test_delegated_qa_rejection_needs_evidence_and_a_candidate",
+        ".bigbang/tests/test_board_v3.py:test_without_a_current_candidate_no_verdict_counts",
+        ".bigbang/tests/test_board_v3.py:test_going_back_without_rejection_also_withdraws_the_decisions",
+        ".bigbang/tests/test_board_v3.py:test_delivery_paths_read_only_prs_updated_since_the_children_exist",
+        ".bigbang/tests/test_board_v3.py:test_a_child_attached_late_still_counts_its_older_prs",
+        ".bigbang/tests/test_board_v3.py:test_prs_of_the_epic_itself_count_even_before_its_children",
+        ".bigbang/tests/test_board_v3.py:test_effects_happen_before_the_receipt",
+        ".bigbang/tests/test_board_v3.py:test_attempts_come_from_receipts_and_the_limit_blocks",
+        ".bigbang/tests/test_board_v3.py:test_agent_passes_common_gates_in_flash",
+        ".bigbang/tests/test_board_v3.py:test_decision_label_is_the_owner_approval",
+        ".bigbang/tests/test_board_v3.py:test_task_done_closes_the_issue_and_cancelled_is_not_planned",
+        ".bigbang/tests/test_board_v3.py:test_rejection_records_reason_label_and_return",
+        ".bigbang/tests/test_board_v3.py:test_replayed_event_writes_nothing_new",
+        ".bigbang/tests/test_board_v3.py:test_blocked_task_cannot_start",
+        ".bigbang/tests/test_board_v3.py:test_facts_from_github",
+        ".bigbang/tests/test_board_v3.py:test_new_issue_enters_the_board_in_its_initial_state",
+        ".bigbang/tests/test_board_v3.py:test_epic_form_answers_become_v3_labels_and_native_dependencies",
+        ".bigbang/tests/test_board_v3.py:test_pr_lifecycle_moves_the_task_and_closes_it_on_merge",
+        ".bigbang/tests/test_board_v3.py:test_pr_closed_without_merge_goes_back_to_coding",
+        ".bigbang/tests/test_board_v3.py:test_foreign_branches_and_events_are_ignored",
+        ".bigbang/tests/test_board_v3.py:test_backlog_and_selection_decisions_advance_the_epic",
+        ".bigbang/tests/test_board_v3.py:test_merge_refused_keeps_the_claim",
+        ".bigbang/tests/test_board_v3.py:test_retried_merge_event_releases_a_claim_left_behind",
+        ".bigbang/tests/test_board_v3.py:test_retried_merge_event_keeps_a_claim_taken_after_the_merge",
+        ".bigbang/tests/test_board_v3.py:test_bugfix_branches_are_read_by_the_controller",
+        ".bigbang/tests/test_board_v3.py:test_late_closed_event_of_a_reopened_pr_is_ignored",
+        ".bigbang/tests/test_board_v3.py:test_decision_label_advances_the_epic",
+        ".bigbang/tests/test_board_v3.py:test_schedule_reconciles_the_board_and_marks_stale_claims",
+        ".bigbang/tests/test_board_v3.py:test_fields_are_created_and_status_options_replaced_keeping_ids",
+        ".bigbang/tests/test_board_v3.py:test_set_values_by_type",
+        ".bigbang/tests/test_board_v3.py:test_items_of_other_repositories_are_ignored",
+        ".bigbang/tests/test_framework_stack.py:test_public_framework_without_runtime_packages_passes_the_content_gate",
+        ".bigbang/tests/test_framework_stack.py:test_framework_runtime_package_without_an_approved_table_is_refused",
+        ".bigbang/tests/test_framework_stack.py:test_framework_unreadable_dependency_ecosystem_is_still_refused",
+        ".bigbang/tests/test_framework_stack.py:test_pr_content_cannot_select_the_framework_policy_for_a_system_base",
+        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_page_is_required_even_for_the_framework",
+        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_keeps_the_normal_approved_package_table",
+        ".bigbang/tests/test_framework_stack.py:test_standalone_framework_stack_guard_uses_the_same_checks",
+        ".bigbang/tests/test_framework_stack.py:test_framework_runtime_manifests_inside_bigbang_are_refused_by_both_gates",
+        ".bigbang/tests/test_framework_stack.py:test_framework_unsupported_ecosystem_inside_bigbang_is_refused",
+        ".bigbang/tests/test_framework_stack.py:test_framework_test_fixtures_are_not_runtime_dependency_declarations",
+        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_checks_approved_and_unapproved_framework_packages",
+        ".bigbang/tests/test_framework_stack.py:test_normal_system_stack_guard_keeps_ignoring_the_inherited_framework",
+        ".bigbang/tests/test_framework_stack.py:test_packaged_framework_directories_are_not_skipped_as_system_build_outputs"
+      ],
+      "hashes": {
+        ".bigbang/bb/board.py": "sha256:b56463151ae793e86be92b70d0670fb1b98713aaef42ff35bc13efb3f193c4b8",
+        ".bigbang/bb/controller.py": "sha256:8c70bec7e79ad6786f7320c719e424d593f77fad6a006c8459a222d45e12200f",
+        ".bigbang/bb/flow_cli.py": "sha256:9b3c62f6029e465e58009e35a755542f2562577daf35b864fb006e519da9407f"
+      },
+      "descricao": "Catálogo de labels v3, Project com 15 estados e campos, bb move validado, reconciliação e controlador de eventos."
+    },
+    {
+      "id": "BB-F-052",
+      "requisitos": [
+        "RF-BB-052"
+      ],
+      "pagina": "Funcionalidade-fluxo-agrupador",
+      "fontes": [
+        ".bigbang/bb/flags.py",
+        ".bigbang/bb/flows.py",
+        ".bigbang/bb/delivery.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_grouping_v3.py:test_both_languages_read_the_same",
+        ".bigbang/tests/test_grouping_v3.py:test_invalid_entries_are_refused",
+        ".bigbang/tests/test_grouping_v3.py:test_switch_keeps_the_file_and_its_language",
+        ".bigbang/tests/test_grouping_v3.py:test_release_gate",
+        ".bigbang/tests/test_grouping_v3.py:test_pending_acceptance_only_for_dark_epics",
+        ".bigbang/tests/test_grouping_v3.py:test_v3_targets",
+        ".bigbang/tests/test_grouping_v3.py:test_start_sprint_creates_children_dependencies_and_test_branch",
+        ".bigbang/tests/test_grouping_v3.py:test_start_sprint_is_idempotent",
+        ".bigbang/tests/test_grouping_v3.py:test_epic_without_readiness_is_refused_with_reasons",
+        ".bigbang/tests/test_grouping_v3.py:test_create_branches_from_develop_when_unblocked",
+        ".bigbang/tests/test_grouping_v3.py:test_docs_branch_only_after_every_task",
+        ".bigbang/tests/test_grouping_v3.py:test_merge_needs_approval_and_a_green_gate_on_the_exact_head",
+        ".bigbang/tests/test_grouping_v3.py:test_legacy_spelling_of_the_approval_counts",
+        ".bigbang/tests/test_grouping_v3.py:test_never_into_main_and_never_outside_the_branch_model",
+        ".bigbang/tests/test_grouping_v3.py:test_human_test_review_needs_the_owner_decision",
+        ".bigbang/tests/test_grouping_v3.py:test_cut_release_from_develop_with_version_lock_and_milestone",
+        ".bigbang/tests/test_grouping_v3.py:test_release_items_for_the_changelog",
+        ".bigbang/tests/test_grouping_v3.py:test_nothing_to_release",
+        ".bigbang/tests/test_grouping_v3.py:test_release_gate_reads_flags_and_pending_marks",
+        ".bigbang/tests/test_grouping_v3.py:test_flash_delegates_sensitive_review_unless_human_was_asked",
+        ".bigbang/tests/test_grouping_v3.py:test_no_release_epic_cannot_change_the_artifact",
+        ".bigbang/tests/test_grouping_v3.py:test_release_pr_skips_the_acceptance_lock",
+        ".bigbang/tests/test_grouping_v3.py:test_clean_task_pr",
+        ".bigbang/tests/test_grouping_v3.py:test_branch_title_and_refs",
+        ".bigbang/tests/test_grouping_v3.py:test_artifact_code_needs_the_epic_flag_decision",
+        ".bigbang/tests/test_grouping_v3.py:test_no_release_follows_the_artifact_paths",
+        ".bigbang/tests/test_grouping_v3.py:test_sensitive_paths_ask_for_the_owner_unless_he_said_otherwise",
+        ".bigbang/tests/test_grouping_v3.py:test_acceptance_lock",
+        ".bigbang/tests/test_grouping_v3.py:test_v3_tree_is_generated_and_verified",
+        ".bigbang/tests/test_delivery_v3.py:test_epics_go_to_qa_or_releasing_and_the_release_pr_opens_once",
+        ".bigbang/tests/test_delivery_v3.py:test_an_epic_with_open_tasks_does_not_enter_qa",
+        ".bigbang/tests/test_delivery_v3.py:test_the_same_candidate_is_promoted_after_the_merge",
+        ".bigbang/tests/test_delivery_v3.py:test_failed_promotion_concludes_nothing",
+        ".bigbang/tests/test_delivery_v3.py:test_open_blocking_issue_refuses",
+        ".bigbang/tests/test_delivery_v3.py:test_release_changed_after_the_candidate_refuses",
+        ".bigbang/tests/test_delivery_v3.py:test_dark_epic_ships_but_stays_in_qa_until_approved",
+        ".bigbang/tests/test_delivery_v3.py:test_approved_epic_with_flag_on_is_done",
+        ".bigbang/tests/test_delivery_v3.py:test_gate_refuses_flag_on_without_approval",
+        ".bigbang/tests/test_delivery_v3.py:test_gate_refuses_a_red_release_pr",
+        ".bigbang/tests/test_delivery_v3.py:test_conflict_returning_main_opens_a_sync_pr",
+        ".bigbang/tests/test_delivery_v3.py:test_publishing_twice_is_harmless",
+        ".bigbang/tests/test_delivery_v3.py:test_unfinished_epic_without_a_flag_cannot_ship",
+        ".bigbang/tests/test_delivery_v3.py:test_any_flag_of_the_epic_on_in_production_counts",
+        ".bigbang/tests/test_delivery_v3.py:test_expired_flag_blocks_the_release",
+        ".bigbang/tests/test_delivery_v3.py:test_release_pr_head_must_be_the_candidate",
+        ".bigbang/tests/test_delivery_v3.py:test_without_a_candidate_the_gate_explains_instead_of_crashing",
+        ".bigbang/tests/test_delivery_v3.py:test_epic_that_lost_its_qa_after_the_gate_is_reported_pending_not_dark",
+        ".bigbang/tests/test_delivery_v3.py:test_gate_reads_flags_and_pending_from_the_release_content",
+        ".bigbang/tests/test_delivery_v3.py:test_no_expression_is_interpolated_into_a_shell_script",
+        ".bigbang/tests/test_delivery_v3.py:test_publish_reads_the_release_content_and_buttons_simulate_first",
+        ".bigbang/tests/test_delivery_v3.py:test_qa_reject_dry_run_checks_and_changes_nothing",
+        ".bigbang/tests/test_delivery_v3.py:test_maintenance_dry_run_merges_nothing",
+        ".bigbang/tests/test_delivery_v3.py:test_maintenance_merges_into_main_without_artifact_changes",
+        ".bigbang/tests/test_delivery_v3.py:test_artifact_change_needs_a_release",
+        ".bigbang/tests/test_delivery_v3.py:test_qa_rejection_creates_a_correction_task_on_the_release_branch",
+        ".bigbang/tests/test_delivery_v3.py:test_deletes_only_merged_branches_of_closed_issues_and_reports_old_claims",
+        ".bigbang/tests/test_delivery_v3.py:test_dry_run_changes_nothing",
+        ".bigbang/tests/test_delivery_v3.py:test_independent_agent_records_the_verdict_of_a_candidate",
+        ".bigbang/tests/test_delivery_v3.py:test_unknown_agent_cannot_record_a_verdict",
+        ".bigbang/tests/test_delivery_v3.py:test_links_leaving_the_pr_content_are_refused_before_any_read",
+        ".bigbang/tests/test_delivery_v3.py:test_pending_epics_are_warned_by_the_publish_command",
+        ".bigbang/tests/test_delivery_v3.py:test_maintenance_dry_run_says_nothing_was_merged",
+        ".bigbang/tests/test_delivery_v3.py:test_pending_warnings_are_written_before_the_milestone_closes",
+        ".bigbang/tests/test_delivery_v3.py:test_publish_workflow_picks_only_numbered_candidates"
+      ],
+      "hashes": {
+        ".bigbang/bb/flags.py": "sha256:06f715aa74201dfd6c9a23de9427155e45bfd570cb8383e59a85c7a3b563ff77",
+        ".bigbang/bb/flows.py": "sha256:5f5a60af46250d7ca6da383809e9f4b74152a78cd9b571b28475002db0a13b3f",
+        ".bigbang/bb/delivery.py": "sha256:77d2bc160223b677f8616736e46f8bbc7e0a0e40c8e81e4f733d4cd93c315977"
+      },
+      "descricao": "Sprint, branches, merge, corte da release, flags, candidata, publicação, manutenção, correção e faxina do modelo B."
+    },
+    {
+      "id": "BB-F-053",
+      "requisitos": [
+        "RF-BB-053"
+      ],
+      "pagina": "Funcionalidade-esteira-v3",
+      "fontes": [
+        ".bigbang/pipeline/AGENTS.base.md",
+        ".bigbang/pipeline/core/files/.github/dependabot.yml.tmpl",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-bug.yml",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-docs.yml",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-epic.yml",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-foundation.yml",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-task.yml",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-test.yml",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/config.yml",
+        ".bigbang/pipeline/core/files/.github/pull_request_template.md",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-board-report.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-ci.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-cleanup.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-codeql.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-controller.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-create-branches.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-cut-release.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-merge-pr.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-publish-maintenance.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-publish.yml.tmpl",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-qa-reject.yml",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-start-sprint.yml",
+        ".bigbang/pipeline/profiles/compiled/files/.github/workflows/bb-candidate.yml.tmpl",
+        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-candidate.yml.tmpl",
+        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-rollback.yml.tmpl"
+      ],
+      "testes": [
+        ".bigbang/tests/test_grouping_v3.py:test_v3_tree_is_generated_and_verified",
+        ".bigbang/tests/test_grouping_v3.py:test_clean_task_pr"
+      ],
+      "hashes": {
+        ".bigbang/pipeline/AGENTS.base.md": "sha256:37182439f6c9f8b3801fab7916a6616e6fb42040e6524262505a92f9c07c24d0",
+        ".bigbang/pipeline/core/files/.github/dependabot.yml.tmpl": "sha256:34ab41c900e502b5e964c35d01fb97ca64f29b11c4c3c29e2bff3a6d718f2470",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-bug.yml": "sha256:a106896eef75aee654f73c09b2ec1d793d387ba0331c44c9982a90b5ac314840",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-docs.yml": "sha256:7330b1a0f1bd69d66711e66c1179a88327f6e38fea9940e5125e99f03fc96fd4",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-epic.yml": "sha256:152eee3b7d7b98f4e4a78f6990ff68f9c842d9b5524df2d4e420594c9e5a3c48",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-foundation.yml": "sha256:73fa35ee91ef0de7d190624600fd73eb436fe5ad4369229f51ccc5b14f200eb7",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-task.yml": "sha256:32efb68775935ff8aa23df0cac1f8702cfb64502022d1909d9ea6eac1a12f77e",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-test.yml": "sha256:bb9537e1f19073e6d262ab8904ccf88c4277077d812766f9f5fd9b0c29eb752e",
+        ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/config.yml": "sha256:1f103c6a9dd07cd13a9a6f17ace6b813f47747eb9cb7e00488cb2073caaf91bb",
+        ".bigbang/pipeline/core/files/.github/pull_request_template.md": "sha256:48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-board-report.yml": "sha256:f6de77cb16f5767464c7a9735bfcc955fc452d6036b987f36e07f219f29bb87f",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-ci.yml": "sha256:92750d63996991c509d772373e24766c46c434869a99e980a0f31b10ce9a4981",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-cleanup.yml": "sha256:aeafd26d370a51c2a038c47349ed7a2a0b477f383e89264222509bfc0f792b01",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-codeql.yml": "sha256:164a28eaba2a75d0ba7f9b736b2341af46c56ff1331b460da201483f5ae467f6",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-controller.yml": "sha256:a2b9e18b184ef64b0eff582bb25ca24fa7746a5a6593977df37a716501ac533d",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-create-branches.yml": "sha256:ceb65a65bcac44411c522ab9fedd03e9bbf765964bbbbbdab7d959b174febda0",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-cut-release.yml": "sha256:82ccc75201ef417fdbdd91d2275d5eabc1120b03e69fb90c53adabc2dfaad04d",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-merge-pr.yml": "sha256:543b4724249bf17c4991b0588c1909c7852b124fc21b72e2fbb0f67a84161762",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-publish-maintenance.yml": "sha256:7671317ab89d4a1cba3c4a2187a5fb067b3cc4a345356e3f712f6a4811a78837",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-publish.yml.tmpl": "sha256:24f768ba12430bb8e1980665f330b376dd8d6802a5472fe355600af16e14fe1e",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-qa-reject.yml": "sha256:b9f7b38d500bb620ed24e621db729ebd04d3041abd59e98208605eef2023281a",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-start-sprint.yml": "sha256:def03451f99bcc7fb1f52717ccd30d433371dcbe616fbf379a03cb3f22c0596c",
+        ".bigbang/pipeline/profiles/compiled/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:c2bc95e8acc3da40b9a4da54f3281b8abd4bb5870ecb30ef69677d27d99a64c9",
+        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:d9e006c860077ec0d4e0b4e1c40b0f482faac452f7b9da639f1300fc1e1e5ed8",
+        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-rollback.yml.tmpl": "sha256:14a3c57fc67e866a2141c65310cf565462dfe81736b4d585cdd28787fff11698"
+      },
+      "descricao": "Árvore .bigbang/pipeline: workflows v3 com gate único, controlador, botões, formulários, instruções e perfis."
+    },
+    {
+      "id": "BB-F-054",
+      "requisitos": [
+        "RF-BB-054"
+      ],
+      "pagina": "Funcionalidade-modos-autonomia",
+      "fontes": [
+        ".bigbang/bb/autonomy.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_autonomy_v3.py:test_loaded_only_in_autonomous_mode_and_validated",
+        ".bigbang/tests/test_autonomy_v3.py:test_contract_limits_replace_the_defaults",
+        ".bigbang/tests/test_autonomy_v3.py:test_publish_needs_the_window_and_the_target",
+        ".bigbang/tests/test_autonomy_v3.py:test_inside_the_contract_the_agent_approves_and_the_receipt_says_so",
+        ".bigbang/tests/test_autonomy_v3.py:test_without_a_valid_contract_everything_is_blocked",
+        ".bigbang/tests/test_autonomy_v3.py:test_risk_outside_the_contract_is_blocked_not_delegated",
+        ".bigbang/tests/test_autonomy_v3.py:test_outside_the_contract_only_the_owner_decision_unblocks",
+        ".bigbang/tests/test_autonomy_v3.py:test_owner_decision_is_recorded_as_the_owner",
+        ".bigbang/tests/test_autonomy_v3.py:test_publish_outside_the_window_is_refused_in_autonomous_mode",
+        ".bigbang/tests/test_autonomy_v3.py:test_controls_in_place_pass",
+        ".bigbang/tests/test_autonomy_v3.py:test_missing_gate_rule_or_open_environment_refuse",
+        ".bigbang/tests/test_autonomy_v3.py:test_private_repository_on_a_free_personal_plan_refuses",
+        ".bigbang/tests/test_autonomy_v3.py:test_missing_environment_refuses",
+        ".bigbang/tests/test_autonomy_v3.py:test_every_command_sees_the_contract_of_the_checkout",
+        ".bigbang/tests/test_autonomy_v3.py:test_autonomy_check_reports_contract_and_bootstrap",
+        ".bigbang/tests/test_autonomy_v3.py:test_board_create_refuses_autonomous_mode_without_the_controls",
+        ".bigbang/tests/test_autonomy_v3.py:test_autonomous_agents_md_explains_the_contract",
+        ".bigbang/tests/test_autonomy_v3.py:test_owner_files_always_need_the_owner_review",
+        ".bigbang/tests/test_autonomy_v3.py:test_contract_flags_agent_lets_the_agent_switch_flags",
+        ".bigbang/tests/test_autonomy_v3.py:test_wrong_types_block_with_a_message_instead_of_crashing",
+        ".bigbang/tests/test_autonomy_v3.py:test_unreadable_contract_blocks",
+        ".bigbang/tests/test_autonomy_v3.py:test_limits_come_only_from_a_usable_contract",
+        ".bigbang/tests/test_autonomy_v3.py:test_wip_of_the_contract_limits_epics_in_progress",
+        ".bigbang/tests/test_autonomy_v3.py:test_unknown_plan_of_a_private_repository_refuses",
+        ".bigbang/tests/test_autonomy_v3.py:test_a_tag_policy_named_main_is_not_the_main_branch",
+        ".bigbang/tests/test_autonomy_v3.py:test_a_ruleset_with_bypass_actors_does_not_count",
+        ".bigbang/tests/test_autonomy_v3.py:test_the_contract_is_never_approved_by_an_agent",
+        ".bigbang/tests/test_autonomy_v3.py:test_owner_files_of_a_v3_project_need_the_owner_unless_he_delegated_this_pr",
+        ".bigbang/tests/test_autonomy_v3.py:test_merge_with_human_review_needs_the_recorded_owner_decision",
+        ".bigbang/tests/test_autonomy_v3.py:test_unseen_bypass_list_refuses",
+        ".bigbang/tests/test_autonomy_v3.py:test_private_repository_of_a_free_or_unknown_organization_refuses"
+      ],
+      "hashes": {
+        ".bigbang/bb/autonomy.py": "sha256:a1f063483bc5a4db93d499c0d475befabbda04287e4c67e4f4dbf2f6d650f654"
+      },
+      "descricao": "Contrato autonomy.toml nos portões e na publicação, checagem do bootstrap e identidade da aprovação nos recibos."
+    },
+    {
+      "id": "BB-F-056",
+      "requisitos": [
+        "RF-BB-056"
+      ],
+      "pagina": "Funcionalidade-framework-pipeline",
+      "fontes": [
+        ".bigbang/bb/framework.py",
+        ".bigbang/pipeline/framework/config.toml",
+        ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl",
+        ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml",
+        ".bigbang/pipeline/framework/scripts/testes-candidata.sh",
+        ".github/workflows/bb-framework-board-report.yml",
+        ".github/workflows/bb-framework-candidate.yml",
+        ".github/workflows/bb-framework-cleanup.yml",
+        ".github/workflows/bb-framework-codeql.yml",
+        ".github/workflows/bb-framework-controller.yml",
+        ".github/workflows/bb-framework-create-branches.yml",
+        ".github/workflows/bb-framework-cut-release.yml",
+        ".github/workflows/bb-framework-gate.yml",
+        ".github/workflows/bb-framework-merge-pr.yml",
+        ".github/workflows/bb-framework-publish-maintenance.yml",
+        ".github/workflows/bb-framework-publish.yml",
+        ".github/workflows/bb-framework-qa-reject.yml",
+        ".github/workflows/bb-framework-start-sprint.yml",
+        ".bigbang-framework.toml"
+      ],
+      "testes": [
+        ".bigbang/tests/test_framework_pipeline.py:test_framework_config_is_v3_grouping_flash_and_universal",
+        ".bigbang/tests/test_framework_pipeline.py:test_trusted_base_can_read_bootstrap_config_before_workflow_activation",
+        ".bigbang/tests/test_framework_pipeline.py:test_generate_framework_is_idempotent_guarded_and_preserves_legacy",
+        ".bigbang/tests/test_framework_pipeline.py:test_foreign_repository_refuses_the_framework_configuration",
+        ".bigbang/tests/test_framework_pipeline.py:test_init_removes_framework_file_and_f5_removes_its_workflows",
+        ".bigbang/tests/test_framework_pipeline.py:test_prepare_version_rewrites_version_checksums_and_expected",
+        ".bigbang/tests/test_framework_pipeline.py:test_prepare_refreshes_documented_hashes_for_the_version_change",
+        ".bigbang/tests/test_framework_pipeline.py:test_prepare_refuses_to_relabel_unreviewed_source_changes",
+        ".bigbang/tests/test_framework_pipeline.py:test_prepare_requires_the_documentation_manifest_before_any_write",
+        ".bigbang/tests/test_framework_pipeline.py:test_prepare_refuses_new_sources_without_documentary_coverage",
+        ".bigbang/tests/test_framework_pipeline.py:test_prepare_rejects_an_invalid_documentation_manifest_before_any_write",
+        ".bigbang/tests/test_framework_pipeline.py:test_prepare_refuses_untracked_sources_in_all_declared_roots",
+        ".bigbang/tests/test_framework_pipeline.py:test_candidate_and_promotion_keep_updater_names",
+        ".bigbang/tests/test_framework_pipeline.py:test_framework_community_keeps_auditing_the_existing_boards",
+        ".bigbang/tests/test_framework_pipeline.py:test_documentation_cli_keeps_the_framework_board_audit",
+        ".bigbang/tests/test_framework_pipeline.py:test_callbacks_and_candidate_ci_use_the_framework_namespace",
+        ".bigbang/tests/test_framework_pipeline.py:test_cli_framework_and_pipeline_are_exclusive",
+        ".bigbang/tests/test_launcher.py:test_template_is_not_founded",
+        ".bigbang/tests/test_launcher.py:test_template_ships_only_guarded_framework_workflows",
+        ".bigbang/tests/test_launcher.py:test_guard_check_rejects_unguarded_jobs",
+        ".bigbang/tests/test_launcher.py:test_every_root_entry_has_a_foundation_decision",
+        ".bigbang/tests/test_launcher.py:test_private_default_mode",
+        ".bigbang/tests/test_launcher.py:test_private_flash_mode",
+        ".bigbang/tests/test_launcher.py:test_autonomous_mode_needs_the_v3_workflow",
+        ".bigbang/tests/test_launcher.py:test_previous_workflow_stays_available",
+        ".bigbang/tests/test_launcher.py:test_public_gets_its_own_manifest",
+        ".bigbang/tests/test_launcher.py:test_compiled_profile_after_f2",
+        ".bigbang/tests/test_framework_stack.py:test_public_framework_without_runtime_packages_passes_the_content_gate",
+        ".bigbang/tests/test_framework_stack.py:test_framework_runtime_package_without_an_approved_table_is_refused",
+        ".bigbang/tests/test_framework_stack.py:test_framework_unreadable_dependency_ecosystem_is_still_refused",
+        ".bigbang/tests/test_framework_stack.py:test_pr_content_cannot_select_the_framework_policy_for_a_system_base",
+        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_page_is_required_even_for_the_framework",
+        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_keeps_the_normal_approved_package_table",
+        ".bigbang/tests/test_framework_stack.py:test_standalone_framework_stack_guard_uses_the_same_checks",
+        ".bigbang/tests/test_framework_stack.py:test_framework_runtime_manifests_inside_bigbang_are_refused_by_both_gates",
+        ".bigbang/tests/test_framework_stack.py:test_framework_unsupported_ecosystem_inside_bigbang_is_refused",
+        ".bigbang/tests/test_framework_stack.py:test_framework_test_fixtures_are_not_runtime_dependency_declarations",
+        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_checks_approved_and_unapproved_framework_packages",
+        ".bigbang/tests/test_framework_stack.py:test_normal_system_stack_guard_keeps_ignoring_the_inherited_framework",
+        ".bigbang/tests/test_framework_stack.py:test_packaged_framework_directories_are_not_skipped_as_system_build_outputs"
+      ],
+      "hashes": {
+        ".bigbang/bb/framework.py": "sha256:1ecbe5ed20b6c26bc1c5de1c53cb71173002f1086f1020775549c6803b308f7a",
+        ".bigbang/pipeline/framework/config.toml": "sha256:e8c3c7578b3d880ba05499eddf41b7251c276f6db15e62ae47038f5dc21e6fed",
+        ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:49709060fa19fa6c0e86e624df856dac13ec41e02eb64d3e4f763d6654b0f810",
+        ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:0245df537e46101bd142701cd485913c8558ed61a262efdae7fd9a2e229dc8d4",
+        ".bigbang/pipeline/framework/scripts/testes-candidata.sh": "sha256:b9cc01977794173b5dc2a2bec28b7ca53eb0f8fa91798f10148d25efae546a0e",
+        ".github/workflows/bb-framework-board-report.yml": "sha256:fd1bca1eff4486906b393d36ddda2f9c61f120ebee8b9b8d7a8b4cb60f8d6c48",
+        ".github/workflows/bb-framework-candidate.yml": "sha256:9208921c934809386e0c19d7ab8b474d7a9575f7575898db19651f90f02148af",
+        ".github/workflows/bb-framework-cleanup.yml": "sha256:86bbaf52ce0e00595d9f58fa00262595cc3d889f18628318869b0b329e07fa66",
+        ".github/workflows/bb-framework-codeql.yml": "sha256:d48adcfdc51211253d7be15911fbcbbad5cc38093f6c32c5931230f519e954cd",
+        ".github/workflows/bb-framework-controller.yml": "sha256:8f3a86b1c7f79de0f2e82cb53965fd2c25f58882178fd2af45907e4b1aa9e29b",
+        ".github/workflows/bb-framework-create-branches.yml": "sha256:d00c1c279ccd743faf524fc99d5770391882ed610158dd378a1137a08b5c2a95",
+        ".github/workflows/bb-framework-cut-release.yml": "sha256:94d91e26326d5dbe6326c3a953128f6c37646da2e30a87a95b30930d96e2ebb5",
+        ".github/workflows/bb-framework-gate.yml": "sha256:c5414ed0d5199a6277b1a4532e082b44521eed9dc16218c9e2182247844fe3d5",
+        ".github/workflows/bb-framework-merge-pr.yml": "sha256:ad55131c97002c8807eae1cddf53732ba9e62f97d09fd27d6abd91f2e93393a3",
+        ".github/workflows/bb-framework-publish-maintenance.yml": "sha256:6b16a750d30e065c8b0124ab3f76277a222226ff31ea5989c42cc3ed4a066491",
+        ".github/workflows/bb-framework-publish.yml": "sha256:23f4dca0f67161c6d9213e57ef35dd303b070873e96d8b749e554abe7cc3b19a",
+        ".github/workflows/bb-framework-qa-reject.yml": "sha256:75511a3098c9e3ad5d89e679200c63140c9e5e28687f71490d8c7582d280b189",
+        ".github/workflows/bb-framework-start-sprint.yml": "sha256:9f20dcc8a7e95f75c05465081481aad72bf31012f1305ad812a77c29021e9f9b",
+        ".bigbang-framework.toml": "sha256:e8c3c7578b3d880ba05499eddf41b7251c276f6db15e62ae47038f5dc21e6fed"
+      },
+      "descricao": "Suporte à esteira exclusiva da origem, namespace próprio e preservação do template não fundado."
+    },
+    {
+      "id": "BB-F-055",
+      "requisitos": [
+        "RF-BB-055"
+      ],
+      "pagina": "Funcionalidade-skills-processo-v3",
+      "fontes": [
+        ".bigbang/pipeline/process/README.md",
+        ".bigbang/pipeline/process/board.md",
+        ".bigbang/pipeline/process/bugs.md",
+        ".bigbang/pipeline/process/delivery.md",
+        ".bigbang/pipeline/process/execution.md",
+        ".bigbang/pipeline/process/modes.md",
+        ".bigbang/pipeline/process/planning.md",
+        ".bigbang/pipeline/process/sprint.md",
+        ".bigbang/pipeline/skills/bb-atualizar/SKILL.md",
+        ".bigbang/pipeline/skills/bb-codar-tarefa/SKILL.md",
+        ".bigbang/pipeline/skills/bb-corrigir-bug/SKILL.md",
+        ".bigbang/pipeline/skills/bb-documentar-epico/SKILL.md",
+        ".bigbang/pipeline/skills/bb-entregar-epico/SKILL.md",
+        ".bigbang/pipeline/skills/bb-escrever-testes-aceite/SKILL.md",
+        ".bigbang/pipeline/skills/bb-montar-github/SKILL.md",
+        ".bigbang/pipeline/skills/bb-refinar-backlog/SKILL.md",
+        ".bigbang/pipeline/skills/bb-reject/SKILL.md",
+        ".bigbang/pipeline/skills/bb-rodar-sprint/SKILL.md",
+        ".bigbang/pipeline/skills/bb-status/SKILL.md",
+        ".bigbang/pipeline/skills/bb-triar-issue/SKILL.md",
+        ".bigbang/pipeline/skills/bb-iniciar-projeto/SKILL.md",
+        ".bigbang/pipeline/skills/bb-prototipar/SKILL.md"
+      ],
+      "testes": [
+        ".bigbang/tests/test_skills_v3.py:test_every_override_has_a_legacy_skill_or_is_v3_only",
+        ".bigbang/tests/test_skills_v3.py:test_v3_project_gets_the_v3_skills",
+        ".bigbang/tests/test_skills_v3.py:test_legacy_project_keeps_the_current_skills",
+        ".bigbang/tests/test_skills_v3.py:test_every_process_reference_of_the_v3_layer_exists",
+        ".bigbang/tests/test_skills_v3.py:test_v3_agents_md_points_to_the_v3_process",
+        ".bigbang/tests/test_skills_v3.py:test_a_bug_fix_pull_request_goes_to_develop_or_a_release_never_to_main",
+        ".bigbang/tests/test_skills_v3.py:test_installed_foundation_instructions_agree_with_v3_branch_policy",
+        ".bigbang/tests/test_skills_v3.py:test_installed_prototype_instructions_follow_v3_states_and_decisions",
+        ".bigbang/tests/test_skills_v3.py:test_every_bb_command_in_the_v3_text_exists_in_the_cli"
+      ],
+      "hashes": {
+        ".bigbang/pipeline/process/README.md": "sha256:563c93bb12e74264d620ffad936c2039cf3ed231f4e0a66090f27063e9bb6d03",
+        ".bigbang/pipeline/process/board.md": "sha256:db8b4f489cbd4f8b08ced195f6da10719095cc85a6d394f2511ebd2b920ab349",
+        ".bigbang/pipeline/process/bugs.md": "sha256:2f13beb591518a5039b46ed34720c7fc27302b30ccc19277990099f9395dbf78",
+        ".bigbang/pipeline/process/delivery.md": "sha256:f3b680f176b722843a8d9eafe8165e8c89cd90e5a99e222618a10bcc3fbd5715",
+        ".bigbang/pipeline/process/execution.md": "sha256:a53d9677df320fdbacc75e4c054a3c87e4c915effa3d8338cf57a9fa2c7f51b9",
+        ".bigbang/pipeline/process/modes.md": "sha256:d1630b5c4aad2e0c36343f67c689669526a1f3299a7acf24f80fafea35cc3eef",
+        ".bigbang/pipeline/process/planning.md": "sha256:14e761b28252ecdf754028721f193a6391d05e73e9079b21cd92219916ab6874",
+        ".bigbang/pipeline/process/sprint.md": "sha256:97901470697eb6d8311c4d127f145241c0ac70b7e6d142e68b0a59f29f6ac44a",
+        ".bigbang/pipeline/skills/bb-atualizar/SKILL.md": "sha256:7c2f6c79a75a01f6726f496f0e5efad9ef2a84febafc76254352181f4dc36fe9",
+        ".bigbang/pipeline/skills/bb-codar-tarefa/SKILL.md": "sha256:166ae8f3b59e05f392fe1e4e5e83ce1fd55bc39745a0ddeb8107b72d9ea887ec",
+        ".bigbang/pipeline/skills/bb-corrigir-bug/SKILL.md": "sha256:d348962ed082094905f600e5ce08e450ce2ad0e4c0a9cdb69b5ef7126d79e46c",
+        ".bigbang/pipeline/skills/bb-documentar-epico/SKILL.md": "sha256:d0b48f7cf545f7076ae28ec43d55d6eecaa65580a358605da100f4b0e7359f57",
+        ".bigbang/pipeline/skills/bb-entregar-epico/SKILL.md": "sha256:e6607b325d04616aee9b3f591334cd78d9535a203a798c401ae0d4991c92b9bb",
+        ".bigbang/pipeline/skills/bb-escrever-testes-aceite/SKILL.md": "sha256:6a5cb576cfa6a2c8c4018fafe33c5ca349d34ce5498bf09183ff530e95fdcd9e",
+        ".bigbang/pipeline/skills/bb-montar-github/SKILL.md": "sha256:ca0e2569034c01baf0eab12f57acf4f0cf54f95bfe35f486d5abd1a40a82f715",
+        ".bigbang/pipeline/skills/bb-refinar-backlog/SKILL.md": "sha256:37075fb483dbcfe96858d4114aa3f200ce7542e3cd72496a6dd06486c17137f0",
+        ".bigbang/pipeline/skills/bb-reject/SKILL.md": "sha256:495c38706e39433d2ce572756dc29a232b6085738eac36c33c9f05a2eac140a9",
+        ".bigbang/pipeline/skills/bb-rodar-sprint/SKILL.md": "sha256:347f87eb83c6aee9d8134793cd2f221413032105549a57c70cad69d343de56ed",
+        ".bigbang/pipeline/skills/bb-status/SKILL.md": "sha256:05aeb51e495fc4a6d6a01bc43f620413efdb202fb2d61dfb01ce171c6c5c2162",
+        ".bigbang/pipeline/skills/bb-triar-issue/SKILL.md": "sha256:964ffa303e729662db316a96b34d281c00cedbf80e32b4017d3cc40165aff6ea",
+        ".bigbang/pipeline/skills/bb-iniciar-projeto/SKILL.md": "sha256:9bf40870be7c5def100be722a4fdf90d9741fa225aa239abdcf70c43570f49a1",
+        ".bigbang/pipeline/skills/bb-prototipar/SKILL.md": "sha256:c4e1c0ce10fc5948f46ae9a00b127a560b8f2aab53ea86801a8f524b3154d850"
+      },
+      "descricao": "Versões v3 das skills adaptadas, a skill bb-reject e os documentos de processo da v3, instalados só em projetos com workflow.model = grouping."
+    },
+    {
+      "id": "BB-F-057",
+      "requisitos": [
+        "RF-BB-057"
+      ],
+      "pagina": "Funcionalidade-migracao-v3",
+      "fontes": [
+        ".bigbang/bb/migrate.py"
+      ],
+      "testes": [
+        ".bigbang/tests/test_migrate_v3.py:test_existing_snapshot_is_never_overwritten",
+        ".bigbang/tests/test_migrate_v3.py:test_snapshot_restores_config_and_agents_exactly",
+        ".bigbang/tests/test_migrate_v3.py:test_dry_run_changes_nothing",
+        ".bigbang/tests/test_migrate_v3.py:test_rewrites_in_english_keeping_the_behavior",
+        ".bigbang/tests/test_migrate_v3.py:test_removes_the_inherited_framework_section_and_keeps_the_project_part",
+        ".bigbang/tests/test_migrate_v3.py:test_second_run_is_a_no_op",
+        ".bigbang/tests/test_migrate_v3.py:test_rollback_after_a_partial_rename_is_idempotent",
+        ".bigbang/tests/test_migrate_v3.py:test_copying_existing_labels_includes_pull_requests",
+        ".bigbang/tests/test_migrate_v3.py:test_foreign_snapshot_refuses_before_any_write",
+        ".bigbang/tests/test_migrate_v3.py:test_needs_the_workflow_part_first",
+        ".bigbang/tests/test_migrate_v3.py:test_renames_keeping_the_issues_copies_when_both_exist_and_creates_the_catalog",
+        ".bigbang/tests/test_migrate_v3.py:test_rollback_restores_the_names",
+        ".bigbang/tests/test_migrate_v3.py:test_dry_run_changes_nothing",
+        ".bigbang/tests/test_migrate_v3.py:test_remigration_after_rollback_uses_current_legacy_evidence",
+        ".bigbang/tests/test_migrate_v3.py:test_closed_epic_without_release_does_not_advance_to_done",
+        ".bigbang/tests/test_migrate_v3.py:test_closed_epic_with_its_stable_tag_is_done",
+        ".bigbang/tests/test_migrate_v3.py:test_bug_without_candidate_does_not_advance_to_qa",
+        ".bigbang/tests/test_migrate_v3.py:test_stale_or_unverified_claim_does_not_advance_to_coding",
+        ".bigbang/tests/test_migrate_v3.py:test_ready_task_waits_for_workflow_migration_even_with_merged_pr",
+        ".bigbang/tests/test_migrate_v3.py:test_bug_without_claim_uses_a_state_allowed_by_the_runtime",
+        ".bigbang/tests/test_migrate_v3.py:test_initial_cards_also_receive_a_migration_receipt",
+        ".bigbang/tests/test_migrate_v3.py:test_legacy_labels_are_mapped_before_the_label_migration",
+        ".bigbang/tests/test_migrate_v3.py:test_needs_the_config_part_first",
+        ".bigbang/tests/test_migrate_v3.py:test_maps_every_card_by_evidence_with_a_migration_receipt",
+        ".bigbang/tests/test_migrate_v3.py:test_snapshot_keeps_the_old_boards_and_rollback_restores_them",
+        ".bigbang/tests/test_migrate_v3.py:test_dry_run_writes_nothing",
+        ".bigbang/tests/test_migrate_v3.py:test_second_run_does_not_duplicate_receipts",
+        ".bigbang/tests/test_migrate_v3.py:test_snapshot_rollback_restores_the_original_configuration",
+        ".bigbang/tests/test_migrate_v3.py:test_needs_the_board_part_first",
+        ".bigbang/tests/test_migrate_v3.py:test_refuses_while_epic_branches_carry_unmerged_work",
+        ".bigbang/tests/test_migrate_v3.py:test_switches_to_grouping_and_lists_the_owner_steps",
+        ".bigbang/tests/test_migrate_v3.py:test_config_alias_dry_run_never_writes_or_contacts_github",
+        ".bigbang/tests/test_migrate_v3.py:test_github_parts_default_to_the_plan_without_yes",
+        ".bigbang/tests/test_migrate_v3.py:test_real_run_without_snapshot_refuses_before_mutation",
+        ".bigbang/tests/test_migrate_v3.py:test_config_roundtrip_from_cli",
+        ".bigbang/tests/test_migrate_v3.py:test_config_and_board_rollbacks_are_refused_while_the_workflow_is_applied",
+        ".bigbang/tests/test_migrate_v3.py:test_workflow_rollback_is_refused_while_the_labels_are_migrated",
+        ".bigbang/tests/test_migrate_v3.py:test_rolling_back_in_reverse_order_works"
+      ],
+      "hashes": {
+        ".bigbang/bb/migrate.py": "sha256:80c1a8779c3872015b7e37dc9b37981a663bfc7f8667ec0dbe70e7fff15a9323"
+      },
+      "descricao": "Migração guiada opcional com ordem segura, consentimento explícito de escrita no GitHub e preservação do legado."
     }
   ],
   "arquivos_funcionais": [

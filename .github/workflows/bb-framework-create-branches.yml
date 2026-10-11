@@ -1,0 +1,38 @@
+# Gerado pelo Big Bang v3.0.0 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-create-branches.yml. Não edite: personalize em bigbang.toml.
+# Button "Create branches" (ADR-0022): branches from develop for every unblocked child of an epic in progress.
+# Also runs after every merge into develop.
+name: Create branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      epic:
+        description: 'Only this epic (empty = every epic in progress)'
+        type: string
+        required: false
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-framework-create-branches
+  cancel-in-progress: false
+
+jobs:
+  create:
+    if: github.repository == 'BrunodosSantosVaz/big-bang' && (vars.PROJECT_OWNER != '')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Create the unblocked branches
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          EPIC: ${{ inputs.epic }}
+        run: python .bigbang/bin/bb.py branches ${EPIC:+--epic "$EPIC"}

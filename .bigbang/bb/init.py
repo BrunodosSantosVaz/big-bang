@@ -5,13 +5,14 @@ import os
 import re
 import unicodedata
 
-from . import documentation, generator, github
+from . import documentation, generator, github, names
 from . import config as config_module
 from .errors import EXIT_INVALID_CONFIG, EXIT_INVALID_STATE, EXIT_USAGE, BbError
 from .paths import config_path, framework_dir, framework_version, read_text, write_text
 from .render import substitute
 
 FOUNDATION_LABEL = ("fundacao", "1D76DB", "Etapa da Fundação (F0 a F5)")
+FOUNDATION_LABEL_V3 = ("type:foundation", "1D76DB", "Etapa da Fundação (F0 a F5)")
 F0_TITLE = "F0 · Ligar ao GitHub e escolher a visibilidade"
 F0_BODY = """Etapa F0 da Fundação (`.bigbang/processo/02-fundacao.md`).
 
@@ -26,7 +27,7 @@ F0_BODY = """Etapa F0 da Fundação (`.bigbang/processo/02-fundacao.md`).
 - README do sistema criado{licenca_criada}
 
 ## Link do PR
-<!-- preenchido pela IA ao abrir o PR fundacao/... -->
+<!-- preenchido pela IA ao abrir o PR da Fundação -->
 """
 LICENSE_HOLDERS = ("[fullname]", "[name of copyright owner]", "[owner]")
 LICENSE_YEARS = ("[year]", "[yyyy]")
@@ -79,6 +80,14 @@ def set_value(text, section, key, value):
     return text[:header.end()] + body + text[end:]
 
 
+def set_config_value(text, legacy_dotted, value):
+    """set_value in the dialect of the file: `bigbang.versao` writes `version` in a v3 (English) bigbang.toml."""
+    if config_module.dialect(config_module.parse(text)) == "v3":
+        legacy_dotted, value = names.key_to_v3(legacy_dotted), names.value_to_v3(legacy_dotted, value)
+    section, key = legacy_dotted.split(".", 1)
+    return set_value(text, section, key, value)
+
+
 def _repository_from_git(root):
     path = os.path.join(root, ".git", "config")
     if not os.path.exists(path):
@@ -88,7 +97,8 @@ def _repository_from_git(root):
     return match.group(1) if match else None
 
 
-def resolve_options(root, nome, slug=None, dono=None, repositorio=None, visibilidade="privado", licenca="", modo="padrao"):
+def resolve_options(root, nome, slug=None, dono=None, repositorio=None, visibilidade="privado", licenca="", modo="normal",
+                    fluxo="grouping"):
     if not nome or not nome.strip():
         raise BbError("informe o nome do sistema (--nome)", EXIT_USAGE)
     repositorio = repositorio or _repository_from_git(root)
@@ -97,9 +107,14 @@ def resolve_options(root, nome, slug=None, dono=None, repositorio=None, visibili
     repositorio = repositorio or f"{dono}/{slug}"
     if visibilidade == "publico" and not licenca:
         raise BbError("repositório público precisa de licença (--licenca, identificador SPDX como MIT)", EXIT_USAGE)
-    if modo not in ("padrao", "flash"):
-        raise BbError("modo deve ser padrao ou flash", EXIT_USAGE)
-    return {"nome": nome.strip(), "slug": slug, "dono": dono, "repositorio": repositorio, "modo": modo,
+    modo = "normal" if modo == "padrao" else modo
+    if modo not in ("normal", "flash", "autonomous"):
+        raise BbError("modo deve ser normal, flash ou autonomous", EXIT_USAGE)
+    if fluxo not in ("grouping", "epic-branch"):
+        raise BbError("fluxo deve ser grouping ou epic-branch", EXIT_USAGE)
+    if modo == "autonomous" and fluxo != "grouping":
+        raise BbError("o modo autonomous existe só no fluxo v3 (--fluxo grouping)", EXIT_USAGE)
+    return {"nome": nome.strip(), "slug": slug, "dono": dono, "repositorio": repositorio, "modo": modo, "fluxo": fluxo,
             "visibilidade": visibilidade, "licenca": licenca if visibilidade == "publico" else ""}
 
 
@@ -108,9 +123,12 @@ def build_config_text(root, options):
     text = set_value(text, "bigbang", "versao", framework_version(root))
     for key in ("nome", "slug", "dono", "repositorio", "visibilidade", "licenca"):
         text = set_value(text, "projeto", key, options[key])
-    text = set_value(text, "projeto", "modo", options.get("modo", "padrao"))
+    mode = options.get("modo", "normal")
+    text = set_value(text, "projeto", "modo", "padrao" if mode in ("normal", "autonomous") else mode)
     text = set_value(text, "paineis", "owner", options["dono"])
     text = set_value(text, "deploy", "imagem", f"ghcr.io/{options['dono'].lower()}/{options['slug']}")
+    if options.get("fluxo", "grouping") == "grouping":
+        text = grouping_text(text, mode)
     errors = config_module.validate(config_module.parse(text), framework_version(root))
     if errors:
         raise BbError("bigbang.toml gerado ficou inválido:\n" + "\n".join(f"  - {e}" for e in errors),
@@ -118,14 +136,39 @@ def build_config_text(root, options):
     return text
 
 
+def grouping_text(text, mode):
+    """The founded bigbang.toml of a v3 project: English names (ADR-0024), single board (its number comes in F4),
+    v3 labels and the grouping workflow (ADR-0022), keeping the template's layout and comments."""
+    text = config_module.text_to_v3(text)
+    replacements = (
+        (r'(?m)^mode = "[a-z]+"([ \t]*#.*)?$',
+         f'mode = "{mode}"                        # normal | flash | autonomous (com autonomy.toml); muda com o dono'),
+        (r'(?m)^model = "three-boards".*$', 'model = "single"                       # Project único, criado em F4'),
+        (r'(?m)^labels = "legacy".*$', 'labels = "v3"\nnumber = 0                             # número do Project (F4)'),
+        (r'(?m)^(planning|execution|bugs) = 0[^\n]*\n', ''),
+        (r'(?m)^model = "epic-branch".*$', 'model = "grouping"                     # épico agrupador (ADR-0022)'),
+    )
+    for pattern, replacement in replacements:
+        text, count = re.subn(pattern, replacement, text, count=1)
+        if not count and "planning" not in pattern:
+            raise BbError(f"modelo do bigbang.toml fora do esperado ({pattern})", EXIT_INVALID_STATE)
+    text = re.sub(r'(?m)^(execution|bugs) = 0[^\n]*\n', '', text)
+    return text
+
+
 def plan_steps(options, with_github):
     steps = []
     if with_github:
-        steps += [f"criar (ou atualizar) a label {FOUNDATION_LABEL[0]} em {options['repositorio']}",
+        label = (FOUNDATION_LABEL_V3 if options.get("fluxo", "grouping") == "grouping" else FOUNDATION_LABEL)[0]
+        steps += [f"criar (ou atualizar) a label {label} em {options['repositorio']}",
                   f"abrir a issue \"{F0_TITLE}\" (se ainda não existir)"]
-    steps += [f"adotar o modo {options.get('modo', 'padrao')} (testes continuam escritos antes do código)",
+    workflow = ("fluxo v3: quadro único e épico agrupador, bigbang.toml em inglês"
+                if options.get("fluxo", "grouping") == "grouping" else "fluxo anterior: branch de épico e três painéis")
+    steps += [f"adotar o modo {options.get('modo', 'normal')} (testes continuam escritos antes do código)",
+              f"adotar o {workflow}",
               "criar bigbang.toml a partir de .bigbang/modelos/bigbang.toml.exemplo",
               "mover README.md e LICENSE do framework para .bigbang/",
+              "retirar do AGENTS.md as instruções exclusivas do framework (trecho bigbang:framework)",
               "criar o README.md do sistema",
               "criar CODE_OF_CONDUCT.md, CONTRIBUTING.md e SECURITY.md do sistema (DOC-16)"]
     if options["visibilidade"] == "publico":
@@ -158,6 +201,10 @@ def run(root, options, with_github=True, today=None):
                                                         {"projeto": options}, source))
     if license_text:
         write_text(os.path.join(root, "LICENSE"), license_text)
+    for name in (".bigbang-framework.toml", ".bigbang-producao.json"):  # the framework's own, never the system's
+        framework_file = os.path.join(root, name)
+        if os.path.isfile(framework_file):
+            os.remove(framework_file)
     write_text(config_path(root), config_text)
     manifest = os.path.join(root, documentation.MANIFEST)
     if wiki:
@@ -174,8 +221,24 @@ def run(root, options, with_github=True, today=None):
         inherited = json.loads(read_text(manifest))
         if inherited.get("repositorio") == "BrunodosSantosVaz/big-bang":
             os.remove(manifest)  # Private project created from the public framework template.
+    _drop_framework_project_section(root)
     generator.apply(generator.build_plan(root), root)
     return issue
+
+
+FRAMEWORK_SECTION = re.compile(r"\n*<!-- bigbang:framework:inicio -->\n.*?<!-- bigbang:framework:fim -->\n?", re.S)
+
+
+def _drop_framework_project_section(root):
+    """A system born from the template inherits the framework's own instructions in the AGENTS.md project section
+    (its mode, its priorities), marked between bigbang:framework comments. Remove exactly that marked segment, so
+    a new system never follows the framework's instructions; the rest of the project section is kept."""
+    path = os.path.join(root, generator.AGENTS_FILE)
+    if os.path.isfile(path):
+        current = read_text(path)
+        cleaned = FRAMEWORK_SECTION.sub("\n", current)
+        if cleaned != current:
+            write_text(path, cleaned)
 
 
 def _license_text(options, today):
@@ -190,7 +253,8 @@ def _license_text(options, today):
 
 def _github_steps(options):
     repository = options["repositorio"]
-    name, color, description = FOUNDATION_LABEL
+    name, color, description = FOUNDATION_LABEL_V3 if options.get("fluxo", "grouping") == "grouping" \
+        else FOUNDATION_LABEL
     github.run("label", "create", name, "--color", color, "--description", description, "--force", "-R", repository)
     existing = json.loads(github.run("issue", "list", "-R", repository, "--label", name, "--state", "all",
                                      "--json", "number,title", "--limit", "100") or "[]")
@@ -198,6 +262,6 @@ def _github_steps(options):
         if issue["title"].startswith("F0 "):
             return issue["number"]
     body = F0_BODY.format(visibilidade=options["visibilidade"], licenca=options["licenca"] or "nenhuma (privado)",
-                          modo=options.get("modo", "padrao"),
+                          modo=options.get("modo", "normal"),
                           licenca_criada=f"\n- LICENSE do sistema ({options['licenca']})" if options["licenca"] else "")
     return github.run("issue", "create", "-R", repository, "--label", name, "--title", F0_TITLE, "--body", body)

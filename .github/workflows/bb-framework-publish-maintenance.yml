@@ -1,0 +1,42 @@
+# Gerado pelo Big Bang v3.0.0 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-publish-maintenance.yml. Não edite: personalize em bigbang.toml.
+# Button "Publish maintenance" (v3): a maintenance/* PR into main that changes nothing of the artifact
+# (documentation, pipeline) is merged after approval and a green gate; then main returns to develop.
+name: Publish maintenance
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'Number of the maintenance/* PR into main'
+        required: true
+        type: string
+      dry_run:
+        description: 'Only check (changes nothing)'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-framework-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'BrunodosSantosVaz/big-bang' && (vars.PROJECT_OWNER != '')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Merge the maintenance and return main to develop
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          PR: ${{ inputs.pr }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '' }}
+        run: python .bigbang/bin/bb.py release maintenance --pr "$PR" ${DRY_RUN:+--dry-run}

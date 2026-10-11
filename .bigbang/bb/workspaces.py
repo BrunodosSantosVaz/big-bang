@@ -32,11 +32,12 @@ def _update_local(root, branch):
             git(root, "update-ref", "refs/heads/" + branch, remote, local)
 
 
-def _bug_branch(root, repo, number):
+def _bug_branch(root, repo, number, v3=False):
     """A bug (or hotfix) has no "Criar branches": its branch is born here, from the main (process 10, pilot #61)."""
     issue = ownership.issue_data(repo, number) or {}
     names = ownership.labels(issue)
-    kind = "hotfix" if "hotfix" in names else "bugfix" if "bug" in names else None
+    is_bug = "bug" in names or "type:bug" in names
+    kind = "hotfix" if "hotfix" in names else ("fix" if v3 else "bugfix") if is_bug else None
     if kind is None:
         return []
     branch = pipeline.branch_name(kind, number, re.sub(r"^\[[^\]]*\]\s*", "", issue.get("title") or ""))
@@ -45,14 +46,18 @@ def _bug_branch(root, repo, number):
     return [branch]
 
 
-def isolate(root, config, receipt, folder=None):
+LEGACY_KINDS = ("feature", "teste", "docs", "bugfix", "hotfix")
+V3_KINDS = ("feature", "test", "docs", "fix", "hotfix")
+
+
+def isolate(root, config, receipt, folder=None, kinds=LEGACY_KINDS):
     repo, number = config["projeto"]["repositorio"], receipt["issue"]
     branches = []
-    for kind in ("feature", "teste", "docs", "bugfix", "hotfix"):
+    for kind in kinds:
         refs = ownership.listing(f"repos/{repo}/git/matching-refs/heads/{kind}/{number}-")
         branches.extend(ref["ref"][len("refs/heads/"):] for ref in refs)
     if not branches:
-        branches = _bug_branch(root, repo, number)
+        branches = _bug_branch(root, repo, number, v3=kinds == V3_KINDS)
     if len(branches) != 1 or pipeline.branch_issue(branches[0])[1] != number:
         raise BbError(f"#{number}: precisa de exatamente uma branch da tarefa criada pela esteira", EXIT_INVALID_STATE)
     # Named after the MAIN checkout, also when run from inside another work folder (pilot: "repo-claude-1-claude-1").
