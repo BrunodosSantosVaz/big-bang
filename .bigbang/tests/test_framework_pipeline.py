@@ -91,6 +91,15 @@ class FrameworkPipeline(unittest.TestCase):
         self.assertIn("ref: develop", checkout.group(1))  # the release branch is only data (--branch)
         self.assertIn('--branch "$BRANCH"', job)
 
+    def test_gate_rules_never_run_the_old_main_code_for_pull_requests_into_main(self):
+        from _raiz import RAIZ
+        text = open(os.path.join(RAIZ, ".bigbang", "pipeline", "framework", "files", ".github", "workflows",
+                                 "bb-gate.yml"), encoding="utf-8").read()
+        job = text[text.index("  rules:"):text.index("  gate:")]
+        self.assertIn("github.event.pull_request.base.ref == 'main' && 'develop'", job)  # trusted v3 code
+        self.assertIn("persist-credentials: false", job)
+        self.assertNotIn("pull_request.head.ref", job.split("PR content as data")[0])  # never the PR's own code
+
     def test_foreign_repository_refuses_the_framework_configuration(self):
         subprocess.run(['git', '-C', self.root, 'remote', 'set-url', 'origin',
                         'https://github.com/another/system.git'], check=True)
