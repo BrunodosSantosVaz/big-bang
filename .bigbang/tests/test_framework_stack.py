@@ -25,6 +25,7 @@ class FrameworkStack(unittest.TestCase):
         self.assertTrue(self.trusted['_framework'])
 
     def write(self, name, text):
+        Path(self.root, name).parent.mkdir(parents=True, exist_ok=True)
         Path(self.root, name).write_text(text, encoding='utf-8')
 
     def write_manifest(self):
@@ -81,3 +82,45 @@ class FrameworkStack(unittest.TestCase):
         self.assertEqual(pipeline_cli._stack_guard(args), 0)
         self.write('requirements.txt', 'unapproved-package==1.0.0\n')
         self.assertNotEqual(pipeline_cli._stack_guard(args), 0)
+
+    def test_framework_runtime_manifests_inside_bigbang_are_refused_by_both_gates(self):
+        manifests = {
+            '.bigbang/requirements.txt': 'unapproved-package==1.0.0\n',
+            '.bigbang/pyproject.toml': '[project]\ndependencies = ["unapproved-package==1.0.0"]\n',
+            '.bigbang/bb/package.json': json.dumps({'dependencies': {'unapproved-package': '1.0.0'}}),
+        }
+        args = SimpleNamespace(raiz=RAIZ, dados=self.root)
+        for path, body in manifests.items():
+            with self.subTest(path=path):
+                self.write(path, body)
+                self.assertTrue(any('dependências de execução' in p for p in self.problems()))
+                self.assertNotEqual(pipeline_cli._stack_guard(args), 0)
+                Path(self.root, path).unlink()
+
+    def test_framework_unsupported_ecosystem_inside_bigbang_is_refused(self):
+        self.write('.bigbang/pubspec.yaml', 'name: framework_example\n')
+        self.assertTrue(any('não suportado' in p for p in self.problems()))
+        self.assertNotEqual(pipeline_cli._stack_guard(SimpleNamespace(raiz=RAIZ, dados=self.root)), 0)
+
+    def test_framework_test_fixtures_are_not_runtime_dependency_declarations(self):
+        self.write('.bigbang/tests/fixture/requirements.txt', 'fixture-only-package==1.0.0\n')
+        self.write('.bigbang/tests/fixture/pubspec.yaml', 'name: fixture_example\n')
+        self.assertEqual(self.problems(), [])
+        self.assertEqual(pipeline_cli._stack_guard(SimpleNamespace(raiz=RAIZ, dados=self.root)), 0)
+
+    def test_a_declared_stack_checks_approved_and_unapproved_framework_packages(self):
+        self.manifest['paginas']['STACK.md'] = 'Stack'
+        self.write_manifest()
+        self.write('Stack.md', '<!-- bb:dependencias:inicio -->\n'
+                   '| approved-package | pypi |\n<!-- bb:dependencias:fim -->\n')
+        self.write('.bigbang/requirements.txt', 'approved-package==1.0.0\n')
+        from unittest.mock import patch
+        with patch('bb.documentation.checkout', return_value=Path(self.root)):
+            self.assertEqual(self.problems(), [])
+            self.write('.bigbang/requirements.txt', 'unapproved-package==1.0.0\n')
+            self.assertTrue(any('não está na tabela' in p for p in self.problems()))
+
+    def test_normal_system_stack_guard_keeps_ignoring_the_inherited_framework(self):
+        self.write('.bigbang/requirements.txt', 'framework-only-package==1.0.0\n')
+        self.write('bigbang.toml', '[projeto]\nvisibilidade = "privado"\n')
+        self.assertEqual(self.problems({k: v for k, v in self.trusted.items() if k != '_framework'}), [])
