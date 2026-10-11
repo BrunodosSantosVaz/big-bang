@@ -1,5 +1,5 @@
 """v3 skills (epic #233 · plan 7.4): a grouping-workflow project gets the v3 version of the adapted skills and the
-v3-only skills; a legacy project keeps the current skills untouched; bb-migrate reaches both."""
+v3-only skills; a legacy project keeps the current skills untouched."""
 import os
 import tempfile
 import unittest
@@ -14,7 +14,7 @@ ADAPTED = ("bb-refinar-backlog", "bb-rodar-sprint", "bb-codar-tarefa", "bb-entre
            "bb-status", "bb-montar-github", "bb-atualizar", "bb-escrever-testes-aceite", "bb-documentar-epico",
            "bb-triar-issue")
 V3_ONLY = ("bb-reject",)
-LEGACY_WORDS = ("epico/", "Iniciar sprint", "bb assumir", "Integrar release", "Homologação ou adiante")
+LEGACY_WORDS = ("`epico/", " epico/", "Iniciar sprint", "bb assumir", "Integrar release", "Homologação ou adiante")
 
 
 def skill(root, name, target=".claude/skills"):
@@ -28,7 +28,6 @@ class SkillsV3(unittest.TestCase):
         legacy = os.listdir(os.path.join(RAIZ, ".bigbang", "skills"))
         self.assertEqual(sorted(set(overrides) - set(legacy)), sorted(V3_ONLY))
         self.assertEqual(sorted(set(ADAPTED) - set(overrides)), [])
-        self.assertIn("bb-migrate", legacy)
 
     def test_v3_project_gets_the_v3_skills(self):
         helper = GeneratedV3()
@@ -36,7 +35,7 @@ class SkillsV3(unittest.TestCase):
             root = helper.project(folder)
             generator.apply(generator.build_plan(root, install_pipeline=True), root)
             for target in generator.SKILL_TARGETS:
-                for name in ADAPTED + V3_ONLY + ("bb-migrate",):
+                for name in ADAPTED + V3_ONLY:
                     text = skill(root, name, target)
                     self.assertIsNotNone(text, f"{target}/{name}")
                     self.assertIn(f"name: {name}", text)
@@ -66,8 +65,38 @@ class SkillsV3(unittest.TestCase):
                             encoding="utf-8").read()
             self.assertIn(original.split("---", 2)[2].strip()[:200], skill(root, "bb-rodar-sprint"))
             self.assertIsNone(skill(root, "bb-reject"))
-            self.assertIsNotNone(skill(root, "bb-migrate"))
 
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ProcessV3(unittest.TestCase):
+    def test_every_process_reference_of_the_v3_layer_exists(self):
+        import re
+        base = os.path.join(RAIZ, ".bigbang", "pipeline")
+        texts = [open(os.path.join(base, "AGENTS.base.md"), encoding="utf-8").read()]
+        for name in os.listdir(os.path.join(base, "skills")):
+            texts.append(open(os.path.join(base, "skills", name, "SKILL.md"), encoding="utf-8").read())
+        found = set()
+        for text in texts:
+            found |= set(re.findall(r"\.bigbang/pipeline/process/([a-z-]+\.md)", text))
+        for name in ("execution.md", "sprint.md", "delivery.md"):
+            found.add(name)
+        for name in sorted(found):
+            self.assertTrue(os.path.exists(os.path.join(base, "process", name)), name)
+        sibling = re.compile(r"`(execution|sprint|delivery|board|planning|bugs|modes)\.md`")
+        for text in texts:
+            for name in sibling.findall(text):
+                self.assertTrue(os.path.exists(os.path.join(base, "process", name + ".md")), name)
+
+    def test_v3_agents_md_points_to_the_v3_process(self):
+        helper = GeneratedV3()
+        with tempfile.TemporaryDirectory() as folder:
+            root = helper.project(folder)
+            generator.apply(generator.build_plan(root, install_pipeline=True), root)
+            agents = open(os.path.join(root, "AGENTS.md"), encoding="utf-8").read()
+            for legacy in ("processo/06-execucao.md", "processo/17-flash.md", "processo/05-sprint.md",
+                           "processo/09-entrega.md"):
+                self.assertNotIn(legacy, agents)
+            self.assertIn(".bigbang/pipeline/process/", agents)

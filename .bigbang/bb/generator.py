@@ -6,6 +6,7 @@ Sources, in composition order (a later layer may replace a file of an earlier on
   .bigbang/esteira/perfis/<perfil>/arquivos/        idem
   .bigbang/esteira/perfis/deploy/alvos/<alvo>/arquivos/   idem, deploy profile only
   .bigbang/skills/bb-*/                             always, written to .agents/skills/ and .claude/skills/
+  .bigbang/pipeline/skills/bb-*/                    v3 projects only: replaces the legacy folder of the same name
 plus the marked blocks of AGENTS.md (always) and STACK.md (when it exists).
 """
 import difflib
@@ -132,7 +133,7 @@ def build_plan(root, install_pipeline=False):
         if layer == "esteira/sempre" and any(path.startswith(".github/") for path in plan.expected):
             raise BbError(".bigbang/esteira/sempre/ não pode gerar arquivos em .github/ (só a esteira gera)",
                           EXIT_INVALID_STATE)
-    _add_skills(plan, root, context, version)
+    _add_skills(plan, root, context, version, v3=is_v3_pipeline(config))
     _add_agents_md(plan, root, context, version, founded=config is not None, v3=is_v3_pipeline(config))
     if config is not None:
         _add_stack_md(plan, root, config, version)
@@ -181,14 +182,23 @@ def _add_tree(plan, root, folder, destination_prefix, context, version):
         plan.add(destination, add_notice(content, destination, version, source), source)
 
 
-def _add_skills(plan, root, context, version):
-    skills = os.path.join(framework_dir(root), "skills")
-    for name in sorted(os.listdir(skills)):
-        folder = os.path.join(skills, name)
-        if not os.path.isdir(folder) or name in IGNORED_NAMES:
-            continue
-        if not name.startswith("bb-"):
-            raise BbError(f".bigbang/skills/{name}: skills do framework precisam do prefixo bb-", EXIT_INVALID_STATE)
+def _add_skills(plan, root, context, version, v3=False):
+    """Framework skills for every project; a v3 project gets the v3 version of the adapted ones and the v3-only
+    skills from .bigbang/pipeline/skills/ (a folder there replaces the legacy folder of the same name)."""
+    sources = {}
+    bases = [os.path.join(framework_dir(root), "skills")]
+    if v3:
+        bases.append(os.path.join(framework_dir(root), "pipeline", "skills"))
+    for base in bases:
+        for name in sorted(os.listdir(base)):
+            folder = os.path.join(base, name)
+            if not os.path.isdir(folder) or name in IGNORED_NAMES:
+                continue
+            if not name.startswith("bb-"):
+                raise BbError(f"{os.path.relpath(folder, root)}: skills do framework precisam do prefixo bb-",
+                              EXIT_INVALID_STATE)
+            sources[name] = folder
+    for name, folder in sorted(sources.items()):
         for target in SKILL_TARGETS:
             _add_tree(plan, root, folder, f"{target}/{name}/", context, version)
 
