@@ -204,8 +204,9 @@ def logical_files(root, prefix):
     return sorted(path.relative_to(root).as_posix() for path in folder.rglob("*.md")) if folder.exists() else []
 
 
-def inventory(root, data):
-    tracked = git(root, "ls-files", "-z").split("\0")
+def inventory(root, data, *, include_untracked=False):
+    options = ("--cached", "--others", "--exclude-standard") if include_untracked else ()
+    tracked = git(root, "ls-files", *options, "-z").split("\0")
     roots = data["codigo"]["raizes"]
     exclusions = data["codigo"].get("excluir", [])
     excluded_extensions = data['codigo'].get('excluir_extensoes', [])
