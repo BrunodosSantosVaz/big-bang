@@ -123,6 +123,29 @@ class SkillsAgreeWithTheCode(unittest.TestCase):
             self.assertNotIn("PR para a `main`", text, name)
             self.assertIn("release/x.y.z", text, name)
 
+    def test_installed_foundation_instructions_agree_with_v3_branch_policy(self):
+        from bb import pipeline
+        helper = GeneratedV3()
+        with tempfile.TemporaryDirectory() as folder:
+            root = helper.project(folder)
+            plan = generator.build_plan(root, install_pipeline=True)
+            text = plan.expected['.claude/skills/bb-iniciar-projeto/SKILL.md']
+            self.assertIn('`type:foundation`', text)
+            self.assertIn('`foundation/<n>-<slug>`', text)
+            self.assertNotIn('`fundacao/', text)
+            self.assertIsNone(pipeline.v3_branch_problem('foundation/1-f0', 'develop'))
+
+    def test_installed_prototype_instructions_follow_v3_states_and_decisions(self):
+        helper = GeneratedV3()
+        with tempfile.TemporaryDirectory() as folder:
+            root = helper.project(folder)
+            text = generator.build_plan(root, install_pipeline=True).expected['.claude/skills/bb-prototipar/SKILL.md']
+            self.assertIn('`approved:refinement`', text)
+            self.assertIn('`prototype:required`', text)
+            self.assertIn('Ready', text)
+            self.assertNotIn('Próxima sprint', text)
+            self.assertNotIn('`refinamento-aprovado`', text)
+
     def test_every_bb_command_in_the_v3_text_exists_in_the_cli(self):
         import re
         from bb import cli
