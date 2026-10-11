@@ -190,8 +190,11 @@ def dependency_files(root, *, include_framework=False):
         relative = to_posix(os.path.relpath(current, root))
         in_framework = include_framework and (relative == '.bigbang' or relative.startswith('.bigbang/'))
         # These directories ship in the framework tarball; a system's output/vendor exclusions do not apply.
-        folders[:] = sorted(f for f in folders if (f != '__pycache__' if in_framework else
-                            f not in SKIPPED_FOLDERS or (include_framework and f == '.bigbang')))
+        if in_framework:
+            folders[:] = sorted(f for f in folders if f != '__pycache__')
+        else:
+            folders[:] = sorted(f for f in folders if f not in SKIPPED_FOLDERS or
+                                (include_framework and f == '.bigbang'))
         if include_framework and relative == '.bigbang':
             folders[:] = [f for f in folders if f != 'tests']  # development fixtures, never runtime packages
         for name in sorted(names):
