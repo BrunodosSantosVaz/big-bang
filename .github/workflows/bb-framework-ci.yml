@@ -38,6 +38,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
       - name: Testes do framework (estrutura, workflows, Markdown e links)
         run: python -m unittest discover -s .bigbang/tests -v
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: bb verificar (CHECKSUMS, camada gerada e workflows)
         run: python .bigbang/bin/bb.py verificar
 

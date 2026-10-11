@@ -601,7 +601,7 @@
         ".bigbang/bb/config.py": "sha256:d3158d093d8bf3997e6fc5831cae86342cc9c23b3c454818e5dc778abd612cf2",
         ".bigbang/bb/names.py": "sha256:7efdd69e473b9282f07c8cc831f0e9a6cdb72640fc6e08ea17139e0db15ad4f0",
         ".bigbang/esteira/perfis/deploy/README.md": "sha256:9d7174376225426873f181ebccbd517cdb1282549aefe19385188c808a9305b8",
-        ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh": "sha256:0dc38a4fe995806053a6ef6bfbcfea69ede00ad175097052d271c3fdaefcf654",
+        ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh": "sha256:1da0044e74c634740c047b36ecceb3cd2d15eb51a490eaee03cd936fe9184dd6",
         ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:421edf4993240f4188eda72421e7d314dd15d2148a6ab4a4216eb28811869869"
       },
       "descricao": "Resolver entregas por contratos instalados, distinguindo suporte implementado de integração reservada."
