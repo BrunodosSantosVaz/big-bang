@@ -233,8 +233,9 @@ Use `bb atualizar 1.5.1` para obter a correção oficial e regenerar os arquivos
   exato; produção fica vinculada ao SHA dos testes completos e conserva aprovação humana.
 - **Release em repositório privado:** a conferência de ancestralidade usa as referências já obtidas pelo
   checkout completo, sem novo `git fetch` após a retirada das credenciais.
-- `aws` e `paas` eram reservas sem implementação e agora sua seleção é recusada explicitamente.
-  `personalizado`, `pacote` e `estatico` também continuam reservados; não há entrega universal anunciada.
+- `aws` e `paas` eram reservas sem implementação e agora sua seleção é recusada explicitamente. O alvo `personalizado`
+  agora suporta scripts do projeto com imagem imutável e variáveis públicas allowlisted, em passos sem credenciais de
+  publicação. `pacote` e `estatico` continuam reservados; não há entrega universal anunciada.
 
 ### O que o projeto precisa fazer
 

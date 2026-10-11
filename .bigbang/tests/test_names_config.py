@@ -39,6 +39,10 @@ class Names(unittest.TestCase):
         self.assertIsNone(names.key_to_legacy("board.model"))
         self.assertEqual(names.key_to_legacy("board.planning"), "paineis.planejamento")
 
+    def test_personalized_deploy_has_no_secret_mapping(self):
+        self.assertNotIn("segredos_personalizado", names.KEYS["deploy"])
+        self.assertIsNone(names.key_to_legacy("deploy.custom_secrets"))
+
     def test_decision_labels_in_both_dialects(self):
         self.assertEqual(len(names.DECISIONS), len(names.DECISIONS_LEGACY) + len(names.V3_ONLY_DECISIONS))
         self.assertEqual(names.label("homologado", "v3"), "qa:approved")

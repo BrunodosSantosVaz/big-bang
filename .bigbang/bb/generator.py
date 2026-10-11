@@ -107,16 +107,91 @@ def with_computed(config, root):
         for legacy, current in ((".bigbang/processo/17-flash.md", ".bigbang/pipeline/process/modes.md"),
                                 (".bigbang/processo/06-execucao.md", ".bigbang/pipeline/process/execution.md")):
             context["gerado"]["modo_trabalho"] = context["gerado"]["modo_trabalho"].replace(legacy, current)
-    context['gerado'].update(env_alvo='          # Perfil compilado: sem credenciais de deploy.', runner_deploy='ubuntu-24.04', preparar_alvo=':')
+    context['gerado'].update(env_alvo='          # Perfil compilado: sem credenciais de deploy.', runner_deploy='ubuntu-24.04', preparar_alvo=':',
+                             publicar_producao='''      - name: Publicar ({{entrega.perfil}})
+        run: |
+          gh auth setup-git
+          {{gerado.preparar_alvo}}
+          bash .bigbang/esteira/nucleo/scripts/publicar-producao.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          SIMULAR: 'false'
+          BB_SHA_TESTADO: ${{ needs.testes-producao.outputs.sha }}
+          # perfil deploy: o servidor de produção (variáveis e segredos do ambiente producao)
+{{gerado.env_alvo}}''',
+                             voltar_producao='''      - name: Voltar produção pelo alvo {{entrega.alvo}}
+        run: |
+          bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
+          bash .bigbang/esteira/perfis/deploy/alvos/{{entrega.alvo}}/scripts/alvo.sh voltar producao "$VERSAO"
+          bash .bigbang/esteira/perfis/deploy/alvos/{{entrega.alvo}}/scripts/alvo.sh saude producao
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ inputs.versao }}
+{{gerado.env_alvo}}''')
     if config['entrega']['perfil'] == 'deploy':
         target, artifact = deploy_catalog.resolve(root, config)
         context['gerado']['preparar_alvo'] = 'bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh'
         context['gerado']['env_alvo'] = '\n'.join(
             '          ' + name + ': ${{ ' + kind + '.' + name + ' }}'
             for kind, names in (('vars', target.variables), ('secrets', target.secrets)) for name in names)
+        if target.name == 'personalizado':
+            context['gerado']['env_alvo'] = '\n'.join(
+                '          ' + name + ': ${{ vars.' + name + ' }}' for name in target.variables)
+            context['gerado']['publicar_producao'] = '''      - name: Preparar publicação personalizada
+        id: preparar-publicacao
+        run: |
+          gh auth setup-git
+          BB_PUBLICACAO_PERSONALIZADA=preparar bash .bigbang/esteira/nucleo/scripts/publicar-producao.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          SIMULAR: 'false'
+          BB_SHA_TESTADO: ${{ needs.testes-producao.outputs.sha }}
+      - name: Retirar credencial do checkout antes dos scripts do projeto
+        if: ${{ steps.preparar-publicacao.outputs.retomada != 'true' }}
+        run: git config --local --unset-all http.https://github.com/.extraheader || true
+      - name: Executar scripts personalizados sem credenciais
+        if: ${{ steps.preparar-publicacao.outputs.retomada != 'true' }}
+        run: |
+          bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
+          bash .bigbang/esteira/perfis/deploy/scripts/publicar-personalizado.sh
+        env:
+          RC_TAG: ${{ steps.preparar-publicacao.outputs.rc_tag }}
+          TAG: ${{ steps.preparar-publicacao.outputs.tag }}
+          TARGET_SHA: ${{ steps.preparar-publicacao.outputs.target_sha }}
+          IMAGEM: ${{ steps.preparar-publicacao.outputs.imagem }}
+{{gerado.env_alvo}}
+      - name: Finalizar publicação personalizada
+        run: |
+          gh auth setup-git
+          BB_PUBLICACAO_PERSONALIZADA=finalizar bash .bigbang/esteira/nucleo/scripts/publicar-producao.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          SIMULAR: 'false'
+          RETOMADA: ${{ steps.preparar-publicacao.outputs.retomada }}
+          RC_TAG: ${{ steps.preparar-publicacao.outputs.rc_tag }}
+          TAG: ${{ steps.preparar-publicacao.outputs.tag }}
+          TARGET_SHA: ${{ steps.preparar-publicacao.outputs.target_sha }}
+          IMAGEM: ${{ steps.preparar-publicacao.outputs.imagem }}'''
+            context['gerado']['voltar_producao'] = '''      - name: Voltar produção pelo alvo personalizado sem credenciais
+        run: |
+          bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
+          bash .bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh voltar producao "$VERSAO" "$IMAGEM"
+          bash .bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh saude producao
+        env:
+          VERSAO: ${{ inputs.versao }}
+          IMAGEM: ${{ needs.conferir.outputs.imagem }}
+{{gerado.env_alvo}}'''.replace('{{gerado.env_alvo}}', context['gerado']['env_alvo'])
         context['gerado']['runner_deploy'] = config_module.get(config, 'deploy.runner')
         context['gerado']['artefato_construir'] = artifact.scripts['construir']
         context['gerado']['artefato_candidata'] = artifact.scripts['candidata']
+    context['gerado']['publicar_producao'] = (context['gerado']['publicar_producao']
+                                              .replace('{{entrega.perfil}}', config['entrega']['perfil'])
+                                              .replace('{{gerado.preparar_alvo}}', context['gerado']['preparar_alvo'])
+                                              .replace('{{gerado.env_alvo}}', context['gerado']['env_alvo']))
+    if config['entrega']['perfil'] == 'deploy':
+        context['gerado']['voltar_producao'] = (context['gerado']['voltar_producao']
+                                                .replace('{{entrega.alvo}}', target.name)
+                                                .replace('{{gerado.env_alvo}}', context['gerado']['env_alvo']))
     return context
 
 

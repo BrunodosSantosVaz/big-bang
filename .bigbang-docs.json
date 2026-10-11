@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "b5e7754e989fe054a2c9798e50fc69457251436b",
-    "commit": "ce543a0090222418a80fa83bf96ba630903f57f2",
+    "commit": "869983e9b33bc71a4ab0f07a27e79db48ddfaf85",
     "branch": "master",
-    "proposta": "bigbang/proposta-314-release-publish-idempotency"
+    "proposta": "bigbang/proposta-177-alvo-personalizado"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -255,7 +255,7 @@
     }
   },
   "codigo": {
-    "commit": "b100c537bebfeeaea44c733aead74d5afe772fae",
+    "commit": "371a61ae5c993f6ba3fde76e77f91e64f0bf9c42",
     "versao": "3.0.1",
     "raizes": [
       ".bigbang/",
@@ -489,10 +489,11 @@
         ".bigbang/tests/test_names_config.py:test_config_get_in_both_languages_and_both_option_spellings",
         ".bigbang/tests/test_names_config.py:test_generate_and_verify_by_either_name",
         ".bigbang/tests/test_names_config.py:test_pipeline_subcommands_by_either_name",
-        ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect"
+        ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect",
+        ".bigbang/tests/test_deploy_custom.py:test_personalized_secret_variables_are_rejected"
       ],
       "hashes": {
-        ".bigbang/bb/config.py": "sha256:cbf986d3cd253040fc5f074292c96bbb8b873fab7b23ce926d0aef73415352d2",
+        ".bigbang/bb/config.py": "sha256:6e1be8259367d86f80c18dcbe19bf78cae3bee9093dd48c8322e202ff5549d18",
         ".bigbang/modelos/bigbang.toml.exemplo": "sha256:e7e60bcd9976ca35ec8d15181f5425b3d78d4cb008b6c421469dd1ffb4907501",
         ".bigbang/modelos/flags.toml": "sha256:3f4bf065d88d1b4b344e2ec8d24e536ef7433333bacb2cf974fc4194703a47ba"
       },
@@ -551,7 +552,20 @@
         ".bigbang/esteira/perfis/deploy/alvos/paas/alvo.toml",
         ".bigbang/esteira/perfis/deploy/alvos/personalizado/alvo.toml",
         ".bigbang/esteira/perfis/deploy/alvos/tsuru/alvo.toml",
-        ".bigbang/esteira/perfis/deploy/alvos/vps-docker/alvo.toml"
+        ".bigbang/esteira/perfis/deploy/alvos/vps-docker/alvo.toml",
+        ".bigbang/bb/config.py",
+        ".bigbang/bb/names.py",
+        ".bigbang/esteira/perfis/deploy/README.md",
+        ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh",
+        ".bigbang/esteira/perfis/deploy/scripts/promover.sh",
+        ".bigbang/bb/generator.py",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl",
+        ".bigbang/esteira/nucleo/scripts/publicar-producao.sh",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl",
+        ".bigbang/esteira/perfis/deploy/scripts/publicar-personalizado.sh",
+        ".bigbang/esteira/perfis/deploy/scripts/finalizar-publicacao.sh",
+        ".bigbang/MIGRACAO.md",
+        ".bigbang/processo/14-automacoes.md"
       ],
       "testes": [
         ".bigbang/tests/test_deploy_catalog.py:test_configuracao_atual_resolve_imagem_sem_chave_nova",
@@ -571,18 +585,34 @@
         ".bigbang/tests/test_deploy_catalog.py:test_catalogo_exibe_adaptador_quebrado_e_sai_com_falha",
         ".bigbang/tests/test_deploy_catalog.py:test_troca_de_alvo_remove_arquivo_obsoleto",
         ".bigbang/tests/test_deploy_catalog.py:test_compilado_nao_depende_de_catalogo_deploy",
-        ".bigbang/tests/test_deploy_catalog.py:test_esquema_recusa_injecao_em_seletores"
+        ".bigbang/tests/test_deploy_catalog.py:test_esquema_recusa_injecao_em_seletores",
+        ".bigbang/tests/test_deploy_custom.py:test_production_custom_scripts_run_outside_tokenized_steps",
+        ".bigbang/tests/test_deploy_custom.py:test_personalized_secret_variables_are_rejected",
+        ".bigbang/tests/test_deploy_custom.py:test_custom_publish_script_cannot_read_a_tokenized_step_ancestor"
       ],
       "hashes": {
-        ".bigbang/bb/deploy_catalog.py": "sha256:a25067fd1b39dcce6be9373555bf0344d6f70637816bff4b26e0ab641c4140b8",
+        ".bigbang/bb/deploy_catalog.py": "sha256:dff2419bbba7e269537e709b3aa27618fbd0c11a21684ca778a0788cbd8c2f57",
         ".bigbang/esteira/perfis/deploy/artefatos/estatico/artefato.toml": "sha256:794471f2556475c697f1b81b50578edd97610533d832606240e6ba20c45ac562",
         ".bigbang/esteira/perfis/deploy/artefatos/imagem/artefato.toml": "sha256:096ab8840b14d81c49bec85482cda461949113779613213c1936612a988ad095",
         ".bigbang/esteira/perfis/deploy/artefatos/pacote/artefato.toml": "sha256:3cbfec3db58a9cd3e9338db6e97bb627a7bacb2dabeb4c958d131827f5721aab",
         ".bigbang/esteira/perfis/deploy/alvos/aws/alvo.toml": "sha256:b494b7c5d33e1434d9eff9288cb1261efcc1fb8601f352d409263a3f9b314f8a",
         ".bigbang/esteira/perfis/deploy/alvos/paas/alvo.toml": "sha256:93f8e059f9ef5fce60c5f659724df326993380b06f53dd3dcc8c9daabedfaa6d",
-        ".bigbang/esteira/perfis/deploy/alvos/personalizado/alvo.toml": "sha256:573d3ee1b81516ede6f4ce079ec2127a89734354162cf971622e195f355b7def",
+        ".bigbang/esteira/perfis/deploy/alvos/personalizado/alvo.toml": "sha256:e3b4dd42a82a951bc1b3ac90c9fd83d17abdf06ac72902ee04d505d79996600f",
         ".bigbang/esteira/perfis/deploy/alvos/tsuru/alvo.toml": "sha256:ecc8f97463f4fe5b9b6cbff63419c1fb6f5152709b2f53a280ef22c825e59273",
-        ".bigbang/esteira/perfis/deploy/alvos/vps-docker/alvo.toml": "sha256:95d1cbda6f0dd85c0f0953a2b409b23b49862ead7c5734f71227698fb7237279"
+        ".bigbang/esteira/perfis/deploy/alvos/vps-docker/alvo.toml": "sha256:95d1cbda6f0dd85c0f0953a2b409b23b49862ead7c5734f71227698fb7237279",
+        ".bigbang/bb/config.py": "sha256:6e1be8259367d86f80c18dcbe19bf78cae3bee9093dd48c8322e202ff5549d18",
+        ".bigbang/bb/names.py": "sha256:48356382e32904a16420eb380b0148ba72a76015ec00703c01c7bc06196c19d0",
+        ".bigbang/esteira/perfis/deploy/README.md": "sha256:825b0d4a861ae63553602b743eee3fe7b88f415558a381a0e97234afc668a490",
+        ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh": "sha256:deca063a270909d6c35fb88abad7f3c9a32e428c91e1970b61276e8488c01646",
+        ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:421edf4993240f4188eda72421e7d314dd15d2148a6ab4a4216eb28811869869",
+        ".bigbang/bb/generator.py": "sha256:76b271e51e4a89922bb21e384b76dc8ea18abdb2d2c0fa4a3ce79d2b15d23793",
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl": "sha256:c2399273b0fb2a9b92a87278f330e8d819a2d137fb4004a1c95005376cfeebed",
+        ".bigbang/esteira/nucleo/scripts/publicar-producao.sh": "sha256:874a1eae83914d78116a178808e1f146c140738a25d1f3c450a5466b1426e20a",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "sha256:025ee7ed42363185fb2d16b5a8dec593b56bb39e885f5d0eb3f8f19f6f01a21c",
+        ".bigbang/esteira/perfis/deploy/scripts/publicar-personalizado.sh": "sha256:3cb921aee2b69d2cf98dea62ff87d558459d5f2125f0bf09245045469b9ba945",
+        ".bigbang/esteira/perfis/deploy/scripts/finalizar-publicacao.sh": "sha256:5a0f1ceecb057767b4c8c8988d191ee0cc5824eedffca0fa70f029da6cd71169",
+        ".bigbang/MIGRACAO.md": "sha256:1e000be6a33005ae94682a9eed869f40f5b5a9143905a02cf9aaab8a289941a8",
+        ".bigbang/processo/14-automacoes.md": "sha256:6e9e080532e3999529d7f427e2076c8033b17722fe5b2b0978b51aa1305752a8"
       },
       "descricao": "Resolver entregas por contratos instalados, distinguindo suporte implementado de integração reservada."
     },
@@ -765,7 +795,7 @@
         ".bigbang/tests/test_grouping_v3.py:test_v3_tree_is_generated_and_verified"
       ],
       "hashes": {
-        ".bigbang/bb/generator.py": "sha256:01f4ba6e0034bcbcf96fea20dfa4a7f2b69066be888235212b814cce208dec54"
+        ".bigbang/bb/generator.py": "sha256:76b271e51e4a89922bb21e384b76dc8ea18abdb2d2c0fa4a3ce79d2b15d23793"
       },
       "descricao": "Gerar instruções e Actions a partir da configuração, preservando a camada do projeto e removendo saídas obsoletas."
     },
@@ -896,7 +926,7 @@
       ],
       "hashes": {
         ".bigbang/bb/package.py": "sha256:8e87231013938d732ebfe3123872e2231f3564030f3264960ba85c4259784197",
-        ".bigbang/MIGRACAO.md": "sha256:ce5b2b406ce728c664595fd7b97f93b01b61624fb48e3175a270c244e699b523",
+        ".bigbang/MIGRACAO.md": "sha256:1e000be6a33005ae94682a9eed869f40f5b5a9143905a02cf9aaab8a289941a8",
         ".bigbang/VERSION": "sha256:06e3fe4a7a1884d20d81cc7065ca8cfd4c394ec602c4d180ddc39bbd4f7da521"
       },
       "descricao": "Empacotar .bigbang com integridade e notas de migração que permitem atualização oficial verificável."
@@ -1680,7 +1710,7 @@
         ".bigbang/tests/test_publicar_producao.py:test_recusa_epico_nao_reprovado"
       ],
       "hashes": {
-        ".bigbang/esteira/nucleo/scripts/publicar-producao.sh": "sha256:52c5daf462f36d4373a4fc1ba988ffc9f6f68eab15a624bb4dd0a7ef08f8c0a3",
+        ".bigbang/esteira/nucleo/scripts/publicar-producao.sh": "sha256:874a1eae83914d78116a178808e1f146c140738a25d1f3c450a5466b1426e20a",
         ".bigbang/esteira/nucleo/scripts/publicar-sem-release.sh": "sha256:7d6fd3c11df4db708bf2f3c031a046f64838a3abef0659c0fcca4f5e17d2b74f",
         ".bigbang/esteira/nucleo/scripts/devolver-main.sh": "sha256:4131c6fa6fabca68495e238a8d54775841c6782cba48b956af08cf7ddc54e625",
         ".bigbang/esteira/nucleo/scripts/link-aprovacao.sh": "sha256:bf1303005e3cfed1139355d46e55c1d0c6d5436c045e5845df7a9a33acbbe880"
@@ -1754,14 +1784,15 @@
         ".bigbang/tests/test_deploy.py:test_pre_release_registra_o_digest",
         ".bigbang/tests/test_deploy.py:test_pre_release_recusa_tag_sem_digest",
         ".bigbang/tests/test_deploy.py:test_promove_o_mesmo_digest_migrando_antes",
-        ".bigbang/tests/test_deploy.py:test_candidata_sem_digest_nao_publica"
+        ".bigbang/tests/test_deploy.py:test_candidata_sem_digest_nao_publica",
+        ".bigbang/tests/test_deploy_custom.py:test_production_health_failure_stops_release_creation"
       ],
       "hashes": {
         ".bigbang/esteira/perfis/deploy/scripts/candidata-imagem.sh": "sha256:a869e5ffa9b60b2047a98478452191be2934f5c0c5d871a077dde5553e490cfe",
         ".bigbang/esteira/perfis/deploy/scripts/candidata-publicar.sh": "sha256:134d3f1ab09ffc9482913d3ce2e0db2265e7ca7da2affa482b8259e4091f7cad",
         ".bigbang/esteira/perfis/deploy/scripts/candidata-sbom.sh": "sha256:91bad05a969a5e4137b524ac98f109285c757ee5eed8442bae57ef526cea6ae0",
         ".bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh": "sha256:813b3574ad2e25f2960c53731bd2bc4e9e6777afc2805e72f2e4c154a47be7d4",
-        ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:6a8dd6f24c0b25fa6b930dae1901af536aaf10fe12764ab554313be69063a308",
+        ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:421edf4993240f4188eda72421e7d314dd15d2148a6ab4a4216eb28811869869",
         ".bigbang/esteira/perfis/deploy/scripts/staging.sh": "sha256:dc9ad69036e27b53cb86ecf00b9eeca131436a97f60b26835ef9506359b6c75e",
         ".bigbang/esteira/perfis/deploy/scripts/trivy.sh": "sha256:ca28f9fe415d8475933b7ba2b9d4a49877d603ad284e731672bbd9951bbe6eb2"
       },
@@ -1936,10 +1967,10 @@
         ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-tarefa-de-correcao.yml": "sha256:8b61c73349cbc13d8be55f90e2ccb73e2bbd265d661eaf57a6d75a7af35c74b5",
         ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ver-paineis.yml": "sha256:eb6faaea3867d3b7aa36c26bc04f678aeccfd32e09cc7210a74098fa1b45ce7c",
         ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl": "sha256:3698792c7ce206352747c6d065f5b86bda10bb4099d2e73e99118386a920ccb7",
-        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "sha256:9870e9b6a91e660d28608115378c3a38c0b9402c531ef2612d7740ea1c1d17ca",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "sha256:025ee7ed42363185fb2d16b5a8dec593b56bb39e885f5d0eb3f8f19f6f01a21c",
         ".bigbang/esteira/perfis/compilado/arquivos/.github/workflows/bb-candidata.yml.tmpl": "sha256:b39b1e75fc9cceea0ece94f584fca49761f71a7d2e525a27d71d072b64cecd7e",
         ".bigbang/esteira/nucleo/arquivos/.github/dependabot.yml.tmpl": "sha256:34ab41c900e502b5e964c35d01fb97ca64f29b11c4c3c29e2bff3a6d718f2470",
-        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl": "sha256:47a5876339a5fca7718cebc2ed32c19b5e6d7aaa1f0ddb358a3b20d5f5b86fcd"
+        ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl": "sha256:c2399273b0fb2a9b92a87278f330e8d819a2d137fb4004a1c95005376cfeebed"
       },
       "descricao": "Orquestrar eventos de CI, sprint, kanban, revisão, entrega, posse e recuperação pelos contratos do framework."
     },
@@ -2111,7 +2142,7 @@
         ".bigbang/processo/11-seguranca-operacional.md": "sha256:951182c7d18ee3c248a7808f03e5a80a2b07bda6ed620a90032569a28dc07371",
         ".bigbang/processo/12-tecnologia-nova.md": "sha256:37693918ef18e16947b874d6cf66a976a9a1513fb266249c5966dd73413e60a2",
         ".bigbang/processo/13-varias-ias.md": "sha256:e265736f7227b86678c7688f5d739579510600ef5d09ed51e8bf27cbe094025e",
-        ".bigbang/processo/14-automacoes.md": "sha256:76913aece6a868c9282a273170e56d10e2c47b5ce6364a37da645fdcad1d7686",
+        ".bigbang/processo/14-automacoes.md": "sha256:6e9e080532e3999529d7f427e2076c8033b17722fe5b2b0978b51aa1305752a8",
         ".bigbang/processo/15-atualizacao-do-framework.md": "sha256:62ea8bfbf0ef9173779be764f220e2a7c662b96be4020745cad9b9869f7082df",
         ".bigbang/processo/16-conversas.md": "sha256:cc93cbfbe4c8d5c9f5ab396641d3859e357eef3511c7a3fb28a6f7574b0dbb94",
         ".bigbang/processo/17-flash.md": "sha256:32925b2db64c18cc76973e53464ad054fd3c842a9ef42c6b90f8d81e48425cce",
@@ -2145,7 +2176,7 @@
         ".bigbang/esteira/sempre/arquivos/.claude/agents/bb-pesquisador.md": "sha256:2e7e58aadf1f41cf66b932d7c3ecfd01f4c6867b7e7dbb744122951d0ec2ea95",
         ".bigbang/esteira/sempre/arquivos/.claude/agents/bb-revisor-pr.md": "sha256:4ad53a97e8b6a498f00c82fd14261d58cee90daa454f6e9edef03461bb210f36",
         ".bigbang/esteira/perfis/compilado/README.md": "sha256:7bd7e77fdb33687200a12bb5f5ed24d3f02f7334a2cbbe6382e8420d57921da8",
-        ".bigbang/esteira/perfis/deploy/README.md": "sha256:0c1bf811111207e80d5b602baa34546937acdcce8ad17b77c66b1a8518eb9e0e",
+        ".bigbang/esteira/perfis/deploy/README.md": "sha256:825b0d4a861ae63553602b743eee3fe7b88f415558a381a0e97234afc668a490",
         ".bigbang/esteira/perfis/deploy/alvos/aws/README.md": "sha256:73a1db0c5cac7cb1ed371961042d7b1c9c51d6c399ed12bef3723d9c42c1cf52",
         ".bigbang/esteira/perfis/deploy/alvos/paas/README.md": "sha256:d8b52c4956fab996c303edcfbda6e162874b8311a23def757877de0aa272ad20",
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md": "sha256:bb04007d9e8e6977492685e35299a7801fdbd87b5fbeb4d5f78132d2cfc57411",
@@ -2196,10 +2227,11 @@
         ".bigbang/tests/test_names_config.py:test_config_get_in_both_languages_and_both_option_spellings",
         ".bigbang/tests/test_names_config.py:test_generate_and_verify_by_either_name",
         ".bigbang/tests/test_names_config.py:test_pipeline_subcommands_by_either_name",
-        ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect"
+        ".bigbang/tests/test_names_config.py:test_decision_labels_follow_the_project_label_dialect",
+        ".bigbang/tests/test_names_config.py:test_personalized_deploy_has_no_secret_mapping"
       ],
       "hashes": {
-        ".bigbang/bb/names.py": "sha256:c273678f0f14d36e3bd9690058d759d954f6f76e49f522f839838bf89c92c9cf"
+        ".bigbang/bb/names.py": "sha256:48356382e32904a16420eb380b0148ba72a76015ec00703c01c7bc06196c19d0"
       },
       "descricao": "Tabela única de nomes v2 ↔ v3 (configuração, valores, CLI, labels, branches, workflows, checks, ambiente, segredos)."
     },
