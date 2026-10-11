@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "dada2f7476fe0019531dcb5f9d7575e3e858f545",
+    "commit": "c2587d06f015cb931c111a0ed06ad125bcd154ed",
     "branch": "master",
     "proposta": "bigbang/proposta-220-v3"
   },
@@ -242,7 +242,7 @@
     }
   },
   "codigo": {
-    "commit": "db8f330ae71e70d5b4eddf517cf6649a94b4f908",
+    "commit": "8cb64a177ea9560a7ff7f763fd3af3023f7e29e0",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -2285,6 +2285,7 @@
         ".bigbang/tests/test_board_v3.py:test_going_back_without_rejection_also_withdraws_the_decisions",
         ".bigbang/tests/test_board_v3.py:test_delivery_paths_read_only_prs_updated_since_the_children_exist",
         ".bigbang/tests/test_board_v3.py:test_a_child_attached_late_still_counts_its_older_prs",
+        ".bigbang/tests/test_board_v3.py:test_prs_of_the_epic_itself_count_even_before_its_children",
         ".bigbang/tests/test_board_v3.py:test_effects_happen_before_the_receipt",
         ".bigbang/tests/test_board_v3.py:test_attempts_come_from_receipts_and_the_limit_blocks",
         ".bigbang/tests/test_board_v3.py:test_agent_passes_common_gates_in_flash",
@@ -2312,9 +2313,9 @@
         ".bigbang/tests/test_board_v3.py:test_items_of_other_repositories_are_ignored"
       ],
       "hashes": {
-        ".bigbang/bb/board.py": "sha256:7002cb0a668a1bd20128aa1cf0e54e3e824822de9dfeb23809ab5e5ea3a87a35",
+        ".bigbang/bb/board.py": "sha256:b431427dee93431979fb4705f9bf84a91afb233f559c30e1c291c02848afa67d",
         ".bigbang/bb/controller.py": "sha256:8c70bec7e79ad6786f7320c719e424d593f77fad6a006c8459a222d45e12200f",
-        ".bigbang/bb/flow_cli.py": "sha256:136c8730a20a8fb0ed2ffd826b365ba1a77b90e067dd48633128280e4991ce7a"
+        ".bigbang/bb/flow_cli.py": "sha256:6982661d18022db7badccc4d3396574fa7224476720d5aca8c21c8bb11438e2a"
       },
       "descricao": "Catálogo de labels v3, Project com 15 estados e campos, bb move validado, reconciliação e controlador de eventos."
     },
@@ -2375,6 +2376,8 @@
         ".bigbang/tests/test_delivery_v3.py:test_any_flag_of_the_epic_on_in_production_counts",
         ".bigbang/tests/test_delivery_v3.py:test_expired_flag_blocks_the_release",
         ".bigbang/tests/test_delivery_v3.py:test_release_pr_head_must_be_the_candidate",
+        ".bigbang/tests/test_delivery_v3.py:test_without_a_candidate_the_gate_explains_instead_of_crashing",
+        ".bigbang/tests/test_delivery_v3.py:test_epic_that_lost_its_qa_after_the_gate_is_reported_pending_not_dark",
         ".bigbang/tests/test_delivery_v3.py:test_gate_reads_flags_and_pending_from_the_release_content",
         ".bigbang/tests/test_delivery_v3.py:test_no_expression_is_interpolated_into_a_shell_script",
         ".bigbang/tests/test_delivery_v3.py:test_publish_reads_the_release_content_and_buttons_simulate_first",
@@ -2392,7 +2395,7 @@
       "hashes": {
         ".bigbang/bb/flags.py": "sha256:06f715aa74201dfd6c9a23de9427155e45bfd570cb8383e59a85c7a3b563ff77",
         ".bigbang/bb/flows.py": "sha256:0b012afb39a75e24db2a37da503382f624cd2b3e9540adc72ef0d0073cccf04f",
-        ".bigbang/bb/delivery.py": "sha256:2e134c5fde4e0ef85f0973ca31e8bacabb1037fc7971767f147e890f27ded444"
+        ".bigbang/bb/delivery.py": "sha256:a372914962deba7bef3cf2ebffa0499203b1142701d2e5c868ce31d851f0ca36"
       },
       "descricao": "Sprint, branches, merge, corte da release, flags, candidata, publicação, manutenção, correção e faxina do modelo B."
     },
@@ -2453,7 +2456,7 @@
         ".bigbang/pipeline/core/files/.github/workflows/bb-cut-release.yml": "sha256:82ccc75201ef417fdbdd91d2275d5eabc1120b03e69fb90c53adabc2dfaad04d",
         ".bigbang/pipeline/core/files/.github/workflows/bb-merge-pr.yml": "sha256:543b4724249bf17c4991b0588c1909c7852b124fc21b72e2fbb0f67a84161762",
         ".bigbang/pipeline/core/files/.github/workflows/bb-publish-maintenance.yml": "sha256:7671317ab89d4a1cba3c4a2187a5fb067b3cc4a345356e3f712f6a4811a78837",
-        ".bigbang/pipeline/core/files/.github/workflows/bb-publish.yml.tmpl": "sha256:e6d357e1ff3015e28a188bea6289d10f817bcf24c4c2c17c64c3bb163a530c9b",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-publish.yml.tmpl": "sha256:dfb91e7e387c95f08a9634494c510ecd360903b9b69fd3f573232ff9c89b9b08",
         ".bigbang/pipeline/core/files/.github/workflows/bb-qa-reject.yml": "sha256:b9f7b38d500bb620ed24e621db729ebd04d3041abd59e98208605eef2023281a",
         ".bigbang/pipeline/core/files/.github/workflows/bb-start-sprint.yml": "sha256:def03451f99bcc7fb1f52717ccd30d433371dcbe616fbf379a03cb3f22c0596c",
         ".bigbang/pipeline/profiles/compiled/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:3fb1ffbabbb29d453615c58194af6b09d58fe5025ee6107c8a97c456772f81c2",
