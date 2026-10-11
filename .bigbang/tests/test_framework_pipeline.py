@@ -44,6 +44,7 @@ class FrameworkPipeline(unittest.TestCase):
             self.assertEqual(config.get(loaded, key), value)
         self.assertEqual(config.get(loaded, 'compiled.build_universal'),
                          'python .bigbang/bin/bb.py package --output $BB_OUTPUT')
+        self.assertIn('copilot-1', config.get(loaded, 'agents.names'))
         self.assertFalse(os.path.exists(os.path.join(self.root, 'bigbang.toml')))
 
     def test_trusted_base_can_read_bootstrap_config_before_workflow_activation(self):

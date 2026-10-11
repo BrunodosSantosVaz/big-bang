@@ -1,0 +1,47 @@
+# Gerado pelo Big Bang v2.0.1 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-qa-reject.yml. Não edite: personalize em bigbang.toml.
+# Button "QA reject" (v3): with the owner's decision qa:rejected recorded on the epic, the epic passes through
+# Rejected back to In Progress and one correction task is born from the release branch (fix/<n>).
+name: QA reject
+
+on:
+  workflow_dispatch:
+    inputs:
+      epic:
+        description: 'Epic rejected in QA'
+        required: true
+        type: string
+      reason:
+        description: 'Reason, in the owner words'
+        required: true
+        type: string
+      dry_run:
+        description: 'Only check (changes nothing)'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bb-framework-qa-reject-${{ inputs.epic }}
+  cancel-in-progress: false
+
+jobs:
+  reject:
+    if: github.repository == 'BrunodosSantosVaz/big-bang'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Correction task
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          EPIC: ${{ inputs.epic }}
+          REASON: ${{ inputs.reason }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '' }}
+        run: python .bigbang/bin/bb.py qa reject "$EPIC" --reason "$REASON" ${DRY_RUN:+--dry-run}

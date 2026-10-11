@@ -62,7 +62,7 @@ owner = "BrunodosSantosVaz"
 number = 0
 
 [agents]
-names = ["claude-1", "claude-2", "codex-1"]
+names = ["claude-1", "claude-2", "codex-1", "copilot-1"]
 tasks_per_agent = 1
 lease_hours = 24
 confirm_seconds = 10

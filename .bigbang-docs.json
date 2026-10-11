@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "93ae0581f6ae01bf198bbcf5053f731bf5c97831",
+    "commit": "69a0d082b62c70eb72582067aa6db98fddae7732",
     "branch": "master",
-    "proposta": "wiki/251-framework-bootstrap"
+    "proposta": "wiki/251-framework-pipeline"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -254,14 +254,15 @@
     }
   },
   "codigo": {
-    "commit": "39da568ec0255bcd0ee319e5018e9d7035450d18",
+    "commit": "f9832d9bff9df45ee56689171fd1f537a0e5e97d",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
       ".github/workflows/",
       "AGENTS.md",
       "CLAUDE.md",
-      ".gitleaksignore"
+      ".gitleaksignore",
+      ".bigbang-framework.toml"
     ],
     "excluir": [
       ".bigbang/tests/",
@@ -1012,13 +1013,6 @@
         ".bigbang/tests/test_bb_esteira.py:test_android",
         ".bigbang/tests/test_bb_esteira.py:test_osv_so_alta_e_critica",
         ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls",
-        ".bigbang/tests/test_framework_stack.py:test_public_framework_without_runtime_packages_passes_the_content_gate",
-        ".bigbang/tests/test_framework_stack.py:test_framework_runtime_package_without_an_approved_table_is_refused",
-        ".bigbang/tests/test_framework_stack.py:test_framework_unreadable_dependency_ecosystem_is_still_refused",
-        ".bigbang/tests/test_framework_stack.py:test_pr_content_cannot_select_the_framework_policy_for_a_system_base",
-        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_page_is_required_even_for_the_framework",
-        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_keeps_the_normal_approved_package_table",
-        ".bigbang/tests/test_framework_stack.py:test_standalone_framework_stack_guard_uses_the_same_checks",
         ".bigbang/tests/test_framework_stack.py:test_public_framework_without_runtime_packages_passes_the_content_gate",
         ".bigbang/tests/test_framework_stack.py:test_framework_runtime_package_without_an_approved_table_is_refused",
         ".bigbang/tests/test_framework_stack.py:test_framework_unreadable_dependency_ecosystem_is_still_refused",
@@ -2369,13 +2363,6 @@
         ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_page_is_required_even_for_the_framework",
         ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_keeps_the_normal_approved_package_table",
         ".bigbang/tests/test_framework_stack.py:test_standalone_framework_stack_guard_uses_the_same_checks",
-        ".bigbang/tests/test_framework_stack.py:test_public_framework_without_runtime_packages_passes_the_content_gate",
-        ".bigbang/tests/test_framework_stack.py:test_framework_runtime_package_without_an_approved_table_is_refused",
-        ".bigbang/tests/test_framework_stack.py:test_framework_unreadable_dependency_ecosystem_is_still_refused",
-        ".bigbang/tests/test_framework_stack.py:test_pr_content_cannot_select_the_framework_policy_for_a_system_base",
-        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_page_is_required_even_for_the_framework",
-        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_keeps_the_normal_approved_package_table",
-        ".bigbang/tests/test_framework_stack.py:test_standalone_framework_stack_guard_uses_the_same_checks",
         ".bigbang/tests/test_framework_stack.py:test_framework_runtime_manifests_inside_bigbang_are_refused_by_both_gates",
         ".bigbang/tests/test_framework_stack.py:test_framework_unsupported_ecosystem_inside_bigbang_is_refused",
         ".bigbang/tests/test_framework_stack.py:test_framework_test_fixtures_are_not_runtime_dependency_declarations",
@@ -2598,7 +2585,21 @@
         ".bigbang/pipeline/framework/config.toml",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml",
-        ".bigbang/pipeline/framework/scripts/testes-candidata.sh"
+        ".bigbang/pipeline/framework/scripts/testes-candidata.sh",
+        ".github/workflows/bb-framework-board-report.yml",
+        ".github/workflows/bb-framework-candidate.yml",
+        ".github/workflows/bb-framework-cleanup.yml",
+        ".github/workflows/bb-framework-codeql.yml",
+        ".github/workflows/bb-framework-controller.yml",
+        ".github/workflows/bb-framework-create-branches.yml",
+        ".github/workflows/bb-framework-cut-release.yml",
+        ".github/workflows/bb-framework-gate.yml",
+        ".github/workflows/bb-framework-merge-pr.yml",
+        ".github/workflows/bb-framework-publish-maintenance.yml",
+        ".github/workflows/bb-framework-publish.yml",
+        ".github/workflows/bb-framework-qa-reject.yml",
+        ".github/workflows/bb-framework-start-sprint.yml",
+        ".bigbang-framework.toml"
       ],
       "testes": [
         ".bigbang/tests/test_framework_pipeline.py:test_framework_config_is_v3_grouping_flash_and_universal",
@@ -2635,13 +2636,6 @@
         ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_page_is_required_even_for_the_framework",
         ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_keeps_the_normal_approved_package_table",
         ".bigbang/tests/test_framework_stack.py:test_standalone_framework_stack_guard_uses_the_same_checks",
-        ".bigbang/tests/test_framework_stack.py:test_public_framework_without_runtime_packages_passes_the_content_gate",
-        ".bigbang/tests/test_framework_stack.py:test_framework_runtime_package_without_an_approved_table_is_refused",
-        ".bigbang/tests/test_framework_stack.py:test_framework_unreadable_dependency_ecosystem_is_still_refused",
-        ".bigbang/tests/test_framework_stack.py:test_pr_content_cannot_select_the_framework_policy_for_a_system_base",
-        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_page_is_required_even_for_the_framework",
-        ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_keeps_the_normal_approved_package_table",
-        ".bigbang/tests/test_framework_stack.py:test_standalone_framework_stack_guard_uses_the_same_checks",
         ".bigbang/tests/test_framework_stack.py:test_framework_runtime_manifests_inside_bigbang_are_refused_by_both_gates",
         ".bigbang/tests/test_framework_stack.py:test_framework_unsupported_ecosystem_inside_bigbang_is_refused",
         ".bigbang/tests/test_framework_stack.py:test_framework_test_fixtures_are_not_runtime_dependency_declarations",
@@ -2651,10 +2645,24 @@
       ],
       "hashes": {
         ".bigbang/bb/framework.py": "sha256:1ecbe5ed20b6c26bc1c5de1c53cb71173002f1086f1020775549c6803b308f7a",
-        ".bigbang/pipeline/framework/config.toml": "sha256:c57f7f196bc92b6ada7018e03771a385e8af381940c6905dc5cb87cce27aa37f",
+        ".bigbang/pipeline/framework/config.toml": "sha256:cefb67f9023d0a1df781f42980dcda03dfcc30caac33ea93c2b59248efeb7a89",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:fe2258f8489b5d490d3aef6b381068a743917d94b723162d285ef8c00db0b89b",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:907afd6987d2626d0858be2e52943cb4905eae90d8b094da63dc0691db0eac59",
-        ".bigbang/pipeline/framework/scripts/testes-candidata.sh": "sha256:b9cc01977794173b5dc2a2bec28b7ca53eb0f8fa91798f10148d25efae546a0e"
+        ".bigbang/pipeline/framework/scripts/testes-candidata.sh": "sha256:b9cc01977794173b5dc2a2bec28b7ca53eb0f8fa91798f10148d25efae546a0e",
+        ".github/workflows/bb-framework-board-report.yml": "sha256:fdf21975274f0435b160985acf046a059a21f4cc9c1d81c9de3534533f461570",
+        ".github/workflows/bb-framework-candidate.yml": "sha256:c70a6aea4115745226400e18b1af997fda9402e404267dbf38a1b1130e9b10d5",
+        ".github/workflows/bb-framework-cleanup.yml": "sha256:66780bb097764c62f51cf9b185be998e672770680f4c5a228e446ab675048f8f",
+        ".github/workflows/bb-framework-codeql.yml": "sha256:9fe01b4710f75f10ddde17a0a7cd2ef5873280cbdf32e2c1ff3e79a94eb90a56",
+        ".github/workflows/bb-framework-controller.yml": "sha256:86450c3a42d4db1c0f88003084f33d707ba30a0b194b4ab6464bc53873b74cc4",
+        ".github/workflows/bb-framework-create-branches.yml": "sha256:43fad8954a79f0b9bd047d31dce63b35c49df659741055a2b0aef53b40b9b1b1",
+        ".github/workflows/bb-framework-cut-release.yml": "sha256:5cc9884f91111d9dfeef47fd270afe0710ff26b19e9868ab5c4a9857bbb20cd0",
+        ".github/workflows/bb-framework-gate.yml": "sha256:b963838bbdd9488ac6497a58c9699f8edf88c41dca5e0eb5fd61dd32c33cdfc7",
+        ".github/workflows/bb-framework-merge-pr.yml": "sha256:f26ba32cbd850b3d834011ba3b1962029c7dec08b94535aa91157cc62c6a4623",
+        ".github/workflows/bb-framework-publish-maintenance.yml": "sha256:250c23c7d9d1d9e159740d11f0a0c3e568cb5a39a75f0e06cd884f2f82dcde82",
+        ".github/workflows/bb-framework-publish.yml": "sha256:3e540871f8e22f94347f6e9bc542cb3d030c154f58b6c017422c78c03b47ff50",
+        ".github/workflows/bb-framework-qa-reject.yml": "sha256:499efc108101ee021df36644edd205689a5cee21b6108566b3b4cb020e1bcbb9",
+        ".github/workflows/bb-framework-start-sprint.yml": "sha256:0701d220ddb29a8ab08222f7b0dc21ac59634c183010a5a491049959818f08e7",
+        ".bigbang-framework.toml": "sha256:cefb67f9023d0a1df781f42980dcda03dfcc30caac33ea93c2b59248efeb7a89"
       },
       "descricao": "Suporte à esteira exclusiva da origem, namespace próprio e preservação do template não fundado."
     },
