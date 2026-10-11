@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "97dce9f1c7fe878c7d9654d0fb184c710357f91b",
-    "commit": "2b4a9602be445fe08ad18ccb9fcef46ffa974dfe",
+    "commit": "dee6eab5dcbe66a2ef5e66884edd5b5f96b006b0",
     "branch": "master",
-    "proposta": "bigbang/proposta-299-codex-1-pr-evidence"
+    "proposta": "bigbang/proposta-299-codex-1-pr-evidence-merge-291"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -646,10 +646,11 @@
         ".bigbang/tests/test_wiki.py:test_uninitialized_wiki_does_not_modify_local_documents",
         ".bigbang/tests/test_wiki.py:test_publish_fast_forwards_and_rerun_is_idempotent",
         ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected",
-        ".bigbang/tests/test_framework_pipeline.py:test_prepare_refuses_untracked_sources_in_all_declared_roots"
+        ".bigbang/tests/test_framework_pipeline.py:test_prepare_refuses_untracked_sources_in_all_declared_roots",
+        ".bigbang/tests/test_wiki.py:test_framework_version_stamp_does_not_invalidate_public_documentation"
       ],
       "hashes": {
-        ".bigbang/bb/documentation.py": "sha256:f87f3352060c89b26898952740d80f34a2de2d1d38906f9f6b2debf153843168"
+        ".bigbang/bb/documentation.py": "sha256:7d87b0078cf02dc21d76bd2db38d2232564902ea690bfbe64cd155b8955c9870"
       },
       "descricao": "Resolver identificadores documentais conforme a visibilidade e publicar somente o snapshot revisado sem perder alterações concorrentes."
     },
@@ -690,7 +691,7 @@
         ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected"
       ],
       "hashes": {
-        ".bigbang/bb/documentation_cli.py": "sha256:830596662eecba15abfa22608ee821e52cff2d030247afd38d3a99ba1d09dcab"
+        ".bigbang/bb/documentation_cli.py": "sha256:dfd45cfbe4dfcf69f6e0dd53bc5a7f384b508a26bcc6e25f066face2e6c13893"
       },
       "descricao": "Preparar, ler, propor, validar e publicar documentação; orientar Discussions, auditoria de painéis e Social preview."
     },
@@ -891,7 +892,7 @@
       ],
       "hashes": {
         ".bigbang/bb/package.py": "sha256:277954b69c243354a4d726708463293e874b13470081be68054aa8948fc98eff",
-        ".bigbang/MIGRACAO.md": "sha256:a0d26290c08e0f57ace27cf2c8f6897130b8567043d7f869c734cbcf205acda1",
+        ".bigbang/MIGRACAO.md": "sha256:dca478f0ef6dfc129aad0035f0f1d2b1d824c7d71f48b6bf4244c59bd743f3ef",
         ".bigbang/VERSION": "sha256:2985be8b28d3ade858e8d8fb4bc22f565b1bf6020dff982dce141f7721b9999c"
       },
       "descricao": "Empacotar .bigbang com integridade e notas de migração que permitem atualização oficial verificável."
@@ -1222,7 +1223,7 @@
         ".bigbang/tests/test_atualizar.py:test_arvore_suja_recusa"
       ],
       "hashes": {
-        ".bigbang/bb/update.py": "sha256:220f77fb9e615dff143f5a6166e9461781c8aa79f74e275888e6fecdbd52f9f4"
+        ".bigbang/bb/update.py": "sha256:e50d061b7a5652dbaab341cb26bbff6f761e5f6c7491d7a7f14c5d32c24d9831"
       },
       "descricao": "Instalar release do framework com SHA-256 e atestação de origem, preservando configurações e abrindo PR específico."
     },
@@ -1778,15 +1779,10 @@
         ".bigbang/tests/test_alvo_vps.py:test_recusa_tag_e_servidor_sem_chave_conhecida",
         ".bigbang/tests/test_alvo_vps.py:test_migrar_antes_com_a_imagem_nova",
         ".bigbang/tests/test_alvo_vps.py:test_ambiente_invalido",
-        ".bigbang/tests/test_alvo_vps.py:test_publicar_por_digest",
-        ".bigbang/tests/test_alvo_vps.py:test_sudo_e_env_do_servidor",
         ".bigbang/tests/test_alvo_vps.py:test_conjunto_incompleto_ou_por_tag",
-        ".bigbang/tests/test_alvo_vps.py:test_recusa_tag_e_servidor_sem_chave_conhecida",
-        ".bigbang/tests/test_alvo_vps.py:test_migrar_antes_com_a_imagem_nova",
         ".bigbang/tests/test_alvo_vps.py:test_pre_checagem_que_falha_nao_troca_a_versao",
         ".bigbang/tests/test_alvo_vps.py:test_saude_no_caminho_configurado",
         ".bigbang/tests/test_alvo_vps.py:test_voltar_restaura_o_conjunto_da_release",
-        ".bigbang/tests/test_alvo_vps.py:test_ambiente_invalido",
         ".bigbang/tests/test_alvo_vps.py:test_ciclo_completo"
       ],
       "hashes": {
@@ -2064,8 +2060,7 @@
         ".bigbang/tests/test_skills.py:test_catalogo_e_formato_agent_skills",
         ".bigbang/tests/test_skills.py:test_skills_descobertas_antes_do_init_sem_esteira",
         ".bigbang/tests/test_skills.py:test_edicao_de_uma_copia_reprova_e_gerador_repara",
-        ".bigbang/tests/test_skills.py:test_skill_do_projeto_e_preservada",
-        ".bigbang/tests/test_skills.py:test_catalogo_e_formato_agent_skills"
+        ".bigbang/tests/test_skills.py:test_skill_do_projeto_e_preservada"
       ],
       "hashes": {
         ".bigbang/AGENTS.base.md": "sha256:9d909eb509ba772c9a08550746476ea7c006adbe15cf6bb49e956679c26a1d40",
@@ -2119,7 +2114,7 @@
         ".bigbang/processo/README.md": "sha256:bbdd88a75546f006f841bb80c1e76be9374d211a4bedd49efe767ee3f56601c3",
         ".bigbang/processo/18-documentacao.md": "sha256:8888ffab4184e2d5b747f47ffdd6ef900d7e8bd20bdad4026beb455d993dddef",
         ".bigbang/skills/README.md": "sha256:54bd926098535f1c5a3f61340668b65696f50936e8f15ca4ffd15c59aac030ac",
-        ".bigbang/skills/bb-atualizar/SKILL.md": "sha256:8ed414b75f9a302bdae54e7e4879e66a0dd1948b33d158c67e5477b4f1c8714e",
+        ".bigbang/skills/bb-atualizar/SKILL.md": "sha256:5dd487b8246286e8a83d8768dd31addca63be32f4916f95bf550f60ca73bd7b6",
         ".bigbang/skills/bb-auditar-seguranca/SKILL.md": "sha256:5fa9479334ef5b2b7218a5aa91ced11662449ba86d792a7768bc44243c0dffdb",
         ".bigbang/skills/bb-codar-tarefa/SKILL.md": "sha256:c295ee6b4d1cbf7a7dfad0bd2b17ea76d5b36c3b9ed08a9f3bbc5af24c0c0dff",
         ".bigbang/skills/bb-corrigir-bug/SKILL.md": "sha256:fdf0d9f830a42831b7168aa2a0ac40c4d0b00f4f936aa1fa217655538426e4d4",
@@ -2151,7 +2146,7 @@
         ".bigbang/esteira/perfis/deploy/alvos/paas/README.md": "sha256:d8b52c4956fab996c303edcfbda6e162874b8311a23def757877de0aa272ad20",
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md": "sha256:bb04007d9e8e6977492685e35299a7801fdbd87b5fbeb4d5f78132d2cfc57411",
         ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md": "sha256:48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
-        "AGENTS.md": "sha256:198220fcc68c024030fd1d01be9dc6e06c753553b8bb13162778a61dd4f47269",
+        "AGENTS.md": "sha256:55fef1393bcf7b330b2eeb3ce37821db2e27d0fc165e3b345586bc00bb1bc52f",
         "CLAUDE.md": "sha256:336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
         ".bigbang/skills/bb-migrate/SKILL.md": "sha256:700dc19417dbfde4ef4e59cb30f40251ecf3ec77f131d2eec7c5c2f442034401"
       },
@@ -2762,7 +2757,6 @@
         ".bigbang/tests/test_migrate_v3.py:test_needs_the_workflow_part_first",
         ".bigbang/tests/test_migrate_v3.py:test_renames_keeping_the_issues_copies_when_both_exist_and_creates_the_catalog",
         ".bigbang/tests/test_migrate_v3.py:test_rollback_restores_the_names",
-        ".bigbang/tests/test_migrate_v3.py:test_dry_run_changes_nothing",
         ".bigbang/tests/test_migrate_v3.py:test_remigration_after_rollback_uses_current_legacy_evidence",
         ".bigbang/tests/test_migrate_v3.py:test_closed_epic_without_release_does_not_advance_to_done",
         ".bigbang/tests/test_migrate_v3.py:test_closed_epic_with_its_stable_tag_is_done",

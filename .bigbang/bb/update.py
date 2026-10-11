@@ -15,7 +15,7 @@ import sys
 import tarfile
 import tempfile
 
-from . import checksums, github, package
+from . import checksums, documentation, github, package
 from . import config as config_module
 from .errors import EXIT_EXTERNAL_COMMAND, EXIT_INVALID_STATE, EXIT_USAGE, EXIT_VERIFICATION_FAILED, BbError
 from .init import set_config_value
@@ -178,6 +178,7 @@ def update(root, target=None, simulate=False, confirmed=False, attestation=True)
     code, generated = _bb(root, "gerar")
     if code:
         raise BbError(f"bb gerar da v{target} falhou na branch {branch}:\n{generated}", EXIT_INVALID_STATE)
+    documentation.refresh_framework_version_hashes(root, current, target)
     code, verified = _bb(root, "verificar")
     if code:
         raise BbError(f"bb verificar falhou na branch local {branch} (nada foi enviado; revise e corrija, ou volte "
