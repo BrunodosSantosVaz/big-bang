@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "dee6eab5dcbe66a2ef5e66884edd5b5f96b006b0",
-    "commit": "71d6f4f2007dbeaf0f700eaec352e1f21f8fcefd",
+    "commit": "5a8006e8948fe751385802d9e45cce2804a0ff43",
     "branch": "master",
     "proposta": "bigbang/proposta-303-autonomy"
   },
@@ -255,7 +255,7 @@
     }
   },
   "codigo": {
-    "commit": "afd3331485152095c9e495d63082185186085c19",
+    "commit": "87ff729053d3bcb820d4246be971af7f028d5867",
     "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
