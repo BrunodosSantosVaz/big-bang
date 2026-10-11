@@ -18,7 +18,7 @@ Leia `AGENTS.md`, `.bigbang/processo/02-fundacao.md` (F4), `.bigbang/pipeline/pr
 
 ## Passos
 
-Habilite Discussions no escopo autorizado e publique o primeiro post factual com `bb community first-post`. Em
+Habilite Discussions no escopo autorizado e publique o primeiro post factual com `bb community welcome-post`. Em
 públicos, confira a Wiki e o quadro; audite o conteúdo antes de deixar o quadro com leitura pública. Registre a Wiki,
 Discussions e o quadro no README e na Wiki, e confira o Social preview preparado em F3.
 

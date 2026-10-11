@@ -63,12 +63,12 @@ class SkillsV3(unittest.TestCase):
             generator.apply(generator.build_plan(root, install_pipeline=True), root)
             original = open(os.path.join(RAIZ, ".bigbang", "skills", "bb-rodar-sprint", "SKILL.md"),
                             encoding="utf-8").read()
-            self.assertIn(original.split("---", 2)[2].strip()[:200], skill(root, "bb-rodar-sprint"))
+            generated = "\n".join(line for line in skill(root, "bb-rodar-sprint").splitlines()
+                                  if not line.startswith("<!-- Gerado pelo Big Bang")).replace("\n\n\n", "\n\n")
+            self.assertEqual(generated.strip(), original.strip())  # the whole legacy skill, only the notice added
             self.assertIsNone(skill(root, "bb-reject"))
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class ProcessV3(unittest.TestCase):
@@ -146,3 +146,7 @@ class SkillsAgreeWithTheCode(unittest.TestCase):
                 self.assertIn(first, commands, f"{name}: bb {first}")
                 if second and commands[first] and not second.startswith(("<", "-")):
                     self.assertIn(second, commands[first], f"{name}: bb {first} {second}")
+
+
+if __name__ == "__main__":
+    unittest.main()

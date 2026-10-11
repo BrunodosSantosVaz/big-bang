@@ -29,7 +29,8 @@ os PRs do Dependabot e os changelogs oficiais.
    stack e confira segurança e documentação. Não reescreva a ordem para esconder a reprodução.
 4. Dependências: revisão em lote, compatibilidade e segurança, dentro da tabela do STACK.md. Dependência de execução
    nova exige `bb-nova-tecnologia`. Manutenção sem falha reproduzida não leva teste de bug inventado.
-5. Abra o PR para a `main` com `Refs #N`, peça a revisão conforme a criticidade e espere o `gate` verde. Depois do
+5. Abra o PR da correção para a `release/x.y.z` em andamento ou, sem release aberta, para a `develop` (a branch nasce da
+   `main`, o PR nunca vai para ela), com `Refs #N`; peça a revisão conforme a criticidade e espere o `gate` verde. Depois do
    merge, o bug segue para QA ou Releasing, e a entrega segue `bb-entregar-epico`. Mudança sem artefato sai por
    `maintenance/*`.
 

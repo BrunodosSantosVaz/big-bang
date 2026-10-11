@@ -1,7 +1,7 @@
 # Processo do fluxo v3
 
 Estes documentos valem para projetos com `workflow.model = "grouping"` (quadro único e épico agrupador). Projetos
-que ainda usam o fluxo anterior seguem `.bigbang/processo/` até migrar (`bb migrate`).
+que ainda usam o fluxo anterior seguem `.bigbang/processo/` até migrarem para a v3 (a skill `bb-migrate` conduz a migração).
 
 | Documento | Assunto |
 | --- | --- |

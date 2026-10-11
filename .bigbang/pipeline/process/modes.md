@@ -11,7 +11,7 @@
 | Modo | Quem aprova os portões |
 | --- | --- |
 | normal | O dono, sempre, por decisão registrada |
-| flash | O agente aprova o trabalho comum. Ficam com o dono a seleção, o cancelamento e o que tiver risco alto ou crítico; com `qa:human`, a homologação também |
+| flash | O agente aprova o trabalho comum. Ficam com o dono a seleção e o cancelamento; refinamento, protótipo, testes e PR passam ao dono a partir do risco crítico; backlog, QA, publicação e flag, a partir do alto; com `qa:human`, a homologação também |
 | autonomous | O agente aprova só o que o contrato `autonomy.toml` permite. Fora dele, o portão fica bloqueado e só a decisão registrada do dono libera |
 
 ## Flash

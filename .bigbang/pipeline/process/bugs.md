@@ -9,7 +9,8 @@
 3. **Correção:** `bb claim N <nome>` na branch `fix/<n>-<slug>` criada da `main` (ou `hotfix/`, para o urgente).
    - Commit 1: o teste que reproduz a falha, com a evidência vermelha.
    - Commit 2: a correção mínima.
-4. **PR para a `main`**, com `Refs #N`, revisão conforme a criticidade e `gate` verde. Depois do merge, o bug vai
+4. **PR para a `release/x.y.z` em andamento ou, sem release aberta, para a `develop`** (a branch nasce da `main`, mas o PR
+   nunca vai para ela: a `main` só recebe release e manutenção), com `Refs #N`, revisão conforme a criticidade e `gate` verde. Depois do merge, o bug vai
    para QA (se a homologação se aplica) ou Releasing, e a publicação segue [delivery.md](delivery.md).
 5. **Dependências:** a atualização em lote fica dentro da tabela do STACK.md. Dependência de execução nova passa por
    `bb-nova-tecnologia`.

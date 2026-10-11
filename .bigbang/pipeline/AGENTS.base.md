@@ -19,7 +19,7 @@ revisão e publicação confirmada da Wiki valem em todos os modos.
   `develop` (`test/`, `feature/`, `docs/`) e um PR para a `develop`; a tarefa fecha no merge.
 - **Release** é cortada da `develop` (`bb release cut`, botão *Cut release*); o que mudou o artefato sem
   homologação entra com a **feature flag desligada** (`flags.toml`, `bb flag`). Correções nascem da `main`
-  (`fix/`, `hotfix/`); mudança sem artefato sai de `maintenance/*` a partir da `main`.
+  (`fix/`, `hotfix/`) e entram pela release em andamento ou pela `develop`; mudança sem artefato sai de `maintenance/*` a partir da `main`.
 - **Posse:** `bb claim <issue> <nome>` adquire a trava atômica (`refs/bigbang/locks/issue-<n>`) e abre a pasta
   própria; renove com `bb renew <issue>`; libere com `bb unclaim <issue>`. Sessão vencida não conclui trabalho.
 
