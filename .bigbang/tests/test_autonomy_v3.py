@@ -209,8 +209,8 @@ class GeneratedMode(unittest.TestCase):
             root = helper.project(folder)
             path = os.path.join(root, "bigbang.toml")
             text = open(path, encoding="utf-8").read()
-            import re
-            text = re.sub(r'(?m)^mode = "[a-z]+"', 'mode = "autonomous"', text, count=1)
+            self.assertIn("[project]\n", text)
+            text = text.replace("[project]\n", '[project]\nmode = "autonomous"\n', 1)
             open(path, "w", encoding="utf-8").write(text)
             generator.apply(generator.build_plan(root, install_pipeline=True), root)
             agents = open(os.path.join(root, "AGENTS.md"), encoding="utf-8").read()
