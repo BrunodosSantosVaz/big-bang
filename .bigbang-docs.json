@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "2320b58a4fc9cc9c45826701db5de1ac9ecb16e5",
+    "commit": "a97d7acc74a061b36f0889d41f63bbc120da3b3c",
     "branch": "master",
     "proposta": "wiki/251-framework-bootstrap"
   },
@@ -251,7 +251,7 @@
     }
   },
   "codigo": {
-    "commit": "4c10eb3217364a0e0688895ea8a3636896521dfb",
+    "commit": "26511b9bd8d1decf60f043bfdf73a4a16cddb085",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -641,10 +641,11 @@
         ".bigbang/tests/test_wiki.py:test_traversal_manifest_cannot_read_outside_wiki",
         ".bigbang/tests/test_wiki.py:test_uninitialized_wiki_does_not_modify_local_documents",
         ".bigbang/tests/test_wiki.py:test_publish_fast_forwards_and_rerun_is_idempotent",
-        ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected"
+        ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected",
+        ".bigbang/tests/test_framework_pipeline.py:test_prepare_refuses_untracked_sources_in_all_declared_roots"
       ],
       "hashes": {
-        ".bigbang/bb/documentation.py": "sha256:5397646c856c301675d7b5aa8f9f3f68db0f5049d36b1816ebbebd72c418a1d5"
+        ".bigbang/bb/documentation.py": "sha256:f87f3352060c89b26898952740d80f34a2de2d1d38906f9f6b2debf153843168"
       },
       "descricao": "Resolver identificadores documentais conforme a visibilidade e publicar somente o snapshot revisado sem perder alterações concorrentes."
     },
@@ -2555,6 +2556,7 @@
         ".bigbang/tests/test_framework_pipeline.py:test_prepare_requires_the_documentation_manifest_before_any_write",
         ".bigbang/tests/test_framework_pipeline.py:test_prepare_refuses_new_sources_without_documentary_coverage",
         ".bigbang/tests/test_framework_pipeline.py:test_prepare_rejects_an_invalid_documentation_manifest_before_any_write",
+        ".bigbang/tests/test_framework_pipeline.py:test_prepare_refuses_untracked_sources_in_all_declared_roots",
         ".bigbang/tests/test_framework_pipeline.py:test_candidate_and_promotion_keep_updater_names",
         ".bigbang/tests/test_framework_pipeline.py:test_framework_community_keeps_auditing_the_existing_boards",
         ".bigbang/tests/test_framework_pipeline.py:test_documentation_cli_keeps_the_framework_board_audit",
@@ -2572,7 +2574,7 @@
         ".bigbang/tests/test_launcher.py:test_compiled_profile_after_f2"
       ],
       "hashes": {
-        ".bigbang/bb/framework.py": "sha256:6873f1b52daf8224ed31e50dc294581d93b8f60a38760c6f1f0dcbc88e964d44",
+        ".bigbang/bb/framework.py": "sha256:c31e30023bf7665d1585f5b666570bc3e404cd55df276174dc95974d92e18a74",
         ".bigbang/pipeline/framework/config.toml": "sha256:c57f7f196bc92b6ada7018e03771a385e8af381940c6905dc5cb87cce27aa37f",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:fe2258f8489b5d490d3aef6b381068a743917d94b723162d285ef8c00db0b89b",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:907afd6987d2626d0858be2e52943cb4905eae90d8b094da63dc0691db0eac59",
