@@ -36,7 +36,7 @@ class FrameworkPipeline(unittest.TestCase):
         with open(os.path.join(self.root, path), encoding='utf-8') as handle:
             return handle.read()
 
-    def test_framework_config_is_v3_grouping_autonomous_and_universal(self):
+    def test_framework_config_is_v3_grouping_flash_and_universal(self):  # name kept for the docs manifest; mode is now autonomous (#303)
         loaded = config.load(self.root)
         self.assertEqual(loaded['_dialect'], 'v3')
         for key, value in [('delivery.profile', 'compiled'), ('compiled.systems', ['universal']),
