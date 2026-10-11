@@ -26,7 +26,7 @@ class FrameworkPipeline(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.root = os.path.join(self.tmp.name, 'repo')
         shutil.copytree(RAIZ, self.root, ignore=ignorar_para_copia())
-        shutil.copy2(os.path.join(RAIZ, '.bigbang/pipeline/framework/config.toml'), self.root)
+        shutil.copy2(os.path.join(RAIZ, '.bigbang/pipeline/framework/config.toml'), os.path.join(self.root, '.bigbang-framework.toml'))
         subprocess.run(['git', 'init', '-q', self.root], check=True)
         subprocess.run(['git', '-C', self.root, 'remote', 'add', 'origin', f'https://github.com/{ORIGIN}.git'], check=True)
 
@@ -112,6 +112,16 @@ class FrameworkPipeline(unittest.TestCase):
                 with open(os.path.join(self.root, path), 'rb') as handle:
                     digest = 'sha256:' + hashlib.sha256(handle.read()).hexdigest()
                 self.assertEqual(feature['hashes'][path], digest, path)
+
+    def test_prepare_refuses_to_relabel_unreviewed_source_changes(self):
+        from bb import framework
+        shutil.copy2(os.path.join(RAIZ, '.bigbang-docs.json'), self.root)
+        with open(os.path.join(self.root, '.bigbang/bb/config.py'), 'a', encoding='utf-8') as handle:
+            handle.write('\n# unreviewed runtime change\n')
+        before = self.read('.bigbang/VERSION')
+        with self.assertRaises(BbError):
+            framework.prepare(self.root, '3.0.0')
+        self.assertEqual(self.read('.bigbang/VERSION'), before)
 
     def test_candidate_and_promotion_keep_updater_names(self):
         from bb import framework
