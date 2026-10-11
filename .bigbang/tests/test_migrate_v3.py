@@ -123,6 +123,24 @@ class Config(Base):
 
 
 class Labels(Base):
+    def test_rollback_after_a_partial_rename_is_idempotent(self):
+        self.ready()
+        self.fake.failures.add(("PATCH", "labels/revisao-humana"))
+        with self.assertRaises(BbError):
+            migrate.labels_part(self.client, self.root, snapshot=self.snapshot)
+        self.fake.failures.clear()
+        migrate.labels_part(self.client, self.root, snapshot=self.snapshot, rollback=True)
+        migrate.labels_part(self.client, self.root, snapshot=self.snapshot, rollback=True)
+        self.assertIn('epic', self.fake.label_names(10))
+
+    def test_copying_existing_labels_includes_pull_requests(self):
+        self.ready()
+        self.fake.labels['review:human'] = {'name': 'review:human'}
+        self.fake.add_issue(70, labels=['revisao-humana'])
+        self.fake.issues[70]['pull_request'] = {}
+        migrate.labels_part(self.client, self.root, snapshot=self.snapshot)
+        self.assertIn('review:human', self.fake.label_names(70))
+
     def test_foreign_snapshot_refuses_before_any_write(self):
         self.ready()
         migrate.labels_part(self.client, self.root, snapshot=self.snapshot)
@@ -186,6 +204,49 @@ class Labels(Base):
 
 
 class Board(Base):
+    def test_remigration_after_rollback_uses_current_legacy_evidence(self):
+        self.ready()
+        self.run_part()
+        self.run_part(rollback=True)
+        self.old[28].set(12, 'Status', 'Backlog Refinement')
+        self.snapshot = os.path.join(self.root, 'board-again.json')
+        report = self.run_part()
+        self.assertEqual(report['mapped'][12], 'Refinement')
+        self.assertEqual(self.new.get(12, 'Status'), 'Refinement')
+        self.assertEqual(board.current_state(self.client, 12, {'BrunodosSantosVaz'}), 'Refinement')
+
+    def test_closed_epic_without_release_does_not_advance_to_done(self):
+        self.ready()
+        self.fake.issues[12]['state'] = 'closed'
+        self.old[28].set(12, 'Status', 'Concluída')
+        self.assertEqual(self.run_part()['mapped'][12], 'Releasing')
+
+    def test_closed_epic_with_its_stable_tag_is_done(self):
+        self.ready()
+        self.fake.issues[12]['state'] = 'closed'
+        self.fake.issues[12]['milestone'] = {'title': 'v1.2.3'}
+        self.fake.refs['refs/tags/v1.2.3'] = 'a' * 40
+        self.old[28].set(12, 'Status', 'Concluída')
+        self.assertEqual(self.run_part()['mapped'][12], 'Done')
+
+    def test_bug_without_candidate_does_not_advance_to_qa(self):
+        self.ready()
+        self.old[30].set(16, 'Status', 'Homologação')
+        self.assertEqual(self.run_part()['mapped'][16], 'In Review')
+
+    def test_stale_or_unverified_claim_does_not_advance_to_coding(self):
+        self.ready()
+        self.fake.comments[14][0]['created_at'] = '2020-01-01T00:00:00Z'
+        self.assertEqual(self.run_part()['mapped'][14], 'Todo')
+
+    def test_ready_task_waits_for_workflow_migration_even_with_merged_pr(self):
+        self.ready()
+        self.fake.pulls[70]['state'] = 'closed'
+        self.fake.pulls[70]['merged'] = True
+        self.fake.issues[17]['state'] = 'closed'
+        self.old[29].set(17, 'Status', 'Pronto')
+        self.assertEqual(self.run_part()['mapped'][17], 'In Review')
+
     def test_initial_cards_also_receive_a_migration_receipt(self):
         self.ready()
         self.run_part()
@@ -210,6 +271,8 @@ class Board(Base):
         self.fake.add_issue(12, "Épico aprovado", labels=["type:epic", "approved:refinement"])
         self.fake.add_issue(13, "Épico sem aprovação", labels=["type:epic"])
         self.fake.add_issue(14, "Tarefa com posse", labels=["type:task", "ia:claude-1"])
+        self.client.comment(14, '<!-- bb:assumida nome=claude-1 sessao=active-session -->')
+        self.fake.comments[14][0]['created_at'] = '2026-10-11T11:00:00Z'
         self.fake.add_issue(15, "Tarefa sem posse", labels=["type:task"])
         self.fake.add_issue(16, "Bug novo", labels=["type:bug"])
         self.fake.add_issue(17, "Tarefa com PR", labels=["type:task"])
