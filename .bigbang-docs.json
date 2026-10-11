@@ -3,7 +3,7 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "97dce9f1c7fe878c7d9654d0fb184c710357f91b",
+    "base": "dee6eab5dcbe66a2ef5e66884edd5b5f96b006b0",
     "commit": "dee6eab5dcbe66a2ef5e66884edd5b5f96b006b0",
     "branch": "master",
     "proposta": "bigbang/proposta-299-codex-1-pr-evidence-merge-291"
@@ -43,7 +43,8 @@
     ".bigbang/docs/decisoes/ADR-0023-quadro-unico-e-estado.md": "ADR-0023-quadro-unico-e-estado",
     ".bigbang/docs/decisoes/ADR-0024-identificadores-em-ingles.md": "ADR-0024-identificadores-em-ingles",
     ".bigbang/docs/decisoes/ADR-0025-modos-e-autonomia.md": "ADR-0025-modos-e-autonomia",
-    ".bigbang/docs/decisoes/ADR-0026-orquestracao-em-python.md": "ADR-0026-orquestracao-em-python"
+    ".bigbang/docs/decisoes/ADR-0026-orquestracao-em-python.md": "ADR-0026-orquestracao-em-python",
+    "Funcionalidade-framework-pipeline": "Funcionalidade-framework-pipeline"
   },
   "categorias": {
     "produto": {
