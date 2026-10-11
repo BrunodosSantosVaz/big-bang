@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "b53851b2e4a59ecb90f419e0779b994b52307354",
+    "commit": "8785d0a5b9930a854509c09ee6251dc7094ff188",
     "branch": "master",
-    "proposta": "bigbang/proposta-220-v3"
+    "proposta": "wiki/248-foundation-fixes"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -248,7 +248,7 @@
     }
   },
   "codigo": {
-    "commit": "7163744dd11c0c379404a8be797e6c3bf406da39",
+    "commit": "11a6b6eae34c457de3d9410d518f3549c473c536",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
@@ -2550,7 +2550,9 @@
         ".bigbang/pipeline/skills/bb-reject/SKILL.md",
         ".bigbang/pipeline/skills/bb-rodar-sprint/SKILL.md",
         ".bigbang/pipeline/skills/bb-status/SKILL.md",
-        ".bigbang/pipeline/skills/bb-triar-issue/SKILL.md"
+        ".bigbang/pipeline/skills/bb-triar-issue/SKILL.md",
+        ".bigbang/pipeline/skills/bb-iniciar-projeto/SKILL.md",
+        ".bigbang/pipeline/skills/bb-prototipar/SKILL.md"
       ],
       "testes": [
         ".bigbang/tests/test_skills_v3.py:test_every_override_has_a_legacy_skill_or_is_v3_only",
@@ -2559,6 +2561,8 @@
         ".bigbang/tests/test_skills_v3.py:test_every_process_reference_of_the_v3_layer_exists",
         ".bigbang/tests/test_skills_v3.py:test_v3_agents_md_points_to_the_v3_process",
         ".bigbang/tests/test_skills_v3.py:test_a_bug_fix_pull_request_goes_to_develop_or_a_release_never_to_main",
+        ".bigbang/tests/test_skills_v3.py:test_installed_foundation_instructions_agree_with_v3_branch_policy",
+        ".bigbang/tests/test_skills_v3.py:test_installed_prototype_instructions_follow_v3_states_and_decisions",
         ".bigbang/tests/test_skills_v3.py:test_every_bb_command_in_the_v3_text_exists_in_the_cli"
       ],
       "hashes": {
@@ -2581,7 +2585,9 @@
         ".bigbang/pipeline/skills/bb-reject/SKILL.md": "sha256:495c38706e39433d2ce572756dc29a232b6085738eac36c33c9f05a2eac140a9",
         ".bigbang/pipeline/skills/bb-rodar-sprint/SKILL.md": "sha256:347f87eb83c6aee9d8134793cd2f221413032105549a57c70cad69d343de56ed",
         ".bigbang/pipeline/skills/bb-status/SKILL.md": "sha256:05aeb51e495fc4a6d6a01bc43f620413efdb202fb2d61dfb01ce171c6c5c2162",
-        ".bigbang/pipeline/skills/bb-triar-issue/SKILL.md": "sha256:964ffa303e729662db316a96b34d281c00cedbf80e32b4017d3cc40165aff6ea"
+        ".bigbang/pipeline/skills/bb-triar-issue/SKILL.md": "sha256:964ffa303e729662db316a96b34d281c00cedbf80e32b4017d3cc40165aff6ea",
+        ".bigbang/pipeline/skills/bb-iniciar-projeto/SKILL.md": "sha256:9bf40870be7c5def100be722a4fdf90d9741fa225aa239abdcf70c43570f49a1",
+        ".bigbang/pipeline/skills/bb-prototipar/SKILL.md": "sha256:c4e1c0ce10fc5948f46ae9a00b127a560b8f2aab53ea86801a8f524b3154d850"
       },
       "descricao": "Versões v3 das skills adaptadas, a skill bb-reject e os documentos de processo da v3, instalados só em projetos com workflow.model = grouping."
     }
