@@ -1,5 +1,6 @@
-"""Guided migration to the v3 (epic #233, plan section 8): four parts (config, labels, board, workflow), each with a
-dry run, a snapshot and a way back; nothing is deleted and every part refuses to run out of order. In-memory GitHub."""
+"""Guided migration to the v3 (epic #233, plan section 8): four parts in order (config, board, workflow, labels; the
+legacy pipeline only understands the Portuguese labels, so they change last), each with a dry run, a snapshot and a
+way back; nothing is deleted and every part refuses to run out of order. In-memory GitHub."""
 import datetime
 import json
 import os
@@ -39,8 +40,13 @@ class Base(unittest.TestCase):
     def setUp(self):
         self.root = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.root, True)
+        from _raiz import RAIZ
+        os.makedirs(os.path.join(self.root, ".bigbang"))
+        shutil.copy(os.path.join(RAIZ, ".bigbang", "VERSION"), os.path.join(self.root, ".bigbang", "VERSION"))
         with open(os.path.join(CENARIOS, "deploy-vps-docker.toml"), encoding="utf-8") as handle:
             text = handle.read()
+        version = open(os.path.join(RAIZ, ".bigbang", "VERSION"), encoding="utf-8").read().strip()
+        text = text.replace('versao = "0.9.0"', f'versao = "{version}"', 1)
         text = text.replace("planejamento = 0", "planejamento = 28").replace("execucao = 0", "execucao = 29") \
             .replace("bugs = 0", "bugs = 30")
         self.write("bigbang.toml", text)
@@ -106,12 +112,22 @@ class Labels(Base):
         self.fake.add_issue(11, "Tarefa", labels=["task", "tem-dependencia"])
         self.snapshot = os.path.join(self.root, "labels.json")
 
-    def test_needs_the_config_part_first(self):
+    def test_needs_the_workflow_part_first(self):
+        migrate.config_part(self.root)
         with self.assertRaises(BbError):
             migrate.labels_part(self.client, self.root, snapshot=self.snapshot)
 
-    def test_renames_keeping_the_issues_copies_when_both_exist_and_creates_the_catalog(self):
+    def ready(self):
         migrate.config_part(self.root)
+        import re
+        text = self.read("bigbang.toml").replace('model = "three-boards"', 'model = "single"', 1)
+        text = re.sub(r"(?m)^(planning|execution|bugs) = \d+[^\n]*\n", "", text)
+        text = text.replace('labels = "legacy"', 'labels = "legacy"\nnumber = 7', 1)
+        text = text.replace('model = "epic-branch"', 'model = "grouping"', 1)
+        self.write("bigbang.toml", text)
+
+    def test_renames_keeping_the_issues_copies_when_both_exist_and_creates_the_catalog(self):
+        self.ready()
         report = migrate.labels_part(self.client, self.root, snapshot=self.snapshot)
         self.assertIn(("epic", "type:epic"), report["renamed"])
         self.assertEqual(self.fake.label_names(10), ["qa:approved", "type:epic"])  # homologado existed as v3 too
@@ -123,7 +139,7 @@ class Labels(Base):
             self.assertIn("epic", json.load(handle)["renamed"])
 
     def test_rollback_restores_the_names(self):
-        migrate.config_part(self.root)
+        self.ready()
         migrate.labels_part(self.client, self.root, snapshot=self.snapshot)
         migrate.labels_part(self.client, self.root, snapshot=self.snapshot, rollback=True)
         self.assertIn("epic", self.fake.label_names(10))
@@ -132,7 +148,7 @@ class Labels(Base):
         self.assertEqual(config_module.get(self.config(), "board.labels"), "legacy")
 
     def test_dry_run_changes_nothing(self):
-        migrate.config_part(self.root)
+        self.ready()
         report = migrate.labels_part(self.client, self.root, snapshot=self.snapshot, dry_run=True)
         self.assertIn("epic", self.fake.labels)
         self.assertNotIn("type:epic", self.fake.labels)
@@ -151,6 +167,9 @@ class Board(Base):
         self.fake.add_issue(17, "Tarefa com PR", labels=["type:task"])
         self.fake.add_pull(70, "feature/17-x", "epico/12-aprovado")
         self.old = {28: FakeProject(), 29: FakeProject(), 30: FakeProject()}
+        for project in self.old.values():
+            project.ensure_field("Status", "SINGLE_SELECT", ["Backlog Refinement", "Próxima sprint", "Code", "CI/PR",
+                                                             "Novo"])
         for number, column in ((10, "Backlog Refinement"), (12, "Próxima sprint"), (13, "Próxima sprint")):
             self.old[28].set(number, "Status", column)
         for number, column in ((14, "Code"), (15, "Code"), (17, "CI/PR")):
@@ -165,11 +184,8 @@ class Board(Base):
 
     def ready(self):
         migrate.config_part(self.root)
-        text = self.read("bigbang.toml").replace('labels = "legacy"', 'labels = "v3"', 1)
-        self.write("bigbang.toml", text)
 
-    def test_needs_the_labels_part_first(self):
-        migrate.config_part(self.root)
+    def test_needs_the_config_part_first(self):
         with self.assertRaises(BbError):
             self.run_part()
 
@@ -220,11 +236,10 @@ class Board(Base):
 class Workflow(Base):
     def ready(self):
         migrate.config_part(self.root)
-        text = self.read("bigbang.toml").replace('labels = "legacy"', 'labels = "v3"', 1)
-        text = text.replace('model = "three-boards"', 'model = "single"', 1)
+        text = self.read("bigbang.toml").replace('model = "three-boards"', 'model = "single"', 1)
         import re
         text = re.sub(r"(?m)^(planning|execution|bugs) = \d+[^\n]*\n", "", text)
-        text = text.replace('labels = "v3"', 'labels = "v3"\nnumber = 7', 1)
+        text = text.replace('labels = "legacy"', 'labels = "legacy"\nnumber = 7', 1)
         self.write("bigbang.toml", text)
         self.fake.refs["refs/heads/develop"] = "d" * 40
 
