@@ -100,3 +100,49 @@ class ProcessV3(unittest.TestCase):
                            "processo/09-entrega.md"):
                 self.assertNotIn(legacy, agents)
             self.assertIn(".bigbang/pipeline/process/", agents)
+
+
+class SkillsAgreeWithTheCode(unittest.TestCase):
+    """What the v3 text teaches must be accepted by the pipeline and exist in the CLI (review of #255)."""
+
+    def texts(self):
+        base = os.path.join(RAIZ, ".bigbang", "pipeline")
+        result = {"AGENTS.base.md": open(os.path.join(base, "AGENTS.base.md"), encoding="utf-8").read()}
+        for folder in ("skills", "process"):
+            for root, _, files in os.walk(os.path.join(base, folder)):
+                for name in files:
+                    path = os.path.join(root, name)
+                    result[os.path.relpath(path, base)] = open(path, encoding="utf-8").read()
+        return result
+
+    def test_a_bug_fix_pull_request_goes_to_develop_or_a_release_never_to_main(self):
+        from bb import pipeline
+        self.assertIsNotNone(pipeline.v3_branch_problem("fix/12-x", "main"))  # the rule the text must respect
+        for name in ("skills/bb-corrigir-bug/SKILL.md", "process/bugs.md"):
+            text = self.texts()[name]
+            self.assertNotIn("PR para a `main`", text, name)
+            self.assertIn("release/x.y.z", text, name)
+
+    def test_every_bb_command_in_the_v3_text_exists_in_the_cli(self):
+        import re
+        from bb import cli
+        import argparse
+        parser = cli.build_parser()
+        commands = {}
+        for action in parser._actions:
+            if isinstance(action, argparse._SubParsersAction):
+                for name, sub in action.choices.items():
+                    subs = {}
+                    for inner in sub._actions:
+                        if isinstance(inner, argparse._SubParsersAction):
+                            subs.update(inner.choices)
+                    commands[name] = subs
+        planned = {("migrate", None)}  # arrives with #250 in this same release
+        for name, text in self.texts().items():
+            for match in re.finditer(r"`bb ([a-z][a-z-]*)(?: ([a-z][a-z-]*))?", text):
+                first, second = match.group(1), match.group(2)
+                if (first, None) in planned or (first, second) in planned:
+                    continue
+                self.assertIn(first, commands, f"{name}: bb {first}")
+                if second and commands[first] and not second.startswith(("<", "-")):
+                    self.assertIn(second, commands[first], f"{name}: bb {first} {second}")
