@@ -56,7 +56,7 @@ while IFS= read -r item || [[ -n "$item" ]]; do
     nome="${item%%=*}"
     imagem="${item#*=}"
   elif [[ "${#esperados[@]}" == 1 ]]; then
-    nome="${!esperados[@]}"
+    nome="${!esperados[*]}"
     imagem="$item"
   else
     echo "::error::manifesto exige serviço=imagem@sha256:… para cada serviço"; exit 2
