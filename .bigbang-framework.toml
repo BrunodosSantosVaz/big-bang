@@ -8,7 +8,7 @@ version = "3.0.0"                       # versão do framework instalada (igual 
 origin = "BrunodosSantosVaz/big-bang"  # de onde vêm as atualizações
 
 [project]
-mode = "flash"                         # padrao | flash; pode mudar depois, com decisão do dono e bb gerar
+mode = "autonomous"                    # normal | flash | autonomous; autonomous exige autonomy.toml e ruleset com o check gate
 name = "Big Bang"
 slug = "bigbang"
 owner = "BrunodosSantosVaz"             # login do GitHub do dono

@@ -3,10 +3,10 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "97dce9f1c7fe878c7d9654d0fb184c710357f91b",
-    "commit": "dee6eab5dcbe66a2ef5e66884edd5b5f96b006b0",
+    "base": "dee6eab5dcbe66a2ef5e66884edd5b5f96b006b0",
+    "commit": "5a8006e8948fe751385802d9e45cce2804a0ff43",
     "branch": "master",
-    "proposta": "bigbang/proposta-299-codex-1-pr-evidence-merge-291"
+    "proposta": "bigbang/proposta-303-autonomy"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -43,7 +43,8 @@
     ".bigbang/docs/decisoes/ADR-0023-quadro-unico-e-estado.md": "ADR-0023-quadro-unico-e-estado",
     ".bigbang/docs/decisoes/ADR-0024-identificadores-em-ingles.md": "ADR-0024-identificadores-em-ingles",
     ".bigbang/docs/decisoes/ADR-0025-modos-e-autonomia.md": "ADR-0025-modos-e-autonomia",
-    ".bigbang/docs/decisoes/ADR-0026-orquestracao-em-python.md": "ADR-0026-orquestracao-em-python"
+    ".bigbang/docs/decisoes/ADR-0026-orquestracao-em-python.md": "ADR-0026-orquestracao-em-python",
+    "Funcionalidade-framework-pipeline": "Funcionalidade-framework-pipeline"
   },
   "categorias": {
     "produto": {
@@ -254,7 +255,7 @@
     }
   },
   "codigo": {
-    "commit": "f56cd9f5d34d4510358e130275976310c799f865",
+    "commit": "87ff729053d3bcb820d4246be971af7f028d5867",
     "versao": "3.0.0",
     "raizes": [
       ".bigbang/",
@@ -835,7 +836,7 @@
         ".bigbang/tests/test_launcher.py:test_compiled_profile_after_f2"
       ],
       "hashes": {
-        ".bigbang/bb/init.py": "sha256:07ea59f34ac7626fe41c13615573f6d80929d98ffd6cc465082a1727ec96f97a"
+        ".bigbang/bb/init.py": "sha256:f339c986dbc250be0582d7b0265b68a60f82ec87bb9e72abefa654598a936db7"
       },
       "descricao": "Preparar F0 com identidade, modo padrão ou Flash, configuração e arquivos comunitários sem destruir conteúdo do projeto."
     },
@@ -2641,7 +2642,7 @@
       ],
       "hashes": {
         ".bigbang/bb/framework.py": "sha256:1ecbe5ed20b6c26bc1c5de1c53cb71173002f1086f1020775549c6803b308f7a",
-        ".bigbang/pipeline/framework/config.toml": "sha256:86e8f4405178dd302d6e6a9ef54403e96a49e43dc4a5fb751e76c331850aa0d9",
+        ".bigbang/pipeline/framework/config.toml": "sha256:72272280fbd612c8d4b605f2f2b2754def0588ce38b5f0a6e1eddf24001803be",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:49709060fa19fa6c0e86e624df856dac13ec41e02eb64d3e4f763d6654b0f810",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:0245df537e46101bd142701cd485913c8558ed61a262efdae7fd9a2e229dc8d4",
         ".bigbang/pipeline/framework/scripts/testes-candidata.sh": "sha256:b9cc01977794173b5dc2a2bec28b7ca53eb0f8fa91798f10148d25efae546a0e",
@@ -2658,7 +2659,7 @@
         ".github/workflows/bb-framework-publish.yml": "sha256:23f4dca0f67161c6d9213e57ef35dd303b070873e96d8b749e554abe7cc3b19a",
         ".github/workflows/bb-framework-qa-reject.yml": "sha256:75511a3098c9e3ad5d89e679200c63140c9e5e28687f71490d8c7582d280b189",
         ".github/workflows/bb-framework-start-sprint.yml": "sha256:9f20dcc8a7e95f75c05465081481aad72bf31012f1305ad812a77c29021e9f9b",
-        ".bigbang-framework.toml": "sha256:86e8f4405178dd302d6e6a9ef54403e96a49e43dc4a5fb751e76c331850aa0d9"
+        ".bigbang-framework.toml": "sha256:72272280fbd612c8d4b605f2f2b2754def0588ce38b5f0a6e1eddf24001803be"
       },
       "descricao": "Suporte à esteira exclusiva da origem, namespace próprio e preservação do template não fundado."
     },
