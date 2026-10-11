@@ -83,7 +83,7 @@ CLI = {
 }
 OPTIONS = {
     "--raiz": "--root", "--simular": "--dry-run", "--esteira": "--pipeline", "--nome": "--name", "--dono": "--owner",
-    "--repositorio": "--repository", "--visibilidade": "--visibility", "--licenca": "--license", "--modo": "--mode",
+    "--repositorio": "--repository", "--visibilidade": "--visibility", "--licenca": "--license", "--modo": "--mode", "--fluxo": "--workflow",
     "--sem-github": "--no-github", "--fase": "--phase", "--versao": "--release", "--completo": "--full",
     "--forcar": "--force-claim", "--frase": "--quote", "--pasta": "--folder", "--ia": "--agent",
     "--relatorio": "--report", "--dados": "--content-dir", "--confirmo-migracao": "--confirm-migration",
