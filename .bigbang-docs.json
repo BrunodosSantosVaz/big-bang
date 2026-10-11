@@ -3,10 +3,10 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "dee6eab5dcbe66a2ef5e66884edd5b5f96b006b0",
-    "commit": "c175533c0bb5f8ef882d87b4c8062e214d27ef6d",
+    "base": "6b6093a535cf858a2fa955ab58ddcaad9d5feb7b",
+    "commit": "97dce9f1c7fe878c7d9654d0fb184c710357f91b",
     "branch": "master",
-    "proposta": "bigbang/proposta-177-alvo-personalizado"
+    "proposta": "wiki/integration"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
