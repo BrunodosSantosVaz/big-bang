@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "a16321f9d7a4e9a21ece12b27bae2097db96c533",
-    "commit": "0dab16cb1d7bf7494e49a841ba59165fc73b6563",
+    "commit": "3a7eb5f142f46f8b466cbcb404bea387fe3388a4",
     "branch": "master",
-    "proposta": "wiki/251-framework-bootstrap"
+    "proposta": "wiki/251-copilot-1"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -254,7 +254,7 @@
     }
   },
   "codigo": {
-    "commit": "d31debea19ba2421e19b6999dd3acef49a62ed36",
+    "commit": "0364cd70c4664e256d940a65382d431557a42740",
     "versao": "2.0.1",
     "raizes": [
       ".bigbang/",
