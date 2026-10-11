@@ -379,7 +379,8 @@ class Board(Base):
         self.snapshot = os.path.join(self.root, "board.json")
 
     def run_part(self, **kwargs):
-        return migrate.board_part(self.client, self.root, open_project=lambda number: self.old[number],
+        return migrate.board_part(self.client, self.root,
+                                  open_project=lambda number: self.new if number == 7 else self.old[number],
                                   create_project=lambda: (7, self.new), snapshot=self.snapshot, now=NOW, **kwargs)
 
     def ready(self):
@@ -403,6 +404,66 @@ class Board(Base):
         config = self.config()
         self.assertEqual(config_module.get(config, "board.model"), "single")
         self.assertEqual(config_module.get(config, "board.number"), 7)
+
+    def test_active_project_workflows_block_before_receipts_or_card_adds(self):
+        self.ready()
+        self.new.active_workflows = [{"name": "Item added to project", "enabled": True}]
+        before = self.config()
+        with self.assertRaisesRegex(BbError, r"Desative.*Project.*Workflows"):
+            self.run_part()
+        self.assertFalse(self.new.values)
+        self.assertFalse(any("migrate-" in comment["body"] for rows in self.fake.comments.values()
+                             for comment in rows))
+        self.assertEqual(config_module.get(self.config(), "board.model"),
+                         config_module.get(before, "board.model"))
+        self.new.active_workflows = []
+        self.run_part(project_number=7)
+        self.assertEqual(config_module.get(self.config(), "board.model"), "single")
+
+    def test_status_is_written_from_the_calculated_mapping_and_verified(self):
+        self.ready()
+        with patch("bb.migrate.board.current_state", return_value="Brainstorm"):
+            report = self.run_part()
+        for number, state in report["mapped"].items():
+            self.assertEqual(self.new.get(number, "Status"), state)
+        self.assertGreaterEqual(self.new.read_calls, 2)
+
+    def test_status_readback_is_repaired_before_config_switch(self):
+        self.ready()
+        project = self.new
+        original_items = project.items
+        reads = 0
+
+        def stale_once(refresh=False):
+            nonlocal reads
+            result = original_items(refresh=refresh)
+            if refresh:
+                reads += 1
+                if reads == 1 and 10 in result:
+                    result[10]["Status"] = "Brainstorm"
+            return result
+
+        project.items = stale_once
+        report = self.run_part()
+        self.assertEqual(project.get(10, "Status"), report["mapped"][10])
+        self.assertEqual(config_module.get(self.config(), "board.model"), "single")
+        self.assertEqual(reads, 2)
+
+    def test_unconfirmed_status_keeps_old_config_model(self):
+        self.ready()
+        project = self.new
+        original_items = project.items
+
+        def always_stale(refresh=False):
+            result = original_items(refresh=refresh)
+            if refresh and 10 in result:
+                result[10]["Status"] = "Brainstorm"
+            return result
+
+        project.items = always_stale
+        with self.assertRaisesRegex(BbError, r"confirmação.*Status"):
+            self.run_part()
+        self.assertEqual(config_module.get(self.config(), "board.model"), "three-boards")
 
     def test_snapshot_keeps_the_old_boards_and_rollback_restores_them(self):
         self.ready()

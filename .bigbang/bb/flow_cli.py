@@ -15,6 +15,8 @@ def register(commands, pipeline_sub):
         p.add_argument("--snapshot", help="arquivo protegido com o estado anterior (obrigatório para aplicar)")
         p.add_argument("--rollback", action="store_true", help="restaura a parte pelo snapshot")
         p.add_argument("--yes", action="store_true", help="confirma as escritas no GitHub desta parte")
+        if part == "board":
+            p.add_argument("--project", type=int, help="retoma o Project do snapshot após desativar workflows")
         p.set_defaults(handler=_migrate)
     board_parser = commands.add_parser("board", help="v3: quadro único (labels, Project, reconciliação)")
     sub = board_parser.add_subparsers(dest="board_command", metavar="<subcomando>")
@@ -143,7 +145,7 @@ def _migrate(args):
                 number = board.create_project(gh.graphql, owner, config_module.get(config, "project.name"), repository)
                 return number, open_project(number)
             report = migrate.board_part(client, args.raiz, open_project=open_project,
-                                        create_project=create_project, **options)
+                                        create_project=create_project, project_number=args.project, **options)
         else:
             report = getattr(migrate, part + "_part")(client, args.raiz, **options)
     if dry_run:

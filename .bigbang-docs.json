@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "97dce9f1c7fe878c7d9654d0fb184c710357f91b",
-    "commit": "d2242188110b0678a08cbacccc51d5afc72aaf2c",
+    "commit": "ec2d614e3dbfa8962fc4ce8ea3c9a4789f0bd3f4",
     "branch": "master",
-    "proposta": "bigbang/proposta-291-codex-1-version-stamp"
+    "proposta": "bigbang/proposta-291-codex-1-version-stamp-merge"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -2372,9 +2372,9 @@
         ".bigbang/tests/test_framework_stack.py:test_packaged_framework_directories_are_not_skipped_as_system_build_outputs"
       ],
       "hashes": {
-        ".bigbang/bb/board.py": "sha256:b56463151ae793e86be92b70d0670fb1b98713aaef42ff35bc13efb3f193c4b8",
+        ".bigbang/bb/board.py": "sha256:680b8673e0f866085531aeff88476333f4aae045a04644eba60339ca139fca46",
         ".bigbang/bb/controller.py": "sha256:8c70bec7e79ad6786f7320c719e424d593f77fad6a006c8459a222d45e12200f",
-        ".bigbang/bb/flow_cli.py": "sha256:9b3c62f6029e465e58009e35a755542f2562577daf35b864fb006e519da9407f"
+        ".bigbang/bb/flow_cli.py": "sha256:d567f67ba6e4a1c6072fef8429cd244ae39235850e123a5a1f12a6d78d078982"
       },
       "descricao": "Catálogo de labels v3, Project com 15 estados e campos, bb move validado, reconciliação e controlador de eventos."
     },
@@ -2787,7 +2787,7 @@
         ".bigbang/tests/test_migrate_v3.py:test_rolling_back_in_reverse_order_works"
       ],
       "hashes": {
-        ".bigbang/bb/migrate.py": "sha256:3fa905bd5d93d4f9a4cb3169bdd722b76a9d733a149c9ab40662a1dedc642e98"
+        ".bigbang/bb/migrate.py": "sha256:056c706514be533d37ef49874338921453efac32dda0cb6d89a4d63ed60a739c"
       },
       "descricao": "Migração guiada opcional com ordem segura, consentimento explícito de escrita no GitHub e preservação do legado."
     }

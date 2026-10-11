@@ -341,6 +341,9 @@ class FakeProject:
 
     def __init__(self):
         self.field_specs, self.values = {}, {}
+        self.active_workflows = []
+        self.set_calls = []
+        self.read_calls = 0
 
     def fields(self):
         return {name: {"type": spec["type"], "options": list(spec.get("options", []))}
@@ -365,12 +368,17 @@ class FakeProject:
             self.values[number].pop(field, None)
         else:
             self.values[number][field] = value
+        self.set_calls.append((number, field, value))
 
     def get(self, number, field):
         return self.values.get(number, {}).get(field)
 
-    def items(self):
+    def items(self, refresh=False):
+        self.read_calls += 1
         return {number: dict(values) for number, values in self.values.items()}
+
+    def workflows(self):
+        return list(self.active_workflows)
 
     # shortcuts for the tests
     def status(self, number):
