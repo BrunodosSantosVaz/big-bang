@@ -259,6 +259,7 @@ class Moves(Base):
 
     def test_delivery_paths_read_only_prs_updated_since_the_children_exist(self):
         self._epic_in_progress(["qa:agent"], "src/app.py")
+        self.fake.issues[10]["created_at"] = "2026-10-10T09:00:00Z"
         for child in (11, 12):  # the sub-issues were born at the sprint start
             self.fake.issues[child]["created_at"] = "2026-10-10T10:00:00Z"
         self.fake.pulls[71]["updated_at"] = "2026-10-10T11:30:00Z"

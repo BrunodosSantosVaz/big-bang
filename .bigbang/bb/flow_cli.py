@@ -367,6 +367,8 @@ def _release_publish(args):
     print(f"Release {args.version} publicada (PR #{result['pr']}); concluídos: "
           + (", ".join(f"#{n}" for n in result["done"]) or "nenhum")
           + "; com a flag desligada: " + (", ".join(f"#{n}" for n in result["dark"]) or "nenhum") + ".")
+    for number in result.get("pending", []):
+        print(f"::warning::épico #{number} publicado com a flag ligada, mas não concluído: confira com o dono")
     return EXIT_OK
 
 
@@ -378,6 +380,9 @@ def _release_maintenance(args):
     for file in client.pull_files(args.pr):
         paths.extend({file.get("previous_filename", file["filename"]), file["filename"]})
     result = delivery.publish_maintenance(client, config, args.pr, changed_paths=paths, dry_run=args.dry_run)
+    if args.dry_run:
+        print(f"Simulação: a manutenção #{args.pr} passa no portão; nada foi mesclado.")
+        return EXIT_OK
     print(f"Manutenção #{args.pr} publicada na main; devolução para a develop: {result}.")
     return EXIT_OK
 

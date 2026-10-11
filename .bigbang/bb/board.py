@@ -212,11 +212,10 @@ def _independent_qa(client, number, receipts_now, actor, trusted, candidate=None
 
 
 def _born(client, number, issue):
-    """When the oldest piece of work of a card was created (its sub-issues, or the card itself without them): no PR
-    of that work can be older. Unknown creation dates mean no bound."""
-    children = client.sub_issues(number)
-    dates = [child.get("created_at") for child in children] if children else [issue.get("created_at")]
-    return None if not dates or None in dates else min(dates)
+    """When the oldest piece of work of a card was created (the card itself or any sub-issue): no PR of that work
+    can be older. Unknown creation dates mean no bound."""
+    dates = [issue.get("created_at")] + [child.get("created_at") for child in client.sub_issues(number)]
+    return None if None in dates else min(dates)
 
 
 def _gate(card_kind, current, target):

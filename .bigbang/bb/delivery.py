@@ -119,14 +119,13 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
                                   pending=pending, project=project)
     published = f"v{version}" in client.tags()
     rc_tag = _latest_candidate(client, version)
+    rc_sha = None
     if rc_tag is None and not published:
         problems.append(f"nenhuma candidata v{version}-rc.N publicada")
     elif rc_tag and not published:
         rc_sha = client.call("GET", f"git/ref/tags/{rc_tag}")[1]["object"]["sha"]
         if client.branch_sha(branch) not in (None, rc_sha):
             problems.append(f"a {branch} mudou depois da candidata {rc_tag}: gere uma candidata nova")
-    else:
-        rc_sha = None
     blocking = [issue["number"] for issue in client.issues("open")
                 if "blocks-production" in issue["labels"] or "bloqueia-producao" in issue["labels"]]
     if blocking:
@@ -148,7 +147,7 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
     if promote and not published:
         promote(rc_tag, f"v{version}", client.branch_sha("main"))  # the candidate's bytes, never a rebuild
     flags_by_epic = _flags(root, today)
-    done, dark = [], []
+    done, dark, pending = [], [], []
     for epic in epics:
         number = epic["number"]
         labels = set(client.issue(number)["labels"])
@@ -168,9 +167,11 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
                            facts={"delivered": True, "flag_on": flag_on}, event_id=f"publish-{number}-{version}-done")
                 done.append(number)
             except BbError:
-                dark.append(number)
+                (pending if flag_on else dark).append(number)
         elif state == "Done":
             done.append(number)
+        elif flag_on:
+            pending.append(number)  # lost its QA after the gate (decision withdrawn): never reported as dark
         else:
             dark.append(number)  # the gate let it through only with every flag off: shipped dark
     client.close_milestone(milestone)
@@ -178,7 +179,11 @@ def publish(client, project, config, version, root, *, today, now=None, pending=
     current = client.locks().current(f"version-{version}")
     if current:
         client.locks().release(f"version-{version}", current["session"], current["generation"], now=now)
-    return {"version": version, "pr": pull["number"], "done": done, "dark": dark}
+    for number in pending:
+        client.comment(number, f"**Big Bang** · a release {version} foi publicada com a flag deste épico ligada, mas "
+                               "ele não pôde ser concluído (a homologação mudou depois do portão). Confira a decisão "
+                               "e a flag com o dono.")
+    return {"version": version, "pr": pull["number"], "done": done, "dark": dark, "pending": pending}
 
 
 def publish_maintenance(client, config, number, *, changed_paths, dry_run=False):
