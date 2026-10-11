@@ -540,6 +540,7 @@ class RecordedGraphQL:
         self.fields = [{"id": "F-status", "name": "Status", "dataType": "SINGLE_SELECT",
                         "options": [{"id": "O-todo", "name": "Todo"}]}]
         self.items = []
+        self.workflow_nodes = [{"name": "Item added to project", "enabled": True}]
 
     def __call__(self, query, variables):
         self.calls.append((query, variables))
@@ -547,6 +548,8 @@ class RecordedGraphQL:
             return {"user": {"projectV2": {"id": "P1"}}}
         if "fields(first" in query:
             return {"node": {"fields": {"nodes": self.fields}}}
+        if "workflows(first" in query:
+            return {"node": {"workflows": {"nodes": self.workflow_nodes}}}
         if "createProjectV2Field" in query:
             self.fields.append({"id": "F-" + variables["n"], "name": variables["n"], "dataType": variables["t"],
                                 "options": [{"id": "O-" + o["name"], "name": o["name"]} for o in variables.get("o", [])]})
@@ -568,6 +571,13 @@ class RecordedGraphQL:
 
 
 class GraphQLAdapter(unittest.TestCase):
+    def test_reads_project_workflow_enabled_state(self):
+        graphql = RecordedGraphQL()
+        project = board.ProjectGraphQL("dona", 7, "dono/repo", graphql)
+        self.assertEqual(project.workflows(), graphql.workflow_nodes)
+        query = next(query for query, _ in graphql.calls if "workflows(first" in query)
+        self.assertIn("enabled", query)
+
     def test_fields_are_created_and_status_options_replaced_keeping_ids(self):
         graphql = RecordedGraphQL()
         project = board.ProjectGraphQL("dona", 7, "dono/repo", graphql)
