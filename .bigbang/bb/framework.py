@@ -84,7 +84,7 @@ def prepare(root, version):
     data = documentation.load(root)
     try:
         covered = {source for feature in data['funcionalidades'] for source in feature['fontes']}
-        actual = set(documentation.inventory(root, data))
+        actual = set(documentation.inventory(root, data, include_untracked=True))
         # Integrity also includes untracked sources. They cannot become trusted merely by preparing a version.
         excluded = data['codigo'].get('excluir', [])
         extensions = data['codigo'].get('excluir_extensoes', [])
