@@ -85,6 +85,30 @@ class Wiki(unittest.TestCase):
             self.assertIn("Objetivo", documentation.read(self.root, "PRODUTO.md"))
         self.assertFalse(self.root.joinpath("PRODUTO.md").exists())
 
+    def test_documentation_commit_works_without_git_identity(self):
+        isolated = Path(self.temp.name) / "isolated-git-home"
+        isolated.mkdir()
+        repository = Path(self.temp.name) / "identity-free-wiki"
+        repository.mkdir()
+        env = {
+            "HOME": str(isolated),
+            "XDG_CONFIG_HOME": str(isolated),
+            "GIT_CONFIG_GLOBAL": str(isolated / "gitconfig"),
+            "GIT_CONFIG_NOSYSTEM": "1",
+        }
+        with patch.dict(os.environ, env):
+            for key in ("GIT_CONFIG_COUNT", "GIT_CONFIG_KEY_0", "GIT_CONFIG_VALUE_0",
+                        "GIT_AUTHOR_NAME", "GIT_AUTHOR_EMAIL", "GIT_COMMITTER_NAME", "GIT_COMMITTER_EMAIL"):
+                os.environ.pop(key, None)
+            subprocess.run(["git", "init", "-q", str(repository)], check=True, env=os.environ.copy())
+            identity = subprocess.run(["git", "-C", str(repository), "var", "GIT_COMMITTER_IDENT"],
+                                      capture_output=True, text=True, env=os.environ.copy())
+            self.assertNotEqual(identity.returncode, 0, "fixture must reproduce a clone without Git identity")
+            repository.joinpath("Home.md").write_text("# Wiki\n", encoding="utf-8")
+            documentation.git(repository, "add", "Home.md")
+            documentation.git(repository, "commit", "-m", "docs: initialize wiki")
+            self.assertEqual(len(git(repository, "rev-parse", "HEAD")), 40)
+
     def test_cli_proposal_review_and_publication_preserve_original_until_confirmed(self):
         from bb import cli
         original = self.root.joinpath('PRODUTO.md')

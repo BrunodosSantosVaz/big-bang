@@ -19,14 +19,33 @@ SHA = re.compile(r"^[a-f0-9]{40}$")
 REPOSITORY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+$")
 PAGE = re.compile(r'^[^\\/:*?"<>|\x00-\x1f]+$')
 FRAMEWORK_VERSION_STAMP = re.compile(rb"Big Bang v\d+\.\d+\.\d+")
+GIT_BOT_NAME = "github-actions[bot]"
+GIT_BOT_EMAIL = "41898282+github-actions[bot]@users.noreply.github.com"
 
 
 def fail(message):
     raise BbError(message, EXIT_INVALID_STATE)
 
 
+def _git_identity_missing(folder):
+    base = ["git"]
+    if folder is not None:
+        base += ["-C", str(folder)]
+    for identity in ("GIT_AUTHOR_IDENT", "GIT_COMMITTER_IDENT"):
+        try:
+            result = subprocess.run(base + ["var", identity], capture_output=True, text=True,
+                                    check=False, timeout=120)
+        except (OSError, subprocess.SubprocessError):
+            return True
+        if result.returncode:
+            return True
+    return False
+
+
 def git(folder, *args):
     command = ["git", "-c", "credential.helper=!gh auth git-credential"]
+    if args and args[0] == "commit" and _git_identity_missing(folder):
+        command += ["-c", f"user.name={GIT_BOT_NAME}", "-c", f"user.email={GIT_BOT_EMAIL}"]
     if folder is not None:
         command += ["-C", str(folder)]
     try:
