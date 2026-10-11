@@ -60,7 +60,7 @@ CLI = {
     (None, "status"): "status", (None, "aceite"): "acceptance", (None, "decisao"): "decision",
     (None, "revisao"): "review", (None, "checklist"): "checklist", (None, "esteira"): "pipeline",
     (None, "documentacao"): "docs", (None, "comunidade"): "community", (None, "atualizar"): "update",
-    (None, "pacote"): "package", (None, "checksums"): "checksums",
+    (None, "pacote"): "package", (None, "checksums"): "checksums", (None, "migrar"): "migrate",
     ("config", "get"): "get", ("aceite", "liberar"): "unpend", ("revisao", "aprovar"): "approve",
     ("checklist", "producao"): "production",
     ("documentacao", "ler"): "read", ("documentacao", "destino"): "path", ("documentacao", "preparar"): "prepare",
@@ -83,7 +83,7 @@ CLI = {
 }
 OPTIONS = {
     "--raiz": "--root", "--simular": "--dry-run", "--esteira": "--pipeline", "--nome": "--name", "--dono": "--owner",
-    "--repositorio": "--repository", "--visibilidade": "--visibility", "--licenca": "--license", "--modo": "--mode",
+    "--repositorio": "--repository", "--visibilidade": "--visibility", "--licenca": "--license", "--modo": "--mode", "--fluxo": "--workflow",
     "--sem-github": "--no-github", "--fase": "--phase", "--versao": "--release", "--completo": "--full",
     "--forcar": "--force-claim", "--frase": "--quote", "--pasta": "--folder", "--ia": "--agent",
     "--relatorio": "--report", "--dados": "--content-dir", "--confirmo-migracao": "--confirm-migration",
