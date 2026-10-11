@@ -648,10 +648,12 @@
         ".bigbang/tests/test_wiki.py:test_publish_fast_forwards_and_rerun_is_idempotent",
         ".bigbang/tests/test_wiki.py:test_concurrent_owner_change_is_preserved_and_publication_rejected",
         ".bigbang/tests/test_framework_pipeline.py:test_prepare_refuses_untracked_sources_in_all_declared_roots",
-        ".bigbang/tests/test_wiki.py:test_framework_version_stamp_does_not_invalidate_public_documentation"
+        ".bigbang/tests/test_wiki.py:test_framework_version_stamp_does_not_invalidate_public_documentation",
+        ".bigbang/tests/test_wiki.py:test_documentation_commit_works_without_git_identity"
       ],
       "hashes": {
-        ".bigbang/bb/documentation.py": "sha256:7d87b0078cf02dc21d76bd2db38d2232564902ea690bfbe64cd155b8955c9870"
+        ".bigbang/bb/documentation.py": "sha256:aee1e8d4658b76c678db6c28824a0f49c37c0e114a760addab4e14899aab7c6b",
+        ".github/workflows/bb-framework-cut-release.yml": "sha256:22ac7ef5b19134d880a3596a7c6599741a21484499e7a6531888d09f1cf9cc46"
       },
       "descricao": "Resolver identificadores documentais conforme a visibilidade e publicar somente o snapshot revisado sem perder alterações concorrentes."
     },
@@ -2493,7 +2495,8 @@
       ],
       "testes": [
         ".bigbang/tests/test_grouping_v3.py:test_v3_tree_is_generated_and_verified",
-        ".bigbang/tests/test_grouping_v3.py:test_clean_task_pr"
+        ".bigbang/tests/test_grouping_v3.py:test_clean_task_pr",
+        ".bigbang/tests/test_framework_pipeline.py:test_cut_release_sets_git_identity_before_documentation_commands"
       ],
       "hashes": {
         ".bigbang/pipeline/AGENTS.base.md": "sha256:37182439f6c9f8b3801fab7916a6616e6fb42040e6524262505a92f9c07c24d0",
@@ -2512,7 +2515,7 @@
         ".bigbang/pipeline/core/files/.github/workflows/bb-codeql.yml": "sha256:164a28eaba2a75d0ba7f9b736b2341af46c56ff1331b460da201483f5ae467f6",
         ".bigbang/pipeline/core/files/.github/workflows/bb-controller.yml": "sha256:a2b9e18b184ef64b0eff582bb25ca24fa7746a5a6593977df37a716501ac533d",
         ".bigbang/pipeline/core/files/.github/workflows/bb-create-branches.yml": "sha256:ceb65a65bcac44411c522ab9fedd03e9bbf765964bbbbbdab7d959b174febda0",
-        ".bigbang/pipeline/core/files/.github/workflows/bb-cut-release.yml": "sha256:82ccc75201ef417fdbdd91d2275d5eabc1120b03e69fb90c53adabc2dfaad04d",
+        ".bigbang/pipeline/core/files/.github/workflows/bb-cut-release.yml": "sha256:d84be9831a1ae3df86b0c5fc02428fdc5a4f71c7ee65d8eaccef4792ac48e376",
         ".bigbang/pipeline/core/files/.github/workflows/bb-merge-pr.yml": "sha256:543b4724249bf17c4991b0588c1909c7852b124fc21b72e2fbb0f67a84161762",
         ".bigbang/pipeline/core/files/.github/workflows/bb-publish-maintenance.yml": "sha256:7671317ab89d4a1cba3c4a2187a5fb067b3cc4a345356e3f712f6a4811a78837",
         ".bigbang/pipeline/core/files/.github/workflows/bb-publish.yml.tmpl": "sha256:24f768ba12430bb8e1980665f330b376dd8d6802a5472fe355600af16e14fe1e",
@@ -2520,7 +2523,8 @@
         ".bigbang/pipeline/core/files/.github/workflows/bb-start-sprint.yml": "sha256:def03451f99bcc7fb1f52717ccd30d433371dcbe616fbf379a03cb3f22c0596c",
         ".bigbang/pipeline/profiles/compiled/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:c2bc95e8acc3da40b9a4da54f3281b8abd4bb5870ecb30ef69677d27d99a64c9",
         ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:d9e006c860077ec0d4e0b4e1c40b0f482faac452f7b9da639f1300fc1e1e5ed8",
-        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-rollback.yml.tmpl": "sha256:14a3c57fc67e866a2141c65310cf565462dfe81736b4d585cdd28787fff11698"
+        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-rollback.yml.tmpl": "sha256:14a3c57fc67e866a2141c65310cf565462dfe81736b4d585cdd28787fff11698",
+        ".github/workflows/bb-framework-cut-release.yml": "sha256:22ac7ef5b19134d880a3596a7c6599741a21484499e7a6531888d09f1cf9cc46"
       },
       "descricao": "Árvore .bigbang/pipeline: workflows v3 com gate único, controlador, botões, formulários, instruções e perfis."
     },
@@ -2638,7 +2642,8 @@
         ".bigbang/tests/test_framework_stack.py:test_framework_test_fixtures_are_not_runtime_dependency_declarations",
         ".bigbang/tests/test_framework_stack.py:test_a_declared_stack_checks_approved_and_unapproved_framework_packages",
         ".bigbang/tests/test_framework_stack.py:test_normal_system_stack_guard_keeps_ignoring_the_inherited_framework",
-        ".bigbang/tests/test_framework_stack.py:test_packaged_framework_directories_are_not_skipped_as_system_build_outputs"
+        ".bigbang/tests/test_framework_stack.py:test_packaged_framework_directories_are_not_skipped_as_system_build_outputs",
+        ".bigbang/tests/test_framework_pipeline.py:test_cut_release_sets_git_identity_before_documentation_commands"
       ],
       "hashes": {
         ".bigbang/bb/framework.py": "sha256:1ecbe5ed20b6c26bc1c5de1c53cb71173002f1086f1020775549c6803b308f7a",
@@ -2652,7 +2657,7 @@
         ".github/workflows/bb-framework-codeql.yml": "sha256:bd7776366427a7b805baaf1227ea24dfe57a9f22d4d30b9efc4527b4ab2be4ee",
         ".github/workflows/bb-framework-controller.yml": "sha256:3f4398c63394283d46c83e72bfd1830df6b36f936b57efba987f759a55f3e63f",
         ".github/workflows/bb-framework-create-branches.yml": "sha256:5c1debff02a75a5a8146424f365109de1d26477dca28c56ef11dff42fb142013",
-        ".github/workflows/bb-framework-cut-release.yml": "sha256:933c88b9370deb4f378323dbcdefdb2bbc77ac04398399f79e106cfff53a8ed5",
+        ".github/workflows/bb-framework-cut-release.yml": "sha256:22ac7ef5b19134d880a3596a7c6599741a21484499e7a6531888d09f1cf9cc46",
         ".github/workflows/bb-framework-gate.yml": "sha256:7eb2aa9bc633133ce0ff633c7855bfaff5c1897bb591e3b7fe75516f8c27638c",
         ".github/workflows/bb-framework-merge-pr.yml": "sha256:5f64fa8b18ee32c9a0a25eaf9b206c26acfe858667cbdda8f4f7541a521b23d5",
         ".github/workflows/bb-framework-publish-maintenance.yml": "sha256:45c69c92b3bd2672d2dccd6deed82c5eddafcf5fca160fa079752bf554ee4bf9",
