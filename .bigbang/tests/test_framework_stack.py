@@ -7,7 +7,6 @@ from types import SimpleNamespace
 import unittest
 
 from _raiz import RAIZ, importar_bb
-from test_grouping_v3 import cfg
 
 importar_bb()
 from bb import config, flow_cli, pipeline_cli
@@ -50,8 +49,10 @@ class FrameworkStack(unittest.TestCase):
 
     def test_pr_content_cannot_select_the_framework_policy_for_a_system_base(self):
         self.write('.bigbang-framework.toml', '[project]\nrepository = "BrunodosSantosVaz/big-bang"\n')
+        system = dict(self.trusted)
+        system.pop('_framework')
         with self.assertRaises(BbError) as error:
-            self.problems(cfg())
+            self.problems(system)
         self.assertIn('documento sem destino na Wiki: STACK.md', error.exception.message)
 
     def test_a_declared_stack_page_is_required_even_for_the_framework(self):
