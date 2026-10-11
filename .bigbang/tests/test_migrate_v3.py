@@ -74,6 +74,83 @@ class Base(unittest.TestCase):
 
 
 class Config(Base):
+    def test_real_three_line_framework_quote_is_removed_and_rollback_is_exact(self):
+        agents = """<!-- bigbang:inicio v3.0.0 -->
+generated instructions
+<!-- bigbang:fim -->
+
+## Projeto
+
+Esta seção pertence ao projeto.
+
+> **Se este é o repositório `BrunodosSantosVaz/big-bang`** (o próprio framework, não um sistema criado a partir
+> dele): não rode a Fundação. Siga `.bigbang/docs/especificacao.md`, trabalhe um épico por vez (seção 17) e registre
+> as decisões do framework em `.bigbang/docs/decisoes/`.
+
+### Comandos
+
+npm test
+"""
+        self.write("AGENTS.md", agents)
+        before = (self.read("bigbang.toml"), agents)
+        snapshot = os.path.join(self.root, "config.json")
+        migrate.config_part(self.root, snapshot=snapshot, dry_run=True)
+        self.assertEqual((self.read("bigbang.toml"), self.read("AGENTS.md")), before)
+        self.assertFalse(os.path.exists(snapshot))
+        migrate.config_part(self.root, snapshot=snapshot)
+        cleaned = self.read("AGENTS.md")
+        self.assertNotIn("BrunodosSantosVaz/big-bang", cleaned)
+        self.assertNotIn("não rode a Fundação", cleaned)
+        self.assertNotIn("as decisões do framework", cleaned)
+        self.assertIn("generated instructions", cleaned)
+        self.assertIn("## Projeto\n\nEsta seção pertence ao projeto.", cleaned)
+        self.assertIn("### Comandos\n\nnpm test\n", cleaned)
+        migrate.config_part(self.root, snapshot=snapshot, rollback=True)
+        self.assertEqual((self.read("bigbang.toml"), self.read("AGENTS.md")), before)
+
+    def test_single_line_framework_quote_preserves_following_project_subsection(self):
+        agents = """## Projeto
+
+Descrição do projeto.
+
+> **Se este é o repositório `BrunodosSantosVaz/big-bang`**: não rode a Fundação.
+
+### Comandos
+
+npm test
+"""
+        expected = """## Projeto
+
+Descrição do projeto.
+
+### Comandos
+
+npm test
+"""
+        self.write("AGENTS.md", agents)
+        migrate.config_part(self.root)
+        self.assertEqual(self.read("AGENTS.md"), expected)
+
+    def test_framework_quote_preserves_later_subsections_and_unrelated_quote(self):
+        prefix = "## Projeto\n\nDescrição do projeto.\n\n"
+        quote = ("> **Se este é o repositório `BrunodosSantosVaz/big-bang`**: instrução herdada\n"
+                 "> continuação do framework\n> última linha herdada\n")
+        following = """### Comandos
+
+npm test
+
+> Nota específica do projeto.
+> Preserve esta continuação.
+
+### Operação
+
+Preserve as instruções do projeto.
+"""
+        # Even without a blank line, the next heading ends the inherited quote.
+        self.write("AGENTS.md", prefix + quote + following)
+        migrate.config_part(self.root)
+        self.assertEqual(self.read("AGENTS.md"), prefix + following)
+
     def test_existing_snapshot_is_never_overwritten(self):
         snapshot = os.path.join(self.root, "config.json")
         self.write("config.json", "precious backup")
