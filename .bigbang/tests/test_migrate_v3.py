@@ -74,6 +74,15 @@ class Base(unittest.TestCase):
 
 
 class Config(Base):
+    def test_existing_snapshot_is_never_overwritten(self):
+        snapshot = os.path.join(self.root, "config.json")
+        self.write("config.json", "precious backup")
+        before = self.read("bigbang.toml")
+        with self.assertRaises(BbError):
+            migrate.config_part(self.root, snapshot=snapshot)
+        self.assertEqual(self.read("config.json"), "precious backup")
+        self.assertEqual(self.read("bigbang.toml"), before)
+
     def test_snapshot_restores_config_and_agents_exactly(self):
         before = (self.read("bigbang.toml"), self.read("AGENTS.md"))
         snapshot = os.path.join(self.root, "config.json")
@@ -177,6 +186,14 @@ class Labels(Base):
 
 
 class Board(Base):
+    def test_initial_cards_also_receive_a_migration_receipt(self):
+        self.ready()
+        self.run_part()
+        for number in (15, 16):
+            history = receipts.parse(self.client.comments(number), {"BrunodosSantosVaz"})
+            self.assertEqual(len(history), 1)
+            self.assertEqual(history[0]["actor"], migrate.MIGRATION_ACTOR)
+
     def test_legacy_labels_are_mapped_before_the_label_migration(self):
         self.ready()
         from bb import names
