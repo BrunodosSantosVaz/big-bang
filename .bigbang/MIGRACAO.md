@@ -4,6 +4,39 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [3.0.0]
+
+### O que muda
+
+A v3 usa identificadores e CLI em inglês, com os nomes em português preservados como aliases. O quadro passa
+para um Project único com 15 estados, incluindo Rejected e Cancelled; o estado é registrado por recibos e a
+posse usa travas atômicas. O fluxo agrupador reúne tarefas de um épico: as tarefas fecham no merge na develop e
+uma release é cortada dessa branch. Feature flags participam do fluxo e o check obrigatório é o `gate`.
+
+Além dos modos normal e flash, o modo autonomous exige um contrato `autonomy.toml`, limites explícitos e os
+controles do GitHub conferidos. Testes continuam escritos antes do código, a revisão é independente e os
+scanners permanecem obrigatórios. `bb init` funda sistemas novos já na v3; `--fluxo epic-branch` preserva o
+fluxo anterior quando escolhido. Sistemas existentes continuam com seu comportamento após `bb update`.
+
+### O que o projeto precisa fazer
+
+Nada.
+
+### Adoção opcional da v3
+
+1. Para continuar como está, atualize normalmente: `bb update` não muda o fluxo, os painéis nem as labels do
+   projeto. Ler esta seção não autoriza migração ou mudança de controles no GitHub.
+2. Para adotar a v3 por completo, use a skill `bb-migrate`: pré-checagem, simulação, snapshots protegidos e um
+   PR revisado por parte, na ordem **config → board → workflow → labels**. Cada parte tem `--dry-run`,
+   `--snapshot <arquivo>` e `--rollback`; escritas no GitHub exigem confirmação explícita `--yes`.
+3. Faça os passos do dono no GitHub **só depois da virada**: check obrigatório `gate`, ambiente `production`
+   com os mesmos revisores/proteções, segredo `PROJECT_TOKEN` e variáveis `PROJECT_OWNER`/`PROJECT_NUMBER`.
+   A skill fornece os comandos exatos. Os painéis anteriores só são arquivados pelo dono após um ciclo sem
+   divergência; nada do histórico é apagado.
+
+Sistemas fundados antes do PR #236 herdaram do AGENTS.md a seção **Modo do próprio framework**.
+`bb migrate config` remove esse trecho: ele pertence ao Big Bang, não ao sistema cliente.
+
 ## [2.0.1] - 2026-10-09
 
 ### O que muda
