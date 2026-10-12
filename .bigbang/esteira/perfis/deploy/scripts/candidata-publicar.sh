@@ -28,14 +28,15 @@ if [[ "$formato" != imagem ]]; then
   fi
   nome=$("${BB_CMD[@]}" config get projeto.nome)
   url=$("${BB_CMD[@]}" config get deploy.url_staging)
+  pacote_sha=$(python3 -c 'import json; print(json.load(open("candidata/manifesto.json"))["artefato"]["sha256"])')
   {
     echo "## Candidata para homologação"; echo
     echo "**Pre-release para testar no staging.** Produção receberá o mesmo pacote verificado, sem nova construção."; echo
     echo "- Staging: $url"
     echo "- Formato: $formato"
-    echo "- Manifesto: `sha256:$manifest_sha`"
-    echo "- Pacote: `$(python3 -c 'import json; print(json.load(open("candidata/manifesto.json"))["artefato"]["sha256"])')`"
-    echo "- Commit: `${GITHUB_SHA:-}`"
+    printf -- '- Manifesto: `sha256:%s`\n' "$manifest_sha"
+    printf -- '- Pacote: `sha256:%s`\n' "$pacote_sha"
+    printf -- '- Commit: `%s`\n' "${GITHUB_SHA:-}"
   } > notas.md
   gh release create "$tag" candidata/manifesto.json candidata/manifesto.sha256 candidata/artefato.tar.gz \
     --repo "$R" --prerelease --target "${GITHUB_SHA:?}" --title "$nome $tag (homologação)" --notes-file notas.md

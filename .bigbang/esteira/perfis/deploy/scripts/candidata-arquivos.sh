@@ -3,7 +3,6 @@
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
-read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 build_tmp=$(mktemp -d)
 trap 'rm -rf "$build_tmp"' EXIT
 mkdir -p "$build_tmp/home" "$build_tmp/tmp"
