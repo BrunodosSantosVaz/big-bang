@@ -130,7 +130,85 @@ def with_computed(config, root):
 {{gerado.env_alvo}}''')
     if config['entrega']['perfil'] == 'deploy':
         target, artifact = deploy_catalog.resolve(root, config)
+        hash_artifact = artifact.identity == 'sha256'
         context['gerado']['preparar_alvo'] = 'bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh'
+        context['gerado'].update(
+            env_testes_candidata=("\n        env:\n          GH_TOKEN: ${{ github.token }}"
+                                 if config_module.get(config, 'project.mode') == 'flash' else ''),
+            artifact_permissions=('' if hash_artifact else '      packages: write'),
+            artifact_preparacao=('' if hash_artifact else '''      - name: Entrar no GHCR
+        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+        env:
+          GH_TOKEN: ${{ github.token }}
+      # QEMU só trabalha quando deploy.plataformas tem uma arquitetura diferente da do runner (ex.: linux/arm64).
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1'''),
+            artifact_build_name=('Construir pacote/arquivos e manifesto SHA-256 sem credenciais'
+                                 if hash_artifact else 'Imagens (uma vez, por digest) e Trivy'),
+            artifact_build_env=('' if hash_artifact else '''        env:
+          TAG: ${{ needs.preparar.outputs.tag }}'''),
+            artifact_upload=('' if not hash_artifact else '''      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: bb-candidata-${{ github.run_id }}
+          path: candidata/
+          if-no-files-found: error
+          retention-days: 90'''),
+            artifact_download_stage=('' if not hash_artifact else '''      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: bb-candidata-${{ github.run_id }}
+          path: candidata'''),
+            artifact_download_publish=('' if not hash_artifact else '''      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: bb-candidata-${{ github.run_id }}
+          path: candidata'''),
+            artifact_permissions_publish=('      packages: write\n      id-token: write\n      attestations: write' if not hash_artifact else ''),
+            artifact_registro_steps=('' if hash_artifact else '''      - name: Entrar no GHCR
+        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Registro das imagens e SBOM (CycloneDX) de cada uma
+        run: bash .bigbang/esteira/perfis/deploy/scripts/candidata-sbom.sh
+        env:
+          IMAGEM: ${{ needs.imagem.outputs.imagem }}
+      # Atestados de procedência: grátis em repositório público; em privado exigem GitHub Enterprise Cloud.
+      - name: Atestado de procedência das imagens
+        if: ${{ github.event.repository.visibility == 'public' }}
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-checksums: candidata/imagens.sha256'''),
+            artifact_publish_env=('''        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.preparar.outputs.tag }}
+          IMAGEM: ${{ needs.imagem.outputs.imagem }}'''
+                                if hash_artifact else '''        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.preparar.outputs.tag }}
+          IMAGEM: ${{ needs.imagem.outputs.imagem }}'''))
+        context['gerado']['artefato_promover'] = artifact.scripts['promover']
+        context['gerado']['artifact_rollback_conferir'] = ('''      - name: Manifesto e pacote registrados na Release
+        id: imagem
+        run: |
+          mkdir -p "$RUNNER_TEMP/rollback-artefato"
+          gh release download "$VERSAO" --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP/rollback-artefato" --pattern manifesto.json --pattern manifesto.sha256 --pattern artefato.tar.gz
+          (cd "$RUNNER_TEMP/rollback-artefato" && sha256sum -c manifesto.sha256)
+          esperado=$(python3 -c 'import json,os; print(json.load(open(os.path.join(os.environ["RUNNER_TEMP"],"rollback-artefato/manifesto.json")))["artefato"]["sha256"])')
+          atual=$(sha256sum "$RUNNER_TEMP/rollback-artefato/artefato.tar.gz" | cut -d' ' -f1)
+          [[ "$atual" == "$esperado" ]] || { echo "::error::SHA-256 do pacote não confere"; exit 1; }
+          echo "imagem=sha256:$esperado" >> "$GITHUB_OUTPUT"
+          echo "Voltaria produção para $VERSAO: sha256:$esperado (migrações não são desfeitas)."
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ inputs.versao }}'''
+            if hash_artifact else '''      - name: Imagem registrada na Release
+        id: imagem
+        run: |
+          imagem=$(gh release download "$VERSAO" --repo "$GITHUB_REPOSITORY" --pattern imagem.txt --output - | tr -d ' \t\r' | grep -v '^$' | paste -sd, -)
+          [[ -n "$imagem" ]] || { echo "::error::$VERSAO não registra uma imagem"; exit 1; }
+          echo "imagem=$imagem" >> "$GITHUB_OUTPUT"
+          echo "Voltaria produção para $VERSAO: $imagem (migrações não são desfeitas)."
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ inputs.versao }}''')
         context['gerado']['env_alvo'] = '\n'.join(
             '          ' + name + ': ${{ ' + kind + '.' + name + ' }}'
             for kind, names in (('vars', target.variables), ('secrets', target.secrets)) for name in names)
@@ -212,6 +290,64 @@ def with_computed(config, root):
         env:
           VERSAO: ${{ inputs.versao }}
           IMAGEM: ${{ needs.conferir.outputs.imagem }}
+{{gerado.env_alvo}}'''.replace('{{gerado.env_alvo}}', context['gerado']['env_alvo'])
+            if hash_artifact:
+                context['gerado']['publicar_producao'] = '''      - name: Preparar publicação personalizada
+        id: preparar-publicacao
+        run: |
+          gh auth setup-git
+          BB_PUBLICACAO_PERSONALIZADA=preparar bash .bigbang/esteira/nucleo/scripts/publicar-producao.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          SIMULAR: 'false'
+          BB_SHA_TESTADO: ${{ needs.testes-producao.outputs.sha }}
+      - name: Retirar credencial do checkout antes dos scripts do projeto
+        if: ${{ steps.preparar-publicacao.outputs.retomada != 'true' }}
+        run: git config --local --unset-all http.https://github.com/.extraheader || true
+      - name: Executar scripts personalizados sem credenciais
+        if: ${{ steps.preparar-publicacao.outputs.retomada != 'true' }}
+        run: |
+          bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
+          bash .bigbang/esteira/perfis/deploy/scripts/publicar-personalizado.sh
+        env:
+          RC_TAG: ${{ steps.preparar-publicacao.outputs.rc_tag }}
+          TAG: ${{ steps.preparar-publicacao.outputs.tag }}
+          TARGET_SHA: ${{ steps.preparar-publicacao.outputs.target_sha }}
+          MANIFESTO: ${{ steps.preparar-publicacao.outputs.manifesto }}
+{{gerado.env_alvo}}
+      - name: Finalizar publicação personalizada
+        run: |
+          gh auth setup-git
+          BB_PUBLICACAO_PERSONALIZADA=finalizar bash .bigbang/esteira/nucleo/scripts/publicar-producao.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          SIMULAR: 'false'
+          RETOMADA: ${{ steps.preparar-publicacao.outputs.retomada }}
+          RC_TAG: ${{ steps.preparar-publicacao.outputs.rc_tag }}
+          TAG: ${{ steps.preparar-publicacao.outputs.tag }}
+          TARGET_SHA: ${{ steps.preparar-publicacao.outputs.target_sha }}
+          MANIFESTO: ${{ steps.preparar-publicacao.outputs.manifesto }}'''
+                context['gerado']['publicar_producao'] = context['gerado']['publicar_producao'].replace(
+                    'bash .bigbang/esteira/perfis/deploy/scripts/publicar-personalizado.sh',
+                    'bash .bigbang/' + artifact.scripts['promover'])
+                context['gerado']['voltar_producao'] = '''      - name: Baixar e conferir manifesto de rollback
+        run: |
+          mkdir -p candidata
+          gh release download "$VERSAO" --repo "$GITHUB_REPOSITORY" --dir candidata --pattern manifesto.json --pattern manifesto.sha256 --pattern artefato.tar.gz
+          (cd candidata && sha256sum -c manifesto.sha256)
+          esperado=$(python3 -c 'import json; print(json.load(open("candidata/manifesto.json"))["artefato"]["sha256"])')
+          atual=$(sha256sum candidata/artefato.tar.gz | cut -d' ' -f1)
+          [[ "$atual" == "$esperado" ]] || { echo "::error::SHA-256 do pacote não confere"; exit 1; }
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ inputs.versao }}
+      - name: Voltar versão pelo alvo personalizado sem credenciais
+        run: |
+          bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
+          bash .bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh voltar producao "$VERSAO" candidata/manifesto.json
+          bash .bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh saude producao
+        env:
+          VERSAO: ${{ inputs.versao }}
 {{gerado.env_alvo}}'''.replace('{{gerado.env_alvo}}', context['gerado']['env_alvo'])
         context['gerado']['runner_deploy'] = config_module.get(config, 'deploy.runner')
         context['gerado']['artefato_construir'] = artifact.scripts['construir']

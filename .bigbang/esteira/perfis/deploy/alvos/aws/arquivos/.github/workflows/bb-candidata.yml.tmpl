@@ -38,7 +38,6 @@ jobs:
     permissions:
       contents: read
       actions: read
-      packages: write
     outputs:
       imagem: ${{ steps.i.outputs.imagem }}
     steps:
@@ -51,21 +50,16 @@ jobs:
           python-version: '3.12'
       - run: bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
       - name: Validar testes (Flash reutiliza CI do mesmo commit)
-        run: bash .bigbang/esteira/nucleo/scripts/testes-candidata.sh
-        env:
-          GH_TOKEN: ${{ github.token }}
-      - name: Entrar no GHCR
-        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-        env:
-          GH_TOKEN: ${{ github.token }}
-      # QEMU só trabalha quando deploy.plataformas tem uma arquitetura diferente da do runner (ex.: linux/arm64).
-      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
-      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-      - name: Imagens (uma vez, por digest) e Trivy
+        run: bash .bigbang/esteira/nucleo/scripts/testes-candidata.sh{{gerado.env_testes_candidata}}
+      - name: Construir pacote/arquivos e manifesto SHA-256 sem credenciais
         id: i
         run: bash .bigbang/{{gerado.artefato_construir}}
-        env:
-          TAG: ${{ needs.preparar.outputs.tag }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: bb-candidata-${{ github.run_id }}
+          path: candidata/
+          if-no-files-found: error
+          retention-days: 90
 
   staging:
     concurrency:
@@ -84,6 +78,10 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: bb-candidata-${{ github.run_id }}
+          path: candidata
       - name: Autenticar na AWS via OIDC
         uses: aws-actions/configure-aws-credentials@ececac4a0913210359f1eb7dd4a942526ea9e201 # v4.1.0
         with:
@@ -103,9 +101,6 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
-      packages: write
-      id-token: write
-      attestations: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -113,21 +108,11 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
-      - name: Entrar no GHCR
-        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-        env:
-          GH_TOKEN: ${{ github.token }}
-      - name: Registro das imagens e SBOM (CycloneDX) de cada uma
-        run: bash .bigbang/esteira/perfis/deploy/scripts/candidata-sbom.sh
-        env:
-          IMAGEM: ${{ needs.imagem.outputs.imagem }}
-      # Atestados de procedência: grátis em repositório público; em privado exigem GitHub Enterprise Cloud.
-      - name: Atestado de procedência das imagens
-        if: ${{ github.event.repository.visibility == 'public' }}
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          subject-checksums: candidata/imagens.sha256
-      - name: Pre-release com os digests
+          name: bb-candidata-${{ github.run_id }}
+          path: candidata
+      - name: Pre-release com o manifesto SHA-256 e pacote
         run: bash .bigbang/{{gerado.artefato_candidata}}
         env:
           GH_TOKEN: ${{ github.token }}

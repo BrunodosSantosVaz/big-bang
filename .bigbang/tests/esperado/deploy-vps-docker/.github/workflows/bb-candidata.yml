@@ -54,8 +54,7 @@ jobs:
       - run: bash .bigbang/esteira/nucleo/scripts/comando.sh instalar
       - name: Validar testes (Flash reutiliza CI do mesmo commit)
         run: bash .bigbang/esteira/nucleo/scripts/testes-candidata.sh
-        env:
-          GH_TOKEN: ${{ github.token }}
+
       - name: Entrar no GHCR
         run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
         env:
@@ -68,6 +67,7 @@ jobs:
         run: bash .bigbang/esteira/perfis/deploy/scripts/candidata-imagem.sh
         env:
           TAG: ${{ needs.preparar.outputs.tag }}
+
 
   staging:
     concurrency:
@@ -83,6 +83,7 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
+
       - name: Staging pelo alvo vps-docker (migração, publicação, saúde, smoke, ZAP)
         run: |
           bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
@@ -115,6 +116,7 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
+
       - name: Entrar no GHCR
         run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
         env:

@@ -34,7 +34,9 @@ finalizar() {
 
 if [ "${BB_PUBLICACAO_PERSONALIZADA:-}" = finalizar ]; then
   if [ "${RETOMADA:-false}" != true ]; then
-    RC_TAG="${RC_TAG:?}" TAG="${TAG:?}" TARGET_SHA="${TARGET_SHA:?}" IMAGEM="${IMAGEM:?}" \
+    RC_TAG="${RC_TAG:?}" TAG="${TAG:?}" TARGET_SHA="${TARGET_SHA:?}" \
+      FORMATO="$("${BB_CMD[@]}" config get deploy.artefato)" \
+      IMAGEM="${IMAGEM:-}" MANIFESTO="${MANIFESTO:-}" \
       bash "$AQUI/../../perfis/deploy/scripts/finalizar-publicacao.sh"
   fi
   finalizar
@@ -121,16 +123,27 @@ if [ "${BB_PUBLICACAO_PERSONALIZADA:-}" = preparar ]; then
   [ "$perfil" = deploy ] || { echo "::error::preparação personalizada exige perfil deploy"; exit 2; }
   alvo_nome=$("${BB_CMD[@]}" config get entrega.alvo)
   [ "$alvo_nome" = personalizado ] || { echo "::error::fase personalizada exige alvo personalizado"; exit 2; }
-  tmp=$(mktemp -d)
-  trap 'rm -rf "$tmp"' EXIT
-  gh release download "$rc" --repo "$R" --pattern imagem.txt --output "$tmp/imagem.txt"
-  imagem=$(tr -d ' \t\r' < "$tmp/imagem.txt" | grep -v '^$' | paste -sd, -)
-  [ -n "$imagem" ] || { echo "::error::a candidata $rc não registra imagens"; exit 1; }
+  formato=$("${BB_CMD[@]}" config get deploy.artefato)
+  if [ "$formato" = imagem ]; then
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' EXIT
+    gh release download "$rc" --repo "$R" --pattern imagem.txt --output "$tmp/imagem.txt"
+    imagem=$(tr -d ' \t\r' < "$tmp/imagem.txt" | grep -v '^$' | paste -sd, -)
+    [ -n "$imagem" ] || { echo "::error::a candidata $rc não registra imagens"; exit 1; }
+    manifesto=""
+  else
+    mkdir -p candidata
+    gh release download "$rc" --repo "$R" --dir candidata --pattern manifesto.json --pattern manifesto.sha256 --pattern artefato.tar.gz
+    PYTHONPATH=.bigbang python3 -m bb.artifacts verify candidata/manifesto.json
+    manifesto="candidata/manifesto.json"
+    imagem=""
+  fi
   {
     echo "rc_tag=$rc"
     echo "tag=$tag"
     echo "target_sha=$alvo"
     echo "imagem=$imagem"
+    echo "manifesto=$manifesto"
     echo "retomada=false"
   } >> "${GITHUB_OUTPUT:?}"
   exit 0

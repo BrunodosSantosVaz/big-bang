@@ -48,6 +48,25 @@ if [[ "$operacao" == saude ]]; then
   exec env -i "${project_environment[@]}" bash "$script" "$ambiente"
 fi
 
+formato=$("${BB_CMD[@]}" config get deploy.artefato)
+if [[ "$formato" != imagem ]]; then
+  if [[ "$operacao" == voltar ]]; then
+    versao="${3:?informe a versão publicada}"
+    [[ "$versao" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::versão inválida"; exit 2; }
+    manifesto="${4:?informe o caminho do manifesto conferido pela esteira}"
+  else
+    manifesto="${3:?informe o caminho do manifesto imutável}"
+  fi
+  [[ -f "$manifesto" && ! -L "$manifesto" ]] || { echo "::error::manifesto ausente ou inseguro"; exit 2; }
+  PYTHONPATH=.bigbang python3 -m bb.artifacts verify "$manifesto"
+  if [[ "$operacao" == voltar ]]; then
+    if run_project_script "$script" "$ambiente" "$manifesto" "$versao"; then status=0; else status=$?; fi
+  else
+    if run_project_script "$script" "$ambiente" "$manifesto"; then status=0; else status=$?; fi
+  fi
+  exit "$status"
+fi
+
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 manifesto="$tmp/imagem.txt"

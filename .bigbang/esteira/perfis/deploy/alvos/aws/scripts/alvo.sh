@@ -27,15 +27,31 @@ case "$operacao" in
       origem="$(dirname "$artefato_entrada")"
     fi
 
+    pasta_sincronizar="$origem"
+    limpar_temporario=false
+    if [ -f "$origem/artefato.tar.gz" ]; then
+      tmp_extrair=$(mktemp -d)
+      limpar_temporario=true
+      tar -xzf "$origem/artefato.tar.gz" -C "$tmp_extrair"
+      pasta_sincronizar="$tmp_extrair"
+    fi
+
+    if [ ! -d "$pasta_sincronizar" ] || [ -z "$(ls -A "$pasta_sincronizar" 2>/dev/null)" ]; then
+      echo "::error::Diretório de arquivos estáticos '$pasta_sincronizar' vazio ou inexistente; abortando sincronização com s3://${AWS_S3_BUCKET} para evitar exclusão acidental de dados." >&2
+      if [ "$limpar_temporario" = true ]; then rm -rf "$pasta_sincronizar"; fi
+      exit 1
+    fi
+
     echo "Sincronizando arquivos com s3://${AWS_S3_BUCKET} na região ${AWS_REGION}..."
     if [ "${AWS_SIMULAR:-false}" = true ] || ! command -v aws >/dev/null 2>&1; then
-      echo "[simulado] aws s3 sync \"$origem\" \"s3://${AWS_S3_BUCKET}\" --delete --region \"${AWS_REGION}\""
+      echo "[simulado] aws s3 sync \"$pasta_sincronizar\" \"s3://${AWS_S3_BUCKET}\" --delete --region \"${AWS_REGION}\""
       echo "[simulado] aws cloudfront create-invalidation --distribution-id \"${AWS_CLOUDFRONT_DISTRIBUTION_ID}\" --paths \"/*\""
     else
-      aws s3 sync "$origem" "s3://${AWS_S3_BUCKET}" --delete --region "${AWS_REGION}"
+      aws s3 sync "$pasta_sincronizar" "s3://${AWS_S3_BUCKET}" --delete --region "${AWS_REGION}"
       echo "Criando invalidação no CloudFront (${AWS_CLOUDFRONT_DISTRIBUTION_ID})..."
       aws cloudfront create-invalidation --distribution-id "${AWS_CLOUDFRONT_DISTRIBUTION_ID}" --paths "/*"
     fi
+    if [ "$limpar_temporario" = true ]; then rm -rf "$pasta_sincronizar"; fi
     echo "Publicação no S3 + CloudFront concluída."
     ;;
 
@@ -58,11 +74,25 @@ case "$operacao" in
     versao="${3:?informe a versão (vX.Y.Z)}"
     [[ "$versao" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit 2
     echo "Executando rollback estático para a versão $versao..."
+    command -v gh >/dev/null 2>&1 || { echo "::error::gh CLI não encontrado para download da release $versao" >&2; exit 1; }
+    [ -n "${GITHUB_REPOSITORY:-}" ] || { echo "::error::GITHUB_REPOSITORY não definido" >&2; exit 1; }
+
     tmp=$(mktemp -d)
     trap 'rm -rf "$tmp"' EXIT
-    if command -v gh >/dev/null 2>&1 && [ -n "${GITHUB_REPOSITORY:-}" ]; then
-      gh release download "$versao" --repo "$GITHUB_REPOSITORY" --dir "$tmp" || true
+    gh release download "$versao" --repo "$GITHUB_REPOSITORY" --dir "$tmp" \
+      --pattern manifesto.json --pattern manifesto.sha256 --pattern artefato.tar.gz
+
+    if [ ! -f "$tmp/manifesto.json" ] || [ ! -f "$tmp/artefato.tar.gz" ]; then
+      echo "::error::Release $versao não contém manifesto.json ou artefato.tar.gz; abortando rollback para evitar sincronização destrutiva no S3." >&2
+      exit 1
     fi
+
+    if command -v python3 >/dev/null 2>&1 && python3 -c "import bb.artifacts" >/dev/null 2>&1; then
+      python3 -m bb.artifacts verify "$tmp/manifesto.json"
+    elif [ -f "$tmp/manifesto.sha256" ] && command -v sha256sum >/dev/null 2>&1; then
+      (cd "$tmp" && sha256sum -c manifesto.sha256)
+    fi
+
     exec bash "$0" publicar "$ambiente" "$tmp"
     ;;
 

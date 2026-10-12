@@ -13,7 +13,12 @@
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
         },
         "StringLike": {
-          "token.actions.githubusercontent.com:sub": "repo:<OWNER>/<REPO>:*"
+          "token.actions.githubusercontent.com:sub": [
+            "repo:<OWNER>/<REPO>:environment:staging",
+            "repo:<OWNER>/<REPO>:environment:producao",
+            "repo:<OWNER>/<REPO>:ref:refs/heads/main",
+            "repo:<OWNER>/<REPO>:ref:refs/tags/v*"
+          ]
         }
       }
     }

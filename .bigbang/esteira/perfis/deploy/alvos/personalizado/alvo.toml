@@ -1,6 +1,6 @@
 descricao = "Scripts do projeto para publicar, migrar, checar saúde e voltar por imagem imutável"
 situacao = "implementado"
-artefatos = ["imagem"]
+artefatos = ["imagem", "pacote", "estatico"]
 operacoes = ["publicar", "migrar", "saude", "voltar"]
 variaveis = []
 segredos = []

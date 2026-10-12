@@ -29,16 +29,7 @@ jobs:
       imagem: ${{ steps.imagem.outputs.imagem }}
     runs-on: ubuntu-24.04
     steps:
-      - name: Imagem registrada na Release
-        id: imagem
-        run: |
-          imagem=$(gh release download "$VERSAO" --repo "$GITHUB_REPOSITORY" --pattern imagem.txt --output - | tr -d ' \t\r' | grep -v '^$' | paste -sd, -)
-          [[ -n "$imagem" ]] || { echo "::error::$VERSAO não registra uma imagem"; exit 1; }
-          echo "imagem=$imagem" >> "$GITHUB_OUTPUT"
-          echo "Voltaria produção para $VERSAO: $imagem (migrações não são desfeitas)."
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSAO: ${{ inputs.versao }}
+{{gerado.artifact_rollback_conferir}}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: ${{ !inputs.simular }}
         with:
