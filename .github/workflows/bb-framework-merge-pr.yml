@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v3.0.1 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-merge-pr.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v3.1.0 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-merge-pr.yml. Não edite: personalize em bigbang.toml.
 # "Merge PR" (ADR-0022): merges an approved PR whose gate is green on the exact head, into develop or a release
 # branch, never into main. Triggered by the approval labels and by the end of CI.
 name: Merge PR

@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v3.0.1 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-publish-maintenance.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v3.1.0 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-publish-maintenance.yml. Não edite: personalize em bigbang.toml.
 # Button "Publish maintenance" (v3): a maintenance/* PR into main that changes nothing of the artifact
 # (documentation, pipeline) is merged after approval and a green gate; then main returns to develop.
 name: Publish maintenance

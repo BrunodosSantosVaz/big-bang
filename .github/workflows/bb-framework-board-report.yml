@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v3.0.1 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-board-report.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v3.1.0 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-board-report.yml. Não edite: personalize em bigbang.toml.
 # Button "Board report": read only. The state of every open card and the stale claims, in the run summary.
 name: Board report
 
