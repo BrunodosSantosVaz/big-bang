@@ -3011,7 +3011,10 @@
     },
     "paineis": {
       "owner": "BrunodosSantosVaz",
-      "quadro": 31
+      "quadro": 31,
+      "planejamento": 31,
+      "execucao": 31,
+      "bugs": 31
     }
   },
   "revisao": {
