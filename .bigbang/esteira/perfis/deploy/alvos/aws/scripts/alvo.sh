@@ -87,10 +87,39 @@ case "$operacao" in
       exit 1
     fi
 
-    if command -v python3 >/dev/null 2>&1 && python3 -c "import bb.artifacts" >/dev/null 2>&1; then
-      python3 -m bb.artifacts verify "$tmp/manifesto.json"
-    elif [ -f "$tmp/manifesto.sha256" ] && command -v sha256sum >/dev/null 2>&1; then
-      (cd "$tmp" && sha256sum -c manifesto.sha256)
+    verificado=false
+    if command -v python3 >/dev/null 2>&1; then
+      if PYTHONPATH=.bigbang python3 -m bb.artifacts verify "$tmp/manifesto.json" 2>/dev/null; then
+        verificado=true
+      fi
+    fi
+
+    if [ "$verificado" != true ]; then
+      if [ ! -f "$tmp/manifesto.sha256" ] || ! command -v sha256sum >/dev/null 2>&1; then
+        echo "::error::Impossível verificar integridade: manifesto.sha256 ausente ou sha256sum não disponível." >&2
+        exit 1
+      fi
+      (cd "$tmp" && sha256sum -c manifesto.sha256) || {
+        echo "::error::Hash do manifesto.json diverge de manifesto.sha256; abortando rollback." >&2
+        exit 1
+      }
+      hash_esperado=""
+      if command -v python3 >/dev/null 2>&1; then
+        hash_esperado=$(python3 -c 'import json; print(json.load(open("'"$tmp"'/manifesto.json")).get("artefato", {}).get("sha256", ""))' 2>/dev/null || true)
+      fi
+      if [ -z "$hash_esperado" ]; then
+        hash_esperado=$(grep -o '"sha256": *"[^"]*"' "$tmp/manifesto.json" | head -n 1 | cut -d'"' -f4 || true)
+      fi
+      if [ -z "$hash_esperado" ]; then
+        echo "::error::Não foi possível extrair o hash esperado do artefato a partir do manifesto.json; abortando rollback." >&2
+        exit 1
+      fi
+      hash_atual=$(sha256sum "$tmp/artefato.tar.gz" | awk '{print $1}')
+      if [ "$hash_atual" != "$hash_esperado" ]; then
+        echo "::error::SHA-256 de artefato.tar.gz ($hash_atual) diverge do manifesto ($hash_esperado); abortando rollback." >&2
+        exit 1
+      fi
+      verificado=true
     fi
 
     exec bash "$0" publicar "$ambiente" "$tmp"

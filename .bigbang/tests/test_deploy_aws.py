@@ -266,7 +266,7 @@ class TestDeployAwsScripts(CasoDeScript):
         hash_valido = hashlib.sha256(b"conteudo original legitimo").hexdigest()
 
         manifesto = {
-            "versao": "1",
+            "versao": 1,
             "formato": "estatico",
             "artefato": {"arquivo": "artefato.tar.gz", "sha256": hash_valido, "tamanho": 26},
             "arquivos": [{"caminho": "index.html", "sha256": hash_valido, "tamanho": 26}]
@@ -307,7 +307,7 @@ class TestDeployAwsScripts(CasoDeScript):
             hash_valido = hashlib.sha256(f.read()).hexdigest()
 
         manifesto = {
-            "versao": "1",
+            "versao": 1,
             "formato": "estatico",
             "artefato": {"arquivo": "artefato.tar.gz", "sha256": hash_valido, "tamanho": 26},
             "arquivos": [{"caminho": "index.html", "sha256": hash_valido, "tamanho": 26}]
@@ -360,7 +360,7 @@ class TestDeployAwsScripts(CasoDeScript):
             tar_bytes = f.read()
         tar_sha = hashlib.sha256(tar_bytes).hexdigest()
         manifesto = {
-            "versao": "1",
+            "versao": 1,
             "formato": "estatico",
             "artefato": {"arquivo": "artefato.tar.gz", "sha256": tar_sha, "tamanho": len(tar_bytes)},
             "arquivos": [{"caminho": "index.html", "sha256": hashlib.sha256(b"<h1>Hello World</h1>").hexdigest(), "tamanho": 20}]
@@ -381,6 +381,7 @@ class TestDeployAwsScripts(CasoDeScript):
                    SAUDE_URL="http://127.0.0.1:9", SAUDE_TENTATIVAS="1", SAUDE_INTERVALO="0")
         res = subprocess.run(["bash", promover], cwd=self.projeto, capture_output=True, text=True, env=env)
         self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+        self.ler_estado()
         self.assertIn("v1.0.0", self.estado.get("releases", []))
         self.assertIn("artefato.tar.gz", self.estado.get("release_assets", {}).get("v1.0.0", []))
 

@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "b5e7754e989fe054a2c9798e50fc69457251436b",
-    "commit": "27d6d05b00f6e30054b5b7012ba8ed695bcf79a8",
+    "commit": "398525e90131975c753784088a98e99b18100f72",
     "branch": "master",
     "proposta": "bigbang/proposta-180-adaptador-aws-s3-cloudfront"
   },
@@ -615,7 +615,7 @@
         ".bigbang/bb/names.py": "sha256:48356382e32904a16420eb380b0148ba72a76015ec00703c01c7bc06196c19d0",
         ".bigbang/esteira/perfis/deploy/README.md": "sha256:d045846337a0b29ec4ae460a1760328d61a25838e6557d5acaf161200f589848",
         ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh": "sha256:a40f537a35c24df539f015eefbab6c7a3ae4c4af2a40a3a6b1707fa1144d2612",
-        ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:421edf4993240f4188eda72421e7d314dd15d2148a6ab4a4216eb28811869869",
+        ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:4300e842e3fe44ce9fd0eb592aad5bcd9e6070556a35386a2b708020ea7a3f64",
         ".bigbang/bb/generator.py": "sha256:d6b6167c189eb76eb6c3ee3e468c69b3611f2537b5ac1bcb4b7bd2a6f81cc055",
         ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl": "sha256:c2399273b0fb2a9b92a87278f330e8d819a2d137fb4004a1c95005376cfeebed",
         ".bigbang/esteira/nucleo/scripts/publicar-producao.sh": "sha256:8591a092718062d40355ba35aac65313d2047bd3fdfffe2479e9cd4b4ec9d1cd",
@@ -1802,7 +1802,7 @@
         ".bigbang/esteira/perfis/deploy/scripts/candidata-publicar.sh": "sha256:d9fd9feb88558287528203ab7cdbf6add28adad91ed6903c163ea4e5b641042e",
         ".bigbang/esteira/perfis/deploy/scripts/candidata-sbom.sh": "sha256:91bad05a969a5e4137b524ac98f109285c757ee5eed8442bae57ef526cea6ae0",
         ".bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh": "sha256:813b3574ad2e25f2960c53731bd2bc4e9e6777afc2805e72f2e4c154a47be7d4",
-        ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:421edf4993240f4188eda72421e7d314dd15d2148a6ab4a4216eb28811869869",
+        ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:4300e842e3fe44ce9fd0eb592aad5bcd9e6070556a35386a2b708020ea7a3f64",
         ".bigbang/esteira/perfis/deploy/scripts/staging.sh": "sha256:991ea42cb25fcd0bcabeb46f08260964e9b042ff9e9571aeefa810936fc015d2",
         ".bigbang/esteira/perfis/deploy/scripts/trivy.sh": "sha256:ca28f9fe415d8475933b7ba2b9d4a49877d603ad284e731672bbd9951bbe6eb2"
       },
@@ -2978,13 +2978,16 @@
         ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_issue_template_relato_teste",
         ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_readme_contem_aviso_beta_e_link_issue_316",
         ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_geracao_workflow_com_oidc_e_sem_docker",
-        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_aviso_beta_na_saida_do_comando"
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_aviso_beta_na_saida_do_comando",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_rollback_rejeita_pacote_corrompido",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_rollback_rejeita_pacote_corrompido_no_fallback",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_promocao_estatica_sem_imagem"
       ],
       "hashes": {
-        ".bigbang/esteira/perfis/deploy/alvos/aws/scripts/alvo.sh": "sha256:77593145e9b72affe50bb3b3bc88e2ba3f92765ed14b551ed80028d67a365117",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/scripts/alvo.sh": "sha256:75a90c7e791365aab741361e117aa06fdba81eddb2d60cb2bee676af230e4474",
         ".bigbang/esteira/perfis/deploy/alvos/aws/alvo.toml": "sha256:5054ffe2eac37347be7ed04142a5a004663fefd8e2c18c4b31afb82359d615a0",
         ".bigbang/esteira/perfis/deploy/alvos/aws/modelos/iam-policy.json": "sha256:7ae057965b5c6cc3df247a27c15de211ddb432a7552ade2c902e41d152988c0a",
-        ".bigbang/esteira/perfis/deploy/alvos/aws/modelos/trust-policy.json": "sha256:e01b05e6db1272202f56f14536d0cb817c9823132ce3acc0c9c11dc18740be9d",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/modelos/trust-policy.json": "sha256:f30ae25af71f6f68b1813203ceef2d1a65b9229b1d8065b6b0e51b17c2703b52",
         ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-candidata.yml.tmpl": "sha256:19814ab2879baf081874a412d7d6b90dd916667b4991529ae6472ea006e9d45c",
         ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl": "sha256:7a5e53a2128955aed74d5fdc586b2252a46ef9c56a6b4350fccf2ae521b697bd",
         ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "sha256:86fc71c3edefb7202d62e73aa965ed78848e105c2ae283261b8ac3c977fd348f",
