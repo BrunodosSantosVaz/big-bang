@@ -126,12 +126,12 @@ class CatalogoDeploy(unittest.TestCase):
         self.assertEqual(code, EXIT_INVALID_CONFIG)
         self.assertIn('promover.sh', err)
 
-    def test_formato_por_hashes_nao_e_entregue_pela_esteira_de_imagens(self):
+    def test_identidade_sha256_nao_pode_ser_configurada_para_imagem(self):
         path = self.artifacts / 'imagem/artefato.toml'
         path.write_text(path.read_text().replace('identidade = "digest"', 'identidade = "sha256"'))
         code, _, err = self.command('gerar', '--esteira')
         self.assertEqual(code, EXIT_INVALID_CONFIG)
-        self.assertIn('entrega por hashes', err)
+        self.assertIn('identidade incompatível', err)
 
     def test_verificar_detecta_contrato_invalido_no_template(self):
         (self.root / 'bigbang.toml').unlink()

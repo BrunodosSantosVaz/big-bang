@@ -198,8 +198,9 @@ def resolve(root, config):
     artifact = read_artifact(root, config['deploy'].get('artefato', 'imagem'))
     if artifact.state != 'implementado':
         _fail(f"deploy.artefato: '{artifact.name}' é reservado, sem implementação; consulte bb alvos")
-    if artifact.identity != 'digest':
-        _fail(f"deploy.artefato: '{artifact.name}' exige entrega por hashes, ainda não implementada no perfil deploy")
+    if (artifact.identity == 'digest' and artifact.name != 'imagem') or \
+            (artifact.identity == 'sha256' and artifact.name not in ('pacote', 'estatico')):
+        _fail(f"deploy.artefato: identidade incompatível com o formato '{artifact.name}'")
     if artifact.name not in target.artifacts:
         _fail(f"entrega.alvo: '{target.name}' não aceita o artefato '{artifact.name}'")
     return target, artifact

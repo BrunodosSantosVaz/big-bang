@@ -1,0 +1,50 @@
+name: "AWS (beta): Relato de teste e melhorias"
+description: "Relate testes reais, sucessos ou problemas com o adaptador AWS S3 + CloudFront (beta)"
+title: "[AWS Beta] Relato de teste: "
+labels: ["beta", "deploy"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Este relato contribui para a validação do adaptador AWS S3 + CloudFront (Beta).
+        Veja e acompanhe a issue principal de validação: [#316 (AWS (beta): relatos de teste e melhorias do alvo S3 + CloudFront)](https://github.com/BrunodosSantosVaz/big-bang/issues/316).
+        
+        **ATENÇÃO: NUNCA inclua segredos, credenciais AWS, chaves de acesso ou tokens em seu relato.**
+  - type: input
+    attributes:
+      label: Versão do Big Bang
+      description: Versão do Big Bang utilizada (ex.: v3.0.1)
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Região AWS
+      description: Região AWS testada (ex.: us-east-1, sa-east-1)
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Resultado do teste
+      options:
+        - "Sucesso total (publicação e invalidação funcionaram)"
+        - "Sucesso parcial (com ressalvas ou ajustes necessários)"
+        - "Falha na autenticação OIDC"
+        - "Falha na publicação S3"
+        - "Falha na invalidação CloudFront"
+        - "Outro problema"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Detalhes do teste
+      description: Descreva como o teste foi executado e o comportamento observado.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Trecho de log ou workflow (sem segredos)
+      description: Cole trechos relevantes do workflow ou logs, certificando-se de remover IDs de conta sensíveis ou dados confidenciais.
+  - type: textarea
+    attributes:
+      label: Sugestões de melhoria
+      description: Sugestões de melhorias para a política IAM, workflow ou script do alvo.

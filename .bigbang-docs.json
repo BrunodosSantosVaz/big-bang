@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "b5e7754e989fe054a2c9798e50fc69457251436b",
-    "commit": "3bc38bc4180ee859bb929e251dbf946046b803b4",
+    "commit": "36e00596007a01e3323337448ef94d696cd004ba",
     "branch": "master",
-    "proposta": "bigbang/proposta-319-single-board"
+    "proposta": "bigbang/proposta-180-adaptador-aws-s3-cloudfront"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -44,7 +44,9 @@
     ".bigbang/docs/decisoes/ADR-0024-identificadores-em-ingles.md": "ADR-0024-identificadores-em-ingles",
     ".bigbang/docs/decisoes/ADR-0025-modos-e-autonomia.md": "ADR-0025-modos-e-autonomia",
     ".bigbang/docs/decisoes/ADR-0026-orquestracao-em-python.md": "ADR-0026-orquestracao-em-python",
-    "Funcionalidade-framework-pipeline": "Funcionalidade-framework-pipeline"
+    "Funcionalidade-framework-pipeline": "Funcionalidade-framework-pipeline",
+    "Deploy-pacotes": "Deploy-pacotes",
+    "Funcionalidade-aws": "Funcionalidade-aws"
   },
   "categorias": {
     "produto": {
@@ -252,10 +254,16 @@
     },
     "RF-BB-057": {
       "pagina": "Requisitos"
+    },
+    "RF-BB-058": {
+      "pagina": "Requisitos"
+    },
+    "RF-BB-059": {
+      "pagina": "Requisitos"
     }
   },
   "codigo": {
-    "commit": "21eebbb0dab96eaee455ec4a6e291384dc1e81c5",
+    "commit": "371a61ae5c993f6ba3fde76e77f91e64f0bf9c42",
     "versao": "3.0.1",
     "raizes": [
       ".bigbang/",
@@ -394,7 +402,7 @@
         ".bigbang/tests/test_names_config.py:test_pipeline_subcommands_by_either_name"
       ],
       "hashes": {
-        ".bigbang/bb/cli.py": "sha256:348e3f797eeedf2343c6f8139796a5f87f48c74b973a9c59602f0f115c897cbf",
+        ".bigbang/bb/cli.py": "sha256:0e7af17297d2fc8ab6135d02b0fad27c3b571c65c7306996f165edd18d58618b",
         ".bigbang/bb/__init__.py": "sha256:9eafc1c524def17452aeb77d49ee0aca1a8c40c7e69d52c3c6dba384e78732eb",
         ".bigbang/bin/bb.py": "sha256:af864bf4452b5aad7c6e90ba6ed7f81cf9cb2fbb8c60f2a5e7e5e4e17372abb4",
         ".bigbang/bin/bb": "sha256:04bf9a43393503416a9307e7272d697afcd9327a0a5b388a451873a70c45e112"
@@ -578,7 +586,6 @@
         ".bigbang/tests/test_deploy_catalog.py:test_artefato_reservado_ou_desconhecido_e_recusado",
         ".bigbang/tests/test_deploy_catalog.py:test_capacidade_incompativel_e_recusada",
         ".bigbang/tests/test_deploy_catalog.py:test_artefato_sem_script_de_promocao_e_recusado",
-        ".bigbang/tests/test_deploy_catalog.py:test_formato_por_hashes_nao_e_entregue_pela_esteira_de_imagens",
         ".bigbang/tests/test_deploy_catalog.py:test_verificar_detecta_contrato_invalido_no_template",
         ".bigbang/tests/test_deploy_catalog.py:test_contrato_invalido_e_recusado",
         ".bigbang/tests/test_deploy_catalog.py:test_nao_le_script_por_link_fora_do_adaptador",
@@ -590,29 +597,31 @@
         ".bigbang/tests/test_deploy_catalog.py:test_esquema_recusa_injecao_em_seletores",
         ".bigbang/tests/test_deploy_custom.py:test_production_custom_scripts_run_outside_tokenized_steps",
         ".bigbang/tests/test_deploy_custom.py:test_personalized_secret_variables_are_rejected",
-        ".bigbang/tests/test_deploy_custom.py:test_custom_publish_script_cannot_read_a_tokenized_step_ancestor"
+        ".bigbang/tests/test_deploy_custom.py:test_custom_publish_script_cannot_read_a_tokenized_step_ancestor",
+        ".bigbang/tests/test_deploy_catalog.py:test_identidade_sha256_nao_pode_ser_configurada_para_imagem",
+        ".bigbang/tests/test_deploy_artifacts.py:test_catalog_and_workflows_enable_package_and_static_for_custom_target"
       ],
       "hashes": {
-        ".bigbang/bb/deploy_catalog.py": "sha256:dff2419bbba7e269537e709b3aa27618fbd0c11a21684ca778a0788cbd8c2f57",
-        ".bigbang/esteira/perfis/deploy/artefatos/estatico/artefato.toml": "sha256:794471f2556475c697f1b81b50578edd97610533d832606240e6ba20c45ac562",
+        ".bigbang/bb/deploy_catalog.py": "sha256:052ea649226c212a6e6dffdfc30a122ffc0a9ef0887fd643a0fb11e6312fa759",
+        ".bigbang/esteira/perfis/deploy/artefatos/estatico/artefato.toml": "sha256:5e8638f061697269f04614d4d8834d38b91002f00ccbc6e91d2c8c8237fae7ad",
         ".bigbang/esteira/perfis/deploy/artefatos/imagem/artefato.toml": "sha256:096ab8840b14d81c49bec85482cda461949113779613213c1936612a988ad095",
-        ".bigbang/esteira/perfis/deploy/artefatos/pacote/artefato.toml": "sha256:3cbfec3db58a9cd3e9338db6e97bb627a7bacb2dabeb4c958d131827f5721aab",
-        ".bigbang/esteira/perfis/deploy/alvos/aws/alvo.toml": "sha256:b494b7c5d33e1434d9eff9288cb1261efcc1fb8601f352d409263a3f9b314f8a",
+        ".bigbang/esteira/perfis/deploy/artefatos/pacote/artefato.toml": "sha256:0b34efb9f039a02d51e73e4c091e95bc55f5e9791c7fbafba3108540e499bae6",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/alvo.toml": "sha256:5054ffe2eac37347be7ed04142a5a004663fefd8e2c18c4b31afb82359d615a0",
         ".bigbang/esteira/perfis/deploy/alvos/paas/alvo.toml": "sha256:93f8e059f9ef5fce60c5f659724df326993380b06f53dd3dcc8c9daabedfaa6d",
-        ".bigbang/esteira/perfis/deploy/alvos/personalizado/alvo.toml": "sha256:e3b4dd42a82a951bc1b3ac90c9fd83d17abdf06ac72902ee04d505d79996600f",
+        ".bigbang/esteira/perfis/deploy/alvos/personalizado/alvo.toml": "sha256:7dd61e72570d03814020fcd069e5b8a85d83d174b97bb356ad5dc50224c68538",
         ".bigbang/esteira/perfis/deploy/alvos/tsuru/alvo.toml": "sha256:ecc8f97463f4fe5b9b6cbff63419c1fb6f5152709b2f53a280ef22c825e59273",
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/alvo.toml": "sha256:95d1cbda6f0dd85c0f0953a2b409b23b49862ead7c5734f71227698fb7237279",
         ".bigbang/bb/config.py": "sha256:6e1be8259367d86f80c18dcbe19bf78cae3bee9093dd48c8322e202ff5549d18",
         ".bigbang/bb/names.py": "sha256:48356382e32904a16420eb380b0148ba72a76015ec00703c01c7bc06196c19d0",
-        ".bigbang/esteira/perfis/deploy/README.md": "sha256:825b0d4a861ae63553602b743eee3fe7b88f415558a381a0e97234afc668a490",
-        ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh": "sha256:deca063a270909d6c35fb88abad7f3c9a32e428c91e1970b61276e8488c01646",
-        ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:421edf4993240f4188eda72421e7d314dd15d2148a6ab4a4216eb28811869869",
-        ".bigbang/bb/generator.py": "sha256:76b271e51e4a89922bb21e384b76dc8ea18abdb2d2c0fa4a3ce79d2b15d23793",
+        ".bigbang/esteira/perfis/deploy/README.md": "sha256:d045846337a0b29ec4ae460a1760328d61a25838e6557d5acaf161200f589848",
+        ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh": "sha256:a40f537a35c24df539f015eefbab6c7a3ae4c4af2a40a3a6b1707fa1144d2612",
+        ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:4300e842e3fe44ce9fd0eb592aad5bcd9e6070556a35386a2b708020ea7a3f64",
+        ".bigbang/bb/generator.py": "sha256:d6b6167c189eb76eb6c3ee3e468c69b3611f2537b5ac1bcb4b7bd2a6f81cc055",
         ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl": "sha256:c2399273b0fb2a9b92a87278f330e8d819a2d137fb4004a1c95005376cfeebed",
-        ".bigbang/esteira/nucleo/scripts/publicar-producao.sh": "sha256:874a1eae83914d78116a178808e1f146c140738a25d1f3c450a5466b1426e20a",
-        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "sha256:025ee7ed42363185fb2d16b5a8dec593b56bb39e885f5d0eb3f8f19f6f01a21c",
-        ".bigbang/esteira/perfis/deploy/scripts/publicar-personalizado.sh": "sha256:3cb921aee2b69d2cf98dea62ff87d558459d5f2125f0bf09245045469b9ba945",
-        ".bigbang/esteira/perfis/deploy/scripts/finalizar-publicacao.sh": "sha256:5a0f1ceecb057767b4c8c8988d191ee0cc5824eedffca0fa70f029da6cd71169",
+        ".bigbang/esteira/nucleo/scripts/publicar-producao.sh": "sha256:8591a092718062d40355ba35aac65313d2047bd3fdfffe2479e9cd4b4ec9d1cd",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "sha256:1708c585432d766cd02bdbb0f2ad30b4246ef92509b28345293b792525e4a8b7",
+        ".bigbang/esteira/perfis/deploy/scripts/publicar-personalizado.sh": "sha256:47e3238064568be91b848e0f275e41c76ce372d6538d3ee8cccf3cf86591db40",
+        ".bigbang/esteira/perfis/deploy/scripts/finalizar-publicacao.sh": "sha256:fd47cc1d94bc9a53ae50bd59b16a52b78d8609bb2f58a31d2fba2f253e7e35fa",
         ".bigbang/MIGRACAO.md": "sha256:1e000be6a33005ae94682a9eed869f40f5b5a9143905a02cf9aaab8a289941a8",
         ".bigbang/processo/14-automacoes.md": "sha256:6e9e080532e3999529d7f427e2076c8033b17722fe5b2b0978b51aa1305752a8"
       },
@@ -684,8 +693,7 @@
         ".bigbang/tests/test_wiki.py:test_documentation_commit_works_without_git_identity"
       ],
       "hashes": {
-        ".bigbang/bb/documentation.py": "sha256:aee1e8d4658b76c678db6c28824a0f49c37c0e114a760addab4e14899aab7c6b",
-        ".github/workflows/bb-framework-cut-release.yml": "sha256:22ac7ef5b19134d880a3596a7c6599741a21484499e7a6531888d09f1cf9cc46"
+        ".bigbang/bb/documentation.py": "sha256:aee1e8d4658b76c678db6c28824a0f49c37c0e114a760addab4e14899aab7c6b"
       },
       "descricao": "Resolver identificadores documentais conforme a visibilidade e publicar somente o snapshot revisado sem perder alterações concorrentes."
     },
@@ -797,7 +805,7 @@
         ".bigbang/tests/test_grouping_v3.py:test_v3_tree_is_generated_and_verified"
       ],
       "hashes": {
-        ".bigbang/bb/generator.py": "sha256:76b271e51e4a89922bb21e384b76dc8ea18abdb2d2c0fa4a3ce79d2b15d23793"
+        ".bigbang/bb/generator.py": "sha256:d6b6167c189eb76eb6c3ee3e468c69b3611f2537b5ac1bcb4b7bd2a6f81cc055"
       },
       "descricao": "Gerar instruções e Actions a partir da configuração, preservando a camada do projeto e removendo saídas obsoletas."
     },
@@ -1560,7 +1568,7 @@
         ".bigbang/tests/test_flash_scripts.py:test_completed_release_can_resume_without_deleted_release_branch"
       ],
       "hashes": {
-        ".bigbang/esteira/nucleo/scripts/comando.sh": "sha256:793695df1d80a4cf27d4f725ad711c260618088b8b1d7e887a5e2e2507ce281c",
+        ".bigbang/esteira/nucleo/scripts/comando.sh": "sha256:432cdbdfd6a0e9e574e1e0bfe7c3b680473d340eda13a4d7cd3ca23a1c4d6437",
         ".bigbang/esteira/nucleo/scripts/testes.sh": "sha256:b4433371062a53965bd55a7a705dc5ee9f8a628bc52dbf9f5141a09e6a7f4d45",
         ".bigbang/esteira/nucleo/scripts/testes-candidata.sh": "sha256:84428668e22f7b1375c55e0e5ecbd0730602327133d45d781c7567b1e8eb7eba",
         ".bigbang/esteira/nucleo/scripts/testes-producao.sh": "sha256:ad3f1d39a848ee5d9c1e51e8574d907ea07a5e7e14c765f94e2ca44c2ea42ea6"
@@ -1712,7 +1720,7 @@
         ".bigbang/tests/test_publicar_producao.py:test_recusa_epico_nao_reprovado"
       ],
       "hashes": {
-        ".bigbang/esteira/nucleo/scripts/publicar-producao.sh": "sha256:874a1eae83914d78116a178808e1f146c140738a25d1f3c450a5466b1426e20a",
+        ".bigbang/esteira/nucleo/scripts/publicar-producao.sh": "sha256:8591a092718062d40355ba35aac65313d2047bd3fdfffe2479e9cd4b4ec9d1cd",
         ".bigbang/esteira/nucleo/scripts/publicar-sem-release.sh": "sha256:7d6fd3c11df4db708bf2f3c031a046f64838a3abef0659c0fcca4f5e17d2b74f",
         ".bigbang/esteira/nucleo/scripts/devolver-main.sh": "sha256:4131c6fa6fabca68495e238a8d54775841c6782cba48b956af08cf7ddc54e625",
         ".bigbang/esteira/nucleo/scripts/link-aprovacao.sh": "sha256:bf1303005e3cfed1139355d46e55c1d0c6d5436c045e5845df7a9a33acbbe880"
@@ -1791,11 +1799,11 @@
       ],
       "hashes": {
         ".bigbang/esteira/perfis/deploy/scripts/candidata-imagem.sh": "sha256:a869e5ffa9b60b2047a98478452191be2934f5c0c5d871a077dde5553e490cfe",
-        ".bigbang/esteira/perfis/deploy/scripts/candidata-publicar.sh": "sha256:134d3f1ab09ffc9482913d3ce2e0db2265e7ca7da2affa482b8259e4091f7cad",
+        ".bigbang/esteira/perfis/deploy/scripts/candidata-publicar.sh": "sha256:d9fd9feb88558287528203ab7cdbf6add28adad91ed6903c163ea4e5b641042e",
         ".bigbang/esteira/perfis/deploy/scripts/candidata-sbom.sh": "sha256:91bad05a969a5e4137b524ac98f109285c757ee5eed8442bae57ef526cea6ae0",
         ".bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh": "sha256:813b3574ad2e25f2960c53731bd2bc4e9e6777afc2805e72f2e4c154a47be7d4",
-        ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:421edf4993240f4188eda72421e7d314dd15d2148a6ab4a4216eb28811869869",
-        ".bigbang/esteira/perfis/deploy/scripts/staging.sh": "sha256:dc9ad69036e27b53cb86ecf00b9eeca131436a97f60b26835ef9506359b6c75e",
+        ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:4300e842e3fe44ce9fd0eb592aad5bcd9e6070556a35386a2b708020ea7a3f64",
+        ".bigbang/esteira/perfis/deploy/scripts/staging.sh": "sha256:991ea42cb25fcd0bcabeb46f08260964e9b042ff9e9571aeefa810936fc015d2",
         ".bigbang/esteira/perfis/deploy/scripts/trivy.sh": "sha256:ca28f9fe415d8475933b7ba2b9d4a49877d603ad284e731672bbd9951bbe6eb2"
       },
       "descricao": "Construir imagens por plataforma e entregar exatamente os digests homologados, com SBOM e scanners."
@@ -1968,8 +1976,8 @@
         ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-seguranca.yml": "sha256:ab00b640465dc092612b1529e875a9200ef5719372bc21b13f9b61743eab5a02",
         ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-tarefa-de-correcao.yml": "sha256:8b61c73349cbc13d8be55f90e2ccb73e2bbd265d661eaf57a6d75a7af35c74b5",
         ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-ver-paineis.yml": "sha256:eb6faaea3867d3b7aa36c26bc04f678aeccfd32e09cc7210a74098fa1b45ce7c",
-        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl": "sha256:3698792c7ce206352747c6d065f5b86bda10bb4099d2e73e99118386a920ccb7",
-        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "sha256:025ee7ed42363185fb2d16b5a8dec593b56bb39e885f5d0eb3f8f19f6f01a21c",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl": "sha256:d706a75e5a5c21563ed4dcf4434aeee89d55a5032dbed03c58031056b504fae4",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "sha256:1708c585432d766cd02bdbb0f2ad30b4246ef92509b28345293b792525e4a8b7",
         ".bigbang/esteira/perfis/compilado/arquivos/.github/workflows/bb-candidata.yml.tmpl": "sha256:b39b1e75fc9cceea0ece94f584fca49761f71a7d2e525a27d71d072b64cecd7e",
         ".bigbang/esteira/nucleo/arquivos/.github/dependabot.yml.tmpl": "sha256:34ab41c900e502b5e964c35d01fb97ca64f29b11c4c3c29e2bff3a6d718f2470",
         ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl": "sha256:c2399273b0fb2a9b92a87278f330e8d819a2d137fb4004a1c95005376cfeebed"
@@ -2178,8 +2186,8 @@
         ".bigbang/esteira/sempre/arquivos/.claude/agents/bb-pesquisador.md": "sha256:2e7e58aadf1f41cf66b932d7c3ecfd01f4c6867b7e7dbb744122951d0ec2ea95",
         ".bigbang/esteira/sempre/arquivos/.claude/agents/bb-revisor-pr.md": "sha256:4ad53a97e8b6a498f00c82fd14261d58cee90daa454f6e9edef03461bb210f36",
         ".bigbang/esteira/perfis/compilado/README.md": "sha256:7bd7e77fdb33687200a12bb5f5ed24d3f02f7334a2cbbe6382e8420d57921da8",
-        ".bigbang/esteira/perfis/deploy/README.md": "sha256:825b0d4a861ae63553602b743eee3fe7b88f415558a381a0e97234afc668a490",
-        ".bigbang/esteira/perfis/deploy/alvos/aws/README.md": "sha256:73a1db0c5cac7cb1ed371961042d7b1c9c51d6c399ed12bef3723d9c42c1cf52",
+        ".bigbang/esteira/perfis/deploy/README.md": "sha256:d045846337a0b29ec4ae460a1760328d61a25838e6557d5acaf161200f589848",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/README.md": "sha256:38d74ba65c1caccd1d4dcb211553ee3c86c5b243c6cd459b914ca3969be60bdc",
         ".bigbang/esteira/perfis/deploy/alvos/paas/README.md": "sha256:d8b52c4956fab996c303edcfbda6e162874b8311a23def757877de0aa272ad20",
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md": "sha256:bb04007d9e8e6977492685e35299a7801fdbd87b5fbeb4d5f78132d2cfc57411",
         ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md": "sha256:48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
@@ -2559,8 +2567,7 @@
         ".bigbang/pipeline/core/files/.github/workflows/bb-start-sprint.yml": "sha256:def03451f99bcc7fb1f52717ccd30d433371dcbe616fbf379a03cb3f22c0596c",
         ".bigbang/pipeline/profiles/compiled/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:c2bc95e8acc3da40b9a4da54f3281b8abd4bb5870ecb30ef69677d27d99a64c9",
         ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:d9e006c860077ec0d4e0b4e1c40b0f482faac452f7b9da639f1300fc1e1e5ed8",
-        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-rollback.yml.tmpl": "sha256:14a3c57fc67e866a2141c65310cf565462dfe81736b4d585cdd28787fff11698",
-        ".github/workflows/bb-framework-cut-release.yml": "sha256:22ac7ef5b19134d880a3596a7c6599741a21484499e7a6531888d09f1cf9cc46"
+        ".bigbang/pipeline/profiles/deploy/files/.github/workflows/bb-rollback.yml.tmpl": "sha256:14a3c57fc67e866a2141c65310cf565462dfe81736b4d585cdd28787fff11698"
       },
       "descricao": "Árvore .bigbang/pipeline: workflows v3 com gate único, controlador, botões, formulários, instruções e perfis."
     },
@@ -2883,6 +2890,111 @@
         ".bigbang/bb/gh.py": "sha256:7509ffc1fe4bf4abc00b5ef6edbfaec144780673b0d2b05d82b411d1b672ef06"
       },
       "descricao": "Migração guiada opcional com ordem segura, consentimento explícito de escrita no GitHub e preservação do legado."
+    },
+    {
+      "id": "BB-F-058",
+      "requisitos": [
+        "RF-BB-058"
+      ],
+      "pagina": "Deploy-pacotes",
+      "fontes": [
+        ".bigbang/bb/artifacts.py",
+        ".bigbang/bb/deploy_catalog.py",
+        ".bigbang/bb/generator.py",
+        ".bigbang/esteira/nucleo/scripts/publicar-producao.sh",
+        ".bigbang/esteira/perfis/deploy/alvos/personalizado/alvo.toml",
+        ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl",
+        ".bigbang/esteira/perfis/deploy/artefatos/estatico/artefato.toml",
+        ".bigbang/esteira/perfis/deploy/artefatos/pacote/artefato.toml",
+        ".bigbang/esteira/perfis/deploy/scripts/candidata-arquivos.sh",
+        ".bigbang/esteira/perfis/deploy/scripts/candidata-publicar.sh",
+        ".bigbang/esteira/perfis/deploy/scripts/finalizar-publicacao.sh",
+        ".bigbang/esteira/perfis/deploy/scripts/publicar-personalizado.sh",
+        ".bigbang/esteira/perfis/deploy/scripts/staging.sh",
+        ".bigbang/tests/test_deploy_artifacts.py",
+        ".bigbang/tests/test_deploy_catalog.py",
+        ".bigbang/esteira/nucleo/scripts/comando.sh"
+      ],
+      "testes": [
+        ".bigbang/tests/test_deploy_artifacts.py:test_package_manifest_pins_payload_and_source_file_by_sha256",
+        ".bigbang/tests/test_deploy_artifacts.py:test_static_manifest_contains_all_files_in_deterministic_order",
+        ".bigbang/tests/test_deploy_artifacts.py:test_manifest_and_archive_tampering_are_rejected",
+        ".bigbang/tests/test_deploy_artifacts.py:test_unsafe_paths_and_symlinks_are_rejected",
+        ".bigbang/tests/test_deploy_artifacts.py:test_manifest_and_archive_path_traversal_are_rejected",
+        ".bigbang/tests/test_deploy_artifacts.py:test_custom_target_verifies_and_passes_package_manifest_without_secrets",
+        ".bigbang/tests/test_deploy_artifacts.py:test_candidate_build_runs_project_command_without_any_secret_environment",
+        ".bigbang/tests/test_deploy_artifacts.py:test_staging_refuses_manifest_that_differs_from_candidate_identity",
+        ".bigbang/tests/test_deploy_artifacts.py:test_catalog_and_workflows_enable_package_and_static_for_custom_target",
+        ".bigbang/tests/test_deploy_catalog.py:test_identidade_sha256_nao_pode_ser_configurada_para_imagem",
+        ".bigbang/tests/test_deploy_artifacts.py:test_hashed_format_build_command_can_create_its_selected_output"
+      ],
+      "hashes": {
+        ".bigbang/bb/artifacts.py": "sha256:cca20617aade64627233cf346055e61f9a6d5393a8beceb1a70808e267ba23c7",
+        ".bigbang/bb/deploy_catalog.py": "sha256:052ea649226c212a6e6dffdfc30a122ffc0a9ef0887fd643a0fb11e6312fa759",
+        ".bigbang/bb/generator.py": "sha256:d6b6167c189eb76eb6c3ee3e468c69b3611f2537b5ac1bcb4b7bd2a6f81cc055",
+        ".bigbang/esteira/nucleo/scripts/publicar-producao.sh": "sha256:8591a092718062d40355ba35aac65313d2047bd3fdfffe2479e9cd4b4ec9d1cd",
+        ".bigbang/esteira/perfis/deploy/alvos/personalizado/alvo.toml": "sha256:7dd61e72570d03814020fcd069e5b8a85d83d174b97bb356ad5dc50224c68538",
+        ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh": "sha256:a40f537a35c24df539f015eefbab6c7a3ae4c4af2a40a3a6b1707fa1144d2612",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-candidata.yml.tmpl": "sha256:d706a75e5a5c21563ed4dcf4434aeee89d55a5032dbed03c58031056b504fae4",
+        ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "sha256:1708c585432d766cd02bdbb0f2ad30b4246ef92509b28345293b792525e4a8b7",
+        ".bigbang/esteira/perfis/deploy/artefatos/estatico/artefato.toml": "sha256:5e8638f061697269f04614d4d8834d38b91002f00ccbc6e91d2c8c8237fae7ad",
+        ".bigbang/esteira/perfis/deploy/artefatos/pacote/artefato.toml": "sha256:0b34efb9f039a02d51e73e4c091e95bc55f5e9791c7fbafba3108540e499bae6",
+        ".bigbang/esteira/perfis/deploy/scripts/candidata-arquivos.sh": "sha256:c0c6eb4e01e67154cb09ffb0d92c28e9d6723594ddf54fb6a3896150fe44b38f",
+        ".bigbang/esteira/perfis/deploy/scripts/candidata-publicar.sh": "sha256:d9fd9feb88558287528203ab7cdbf6add28adad91ed6903c163ea4e5b641042e",
+        ".bigbang/esteira/perfis/deploy/scripts/finalizar-publicacao.sh": "sha256:fd47cc1d94bc9a53ae50bd59b16a52b78d8609bb2f58a31d2fba2f253e7e35fa",
+        ".bigbang/esteira/perfis/deploy/scripts/publicar-personalizado.sh": "sha256:47e3238064568be91b848e0f275e41c76ce372d6538d3ee8cccf3cf86591db40",
+        ".bigbang/esteira/perfis/deploy/scripts/staging.sh": "sha256:991ea42cb25fcd0bcabeb46f08260964e9b042ff9e9571aeefa810936fc015d2",
+        ".bigbang/tests/test_deploy_artifacts.py": "sha256:1ce978d861a8ca78f2ad6609e991ad7f90071cfd3fd44d2f584dffc202c248ac",
+        ".bigbang/tests/test_deploy_catalog.py": "sha256:d04bbb0fedde126d0de0a23468d47c10f6f28f19dd226d814cfc08c13b3640d1",
+        ".bigbang/esteira/nucleo/scripts/comando.sh": "sha256:432cdbdfd6a0e9e574e1e0bfe7c3b680473d340eda13a4d7cd3ca23a1c4d6437"
+      },
+      "descricao": "Construir e promover pacotes e arquivos estáticos por manifesto imutável SHA-256, sem rebuild entre ambientes e sem expor segredos a scripts do projeto."
+    },
+    {
+      "id": "BB-F-059",
+      "requisitos": [
+        "RF-BB-059"
+      ],
+      "pagina": "Funcionalidade-aws",
+      "fontes": [
+        ".bigbang/esteira/perfis/deploy/alvos/aws/scripts/alvo.sh",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/alvo.toml",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/modelos/iam-policy.json",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/modelos/trust-policy.json",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-candidata.yml.tmpl",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/ISSUE_TEMPLATE/bb-aws-beta-relato.yml"
+      ],
+      "testes": [
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_contrato_implementado",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_iam_policy_template_minima_sem_curingas",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_trust_policy_restrito_a_ambientes_e_refs_protegidas",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_script_operacoes_e_aviso_beta",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_publicar_rejeita_pasta_vazia_para_proteger_s3",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_rollback_aborta_em_falha_de_download_para_proteger_s3",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_issue_template_relato_teste",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_readme_contem_aviso_beta_e_link_issue_316",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_geracao_workflow_com_oidc_e_sem_docker",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_aviso_beta_na_saida_do_comando",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_rollback_rejeita_pacote_corrompido",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_rollback_rejeita_pacote_corrompido_no_fallback",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_rollback_sucesso_com_pacote_integro_no_fallback",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_promocao_estatica_sem_imagem"
+      ],
+      "hashes": {
+        ".bigbang/esteira/perfis/deploy/alvos/aws/scripts/alvo.sh": "sha256:d17e70dbc62778a73d34dbd5e4b71841f7d404a647c8e6981db76081990e02c3",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/alvo.toml": "sha256:5054ffe2eac37347be7ed04142a5a004663fefd8e2c18c4b31afb82359d615a0",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/modelos/iam-policy.json": "sha256:4685b229817ebb3f93dfd8caf6e05e13341c6ed8448470c051d28bd449337883",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/modelos/trust-policy.json": "sha256:9f0c250d6b01cad284ad8d6dca3f89e451d024fd2fc5e6e7a5f61c1931e85db0",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-candidata.yml.tmpl": "sha256:19814ab2879baf081874a412d7d6b90dd916667b4991529ae6472ea006e9d45c",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl": "sha256:7a5e53a2128955aed74d5fdc586b2252a46ef9c56a6b4350fccf2ae521b697bd",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "sha256:86fc71c3edefb7202d62e73aa965ed78848e105c2ae283261b8ac3c977fd348f",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/ISSUE_TEMPLATE/bb-aws-beta-relato.yml": "sha256:a6d951f546815fe4153577dfc1d7eb77ac03d771dd9af79fc71737536aaa61ff"
+      },
+      "descricao": "Entregar sites estáticos no AWS S3 e CloudFront via autenticação OIDC e permissões mínimas em estágio Beta."
     }
   ],
   "arquivos_funcionais": [

@@ -16,6 +16,13 @@ existe=""
 while IFS= read -r caminho; do
   [ -n "$caminho" ] && [ -e "${caminho%/}" ] && { existe="$caminho"; break; }
 done < <("${BB_CMD[@]}" config get entrega.caminhos_artefato)
+if [ "$chave" = build ] && [ "$("${BB_CMD[@]}" config get entrega.perfil)" = deploy ]; then
+  formato=$("${BB_CMD[@]}" config get deploy.artefato)
+  if [ "$formato" = pacote ] || [ "$formato" = estatico ]; then
+    # These artifacts may be created by the build itself, so their selected output need not exist yet.
+    existe=gerado-pelo-build
+  fi
+fi
 if [ -z "$existe" ]; then
   echo "::notice::nenhum caminho do artefato (entrega.caminhos_artefato) existe ainda: comandos.$chave pulado; o código chega pelo épico Esqueleto andante."
   exit 0

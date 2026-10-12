@@ -10,9 +10,19 @@ ZAP_IMAGEM="ghcr.io/zaproxy/zaproxy@sha256:781a2bdaea47324e7bab583e2263f21d257b0
 imagem="${IMAGEM:?}"
 alvo=".bigbang/esteira/perfis/deploy/alvos/$("${BB_CMD[@]}" config get entrega.alvo)/scripts/alvo.sh"
 url=$("${BB_CMD[@]}" config get deploy.url_staging)
+formato=$("${BB_CMD[@]}" config get deploy.artefato)
 
-bash "$alvo" migrar staging "$imagem"
-bash "$alvo" publicar staging "$imagem"
+if [[ "$formato" == imagem ]]; then
+  manifesto="$imagem"
+else
+  manifesto="candidata/manifesto.json"
+  PYTHONPATH=.bigbang python3 -m bb.artifacts verify "$manifesto"
+  manifesto_sha=$(sha256sum "$manifesto" | cut -d' ' -f1)
+  [[ "$imagem" == "sha256:$manifesto_sha" ]] \
+    || { echo "::error::identidade da candidata diverge do manifesto de staging"; exit 1; }
+fi
+bash "$alvo" migrar staging "$manifesto"
+bash "$alvo" publicar staging "$manifesto"
 bash "$alvo" saude staging
 smoke=$("${BB_CMD[@]}" config get deploy.smoke)
 echo "+ $smoke (BB_URL=$url)"
