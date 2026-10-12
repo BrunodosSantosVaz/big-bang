@@ -205,7 +205,9 @@ def verify(root, config):
     elif not any(WELCOME_MARKER in item["body"] for item in state["discussions"]["nodes"]):
         found.append("falta o primeiro post da IA em Discussions")
     if config["projeto"].get("visibilidade") == "publico":
-        for key in ("planejamento", "execucao", "bugs"):
+        boards = config["paineis"]
+        # v3: one board ("quadro"); the three v2 boards stay supported for systems that still have them.
+        for key in (("quadro",) if boards.get("quadro") else ("planejamento", "execucao", "bugs")):
             try:
                 number = config["paineis"][key]
                 if not number:
