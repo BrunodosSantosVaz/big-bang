@@ -81,6 +81,23 @@ class FrameworkPipeline(unittest.TestCase):
             self.assertIn(job, gate)
         self.assertIn('--remote-visibility', gate)
 
+    def test_cut_release_sets_git_identity_before_documentation_commands(self):
+        paths = (
+            '.bigbang/pipeline/core/files/.github/workflows/bb-cut-release.yml',
+            '.github/workflows/bb-framework-cut-release.yml',
+        )
+        for path in paths:
+            with self.subTest(path=path):
+                text = self.read(path)
+                name = text.index('git config user.name "github-actions[bot]"')
+                email = text.index('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"')
+                write_version = text.index('python .bigbang/bin/bb.py pipeline write-version')
+                changelog = text.index('python .bigbang/bin/bb.py release items')
+                self.assertLess(name, write_version)
+                self.assertLess(email, write_version)
+                self.assertLess(name, changelog)
+                self.assertLess(email, changelog)
+
     def test_candidate_ready_runs_trusted_code_never_the_release_branch(self):
         import re
         from _raiz import RAIZ
@@ -255,7 +272,7 @@ class FrameworkPipeline(unittest.TestCase):
                 patch.object(pipeline_cli.config_module, 'load', return_value=own), \
                 patch.object(pipeline_cli.community_public, 'verify', return_value=[]) as audit:
             self.assertEqual(pipeline_cli._docs(args), 0)
-        self.assertEqual(audit.call_args.args[1]['paineis']['planejamento'], 28)
+        self.assertEqual(audit.call_args.args[1]['paineis']['quadro'], 31)
 
     def test_documentation_cli_keeps_the_framework_board_audit(self):
         from types import SimpleNamespace
@@ -266,7 +283,7 @@ class FrameworkPipeline(unittest.TestCase):
                 patch.object(documentation_cli.config_module, 'load', return_value=own), \
                 patch.object(documentation_cli.community_public, 'verify', return_value=[]) as audit:
             self.assertEqual(documentation_cli._validate(args), 0)
-        self.assertEqual(audit.call_args.args[1]['paineis']['planejamento'], 28)
+        self.assertEqual(audit.call_args.args[1]['paineis']['quadro'], 31)
 
     def test_callbacks_and_candidate_ci_use_the_framework_namespace(self):
         plan = generator.build_plan(self.root, framework=True)

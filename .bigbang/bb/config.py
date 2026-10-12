@@ -114,6 +114,9 @@ SCHEMA = {
         "servico_checar": _string(SERVICE, required=False),
         "runner": _string_list(re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*\Z"), unique=True),
         "preparar_rede": _string(required=False),
+        "script_publicar": _string(required=False), "script_migrar": _string(required=False),
+        "script_saude": _string(required=False), "script_voltar": _string(required=False),
+        "variaveis_personalizado": _string_list(re.compile(r"[A-Z][A-Z0-9_]*\Z"), non_empty=False, unique=True),
     },
     "comandos": {key: _string(required=False) for key in COMMAND_KEYS},
     "testes": {"cobertura_minima": _integer(0, 100), "marca_pendente": _string(), "padrao_teste": _regex,
@@ -147,6 +150,11 @@ OPTIONAL_KEYS = {
         "caminho_saude": "/api/health",      # health check path (OBS-04)
         "servico_migrar": "migrar",          # compose service that runs the migration
         "servico_checar": "",                # compose service that checks the server before migrating ("" = none)
+        "script_publicar": "",
+        "script_migrar": "",
+        "script_saude": "",
+        "script_voltar": "",
+        "variaveis_personalizado": [],
     },
 }
 

@@ -3,7 +3,7 @@
 Discovery is read-only. A delivery must resolve before the generator plans or writes any file. Reserved entries
 document future integrations without claiming support. No provider names are hardcoded in the CLI or generator.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 import re
 import tomllib
@@ -16,6 +16,13 @@ ENV_NAME = re.compile(r"[A-Z][A-Z0-9_]*")
 REQUIRED_OPERATIONS = {"publicar", "migrar", "saude", "voltar"}
 STATES = {"implementado", "reservado"}
 MAX_CONTRACT_BYTES = 65536
+CUSTOM_SCRIPTS = {
+    "publicar": "script_publicar",
+    "migrar": "script_migrar",
+    "saude": "script_saude",
+    "voltar": "script_voltar",
+}
+CUSTOM_ENVIRONMENT_KEYS = ("variaveis_personalizado",)
 
 
 @dataclass(frozen=True)
@@ -140,11 +147,50 @@ def read_artifact(root, name):
     return Artifact(name, data['descricao'], data['situacao'], data['identidade'], dict(scripts), folder)
 
 
+def _custom_script(root, operation, relative):
+    if not isinstance(relative, str) or not re.fullmatch(r"[A-Za-z0-9_./-]+\.sh", relative):
+        _fail(f"personalizado: deploy.script_{operation} deve ser caminho relativo para um script .sh")
+    parts = relative.split("/")
+    if any(part in ("", ".", "..") for part in parts) or parts[0] == ".bigbang":
+        _fail(f"personalizado: deploy.script_{operation} deve apontar para fora de .bigbang")
+    try:
+        project = Path(root).resolve()
+        script = (project / relative).resolve()
+        valid_file = script.is_file() and script.stat().st_size > 0
+    except (OSError, RuntimeError) as exc:
+        _fail(f"personalizado: não foi possível verificar deploy.script_{operation} ({exc})")
+    if not script.is_relative_to(project) or ".bigbang" in script.relative_to(project).parts:
+        _fail(f"personalizado: deploy.script_{operation} aponta para fora dos scripts do projeto")
+    if not valid_file:
+        _fail(f"personalizado: script obrigatório ausente ou vazio ({relative})")
+    return relative
+
+
+def _customize_target(root, config, target):
+    deploy = config["deploy"]
+    settings = [*CUSTOM_SCRIPTS.values(), *CUSTOM_ENVIRONMENT_KEYS]
+    if target.name != "personalizado":
+        if any(deploy.get(key) for key in settings):
+            _fail("deploy.script_* e deploy.*_personalizado só podem ser usados com entrega.alvo = 'personalizado'")
+        return target
+    for operation, key in CUSTOM_SCRIPTS.items():
+        _custom_script(root, operation, deploy.get(key))
+    variables = _names(deploy, "variaveis_personalizado", ENV_NAME, non_empty=False)
+    secrets = ()
+    reserved = {"GH_TOKEN", "IMAGEM", "VERSAO", "SIMULAR", "RC_TAG", "TAG", "TARGET_SHA",
+                "BB", "PATH", "HOME", "PYTHONPATH", "PYTHONHOME", "NODE_OPTIONS", "BASH_ENV", "ENV"}
+    if any(name in reserved or name.startswith(("BB_", "GITHUB_", "RUNNER_", "INPUT_", "LD_"))
+           for name in variables + secrets):
+        _fail("personalizado: variáveis e segredos não podem usar nomes reservados à esteira")
+    return replace(target, variables=variables, secrets=secrets)
+
+
 def resolve(root, config):
     """Return a compatible implemented target/artifact pair, or a configuration error before any write."""
     target = read_target(root, config['entrega']['alvo'])
     if target.state != 'implementado':
         _fail(f"entrega.alvo: '{target.name}' é reservado, sem implementação; consulte bb alvos")
+    target = _customize_target(root, config, target)
     if target.max_services is not None and len(config['deploy'].get('servicos', ['app=Dockerfile'])) > target.max_services:
         _fail(f'{target.name}: aceita no máximo {target.max_services} serviço por aplicação')
     if config['deploy'].get('servico_checar') and 'checar' not in target.operations:
@@ -152,8 +198,9 @@ def resolve(root, config):
     artifact = read_artifact(root, config['deploy'].get('artefato', 'imagem'))
     if artifact.state != 'implementado':
         _fail(f"deploy.artefato: '{artifact.name}' é reservado, sem implementação; consulte bb alvos")
-    if artifact.identity != 'digest':
-        _fail(f"deploy.artefato: '{artifact.name}' exige entrega por hashes, ainda não implementada no perfil deploy")
+    if (artifact.identity == 'digest' and artifact.name != 'imagem') or \
+            (artifact.identity == 'sha256' and artifact.name not in ('pacote', 'estatico')):
+        _fail(f"deploy.artefato: identidade incompatível com o formato '{artifact.name}'")
     if artifact.name not in target.artifacts:
         _fail(f"entrega.alvo: '{target.name}' não aceita o artefato '{artifact.name}'")
     return target, artifact

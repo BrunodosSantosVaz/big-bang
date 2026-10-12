@@ -4,6 +4,26 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [3.1.0] - 2026-10-12
+
+### O que muda
+
+Deploy multiplataforma (épico #174) e correções de operação:
+
+- **Alvo de deploy personalizado:** o projeto pode publicar com scripts próprios. Os scripts rodam com ambiente mínimo e
+  nunca recebem o token da publicação.
+- **Pacotes e arquivos estáticos:** novos formatos de artefato com **manifesto imutável** por hash SHA-256; a promoção
+  reutiliza o mesmo artefato e a validação recusa corrupção e caminhos fora do pacote.
+- **Adaptador AWS (S3 + CloudFront) em BETA:** autenticação por OIDC (sem chaves fixas) e política de menor privilégio.
+  **Não foi testado em conta AWS real:** use com atenção e envie o relato pelo template de issue gerado.
+- **Publicação e corte de release repetíveis:** o botão de publicar aceita PR já mesclado e lê as notas depois do merge; o
+  botão de corte configura a identidade do git antes de gravar a versão.
+- **Checagem de comunidade** aceita o quadro único (`paineis.quadro`), além do formato de três painéis.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [3.0.1] - 2026-10-11
 
 ### O que muda
@@ -233,8 +253,9 @@ Use `bb atualizar 1.5.1` para obter a correção oficial e regenerar os arquivos
   exato; produção fica vinculada ao SHA dos testes completos e conserva aprovação humana.
 - **Release em repositório privado:** a conferência de ancestralidade usa as referências já obtidas pelo
   checkout completo, sem novo `git fetch` após a retirada das credenciais.
-- `aws` e `paas` eram reservas sem implementação e agora sua seleção é recusada explicitamente.
-  `personalizado`, `pacote` e `estatico` também continuam reservados; não há entrega universal anunciada.
+- `aws` e `paas` eram reservas sem implementação e agora sua seleção é recusada explicitamente. O alvo `personalizado`
+  agora suporta scripts do projeto com imagem imutável e variáveis públicas allowlisted, em passos sem credenciais de
+  publicação. `pacote` e `estatico` continuam reservados; não há entrega universal anunciada.
 
 ### O que o projeto precisa fazer
 

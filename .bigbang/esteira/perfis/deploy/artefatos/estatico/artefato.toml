@@ -1,4 +1,8 @@
-descricao = "Arquivos estáticos por manifesto e SHA-256; implementação na tarefa #179 do framework"
-situacao = "reservado"
+descricao = "Arquivos estáticos em pacote imutável com manifesto SHA-256"
+situacao = "implementado"
 identidade = "sha256"
-scripts = {}
+
+[scripts]
+construir = "esteira/perfis/deploy/scripts/candidata-arquivos.sh"
+candidata = "esteira/perfis/deploy/scripts/candidata-publicar.sh"
+promover = "esteira/perfis/deploy/scripts/publicar-personalizado.sh"

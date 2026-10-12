@@ -389,6 +389,10 @@ def _gerar(args):
     for kind, path in generator.apply(plan, args.raiz):
         print(f"{kind}: {path}")
     print(f"{len(pending)} arquivo(s) atualizados. Rode bb verificar e revise o diff num PR.")
+    cfg = config_module.load(args.raiz, required=False)
+    if cfg and cfg.get("entrega", {}).get("alvo") == "aws":
+        print("AVISO (BETA): O alvo AWS (S3 + CloudFront) está em estágio beta e não foi testado em conta AWS real.\n"
+              "Relate resultados na issue #316: https://github.com/BrunodosSantosVaz/big-bang/issues/316")
     return EXIT_OK
 
 

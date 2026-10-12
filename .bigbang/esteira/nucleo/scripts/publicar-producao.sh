@@ -32,9 +32,24 @@ finalizar() {
   TAG="$tag" SIMULAR="$SIMULAR" bash "$AQUI/devolver-main.sh"
 }
 
+if [ "${BB_PUBLICACAO_PERSONALIZADA:-}" = finalizar ]; then
+  if [ "${RETOMADA:-false}" != true ]; then
+    RC_TAG="${RC_TAG:?}" TAG="${TAG:?}" TARGET_SHA="${TARGET_SHA:?}" \
+      FORMATO="$("${BB_CMD[@]}" config get deploy.artefato)" \
+      IMAGEM="${IMAGEM:-}" MANIFESTO="${MANIFESTO:-}" \
+      bash "$AQUI/../../perfis/deploy/scripts/finalizar-publicacao.sh"
+  fi
+  finalizar
+  exit 0
+fi
+
 echo "Publicar $tag em produção$([ "$SIMULAR" = true ] && echo " [SIMULAÇÃO]")"
 git fetch -q origin "+refs/heads/*:refs/remotes/origin/*" --tags
 if gh release view "$tag" --repo "$R" >/dev/null 2>&1; then
+  if [ "${BB_PUBLICACAO_PERSONALIZADA:-}" = preparar ]; then
+    echo "retomada=true" >> "${GITHUB_OUTPUT:?}"
+    exit 0
+  fi
   echo "A Release $tag já existe: só a limpeza e a devolução da main (retomada)."
   finalizar; exit 0
 fi
@@ -104,6 +119,35 @@ gh pr merge "$pr" --repo "$R" --merge --match-head-commit "$head_sha" \
 git fetch -q origin main
 alvo=$(git rev-parse origin/main)
 echo "PR #$pr mesclado na main (${alvo:0:7})."
+if [ "${BB_PUBLICACAO_PERSONALIZADA:-}" = preparar ]; then
+  [ "$perfil" = deploy ] || { echo "::error::preparação personalizada exige perfil deploy"; exit 2; }
+  alvo_nome=$("${BB_CMD[@]}" config get entrega.alvo)
+  [ "$alvo_nome" = personalizado ] || { echo "::error::fase personalizada exige alvo personalizado"; exit 2; }
+  formato=$("${BB_CMD[@]}" config get deploy.artefato)
+  if [ "$formato" = imagem ]; then
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' EXIT
+    gh release download "$rc" --repo "$R" --pattern imagem.txt --output "$tmp/imagem.txt"
+    imagem=$(tr -d ' \t\r' < "$tmp/imagem.txt" | grep -v '^$' | paste -sd, -)
+    [ -n "$imagem" ] || { echo "::error::a candidata $rc não registra imagens"; exit 1; }
+    manifesto=""
+  else
+    mkdir -p candidata
+    gh release download "$rc" --repo "$R" --dir candidata --pattern manifesto.json --pattern manifesto.sha256 --pattern artefato.tar.gz
+    PYTHONPATH=.bigbang python3 -m bb.artifacts verify candidata/manifesto.json
+    manifesto="candidata/manifesto.json"
+    imagem=""
+  fi
+  {
+    echo "rc_tag=$rc"
+    echo "tag=$tag"
+    echo "target_sha=$alvo"
+    echo "imagem=$imagem"
+    echo "manifesto=$manifesto"
+    echo "retomada=false"
+  } >> "${GITHUB_OUTPUT:?}"
+  exit 0
+fi
 RC_TAG="$rc" TAG="$tag" TARGET_SHA="$alvo" bash "$AQUI/../../perfis/$perfil/scripts/promover.sh"
 finalizar
 echo "$tag publicada em produção."

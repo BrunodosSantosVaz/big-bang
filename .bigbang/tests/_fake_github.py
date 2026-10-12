@@ -277,7 +277,8 @@ class FakeGitHub:
             return 405, {"message": "Pull Request is not mergeable"}
         if payload.get("sha") and payload["sha"] != pull["head"]["sha"]:
             return 409, {"message": "Head branch was modified"}
-        pull.update(state="closed", merged=True, merge_method=payload.get("merge_method"))
+        pull.update(state="closed", merged=True, merged_at="2026-10-11T12:00:00Z",
+                    merge_method=payload.get("merge_method"))
         return 200, {"merged": True, "sha": "f" * 40}
 
     def _check_runs(self, params, payload, sha):

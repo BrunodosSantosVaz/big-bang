@@ -1,5 +1,5 @@
-descricao = "Scripts do projeto; implementação na tarefa #177 do framework"
-situacao = "reservado"
+descricao = "Scripts do projeto para publicar, migrar, checar saúde e voltar por imagem imutável"
+situacao = "implementado"
 artefatos = ["imagem", "pacote", "estatico"]
 operacoes = ["publicar", "migrar", "saude", "voltar"]
 variaveis = []

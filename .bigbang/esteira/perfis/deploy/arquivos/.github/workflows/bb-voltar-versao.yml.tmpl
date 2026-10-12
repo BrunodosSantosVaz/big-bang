@@ -25,16 +25,11 @@ concurrency:
 
 jobs:
   conferir:
+    outputs:
+      imagem: ${{ steps.imagem.outputs.imagem }}
     runs-on: ubuntu-24.04
     steps:
-      - name: Imagem registrada na Release
-        run: |
-          imagem=$(gh release download "$VERSAO" --repo "$GITHUB_REPOSITORY" --pattern imagem.txt --output - | tr -d '[:space:]')
-          [[ "$imagem" =~ @sha256:[0-9a-f]{64}$ ]] || { echo "::error::$VERSAO não registra um digest"; exit 1; }
-          echo "Voltaria produção para $VERSAO: $imagem (migrações não são desfeitas)."
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSAO: ${{ inputs.versao }}
+{{gerado.artifact_rollback_conferir}}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: ${{ !inputs.simular }}
         with:
@@ -58,12 +53,4 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
-      - name: Voltar produção pelo alvo {{entrega.alvo}}
-        run: |
-          bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
-          bash .bigbang/esteira/perfis/deploy/alvos/{{entrega.alvo}}/scripts/alvo.sh voltar producao "$VERSAO"
-          bash .bigbang/esteira/perfis/deploy/alvos/{{entrega.alvo}}/scripts/alvo.sh saude producao
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSAO: ${{ inputs.versao }}
-{{gerado.env_alvo}}
+{{gerado.voltar_producao}}

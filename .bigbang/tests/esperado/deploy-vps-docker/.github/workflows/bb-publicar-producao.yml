@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v3.0.1 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v3.1.0 a partir de .bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl. Não edite: personalize em bigbang.toml.
 # Botão "Publicar em produção" (spec 11.6, passo 10). "conferir" roda sempre (portão e plano, nada muda);
 # "publicar" só com simular=false e depois que o dono aprova o ambiente "producao" — o único "ok" que ele não delega.
 # Com simular=false, "conferir" deixa no resumo do run o link e os passos para quem aprova (link-aprovacao.sh).
@@ -84,12 +84,14 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          persist-credentials: false
           token: ${{ secrets.PROJETO_TOKEN }}
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
       - name: Publicar (deploy)
         run: |
+          gh auth setup-git
           bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
           bash .bigbang/esteira/nucleo/scripts/publicar-producao.sh
         env:

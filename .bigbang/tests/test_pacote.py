@@ -114,6 +114,13 @@ class Migracao(unittest.TestCase):
                 self.assertIn("### O que muda", texto)
                 self.assertIn(package.MANUAL_HEADING, texto)
 
+    def test_migracao_lida_do_target_sha_quando_root_desatualizado(self):
+        with tempfile.TemporaryDirectory() as vazio:
+            # Em vazio/ não há MIGRACAO.md, mas no HEAD do git há 3.0.1
+            texto = package.release_notes(vazio, "3.0.1", target_sha="HEAD")
+            self.assertIn("## [3.0.1]", texto)
+
+
 
 if __name__ == "__main__":
     unittest.main()
