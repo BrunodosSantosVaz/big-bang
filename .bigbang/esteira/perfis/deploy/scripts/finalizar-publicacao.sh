@@ -7,7 +7,9 @@ R="${GITHUB_REPOSITORY:?}"
 rc="${RC_TAG:?}"
 tag="${TAG:?}"
 alvo_sha="${TARGET_SHA:?}"
-imagem="${IMAGEM:?}"
+formato="${FORMATO:-imagem}"
+imagem="${IMAGEM:-}"
+manifesto="${MANIFESTO:-}"
 saude="${SAUDE:-ok}"
 v="${tag#v}"
 [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::versão inválida"; exit 2; }
@@ -15,9 +17,25 @@ v="${tag#v}"
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
-gh release download "$rc" --repo "$R" --dir "$tmp" --pattern imagem.txt --pattern 'sbom-*.json'
-registrado=$(tr -d ' \t\r' < "$tmp/imagem.txt" | grep -v '^$' | paste -sd, -)
-[[ "$registrado" == "$imagem" ]] || { echo "::error::manifesto da candidata mudou"; exit 1; }
+if [[ "$formato" == imagem ]]; then
+  [[ -n "$imagem" ]] || { echo "::error::imagem ausente"; exit 2; }
+  gh release download "$rc" --repo "$R" --dir "$tmp" --pattern imagem.txt --pattern 'sbom-*.json'
+  registrado=$(tr -d ' \t\r' < "$tmp/imagem.txt" | grep -v '^$' | paste -sd, -)
+  [[ "$registrado" == "$imagem" ]] || { echo "::error::manifesto da candidata mudou"; exit 1; }
+  shopt -s nullglob
+  arquivos=("$tmp/imagem.txt" "$tmp"/sbom-*.json)
+  shopt -u nullglob
+  identidade="$imagem"
+else
+  gh release download "$rc" --repo "$R" --dir "$tmp" --pattern manifesto.json --pattern manifesto.sha256 --pattern artefato.tar.gz
+  PYTHONPATH=.bigbang python3 -m bb.artifacts verify "$tmp/manifesto.json"
+  manifesto_sha=$(awk '{print $1}' "$tmp/manifesto.sha256")
+  [[ -n "$manifesto" && -f "$manifesto" ]] || { echo "::error::manifesto validado não foi passado aos scripts"; exit 2; }
+  [[ "$(sha256sum "$manifesto" | cut -d' ' -f1)" == "$manifesto_sha" ]] \
+    || { echo "::error::manifesto usado nos scripts diverge da candidata"; exit 1; }
+  identidade="sha256:$manifesto_sha"
+  arquivos=("$tmp/manifesto.json" "$tmp/manifesto.sha256" "$tmp/artefato.tar.gz")
+fi
 
 { git show "$alvo_sha:CHANGELOG.md" 2>/dev/null || true; } | awk -v v="$v" '
   index($0, "## [" v "]") == 1 { dentro = 1; next }
@@ -27,12 +45,13 @@ registrado=$(tr -d ' \t\r' < "$tmp/imagem.txt" | grep -v '^$' | paste -sd, -)
   echo
   echo "### Origem e conferência"
   echo
-  echo "As mesmas imagens da candidata $rc, homologadas no staging: $imagem."
+  if [[ "$formato" == imagem ]]; then
+    echo "As mesmas imagens da candidata $rc, homologadas no staging: $imagem."
+  else
+    echo "O mesmo manifesto sha256:$manifesto_sha e pacote da candidata $rc, homologados no staging."
+  fi
   echo "Health check depois da publicação: $saude."
 } >> "$tmp/notas.md"
-shopt -s nullglob
-arquivos=("$tmp"/imagem.txt "$tmp"/sbom-*.json)
-shopt -u nullglob
 gh release create "$tag" "${arquivos[@]}" --repo "$R" --target "$alvo_sha" --latest \
   --title "$(python3 .bigbang/bin/bb.py config get projeto.nome) $tag" --notes-file "$tmp/notas.md"
-echo "Publicada: $tag ($imagem)."
+echo "Publicada: $tag ($identidade)."
