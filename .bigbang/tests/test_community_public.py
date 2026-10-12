@@ -129,3 +129,27 @@ class Projects(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SingleBoard(unittest.TestCase):
+    """v3 projects have one public board (quadro); the v2 three-board layout keeps working."""
+
+    CONFIG = {"projeto": {"repositorio": "owner/game", "visibilidade": "publico"}}
+    STATE = {"hasDiscussionsEnabled": True, "discussions": {"nodes": [{"body": community_public.WELCOME_MARKER}]}}
+
+    def verify(self, boards):
+        config = dict(self.CONFIG, paineis=boards)
+        with patch.object(community_public, "discussion_state", return_value=self.STATE), \
+                patch.object(community_public, "anonymous_project") as anonymous:
+            found = community_public.verify(".", config)
+        return found, [call.args for call in anonymous.call_args_list]
+
+    def test_single_board_reads_only_that_board(self):
+        found, reads = self.verify({"owner": "owner", "quadro": 31})
+        self.assertEqual(found, [])
+        self.assertEqual(reads, [("owner", 31)])
+
+    def test_three_board_layout_still_reads_all_three(self):
+        found, reads = self.verify({"owner": "owner", "planejamento": 1, "execucao": 2, "bugs": 3})
+        self.assertEqual(found, [])
+        self.assertEqual(reads, [("owner", 1), ("owner", 2), ("owner", 3)])
