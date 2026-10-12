@@ -4,7 +4,7 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "b5e7754e989fe054a2c9798e50fc69457251436b",
-    "commit": "0137a108804808091ebe2f2777cb3e1b6f69d1c2",
+    "commit": "3bc38bc4180ee859bb929e251dbf946046b803b4",
     "branch": "master",
     "proposta": "bigbang/proposta-319-single-board"
   },
@@ -255,7 +255,7 @@
     }
   },
   "codigo": {
-    "commit": "96de20378b877be410ac1153f10d4445554e7063",
+    "commit": "21eebbb0dab96eaee455ec4a6e291384dc1e81c5",
     "versao": "3.0.1",
     "raizes": [
       ".bigbang/",
@@ -421,7 +421,9 @@
         ".bigbang/tests/test_community_public.py:test_creation_audit_rejects_nondefault_options_and_title",
         ".bigbang/tests/test_community_public.py:test_draft_or_private_item_is_never_published",
         ".bigbang/tests/test_community_public.py:test_existing_text_requires_reviewed_audit_before_becoming_public",
-        ".bigbang/tests/test_community_public.py:test_empty_existing_board_with_sensitive_custom_field_needs_audit"
+        ".bigbang/tests/test_community_public.py:test_empty_existing_board_with_sensitive_custom_field_needs_audit",
+        ".bigbang/tests/test_community_public.py:test_single_board_reads_only_that_board",
+        ".bigbang/tests/test_community_public.py:test_three_board_layout_still_reads_all_three"
       ],
       "hashes": {
         ".bigbang/bb/community_public.py": "sha256:f79676c8ed80e045c2afd0012d94a5b41002c79b533bec4786f08c7026d015a7"
