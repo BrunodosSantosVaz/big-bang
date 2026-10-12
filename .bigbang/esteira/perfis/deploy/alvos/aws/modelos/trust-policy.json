@@ -14,8 +14,7 @@
         },
         "StringLike": {
           "token.actions.githubusercontent.com:sub": [
-            "repo:<OWNER>/<REPO>:environment:staging",
-            "repo:<OWNER>/<REPO>:environment:producao"
+            "repo:<OWNER>/<REPO>:environment:<AMBIENTE>"
           ]
         }
       }

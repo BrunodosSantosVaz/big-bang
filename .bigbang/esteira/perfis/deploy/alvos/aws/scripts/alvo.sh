@@ -105,10 +105,10 @@ case "$operacao" in
       }
       hash_esperado=""
       if command -v python3 >/dev/null 2>&1; then
-        hash_esperado=$(python3 -c 'import json; print(json.load(open("'"$tmp"'/manifesto.json")).get("artefato", {}).get("sha256", ""))' 2>/dev/null || true)
+        hash_esperado=$(python3 -c 'import json, sys; sys.stdout.write(json.load(open(sys.argv[1]))["artefato"]["sha256"])' "$tmp/manifesto.json" 2>/dev/null || true)
       fi
       if [ -z "$hash_esperado" ]; then
-        hash_esperado=$(grep -o '"sha256": *"[^"]*"' "$tmp/manifesto.json" | head -n 1 | cut -d'"' -f4 || true)
+        hash_esperado=$(tr '\n' ' ' < "$tmp/manifesto.json" | grep -o '"artefato"[[:space:]]*:[[:space:]]*{[^}]*}' | grep -o '"sha256"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 | cut -d'"' -f4 || true)
       fi
       if [ -z "$hash_esperado" ]; then
         echo "::error::Não foi possível extrair o hash esperado do artefato a partir do manifesto.json; abortando rollback." >&2

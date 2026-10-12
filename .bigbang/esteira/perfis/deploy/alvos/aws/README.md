@@ -38,15 +38,18 @@ No console IAM, configure o provedor OIDC para o GitHub Actions:
 - **URL do provedor:** `https://token.actions.githubusercontent.com`
 - **Audience:** `sts.amazonaws.com`
 
-### 2. Trust Policy (Relação de Confiança)
-Utilize o modelo em [`modelos/trust-policy.json`](modelos/trust-policy.json) ao criar a Role:
-Substitua `<AWS_ACCOUNT_ID>`, `<OWNER>` e `<REPO>` pelos dados do seu repositório.
+### 2. Separação de Roles por Ambiente (Trust Policy)
+Para garantir isolamento rigoroso e evitar que execuções de staging possuam permissão de escrita ou exclusão em recursos de produção, **crie uma IAM Role distinta para cada ambiente** (`staging` e `producao`).
+Utilize o modelo em [`modelos/trust-policy.json`](modelos/trust-policy.json) ao criar cada Role:
+- Substitua `<AWS_ACCOUNT_ID>`, `<OWNER>` e `<REPO>` pelos dados do seu repositório.
+- Substitua `<AMBIENTE>` pelo ambiente específico da role (`staging` para a role de homologação, `producao` para a role de produção).
+- No GitHub, configure o segredo `AWS_ROLE_ARN` e as variáveis correspondentes (`AWS_S3_BUCKET`, `AWS_CLOUDFRONT_DISTRIBUTION_ID`, `AWS_REGION`) dentro de cada GitHub Environment (`staging` e `producao`).
 
 ### 3. Política de Permissões Mínimas
-Anexe a política baseada em [`modelos/iam-policy.json`](modelos/iam-policy.json):
-- S3: `s3:ListBucket` no bucket e `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` nos objetos.
-- CloudFront: `cloudfront:CreateInvalidation` e `cloudfront:GetInvalidation` restritos à distribuição.
-- Não concede acesso de administração nem ações curinga (`*`).
+Anexe a política baseada em [`modelos/iam-policy.json`](modelos/iam-policy.json) apontando para o bucket e distribuição de cada ambiente:
+- S3: `s3:ListBucket` no bucket e `s3:PutObject`, `s3:DeleteObject` nos objetos (necessários para `aws s3 sync --delete`).
+- CloudFront: `cloudfront:CreateInvalidation` restrito à distribuição correspondente.
+- Não concede acesso de administração, permissões não utilizadas (`s3:GetObject`, `cloudfront:GetInvalidation`) nem ações curinga (`*`).
 
 ---
 
