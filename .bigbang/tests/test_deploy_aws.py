@@ -70,15 +70,15 @@ class TestDeployAws(unittest.TestCase):
             self.assertNotIn("s3:*", actions)
             self.assertNotIn("cloudfront:*", actions)
 
-        # Ações S3 mínimas para hospedagem estática
+        # Ações S3 mínimas necessárias para hospedagem estática (sem GetObject)
         self.assertIn("s3:ListBucket", all_actions)
         self.assertIn("s3:PutObject", all_actions)
-        self.assertIn("s3:GetObject", all_actions)
+        self.assertNotIn("s3:GetObject", all_actions)
         self.assertIn("s3:DeleteObject", all_actions)
 
-        # Ações CloudFront mínimas para invalidação de cache
+        # Ações CloudFront mínimas para invalidação de cache (sem GetInvalidation)
         self.assertIn("cloudfront:CreateInvalidation", all_actions)
-        self.assertIn("cloudfront:GetInvalidation", all_actions)
+        self.assertNotIn("cloudfront:GetInvalidation", all_actions)
 
     def test_alvo_aws_trust_policy_restrito_a_ambientes_e_refs_protegidas(self):
         trust_path = self.aws_dir / "modelos/trust-policy.json"
@@ -90,14 +90,13 @@ class TestDeployAws(unittest.TestCase):
         self.assertEqual(condition["StringEquals"]["token.actions.githubusercontent.com:aud"], "sts.amazonaws.com")
         sub_allowed = condition["StringLike"]["token.actions.githubusercontent.com:sub"]
 
-        # Deve ser lista restrita e nunca curinga amplo
+        # Deve ser lista restrita ao ambiente parametrizado e nunca curinga amplo ou ambientes combinados
         self.assertIsInstance(sub_allowed, list)
         self.assertNotIn("repo:<OWNER>/<REPO>:*", sub_allowed)
-        self.assertIn("repo:<OWNER>/<REPO>:environment:staging", sub_allowed)
-        self.assertIn("repo:<OWNER>/<REPO>:environment:producao", sub_allowed)
+        self.assertIn("repo:<OWNER>/<REPO>:environment:<AMBIENTE>", sub_allowed)
         self.assertNotIn("repo:<OWNER>/<REPO>:ref:refs/heads/main", sub_allowed)
         self.assertNotIn("repo:<OWNER>/<REPO>:ref:refs/tags/v*", sub_allowed)
-        self.assertEqual(len(sub_allowed), 2)
+        self.assertEqual(len(sub_allowed), 1)
 
     def test_alvo_aws_script_operacoes_e_aviso_beta(self):
         script = self.aws_dir / "scripts/alvo.sh"
@@ -344,6 +343,52 @@ class TestDeployAwsScripts(CasoDeScript):
                              cwd=self.projeto, capture_output=True, text=True, env=env)
         self.assertNotEqual(res.returncode, 0, res.stdout)
         self.assertNotIn("aws s3 sync", res.stdout)
+
+    def test_alvo_aws_rollback_sucesso_com_pacote_integro_no_fallback(self):
+        script = os.path.join(self.projeto, ".bigbang/esteira/perfis/deploy/alvos/aws/scripts/alvo.sh")
+        rel_dir = os.path.join(self.pasta, "rel_v3")
+        os.makedirs(rel_dir, exist_ok=True)
+        tar_valido = os.path.join(rel_dir, "artefato.tar.gz")
+        tmp_orig = os.path.join(self.pasta, "orig_index_v3.html")
+        with open(tmp_orig, "w", encoding="utf-8") as f:
+            f.write("<h1>conteudo estatico v3</h1>")
+        with tarfile.open(tar_valido, "w:gz") as tar:
+            tar.add(tmp_orig, arcname="index.html")
+        with open(tar_valido, "rb") as f:
+            hash_tar = hashlib.sha256(f.read()).hexdigest()
+
+        # Manifesto com 'arquivos' antes de 'artefato', como produzido por json com sort_keys=True
+        manifesto = {
+            "arquivos": [{"caminho": "index.html", "sha256": "0" * 64, "tamanho": 28}],
+            "artefato": {"arquivo": "artefato.tar.gz", "sha256": hash_tar, "tamanho": os.path.getsize(tar_valido)},
+            "formato": "estatico",
+            "versao": 1
+        }
+        with open(os.path.join(rel_dir, "manifesto.json"), "w", encoding="utf-8") as f:
+            json.dump(manifesto, f, sort_keys=True)
+        with open(os.path.join(rel_dir, "manifesto.json"), "rb") as f:
+            manifesto_hash = hashlib.sha256(f.read()).hexdigest()
+        with open(os.path.join(rel_dir, "manifesto.sha256"), "w", encoding="utf-8") as f:
+            f.write(f"{manifesto_hash}  manifesto.json\n")
+
+        self.estado.setdefault("releases", []).append("v3.0.0")
+        self.estado.setdefault("release_dirs", {})["v3.0.0"] = rel_dir
+        self.estado.setdefault("release_assets", {})["v3.0.0"] = ["manifesto.json", "manifesto.sha256", "artefato.tar.gz"]
+        self.gravar_estado()
+
+        # Wrapper python3 que falha completamente forçando o fallback em shell puro no alvo.sh
+        py_mock_dir = os.path.join(self.pasta, "mock_py_bin_v3")
+        os.makedirs(py_mock_dir, exist_ok=True)
+        py_mock = os.path.join(py_mock_dir, "python3")
+        with open(py_mock, "w", encoding="utf-8") as f:
+            f.write('#!/usr/bin/env bash\nexit 1\n')
+        os.chmod(py_mock, 0o755)
+
+        env = dict(self.env, PATH=f"{py_mock_dir}:{self.env['PATH']}")
+        res = subprocess.run(["bash", script, "voltar", "producao", "v3.0.0"],
+                             cwd=self.projeto, capture_output=True, text=True, env=env)
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+        self.assertIn("aws s3 sync", res.stdout)
 
     def test_alvo_aws_promocao_estatica_sem_imagem(self):
         promover = os.path.join(self.projeto, ".bigbang/esteira/perfis/deploy/scripts/promover.sh")
