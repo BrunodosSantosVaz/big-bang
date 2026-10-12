@@ -4,11 +4,12 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "b5e7754e989fe054a2c9798e50fc69457251436b",
-    "commit": "869983e9b33bc71a4ab0f07a27e79db48ddfaf85",
+    "commit": "59cbc1e63ccfeacb0390c2feda40007a8b23e968",
     "branch": "master",
-    "proposta": "bigbang/proposta-177-alvo-personalizado"
+    "proposta": "bigbang/proposta-180-adaptador-aws-s3-cloudfront"
   },
   "paginas": {
+    "Funcionalidade-aws": "Funcionalidade-aws",
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
     ".bigbang/docs/decisoes/ADR-0001-python-biblioteca-padrao.md": "ADR-0001-python-biblioteca-padrao",
     ".bigbang/docs/decisoes/ADR-0002-configuracao-em-toml.md": "ADR-0002-configuracao-em-toml",
@@ -394,7 +395,7 @@
         ".bigbang/tests/test_names_config.py:test_pipeline_subcommands_by_either_name"
       ],
       "hashes": {
-        ".bigbang/bb/cli.py": "sha256:348e3f797eeedf2343c6f8139796a5f87f48c74b973a9c59602f0f115c897cbf",
+        ".bigbang/bb/cli.py": "sha256:0e7af17297d2fc8ab6135d02b0fad27c3b571c65c7306996f165edd18d58618b",
         ".bigbang/bb/__init__.py": "sha256:9eafc1c524def17452aeb77d49ee0aca1a8c40c7e69d52c3c6dba384e78732eb",
         ".bigbang/bin/bb.py": "sha256:af864bf4452b5aad7c6e90ba6ed7f81cf9cb2fbb8c60f2a5e7e5e4e17372abb4",
         ".bigbang/bin/bb": "sha256:04bf9a43393503416a9307e7272d697afcd9327a0a5b388a451873a70c45e112"
@@ -595,7 +596,7 @@
         ".bigbang/esteira/perfis/deploy/artefatos/estatico/artefato.toml": "sha256:794471f2556475c697f1b81b50578edd97610533d832606240e6ba20c45ac562",
         ".bigbang/esteira/perfis/deploy/artefatos/imagem/artefato.toml": "sha256:096ab8840b14d81c49bec85482cda461949113779613213c1936612a988ad095",
         ".bigbang/esteira/perfis/deploy/artefatos/pacote/artefato.toml": "sha256:3cbfec3db58a9cd3e9338db6e97bb627a7bacb2dabeb4c958d131827f5721aab",
-        ".bigbang/esteira/perfis/deploy/alvos/aws/alvo.toml": "sha256:b494b7c5d33e1434d9eff9288cb1261efcc1fb8601f352d409263a3f9b314f8a",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/alvo.toml": "sha256:5054ffe2eac37347be7ed04142a5a004663fefd8e2c18c4b31afb82359d615a0",
         ".bigbang/esteira/perfis/deploy/alvos/paas/alvo.toml": "sha256:93f8e059f9ef5fce60c5f659724df326993380b06f53dd3dcc8c9daabedfaa6d",
         ".bigbang/esteira/perfis/deploy/alvos/personalizado/alvo.toml": "sha256:e3b4dd42a82a951bc1b3ac90c9fd83d17abdf06ac72902ee04d505d79996600f",
         ".bigbang/esteira/perfis/deploy/alvos/tsuru/alvo.toml": "sha256:ecc8f97463f4fe5b9b6cbff63419c1fb6f5152709b2f53a280ef22c825e59273",
@@ -605,7 +606,7 @@
         ".bigbang/esteira/perfis/deploy/README.md": "sha256:825b0d4a861ae63553602b743eee3fe7b88f415558a381a0e97234afc668a490",
         ".bigbang/esteira/perfis/deploy/alvos/personalizado/scripts/alvo.sh": "sha256:deca063a270909d6c35fb88abad7f3c9a32e428c91e1970b61276e8488c01646",
         ".bigbang/esteira/perfis/deploy/scripts/promover.sh": "sha256:421edf4993240f4188eda72421e7d314dd15d2148a6ab4a4216eb28811869869",
-        ".bigbang/bb/generator.py": "sha256:76b271e51e4a89922bb21e384b76dc8ea18abdb2d2c0fa4a3ce79d2b15d23793",
+        ".bigbang/bb/generator.py": "sha256:9b2ab0c7fcdc50031f2916f1bbec0b2144c6691521ca08ceec441b44896f2fcb",
         ".bigbang/esteira/nucleo/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl": "sha256:c2399273b0fb2a9b92a87278f330e8d819a2d137fb4004a1c95005376cfeebed",
         ".bigbang/esteira/nucleo/scripts/publicar-producao.sh": "sha256:874a1eae83914d78116a178808e1f146c140738a25d1f3c450a5466b1426e20a",
         ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "sha256:025ee7ed42363185fb2d16b5a8dec593b56bb39e885f5d0eb3f8f19f6f01a21c",
@@ -795,7 +796,7 @@
         ".bigbang/tests/test_grouping_v3.py:test_v3_tree_is_generated_and_verified"
       ],
       "hashes": {
-        ".bigbang/bb/generator.py": "sha256:76b271e51e4a89922bb21e384b76dc8ea18abdb2d2c0fa4a3ce79d2b15d23793"
+        ".bigbang/bb/generator.py": "sha256:9b2ab0c7fcdc50031f2916f1bbec0b2144c6691521ca08ceec441b44896f2fcb"
       },
       "descricao": "Gerar instruções e Actions a partir da configuração, preservando a camada do projeto e removendo saídas obsoletas."
     },
@@ -2177,7 +2178,7 @@
         ".bigbang/esteira/sempre/arquivos/.claude/agents/bb-revisor-pr.md": "sha256:4ad53a97e8b6a498f00c82fd14261d58cee90daa454f6e9edef03461bb210f36",
         ".bigbang/esteira/perfis/compilado/README.md": "sha256:7bd7e77fdb33687200a12bb5f5ed24d3f02f7334a2cbbe6382e8420d57921da8",
         ".bigbang/esteira/perfis/deploy/README.md": "sha256:825b0d4a861ae63553602b743eee3fe7b88f415558a381a0e97234afc668a490",
-        ".bigbang/esteira/perfis/deploy/alvos/aws/README.md": "sha256:73a1db0c5cac7cb1ed371961042d7b1c9c51d6c399ed12bef3723d9c42c1cf52",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/README.md": "sha256:fc680640d71d2d2d3e95de886127a258d25869d750c6b1efbb52fcd9b9bed814",
         ".bigbang/esteira/perfis/deploy/alvos/paas/README.md": "sha256:d8b52c4956fab996c303edcfbda6e162874b8311a23def757877de0aa272ad20",
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md": "sha256:bb04007d9e8e6977492685e35299a7801fdbd87b5fbeb4d5f78132d2cfc57411",
         ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md": "sha256:48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
@@ -2881,6 +2882,43 @@
         ".bigbang/bb/gh.py": "sha256:7509ffc1fe4bf4abc00b5ef6edbfaec144780673b0d2b05d82b411d1b672ef06"
       },
       "descricao": "Migração guiada opcional com ordem segura, consentimento explícito de escrita no GitHub e preservação do legado."
+    },
+    {
+      "id": "BB-F-058",
+      "requisitos": [
+        "RF-BB-043"
+      ],
+      "pagina": "Funcionalidade-aws",
+      "fontes": [
+        ".bigbang/esteira/perfis/deploy/alvos/aws/scripts/alvo.sh",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/alvo.toml",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/modelos/iam-policy.json",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/modelos/trust-policy.json",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-candidata.yml.tmpl",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/ISSUE_TEMPLATE/bb-aws-beta-relato.yml"
+      ],
+      "testes": [
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_contrato_implementado",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_iam_policy_template_minima_sem_curingas",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_script_operacoes_e_aviso_beta",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_issue_template_relato_teste",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_readme_contem_aviso_beta_e_link_issue_316",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_geracao_workflow_com_oidc",
+        ".bigbang/tests/test_deploy_aws.py:test_alvo_aws_aviso_beta_na_saida_do_comando"
+      ],
+      "hashes": {
+        ".bigbang/esteira/perfis/deploy/alvos/aws/scripts/alvo.sh": "sha256:b3741c13a501609cfdc823b7a8d1a8ec0c1c80165483305ffee63f74b8784b33",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/alvo.toml": "sha256:5054ffe2eac37347be7ed04142a5a004663fefd8e2c18c4b31afb82359d615a0",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/modelos/iam-policy.json": "sha256:7ae057965b5c6cc3df247a27c15de211ddb432a7552ade2c902e41d152988c0a",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/modelos/trust-policy.json": "sha256:4223bb9563c485553b369e18062815e1458dacd8de9c2df5dba864956e9aa749",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-candidata.yml.tmpl": "sha256:8e801ddc788f058dac1d7dc911d20f59e3c3374b99456ca542de6aef032ab03c",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-publicar-producao.yml.tmpl": "sha256:7a5e53a2128955aed74d5fdc586b2252a46ef9c56a6b4350fccf2ae521b697bd",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "sha256:86fc71c3edefb7202d62e73aa965ed78848e105c2ae283261b8ac3c977fd348f",
+        ".bigbang/esteira/perfis/deploy/alvos/aws/arquivos/.github/ISSUE_TEMPLATE/bb-aws-beta-relato.yml": "sha256:a6d951f546815fe4153577dfc1d7eb77ac03d771dd9af79fc71737536aaa61ff"
+      },
+      "descricao": "Entregar sites estáticos no AWS S3 e CloudFront via autenticação OIDC e permissões mínimas em estágio Beta."
     }
   ],
   "arquivos_funcionais": [

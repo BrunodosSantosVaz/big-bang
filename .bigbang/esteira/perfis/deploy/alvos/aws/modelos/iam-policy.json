@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3StaticSiteBucketAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": "arn:aws:s3:::${AWS_S3_BUCKET}"
+    },
+    {
+      "Sid": "S3StaticSiteObjectsAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": "arn:aws:s3:::${AWS_S3_BUCKET}/*"
+    },
+    {
+      "Sid": "CloudFrontInvalidationAccess",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:CreateInvalidation",
+        "cloudfront:GetInvalidation"
+      ],
+      "Resource": "arn:aws:cloudfront::*:distribution/${AWS_CLOUDFRONT_DISTRIBUTION_ID}"
+    }
+  ]
+}

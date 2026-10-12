@@ -134,7 +134,39 @@ def with_computed(config, root):
         context['gerado']['env_alvo'] = '\n'.join(
             '          ' + name + ': ${{ ' + kind + '.' + name + ' }}'
             for kind, names in (('vars', target.variables), ('secrets', target.secrets)) for name in names)
-        if target.name == 'personalizado':
+        if target.name == 'aws':
+            context['gerado']['publicar_producao'] = '''      - name: Autenticar na AWS via OIDC
+        uses: aws-actions/configure-aws-credentials@ececac4a0913210359f1eb7dd4a942526ea9e201 # v4.1.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          audience: sts.amazonaws.com
+      - name: Publicar ({{entrega.perfil}})
+        run: |
+          gh auth setup-git
+          {{gerado.preparar_alvo}}
+          bash .bigbang/esteira/nucleo/scripts/publicar-producao.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          SIMULAR: 'false'
+          BB_SHA_TESTADO: ${{ needs.testes-producao.outputs.sha }}
+{{gerado.env_alvo}}'''
+            context['gerado']['voltar_producao'] = '''      - name: Autenticar na AWS via OIDC
+        uses: aws-actions/configure-aws-credentials@ececac4a0913210359f1eb7dd4a942526ea9e201 # v4.1.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          audience: sts.amazonaws.com
+      - name: Voltar produção pelo alvo {{entrega.alvo}}
+        run: |
+          bash .bigbang/esteira/perfis/deploy/scripts/preparar-alvo.sh
+          bash .bigbang/esteira/perfis/deploy/alvos/{{entrega.alvo}}/scripts/alvo.sh voltar producao "$VERSAO"
+          bash .bigbang/esteira/perfis/deploy/alvos/{{entrega.alvo}}/scripts/alvo.sh saude producao
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ inputs.versao }}
+{{gerado.env_alvo}}'''
+        elif target.name == 'personalizado':
             context['gerado']['env_alvo'] = '\n'.join(
                 '          ' + name + ': ${{ vars.' + name + ' }}' for name in target.variables)
             context['gerado']['publicar_producao'] = '''      - name: Preparar publicação personalizada
