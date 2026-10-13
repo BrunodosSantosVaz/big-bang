@@ -572,15 +572,17 @@ def tables_without_rls(sql_texts):
     return sorted(set(created) - protected)
 
 
-def clean_deployments(client, run_id, environment=None):
-    """Clean GitHub deployment records for the given workflow run ID without touching environments or reviewers.
+def clean_deployments(client, run_id=None, environment=None, stale=False, exclude_run_id=None):
+    """Clean GitHub deployment records for the given workflow run ID or stale deployments without touching environments or reviewers.
 
     Deactivates matching deployments by setting status to inactive, then deletes them.
-    Matches the exact workflow run ID in the status log_url to avoid prefix collisions.
+    If stale is True, matches deployments belonging to runs other than exclude_run_id (or all runs if exclude_run_id is None).
+    Otherwise, matches the exact workflow run ID in the status log_url to avoid prefix collisions.
     """
-    if not run_id:
+    if not run_id and not stale:
         return []
-    run_pattern = re.compile(r"/actions/runs/" + re.escape(str(run_id)) + r"(?:/|\?|#|$)")
+    run_pattern = re.compile(r"/actions/runs/" + re.escape(str(run_id)) + r"(?:/|\?|#|$)") if run_id else None
+    exclude_pattern = re.compile(r"/actions/runs/" + re.escape(str(exclude_run_id)) + r"(?:/|\?|#|$)") if exclude_run_id else None
     deployments = client.paginate("deployments")
     cleaned = []
     for dep in deployments:
@@ -589,7 +591,13 @@ def clean_deployments(client, run_id, environment=None):
         if environment is not None and dep_env != environment:
             continue
         statuses = client.paginate(f"deployments/{dep_id}/statuses")
-        match = any(bool(run_pattern.search(status.get("log_url") or "")) for status in statuses)
+        if stale:
+            # If exclude_run_id is specified, skip deployments matching the excluded run
+            if exclude_pattern and any(bool(exclude_pattern.search(status.get("log_url") or "")) for status in statuses):
+                continue
+            match = True
+        else:
+            match = any(bool(run_pattern.search(status.get("log_url") or "")) for status in statuses)
         if match:
             # Set to inactive first
             client.call("POST", f"deployments/{dep_id}/statuses", {"state": "inactive"}, accept=(200, 201, 204))

@@ -137,9 +137,11 @@ def register(commands, parser_class):
     p.add_argument("issue", type=int)
     p.set_defaults(handler=lambda args: ownership.touch(config_module.load(args.raiz), args.issue) or EXIT_OK)
 
-    p = sub.add_parser(**names.cli_name('esteira', "limpar-deployments"), help="limpa registros de deployment do run atual")
-    p.add_argument("--run-id", dest="run_id", default=os.environ.get("GITHUB_RUN_ID", ""), help="ID do workflow run")
+    p = sub.add_parser(**names.cli_name('esteira', "limpar-deployments"), help="limpa registros de deployment do run atual ou residuais")
+    p.add_argument("--run-id", dest="run_id", default="", help="ID do workflow run a limpar")
     p.add_argument("--environment", dest="environment", default="production", help="ambiente do deployment")
+    p.add_argument("--stale", dest="stale", action="store_true", help="limpa registros residuais de outros runs")
+    p.add_argument("--exclude-run-id", dest="exclude_run_id", default=os.environ.get("GITHUB_RUN_ID", ""), help="ID do run a preservar ao usar --stale")
     p.set_defaults(handler=_clean_deployments)
 
     from . import flow_cli
@@ -404,7 +406,14 @@ def _clean_deployments(args):
     config = config_module.load(args.raiz)
     repo = config_module.get(config, "project.repository")
     client = gh.GitHub(repo)
-    cleaned = pipeline.clean_deployments(client, run_id=args.run_id, environment=args.environment)
+    run_id = args.run_id or (os.environ.get("GITHUB_RUN_ID", "") if not args.stale else "")
+    cleaned = pipeline.clean_deployments(
+        client,
+        run_id=run_id,
+        environment=args.environment,
+        stale=args.stale,
+        exclude_run_id=args.exclude_run_id,
+    )
     if cleaned:
         print(f"Deployments limpos: {', '.join(str(d) for d in cleaned)}")
     else:

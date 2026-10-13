@@ -60,7 +60,7 @@ jobs:
         if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
-        run: python .bigbang/bin/bb.py pipeline clean-deployments --environment production
+        run: python .bigbang/bin/bb.py pipeline clean-deployments --environment production --stale
       - name: How to approve (link and steps for the approver)
         if: ${{ !inputs.dry_run }}
         env:
