@@ -294,7 +294,7 @@ class PublicarSemRelease(ComGit):
         self.estado["refs"]["heads/epico/7-estoque"] = "x"
         self.mesclados("teste/11-testes")
         for n in (11, 12, 13):
-            self.cartao(2, n, "Pronto")
+            self.cartao(1, n, "Pronto")
 
     def test_avanca_a_main_e_conclui_o_epico(self):
         self.preparar()
@@ -304,7 +304,7 @@ class PublicarSemRelease(ComGit):
         for n in ("7", "11", "12", "13"):
             self.assertEqual(self.estado["issues"][n]["state"], "closed")
         self.assertEqual(self.status(1, 7), "Concluída")
-        self.assertEqual(self.status(2, 12), "Concluído")
+        self.assertEqual(self.status(1, 12), "Concluído")
         self.assertIn("epico/7-estoque", self.estado.get("apagadas", []))
 
     def test_recusa_com_artefato_ou_ci_vermelha(self):
@@ -333,12 +333,11 @@ class PublicarSemRelease(ComGit):
 class EncerrarEVerPaineis(ComGit):
     def test_encerrar_sprint_mantem_os_cartoes(self):
         self.issue(5, "Tarefa")
-        self.rodar("projeto.sh", "sprint-criar", "2", "Sprint 1 · 2026-10-05")
         self.rodar("projeto.sh", "sprint-criar", "1", "Sprint 1 · 2026-10-05")
-        self.rodar("projeto.sh", "sprint", "2", "5", "Sprint 1 · 2026-10-05")
+        self.rodar("projeto.sh", "sprint", "1", "5", "Sprint 1 · 2026-10-05")
         r = self.script("encerrar.sh", SPRINT="true", HOJE="2026-10-19")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertEqual(self.rodar("projeto.sh", "sprint-de", "2", "5").stdout.strip(),
+        self.assertEqual(self.rodar("projeto.sh", "sprint-de", "1", "5").stdout.strip(),
                          "Sprint 1 · 2026-10-05 → 2026-10-19")
 
     def test_encerrar_versao_exige_publicacao(self):

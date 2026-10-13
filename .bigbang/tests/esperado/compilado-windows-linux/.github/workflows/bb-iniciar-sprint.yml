@@ -40,5 +40,5 @@ jobs:
           SIMULAR: ${{ inputs.simular }}
           DATA: ${{ inputs.data }}
           PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
-          PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
-          PROJETO_EXECUCAO: ${{ vars.PROJETO_EXECUCAO }}
+          PROJETO_QUADRO: ${{ vars.PROJETO_QUADRO }}
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}

@@ -95,7 +95,7 @@ class BilingualConfig(unittest.TestCase):
         self.assertEqual(config.get(loaded, "deploy.servico_migrar"), "migrar")  # optional default
         self.assertEqual(config.get(loaded, "deploy.migrate_service"), "migrar")
         self.assertEqual(config.get(loaded, "workflow.model"), "epic-branch")
-        self.assertEqual(config.get(loaded, "board.model"), "three-boards")
+        self.assertEqual(config.get(loaded, "board.model"), "single")
 
     def test_get_translates_plain_mappings(self):
         plain = config.parse(scenario_text("compilado-windows-linux"))

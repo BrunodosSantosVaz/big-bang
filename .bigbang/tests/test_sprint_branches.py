@@ -44,9 +44,9 @@ class IniciarSprint(ComBb):
                 self.assertIn("revisao-humana", issues[n]["labels"])
                 self.assertIn("testes-revisao-ia", issues[n]["labels"])
                 self.assertEqual(issues[n]["parent"], 7)
-                self.assertEqual(self.status(2, n), "A fazer")
-                self.assertEqual(self.estado["boards"]["2"]["items"][str(n)]["Sprint"], "Sprint 1 · 2026-10-05")
-                self.assertEqual(self.estado["boards"]["2"]["items"][str(n)]["Épico"], "#7")
+                self.assertEqual(self.status(1, n), "A fazer")
+                self.assertEqual(self.estado["boards"]["1"]["items"][str(n)]["Sprint"], "Sprint 1 · 2026-10-05")
+                self.assertEqual(self.estado["boards"]["1"]["items"][str(n)]["Épico"], "#7")
         self.assertIn("CA-1", issues[teste]["body"])
         self.assertEqual(issues[t1]["blocked_by"], [teste])
         self.assertEqual(sorted(issues[t2]["blocked_by"]), sorted([teste, t1]))
@@ -71,7 +71,7 @@ class IniciarSprint(ComBb):
         r = self.iniciar()
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(len(self.criadas()), antes)
-        self.assertEqual(self.rodar("projeto.sh", "sprints", "2").stdout.count("Sprint 1 · 2026-10-05"), 1)
+        self.assertEqual(self.rodar("projeto.sh", "sprints", "1").stdout.count("Sprint 1 · 2026-10-05"), 1)
 
     def test_proxima_sprint_numera(self):
         self.iniciar()
@@ -111,7 +111,7 @@ class CriarBranches(IniciarSprint.__bases__[0]):
         self.issue(13, "API", labels=["task"], parent=7, blocked_by=[11, 12])
         self.issue(14, "Documentação · Estoque", labels=["documentacao"], parent=7, blocked_by=[12, 13])
         for n in (11, 12, 13, 14):
-            self.cartao(2, n, "A fazer")
+            self.cartao(1, n, "A fazer")
 
     def criar(self):
         r = self.rodar("criar-branches.sh", env={"BB": self.bb, "EPICO": "7"})
@@ -133,8 +133,8 @@ class CriarBranches(IniciarSprint.__bases__[0]):
         self.mesclar("teste/11-testes-de-aceite-estoque")
         self.criar()
         self.assertEqual(self.branches(), ["feature/12-dominio", "teste/11-testes-de-aceite-estoque"])
-        self.assertEqual(self.status(2, 12), "Feature")
-        self.assertEqual(self.status(2, 13), "A fazer")  # depends on 12
+        self.assertEqual(self.status(1, 12), "Feature")
+        self.assertEqual(self.status(1, 13), "A fazer")  # depends on 12
         self.mesclar("feature/12-dominio")
         self.criar()
         self.assertIn("feature/13-api", self.branches())

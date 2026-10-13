@@ -570,10 +570,14 @@ class CLI(Base):
         self.assertEqual(self.read("bigbang.toml"), before)
 
     def test_github_parts_default_to_the_plan_without_yes(self):
-        for part in ("board", "labels"):
-            with self.subTest(part=part), patch("bb.migrate." + part + "_part", return_value={}) as action:
-                self.assertEqual(cli.main(["--root", self.root, "migrate", part]), 0)
-                self.assertTrue(action.call_args.kwargs["dry_run"])
+        with patch("bb.migrate.board_part", return_value={}) as action:
+            self.assertEqual(cli.main(["--root", self.root, "migrate", "board"]), 0)
+            self.assertTrue(action.call_args.kwargs["dry_run"])
+        text = self.read("bigbang.toml").replace("planejamento = 28\nexecucao = 29\nbugs = 30", "quadro = 17")
+        self.write("bigbang.toml", text)
+        with patch("bb.migrate.labels_part", return_value={}) as action:
+            self.assertEqual(cli.main(["--root", self.root, "migrate", "labels"]), 0)
+            self.assertTrue(action.call_args.kwargs["dry_run"])
 
     def test_real_run_without_snapshot_refuses_before_mutation(self):
         with patch("bb.migrate.labels_part") as action:

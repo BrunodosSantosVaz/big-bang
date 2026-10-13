@@ -47,7 +47,8 @@ class CasoDeScript(unittest.TestCase):
         os.chmod(gh, os.stat(gh).st_mode | stat.S_IXUSR)
         self.estado_arquivo = os.path.join(self.pasta, "estado.json")
         self.log = os.path.join(self.pasta, "gh.log")
-        self.estado = {"boards": {"1": painel(1, STATUS_PLANEJAMENTO), "2": painel(2, STATUS_EXECUCAO),
+        colunas_quadro = list(dict.fromkeys(STATUS_PLANEJAMENTO + STATUS_EXECUCAO + STATUS_BUGS))
+        self.estado = {"boards": {"1": painel(1, colunas_quadro), "2": painel(2, STATUS_EXECUCAO),
                                   "3": painel(3, STATUS_BUGS)},
                        "issues": {}, "refs": {}, "pulls": [], "checks": {}}
         self.gravar_estado()
@@ -83,7 +84,7 @@ class CasoDeScript(unittest.TestCase):
         ambiente = {**os.environ, "PATH": self.bin + os.pathsep + os.environ["PATH"],
                     "FAKE_GH_STATE": self.estado_arquivo, "FAKE_GH_LOG": self.log,
                     "GITHUB_REPOSITORY": "dono/repo", "PROJETO_OWNER": "dono",
-                    "PROJETO_PLANEJAMENTO": "1", "PROJETO_EXECUCAO": "2", "PROJETO_BUGS": "3",
+                    "PROJETO_QUADRO": "1",
                     **(env or {})}
         resultado = subprocess.run(["bash", os.path.join(pasta, script), *args], capture_output=True, text=True,
                                    env=ambiente, cwd=cwd or self.pasta, check=False)

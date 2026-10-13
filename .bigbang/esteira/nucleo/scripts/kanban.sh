@@ -15,7 +15,7 @@
 #
 # Environment: EVENT, ACTION, ISSUE, LABEL, BODY_FROM (previous body on "edited"), REF_NAME, CREATED, DELETED,
 # HEAD_REF, BASE_REF, MERGED, DRAFT, PR_LABELS, PR_NUMBER (workflow_run), CONCLUSION (workflow_run),
-# PROJETO_PLANEJAMENTO/EXECUCAO/BUGS, GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN). BB as in regras-pr.sh.
+# PROJETO_QUADRO (PROJECT_NUMBER), GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN). BB as in regras-pr.sh.
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
@@ -24,7 +24,8 @@ if [ -z "${BB_CACHE_DIR:-}" ]; then  # board ids and options fetched once per ru
 fi
 
 AQUI="$(cd "$(dirname "$0")" && pwd)"
-PLAN="${PROJETO_PLANEJAMENTO:?}"; EXEC="${PROJETO_EXECUCAO:?}"; BUGS="${PROJETO_BUGS:?}"
+QUADRO="${PROJETO_QUADRO:-${PROJECT_NUMBER:?informe PROJETO_QUADRO ou PROJECT_NUMBER}}"
+PLAN="$QUADRO"; EXEC="$QUADRO"; BUGS="$QUADRO"
 R="${GITHUB_REPOSITORY:?}"
 read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 mover() { bash "$AQUI/projeto.sh" mover "$@"; }

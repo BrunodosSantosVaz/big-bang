@@ -64,4 +64,5 @@ jobs:
           CONFIRMAR_VERSAO: ${{ inputs.confirmar_versao }}
           SIMULAR: ${{ inputs.simular }}
           PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
-          PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
+          PROJETO_QUADRO: ${{ vars.PROJETO_QUADRO }}
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}

@@ -140,11 +140,13 @@ def grouping_text(text, mode):
     """The founded bigbang.toml of a v3 project: English names (ADR-0024), single board (its number comes in F4),
     v3 labels and the grouping workflow (ADR-0022), keeping the template's layout and comments."""
     text = config_module.text_to_v3(text)
+    labels_rep = ('labels = "v3"\nnumber = 0                             # número do Project (F4)'
+                  if "number =" not in text else 'labels = "v3"')
     replacements = (
         (r'(?m)^mode = "[a-z]+"([ \t]*#.*)?$',
          f'mode = "{mode}"                        # normal | flash | autonomous (com autonomy.toml); muda com o dono'),
-        (r'(?m)^model = "three-boards".*$', 'model = "single"                       # Project único, criado em F4'),
-        (r'(?m)^labels = "legacy".*$', 'labels = "v3"\nnumber = 0                             # número do Project (F4)'),
+        (r'(?m)^model = "(three-boards|single)".*$', 'model = "single"                       # Project único, criado em F4'),
+        (r'(?m)^labels = "legacy".*$', labels_rep),
         (r'(?m)^(planning|execution|bugs) = 0[^\n]*\n', ''),
         (r'(?m)^model = "epic-branch".*$', 'model = "grouping"                     # épico agrupador (ADR-0022)'),
     )
@@ -163,7 +165,7 @@ def plan_steps(options, with_github):
         steps += [f"criar (ou atualizar) a label {label} em {options['repositorio']}",
                   f"abrir a issue \"{F0_TITLE}\" (se ainda não existir)"]
     workflow = ("fluxo v3: quadro único e épico agrupador, bigbang.toml em inglês"
-                if options.get("fluxo", "grouping") == "grouping" else "fluxo anterior: branch de épico e três painéis")
+                if options.get("fluxo", "grouping") == "grouping" else "fluxo anterior: branch de épico")
     steps += [f"adotar o modo {options.get('modo', 'normal')} (testes continuam escritos antes do código)",
               f"adotar o {workflow}",
               "criar bigbang.toml a partir de .bigbang/modelos/bigbang.toml.exemplo",

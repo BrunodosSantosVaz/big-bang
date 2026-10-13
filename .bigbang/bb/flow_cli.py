@@ -134,7 +134,7 @@ def _migrate(args):
     if part == "config":
         report = migrate.config_part(args.raiz, **options)
     else:
-        config = config_module.load(args.raiz)
+        config = config_module.load(args.raiz, migration=(part == "board"))
         repository = config_module.get(config, "project.repository")
         client = gh.GitHub(repository)
         if part == "board":

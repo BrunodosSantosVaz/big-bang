@@ -69,9 +69,7 @@ zonas_sensiveis = ["src/**/auth/**", "src/**/payments/**", "migrations/**"]
 
 [paineis]                              # preenchido em F4
 owner = "BrunodosSantosVaz"
-planejamento = 0
-execucao = 0
-bugs = 0
+quadro = 0
 
 [ias]
 nomes = ["claude-1", "claude-2", "codex-1"]

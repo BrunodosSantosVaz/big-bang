@@ -44,6 +44,5 @@ jobs:
           SPRINT: ${{ inputs.sprint }}
           SIMULAR: ${{ inputs.simular }}
           PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
-          PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
-          PROJETO_EXECUCAO: ${{ vars.PROJETO_EXECUCAO }}
-          PROJETO_BUGS: ${{ vars.PROJETO_BUGS }}
+          PROJETO_QUADRO: ${{ vars.PROJETO_QUADRO }}
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}
