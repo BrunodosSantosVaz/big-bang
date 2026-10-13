@@ -133,6 +133,40 @@ class TestDeploymentsCleanup(unittest.TestCase):
         self.assertIn(("POST", "repos/dono/repo/deployments/401/statuses", {"state": "inactive"}), calls)
         self.assertIn(("DELETE", "repos/dono/repo/deployments/401", None), calls)
 
+    def test_clean_deployments_stale_cleans_other_runs_and_preserves_current_run(self):
+        calls = []
+
+        def fake_api(method, path, payload=None):
+            calls.append((method, path, payload))
+            if method == "GET" and path.startswith("repos/dono/repo/deployments?"):
+                return 200, [
+                    {"id": 501, "environment": "production"},
+                    {"id": 502, "environment": "production"},
+                    {"id": 503, "environment": "staging"},
+                ]
+            if method == "GET" and path.startswith("repos/dono/repo/deployments/501/statuses"):
+                # stale run 777
+                return 200, [{"id": 1, "log_url": "https://github.com/dono/repo/actions/runs/777/job/1"}]
+            if method == "GET" and path.startswith("repos/dono/repo/deployments/502/statuses"):
+                # current run 888
+                return 200, [{"id": 2, "log_url": "https://github.com/dono/repo/actions/runs/888/job/2"}]
+            if method == "GET" and path.startswith("repos/dono/repo/deployments/503/statuses"):
+                # stale run 666, but in staging
+                return 200, [{"id": 3, "log_url": "https://github.com/dono/repo/actions/runs/666/job/3"}]
+            if method == "POST" and "statuses" in path:
+                return 201, {"id": 999, "state": "inactive"}
+            if method == "DELETE":
+                return 204, None
+            return 200, {}
+
+        client = gh.GitHub("dono/repo", api=fake_api)
+        cleaned = pipeline.clean_deployments(client, stale=True, exclude_run_id="888", environment="production")
+
+        self.assertEqual(cleaned, [501])
+        self.assertIn(("DELETE", "repos/dono/repo/deployments/501", None), calls)
+        self.assertNotIn(("DELETE", "repos/dono/repo/deployments/502", None), calls)
+        self.assertNotIn(("DELETE", "repos/dono/repo/deployments/503", None), calls)
+
 
 class TestPublishWorkflowCleanDeploymentsStep(unittest.TestCase):
     def test_publish_workflow_contains_clean_deployments_always_step(self):
@@ -144,4 +178,4 @@ class TestPublishWorkflowCleanDeploymentsStep(unittest.TestCase):
         self.assertIn("name: Clean deployments", template_text)
         self.assertIn("if: always()", template_text)
         self.assertIn("name: Clean stale deployments", template_text)
-        self.assertIn("python .bigbang/bin/bb.py pipeline clean-deployments --environment production", template_text)
+        self.assertIn("python .bigbang/bin/bb.py pipeline clean-deployments --environment production --stale", template_text)
