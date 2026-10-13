@@ -56,6 +56,11 @@ jobs:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
           VERSION: ${{ inputs.version }}
         run: python .bigbang/bin/bb.py release publish --version "$VERSION" --dry-run --content-dir "$RUNNER_TEMP/release"
+      - name: Clean stale deployments
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: python .bigbang/bin/bb.py pipeline clean-deployments --environment production
       - name: How to approve (link and steps for the approver)
         if: ${{ !inputs.dry_run }}
         env:

@@ -143,4 +143,5 @@ class TestPublishWorkflowCleanDeploymentsStep(unittest.TestCase):
             template_text = f.read()
         self.assertIn("name: Clean deployments", template_text)
         self.assertIn("if: always()", template_text)
+        self.assertIn("name: Clean stale deployments", template_text)
         self.assertIn("python .bigbang/bin/bb.py pipeline clean-deployments --environment production", template_text)
