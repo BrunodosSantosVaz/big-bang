@@ -167,6 +167,57 @@ class TestDeploymentsCleanup(unittest.TestCase):
         self.assertNotIn(("DELETE", "repos/dono/repo/deployments/502", None), calls)
         self.assertNotIn(("DELETE", "repos/dono/repo/deployments/503", None), calls)
 
+    def test_clean_deployments_stale_preserves_active_and_waiting_runs_and_empty_log_urls(self):
+        calls = []
+
+        def fake_api(method, path, payload=None):
+            calls.append((method, path, payload))
+            if method == "GET" and path.startswith("repos/dono/repo/deployments?"):
+                return 200, [
+                    {"id": 601, "environment": "production"},
+                    {"id": 602, "environment": "production"},
+                    {"id": 603, "environment": "production"},
+                    {"id": 604, "environment": "production"},
+                    {"id": 605, "environment": "production"},
+                ]
+            if method == "GET" and path.startswith("repos/dono/repo/deployments/601/statuses"):
+                # run 100 is completed (should be cleaned)
+                return 200, [{"id": 1, "log_url": "https://github.com/dono/repo/actions/runs/100/job/1"}]
+            if method == "GET" and path.startswith("repos/dono/repo/deployments/602/statuses"):
+                # run 200 is in_progress (active - should be preserved)
+                return 200, [{"id": 2, "log_url": "https://github.com/dono/repo/actions/runs/200/job/1"}]
+            if method == "GET" and path.startswith("repos/dono/repo/deployments/603/statuses"):
+                # run 300 is waiting for approval (active - should be preserved)
+                return 200, [{"id": 3, "log_url": "https://github.com/dono/repo/actions/runs/300/job/1"}]
+            if method == "GET" and path.startswith("repos/dono/repo/deployments/604/statuses"):
+                # no status at all (should be preserved)
+                return 200, []
+            if method == "GET" and path.startswith("repos/dono/repo/deployments/605/statuses"):
+                # status with empty or non-run log_url (should be preserved)
+                return 200, [{"id": 5, "log_url": ""}]
+            if method == "GET" and path.startswith("repos/dono/repo/actions/runs/100"):
+                return 200, {"id": 100, "status": "completed", "conclusion": "failure"}
+            if method == "GET" and path.startswith("repos/dono/repo/actions/runs/200"):
+                return 200, {"id": 200, "status": "in_progress", "conclusion": None}
+            if method == "GET" and path.startswith("repos/dono/repo/actions/runs/300"):
+                return 200, {"id": 300, "status": "waiting", "conclusion": None}
+            if method == "POST" and "statuses" in path:
+                return 201, {"id": 999, "state": "inactive"}
+            if method == "DELETE":
+                return 204, None
+            return 200, {}
+
+        client = gh.GitHub("dono/repo", api=fake_api)
+        cleaned = pipeline.clean_deployments(client, stale=True, exclude_run_id="888", environment="production")
+
+        # Only 601 (completed run) should be cleaned
+        self.assertEqual(cleaned, [601])
+        self.assertIn(("DELETE", "repos/dono/repo/deployments/601", None), calls)
+        self.assertNotIn(("DELETE", "repos/dono/repo/deployments/602", None), calls)
+        self.assertNotIn(("DELETE", "repos/dono/repo/deployments/603", None), calls)
+        self.assertNotIn(("DELETE", "repos/dono/repo/deployments/604", None), calls)
+        self.assertNotIn(("DELETE", "repos/dono/repo/deployments/605", None), calls)
+
 
 class TestPublishWorkflowCleanDeploymentsStep(unittest.TestCase):
     def test_publish_workflow_contains_clean_deployments_always_step(self):
