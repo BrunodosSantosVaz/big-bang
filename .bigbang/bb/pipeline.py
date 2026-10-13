@@ -576,10 +576,11 @@ def clean_deployments(client, run_id, environment=None):
     """Clean GitHub deployment records for the given workflow run ID without touching environments or reviewers.
 
     Deactivates matching deployments by setting status to inactive, then deletes them.
+    Matches the exact workflow run ID in the status log_url to avoid prefix collisions.
     """
     if not run_id:
         return []
-    run_str = str(run_id)
+    run_pattern = re.compile(r"/actions/runs/" + re.escape(str(run_id)) + r"(?:/|\?|#|$)")
     deployments = client.paginate("deployments")
     cleaned = []
     for dep in deployments:
@@ -588,7 +589,7 @@ def clean_deployments(client, run_id, environment=None):
         if environment is not None and dep_env != environment:
             continue
         statuses = client.paginate(f"deployments/{dep_id}/statuses")
-        match = any(run_str in (status.get("log_url") or "") for status in statuses)
+        match = any(bool(run_pattern.search(status.get("log_url") or "")) for status in statuses)
         if match:
             # Set to inactive first
             client.call("POST", f"deployments/{dep_id}/statuses", {"state": "inactive"}, accept=(200, 201, 204))

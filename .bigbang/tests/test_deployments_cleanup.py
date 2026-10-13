@@ -75,16 +75,50 @@ class TestDeploymentsCleanup(unittest.TestCase):
         self.assertIn(("DELETE", "repos/dono/repo/deployments/201", None), calls)
 
 
-if __name__ == "__main__":
-    unittest.main()
+    def test_clean_deployments_exact_run_id_no_prefix_collision(self):
+        calls = []
+
+        def fake_api(method, path, payload=None):
+            calls.append((method, path, payload))
+            if method == "GET" and path.startswith("repos/dono/repo/deployments?"):
+                return 200, [
+                    {"id": 301, "environment": "production"},
+                    {"id": 302, "environment": "production"},
+                    {"id": 303, "environment": "production"},
+                ]
+            if method == "GET" and path.startswith("repos/dono/repo/deployments/301/statuses"):
+                # run 1234 prefix matches 123 but is NOT exact 123
+                return 200, [{"id": 1, "log_url": "https://github.com/dono/repo/actions/runs/1234/job/10"}]
+            if method == "GET" and path.startswith("repos/dono/repo/deployments/302/statuses"):
+                # run 9123 suffix matches 123 but is NOT exact 123
+                return 200, [{"id": 2, "log_url": "https://github.com/dono/repo/actions/runs/9123/job/20"}]
+            if method == "GET" and path.startswith("repos/dono/repo/deployments/303/statuses"):
+                # exact run 123
+                return 200, [{"id": 3, "log_url": "https://github.com/dono/repo/actions/runs/123/job/30"}]
+            if method == "POST" and "statuses" in path:
+                return 201, {"id": 999, "state": "inactive"}
+            if method == "DELETE":
+                return 204, None
+            return 200, {}
+
+        client = gh.GitHub("dono/repo", api=fake_api)
+        cleaned = pipeline.clean_deployments(client, run_id="123", environment="production")
+
+        self.assertEqual(cleaned, [303])
+        self.assertNotIn(("DELETE", "repos/dono/repo/deployments/301", None), calls)
+        self.assertNotIn(("DELETE", "repos/dono/repo/deployments/302", None), calls)
+        self.assertIn(("DELETE", "repos/dono/repo/deployments/303", None), calls)
 
 
 class TestPublishWorkflowCleanDeploymentsStep(unittest.TestCase):
-    def test_publish_workflow_contains_clean_deployments_always_step(self):
+    def test_publish_workflow_contains_clean_deployments_always_step_and_job(self):
         import os
         from _raiz import RAIZ
         template_path = os.path.join(RAIZ, ".bigbang", "pipeline", "core", "files", ".github", "workflows", "bb-publish.yml.tmpl")
-        template_text = open(template_path, encoding="utf-8").read()
+        with open(template_path, encoding="utf-8") as f:
+            template_text = f.read()
         self.assertIn("name: Clean deployments", template_text)
-        self.assertIn("if: always()", template_text)
+        self.assertIn("cleanup:", template_text)
+        self.assertIn("needs: [check, publish]", template_text)
+        self.assertIn("if: always() && needs.check.result == 'success' && !inputs.dry_run", template_text)
         self.assertIn("python .bigbang/bin/bb.py pipeline clean-deployments --environment production", template_text)
