@@ -18,7 +18,7 @@ Deploy multiplataforma (épico #174) e correções de operação:
   **Não foi testado em conta AWS real:** use com atenção e envie o relato pelo template de issue gerado.
 - **Publicação e corte de release repetíveis:** o botão de publicar aceita PR já mesclado e lê as notas depois do merge; o
   botão de corte configura a identidade do git antes de gravar a versão.
-- **Checagem de comunidade** aceita o quadro único (`paineis.quadro`), além do formato de três painéis.
+- **Checagem de comunidade** valida o quadro único (`paineis.quadro`).
 
 ### O que o projeto precisa fazer
 

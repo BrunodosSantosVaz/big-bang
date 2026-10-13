@@ -274,12 +274,15 @@ def _status(args):
     import subprocess
     config = config_module.load(args.raiz)
     script = os.path.join(args.raiz, ".bigbang", "esteira", "nucleo", "scripts", "ver-paineis.sh")
+    paineis = config.get("paineis", {})
+    quadro = paineis.get("quadro")
     env = {**os.environ, "GITHUB_REPOSITORY": config["projeto"]["repositorio"],
-           "PROJETO_OWNER": config["paineis"]["owner"], "PYTHON": sys.executable,
+           "PROJETO_OWNER": paineis.get("owner", ""), "PYTHON": sys.executable,
            "BB_ENTRY": os.path.join(args.raiz, ".bigbang", "bin", "bb.py"), "BB_ROOT": args.raiz}
     env.pop("BB", None)
-    for key in ("planejamento", "execucao", "bugs"):
-        env["PROJETO_" + key.upper()] = str(config["paineis"][key]) if config["paineis"][key] else ""
+    if quadro is not None:
+        env["PROJECT_NUMBER"] = str(quadro) if quadro else ""
+        env["PROJETO_QUADRO"] = str(quadro) if quadro else ""
     result = subprocess.run(["bash", script], env=env, cwd=args.raiz, check=False)
     return EXIT_OK if result.returncode == 0 else EXIT_UNEXPECTED
 

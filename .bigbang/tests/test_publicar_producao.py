@@ -149,7 +149,7 @@ class TarefaDeCorrecao(ComBb):
         self.assertEqual(issue["milestone"], "v0.2.0")
         self.assertEqual(issue["parent"], 7)
         self.assertIn("A vírgula sai antes do nome.", issue["body"])
-        self.assertEqual(self.status(2, nova), "Feature")
+        self.assertEqual(self.status(1, nova), "Feature")
         self.assertIn(f"heads/feature/{nova}-correcao-a-virgula-sai-antes-do-nome", self.estado["refs"])
 
     def test_motivo_longo_vira_titulo_cortado_em_palavra_inteira(self):  # pilot: title cut mid-word

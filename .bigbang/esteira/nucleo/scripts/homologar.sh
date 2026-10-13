@@ -3,14 +3,15 @@
 # Bugs — losing a previous `reprovado`; the epic gets a comment with the candidate and its acceptance criteria; and
 # the PR release/x.y.z -> main is opened (once). The release does NOT go to develop: develop only gets artifact
 # code after production (invariant of spec 11.5).
-# Environment: BRANCH (release/x.y.z), RC_TAG, PROJETO_PLANEJAMENTO/BUGS, GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN).
+# Environment: BRANCH (release/x.y.z), RC_TAG, PROJETO_QUADRO (PROJECT_NUMBER), GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN).
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 if [ -z "${BB_CACHE_DIR:-}" ]; then
   BB_CACHE_DIR=$(mktemp -d); export BB_CACHE_DIR; trap 'rm -rf "$BB_CACHE_DIR"' EXIT
 fi
 AQUI="$(cd "$(dirname "$0")" && pwd)"
-PLAN="${PROJETO_PLANEJAMENTO:?}"; BUGS="${PROJETO_BUGS:?}"; R="${GITHUB_REPOSITORY:?}"
+QUADRO="${PROJETO_QUADRO:-${PROJECT_NUMBER:?informe PROJETO_QUADRO ou PROJECT_NUMBER}}"
+PLAN="$QUADRO"; BUGS="$QUADRO"; R="${GITHUB_REPOSITORY:?}"
 branch="${BRANCH:?}"; rc="${RC_TAG:?}"; v="${branch#release/}"; tag="v$v"
 projeto() { bash "$AQUI/projeto.sh" "$@"; }
 

@@ -359,7 +359,7 @@ def _docs(args):
             if config:
                 problems += community_public.verify(root, config)
             else:
-                problems.append("configuração dos três painéis obrigatórios ausente")
+                problems.append("configuração do painel obrigatório ausente")
     for problem in problems:
         print(problem)
     if not problems:

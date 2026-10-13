@@ -294,7 +294,7 @@ class PublicarSemRelease(ComGit):
         self.estado["refs"]["heads/epico/7-estoque"] = "x"
         self.mesclados("teste/11-testes")
         for n in (11, 12, 13):
-            self.cartao(2, n, "Pronto")
+            self.cartao(1, n, "Pronto")
 
     def test_avanca_a_main_e_conclui_o_epico(self):
         self.preparar()
@@ -304,7 +304,7 @@ class PublicarSemRelease(ComGit):
         for n in ("7", "11", "12", "13"):
             self.assertEqual(self.estado["issues"][n]["state"], "closed")
         self.assertEqual(self.status(1, 7), "Concluída")
-        self.assertEqual(self.status(2, 12), "Concluído")
+        self.assertEqual(self.status(1, 12), "Concluído")
         self.assertIn("epico/7-estoque", self.estado.get("apagadas", []))
 
     def test_recusa_com_artefato_ou_ci_vermelha(self):
@@ -333,12 +333,11 @@ class PublicarSemRelease(ComGit):
 class EncerrarEVerPaineis(ComGit):
     def test_encerrar_sprint_mantem_os_cartoes(self):
         self.issue(5, "Tarefa")
-        self.rodar("projeto.sh", "sprint-criar", "2", "Sprint 1 · 2026-10-05")
         self.rodar("projeto.sh", "sprint-criar", "1", "Sprint 1 · 2026-10-05")
-        self.rodar("projeto.sh", "sprint", "2", "5", "Sprint 1 · 2026-10-05")
+        self.rodar("projeto.sh", "sprint", "1", "5", "Sprint 1 · 2026-10-05")
         r = self.script("encerrar.sh", SPRINT="true", HOJE="2026-10-19")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertEqual(self.rodar("projeto.sh", "sprint-de", "2", "5").stdout.strip(),
+        self.assertEqual(self.rodar("projeto.sh", "sprint-de", "1", "5").stdout.strip(),
                          "Sprint 1 · 2026-10-05 → 2026-10-19")
 
     def test_encerrar_versao_exige_publicacao(self):
@@ -373,16 +372,19 @@ class EncerrarEVerPaineis(ComGit):
     def test_ver_paineis(self):
         self.issue(7, "Estoque")
         self.issue(12, "Regra")
+        self.estado["boards"]["1"]["fields"]["Status"]["options"].append(
+            {"id": "OS1-pr", "name": "Validar PR"}
+        )
         self.cartao(1, 7, "Homologação")
-        self.cartao(2, 12, "Validar PR", Sprint="Sprint 1 · 2026-10-05")
+        self.cartao(1, 12, "Validar PR", Sprint="Sprint 1 · 2026-10-05")
         os.makedirs(os.path.join(self.pasta, ".bigbang"), exist_ok=True)
         shutil.copy(os.path.join(BIGBANG, "VERSION"), os.path.join(self.pasta, ".bigbang", "VERSION"))
         with open(os.path.join(self.pasta, "bigbang.toml"), "w", encoding="utf-8") as handle:
             handle.write(exemplo_toml().replace("BrunodosSantosVaz/meu-sistema", "dono/repo").replace(
-                'dono = "BrunodosSantosVaz"', 'dono = "dono"'))
+                'dono = "BrunodosSantosVaz"', 'dono = "dono"').replace("quadro = 0", "quadro = 1"))
         r = self.rodar("ver-paineis.sh", env={"BB": f"{sys.executable} {BB} --raiz {self.pasta}"})
         self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertIn("- Homologar o épico #7 Estoque", r.stdout)
+        self.assertIn("- Homologar o #7 Estoque", r.stdout)
         self.assertIn("- Revisar o PR da #12 Regra", r.stdout)
         self.assertIn("### Validar PR\n\n- #12 Regra (Sprint 1 · 2026-10-05)", r.stdout)
 

@@ -126,7 +126,7 @@ SCHEMA = {
         "zonas_sensiveis": _string_list(non_empty=False),
     },
     "paineis": {
-        "owner": _string(GITHUB_LOGIN), "planejamento": _integer(0), "execucao": _integer(0), "bugs": _integer(0),
+        "owner": _string(GITHUB_LOGIN), "quadro": _integer(0),
     },
     "ias": {
         "nomes": _string_list(SLUG, unique=True), "tarefas_por_ia": _integer(1), "trava_expira_horas": _integer(1),
@@ -141,6 +141,7 @@ OPTIONAL_KEYS = {
     "projeto": {"modo": "padrao"},
     "comandos": {"testes_alterados": ""},
     "testes": {"caminhos_estruturais": []},
+    "paineis": {"quadro": 0},
     "deploy": {
         "artefato": "imagem",                # installed format; capabilities checked before generation
         "runner": ["ubuntu-24.04"],
@@ -162,20 +163,20 @@ OPTIONAL_KEYS = {
 PROFILE_SECTIONS = {"deploy": "deploy", "compilado": "compilado"}
 
 
-def validate(config, expected_version=None):
+def validate(config, expected_version=None, allow_legacy_boards=False):
     """Return the list of schema errors (empty when valid), for a legacy or a v3 file."""
     kind = dialect(config)
     if kind == "mixed":
         return ["bigbang.toml mistura nomes em português (v2) e em inglês (v3); escreva o arquivo em um só idioma "
                 "(ADR-0024)"]
     if kind == "v3":
-        legacy, _, errors = _v3_to_legacy(config)
-        structural = [_message_to_v3(error) for error in _validate_legacy(legacy, expected_version)]
+        legacy, _, errors = _v3_to_legacy(config, allow_legacy_boards=allow_legacy_boards)
+        structural = [_message_to_v3(error) for error in _validate_legacy(legacy, expected_version, allow_legacy_boards=allow_legacy_boards)]
         return errors + [error for error in structural if error not in errors]
-    return _validate_legacy(config, expected_version)
+    return _validate_legacy(config, expected_version, allow_legacy_boards=allow_legacy_boards)
 
 
-def _validate_legacy(config, expected_version=None):
+def _validate_legacy(config, expected_version=None, allow_legacy_boards=False):
     errors = []
     for section in config:
         if section not in SCHEMA:
@@ -191,13 +192,13 @@ def _validate_legacy(config, expected_version=None):
         if not isinstance(table, dict):
             errors.append(f"[{section}] deve ser uma seção")
             continue
-        errors.extend(_validate_section(section, table, keys))
+        errors.extend(_validate_section(section, table, keys, allow_legacy_boards=allow_legacy_boards))
     if not errors:
         errors.extend(_cross_checks(config, expected_version))
     return errors
 
 
-def _validate_section(section, table, keys):
+def _validate_section(section, table, keys, allow_legacy_boards=False):
     errors = []
     extra_keys = set()
     if section == "compilado":
@@ -208,9 +209,14 @@ def _validate_section(section, table, keys):
                 errors.append(f"[compilado] falta {key} (comando de build de cada sistema)")
             elif _string()(table[key]):
                 errors.append(f"[compilado] {key}: {_string()(table[key])}")
+    legacy_board_keys = {"planejamento", "execucao", "bugs"} if (section == "paineis" and allow_legacy_boards) else set()
     for key in table:
-        if key not in keys and key not in extra_keys:
+        if key not in keys and key not in extra_keys and key not in legacy_board_keys:
             errors.append(f"chave desconhecida: {section}.{key}")
+        elif key in legacy_board_keys:
+            err = _integer(0)(table[key])
+            if err:
+                errors.append(f"{section}.{key}: {err}")
     for key, check in keys.items():
         if key not in table:
             if key not in OPTIONAL_KEYS.get(section, {}):
@@ -256,7 +262,7 @@ BOARD_MODELS = ("single", "three-boards")
 WORKFLOW_MODELS = ("grouping", "epic-branch")
 LABEL_DIALECTS = ("v3", "legacy")
 V3_DEFAULTS = {"board": {"model": "single", "labels": "v3"}, "workflow": {"model": "grouping"}}
-LEGACY_DEFAULTS = {"board": {"model": "three-boards", "number": 0, "labels": "legacy"},
+LEGACY_DEFAULTS = {"board": {"model": "single", "number": 0, "labels": "legacy"},
                    "workflow": {"model": "epic-branch"}}
 
 
@@ -282,7 +288,7 @@ def _message_to_v3(message):
                   lambda m: names.key_to_v3(m.group(0)) if m.group(1) in names.SECTIONS else m.group(0), message)
 
 
-def _v3_to_legacy(raw):
+def _v3_to_legacy(raw, allow_legacy_boards=False):
     """Translate a v3 file into the legacy shape. Returns (legacy, v3_extras, errors)."""
     legacy, errors = {}, []
     extras = {"board": dict(V3_DEFAULTS["board"]), "workflow": dict(V3_DEFAULTS["workflow"]), "mode": None}
@@ -308,7 +314,7 @@ def _v3_to_legacy(raw):
             continue
         target = legacy.setdefault(legacy_section, {})
         for key, value in table.items():
-            if section == "board" and key in ("model", "number", "labels"):
+            if section == "board" and key in ("model", "number", "labels", "planning", "execution", "bugs"):
                 extras["board"][key] = value
                 continue
             if section == "compiled" and names.is_build_key(key):
@@ -342,13 +348,24 @@ def _v3_to_legacy(raw):
         number = board.get("number")
         if isinstance(number, bool) or not isinstance(number, int) or number < 0:
             errors.append("board.number: número do Project único (inteiro, 0 antes de F4)")
-        elif isinstance(legacy.get("paineis"), dict):
-            for key in ("planejamento", "execucao", "bugs"):
-                if key in legacy["paineis"]:
-                    errors.append(f"board.{names.KEYS['paineis'][key]}: só existe no modelo three-boards")
-                legacy["paineis"][key] = number  # the legacy view sees the single board in every role
-    elif "number" in board and board["number"]:
-        errors.append("board.number: só existe no modelo single")
+        for key in ("planning", "execution", "bugs"):
+            if key in board:
+                errors.append(f"board.{key}: só existe no modelo three-boards")
+        if isinstance(legacy.get("paineis"), dict):
+            legacy["paineis"]["quadro"] = number
+    elif board["model"] == "three-boards":
+        if not allow_legacy_boards:
+            errors.append('board.model: o modelo three-boards é exclusivo da migração; o Big Bang entende um quadro único (model = "single")')
+        if "number" in board and board["number"]:
+            errors.append("board.number: só existe no modelo single")
+        for key in ("planning", "execution", "bugs"):
+            val = board.get(key)
+            if val is not None:
+                err = _integer(0)(val)
+                if err:
+                    errors.append(f"board.{key}: {err}")
+        if isinstance(legacy.get("paineis"), dict):
+            legacy["paineis"]["quadro"] = 0
     return legacy, extras, errors
 
 
@@ -399,6 +416,8 @@ def views(raw):
         for section, defaults in LEGACY_DEFAULTS.items():
             for key, value in defaults.items():
                 v3.setdefault(section, {}).setdefault(key, value)
+        if any(k in legacy.get("paineis", {}) for k in ("planejamento", "execucao", "bugs")):
+            v3["board"]["model"] = "three-boards"
     merged = {section: dict(table) if isinstance(table, dict) else table for section, table in legacy.items()}
     for section, table in v3.items():
         merged.setdefault(section, {}).update(table)
@@ -424,7 +443,14 @@ def text_to_v3(text):
             section = header.group(2)
             lines.append(f"{header.group(1)}[{names.SECTIONS.get(section, section)}]{header.group(3)}")
             if section == "paineis":
-                lines.append('model = "three-boards"                 # single depois da migração do quadro')
+                parsed_legacy = parse(text)
+                has_three = isinstance(parsed_legacy.get("paineis"), dict) and any(
+                    k in parsed_legacy["paineis"] for k in ("planejamento", "execucao", "bugs")
+                )
+                if has_three:
+                    lines.append('model = "three-boards"                 # single depois da migração do quadro')
+                else:
+                    lines.append('model = "single"                       # quadro único')
                 lines.append('labels = "legacy"                      # v3 depois da migração das labels')
             continue
         assignment = ASSIGNMENT.match(line)
@@ -439,7 +465,7 @@ def text_to_v3(text):
             continue
         lines.append(line)
     result = "\n".join(lines).rstrip("\n") + "\n\n[workflow]\nmodel = \"epic-branch\"\n"
-    if validate(parse(result)) and not validate(parse(text)):
+    if validate(parse(result), allow_legacy_boards=True) and not validate(parse(text), allow_legacy_boards=True):
         raise BbError("a tradução para v3 não validou; nada foi alterado", EXIT_INVALID_CONFIG)
     return result
 
@@ -451,7 +477,7 @@ def parse(text, source="bigbang.toml"):
         raise BbError(f"{source} não é um TOML válido: {exc}", EXIT_INVALID_CONFIG) from exc
 
 
-def load(root, required=True):
+def load(root, required=True, migration=False):
     """Load and validate bigbang.toml. Returns None when the file does not exist and is not required."""
     path = config_path(root)
     if not os.path.exists(path):
@@ -468,7 +494,7 @@ def load(root, required=True):
             config = tomllib.load(handle)
         except tomllib.TOMLDecodeError as exc:
             raise BbError(f"bigbang.toml não é um TOML válido: {exc}", EXIT_INVALID_CONFIG) from exc
-    errors = validate(config, framework_version(root))
+    errors = validate(config, framework_version(root), allow_legacy_boards=migration)
     if errors:
         raise BbError("bigbang.toml inválido:\n" + "\n".join(f"  - {e}" for e in errors), EXIT_INVALID_CONFIG)
     return views(config)

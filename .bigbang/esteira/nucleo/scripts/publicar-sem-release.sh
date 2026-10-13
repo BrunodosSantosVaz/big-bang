@@ -8,7 +8,7 @@
 # THEN: fast-forward main to develop; close the open sem-release epics whose sub-issues are all merged into their
 # epic branch (and those sub-issues), cards -> Concluído / Concluída; delete their merged epico/teste/feature/docs
 # branches (only when contained in main). Idempotent.
-# Environment: SIMULAR, PROJETO_PLANEJAMENTO/EXECUCAO, GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN), BB.
+# Environment: SIMULAR, PROJETO_QUADRO (PROJECT_NUMBER), GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN), BB.
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
@@ -17,7 +17,8 @@ if [ -z "${BB_CACHE_DIR:-}" ]; then  # board ids and options fetched once per ru
 fi
 
 AQUI="$(cd "$(dirname "$0")" && pwd)"
-PLAN="${PROJETO_PLANEJAMENTO:?}"; EXEC="${PROJETO_EXECUCAO:?}"
+QUADRO="${PROJETO_QUADRO:-${PROJECT_NUMBER:?informe PROJETO_QUADRO ou PROJECT_NUMBER}}"
+PLAN="$QUADRO"; EXEC="$QUADRO"
 R="${GITHUB_REPOSITORY:?}"; OWNER="${R%%/*}"; REPO="${R##*/}"; SIMULAR="${SIMULAR:-false}"
 read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 projeto() { bash "$AQUI/projeto.sh" "$@"; }

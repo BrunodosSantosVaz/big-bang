@@ -149,7 +149,7 @@ class SingleBoard(unittest.TestCase):
         self.assertEqual(found, [])
         self.assertEqual(reads, [("owner", 31)])
 
-    def test_three_board_layout_still_reads_all_three(self):
+    def test_three_board_layout_refused_only_quadro_allowed(self):
         found, reads = self.verify({"owner": "owner", "planejamento": 1, "execucao": 2, "bugs": 3})
-        self.assertEqual(found, [])
-        self.assertEqual(reads, [("owner", 1), ("owner", 2), ("owner", 3)])
+        self.assertIn("painel obrigatório não configurado: quadro", found)
+        self.assertEqual(reads, [])

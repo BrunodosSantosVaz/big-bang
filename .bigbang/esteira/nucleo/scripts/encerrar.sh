@@ -5,7 +5,7 @@
 #                  locks of CNABLens: exact name, tag and Release vX.Y.Z exist, branch contained in the tag and in main.
 #                  Tags are never deleted or moved.
 #   SPRINT=true  : records the end of the current sprint: "Sprint N · <início>" -> "Sprint N · <início> → <hoje>".
-# Idempotent. Environment: VERSAO, SPRINT, SIMULAR, PROJETO_PLANEJAMENTO/EXECUCAO/BUGS, GITHUB_REPOSITORY, GH_TOKEN.
+# Idempotent. Environment: VERSAO, SPRINT, SIMULAR, PROJETO_QUADRO (PROJECT_NUMBER), GITHUB_REPOSITORY, GH_TOKEN.
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
@@ -14,7 +14,8 @@ if [ -z "${BB_CACHE_DIR:-}" ]; then  # board ids and options fetched once per ru
 fi
 
 AQUI="$(cd "$(dirname "$0")" && pwd)"
-PLAN="${PROJETO_PLANEJAMENTO:?}"; EXEC="${PROJETO_EXECUCAO:?}"; BUGS="${PROJETO_BUGS:?}"
+QUADRO="${PROJETO_QUADRO:-${PROJECT_NUMBER:?informe PROJETO_QUADRO ou PROJECT_NUMBER}}"
+PLAN="$QUADRO"; EXEC="$QUADRO"; BUGS="$QUADRO"
 R="${GITHUB_REPOSITORY:?}"; SIMULAR="${SIMULAR:-false}"; HOJE="${HOJE:-$(date -u +%F)}"
 sobras=0
 [ "$SIMULAR" = true ] && export DRY_RUN=1

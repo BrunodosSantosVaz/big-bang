@@ -31,7 +31,7 @@ def _config_text(root):
 
 
 def _write_config(root, text):
-    errors = config_module.validate(config_module.parse(text))
+    errors = config_module.validate(config_module.parse(text), allow_legacy_boards=True)
     if errors:
         raise BbError("bigbang.toml migrado ficou inválido:\n" + "\n".join(f"  - {e}" for e in errors),
                       EXIT_INVALID_STATE)
@@ -128,9 +128,9 @@ def _rollback_order(config, part):
 def config_part(root, *, snapshot=None, dry_run=False, rollback=False):
     """bigbang.toml with the English names, same behavior (epic-branch, three boards, legacy labels)."""
     text = _config_text(root)
-    repository = config_module.get(config_module.load(root), "project.repository")
+    repository = config_module.get(config_module.load(root, migration=True), "project.repository")
     if rollback:
-        _rollback_order(config_module.load(root), "config")
+        _rollback_order(config_module.load(root, migration=True), "config")
         data = _load_snapshot(snapshot, "config", repository)
         if not dry_run:
             _write_config(root, data["config_before"])
@@ -344,7 +344,7 @@ def board_part(client, root, *, open_project, create_project, snapshot=None, dry
     the switch in bigbang.toml. The old boards are left untouched."""
     now = now or datetime.datetime.now(datetime.timezone.utc)
     text = _config_text(root)
-    config = config_module.load(root)
+    config = config_module.load(root, migration=True)
     if rollback:
         _rollback_order(config, "board")
         data = _load_snapshot(snapshot, "board", config_module.get(config, "project.repository"))

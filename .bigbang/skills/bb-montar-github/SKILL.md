@@ -20,7 +20,7 @@ Leia `AGENTS.md`, `.bigbang/processo/02-fundacao.md` (F4), `.bigbang/processo/04
 
 Habilite Discussions no escopo autorizado e publique o primeiro post factual com `bb comunidade primeiro-post`.
 Em públicos, confira Wiki e painéis separados; audite conteúdo antes de publicar um painel existente.
-Registre Wiki, Discussions e três painéis no README e na Wiki; confira Social preview preparado em F3.
+Registre Wiki, Discussions e o quadro único no README e na Wiki; confira Social preview preparado em F3.
 
 1. Um item por vez: mostre comando exato, propósito, efeito e qualquer limitação do plano. Espere o dono agir ou autorizar;
    confira o resultado com leitura por gh antes de seguir. Nunca trate configuração desejada como aplicada.
@@ -28,12 +28,12 @@ Registre Wiki, Discussions e três painéis no README e na Wiki; confira Social 
    e guardá-lo via `gh secret set PROJETO_TOKEN`. Confira só nome/metadados do secret, jamais seu valor.
 3. Confira secret scanning/push protection; ambiente producao com aprovação do dono e só main; staging no perfil deploy;
    rulesets de main/develop/epico com PR, checks check/regras/seguranca e bloqueio de força/exclusão.
-4. Deploy: credenciais do alvo, preferindo OIDC. Confira variáveis PROJETO_OWNER/números dos painéis, merge commit
+4. Deploy: credenciais do alvo, preferindo OIDC. Confira variáveis PROJECT_OWNER/número do quadro, merge commit
    permitido e exclusão automática de branch desligada. Se o plano não suportar uma proteção, explique e peça decisão.
 5. Com autorização, use `.bigbang/scripts/criar-labels.sh`, `.bigbang/scripts/criar-paineis.sh` e
    `.bigbang/scripts/configurar-repositorio.sh` (itens 3, 4, 5 e 7), sempre primeiro com `--simular`;
-   não recrie sua lógica. Registre os números reais dos painéis no `bigbang.toml`, acrescente as issues da Fundação.
-6. Execute `bb status` e confira os três painéis. Registre evidências no PR de F4 e peça aprovação.
+   não recrie sua lógica. Registre o número real do quadro no `bigbang.toml`, acrescente as issues da Fundação.
+6. Execute `bb status` e confira o quadro único. Registre evidências no PR de F4 e peça aprovação.
 
 ## Pare e pergunte quando
 
@@ -45,4 +45,4 @@ Peça, leia ou exponha o valor de token; amplie escopos silenciosamente; aprove 
 
 ## Pronto quando
 
-F4 aprovado, configuração efetiva registrada e `bb status` lendo os três painéis, com limitações aceitas explicitamente.
+F4 aprovado, configuração efetiva registrada e `bb status` lendo o quadro único, com limitações aceitas explicitamente.

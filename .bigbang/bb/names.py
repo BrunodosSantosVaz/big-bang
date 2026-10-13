@@ -32,7 +32,7 @@ KEYS = {
                "padrao_teste": "test_pattern", "caminhos_estruturais": "structural_paths"},
     "seguranca": {"nivel_asvs": "asvs_level", "banco_no_navegador": "browser_database",
                   "zonas_sensiveis": "sensitive_paths"},
-    "paineis": {"owner": "owner", "planejamento": "planning", "execucao": "execution", "bugs": "bugs"},
+    "paineis": {"owner": "owner", "quadro": "number", "planejamento": "planning", "execucao": "execution", "bugs": "bugs"},
     "ias": {"nomes": "names", "tarefas_por_ia": "tasks_per_agent", "trava_expira_horas": "lease_hours",
             "espera_confirmacao_segundos": "confirm_seconds"},
     "flags": {"validade_maxima_dias": "max_age_days"},
@@ -47,8 +47,7 @@ VALUES = {
 }
 # Keys that only exist in v3 files: (section, key) -> default when a legacy file is read.
 V3_ONLY = {
-    ("board", "model"): "three-boards",
-    ("board", "number"): 0,
+    ("board", "model"): "single",
     ("board", "labels"): "legacy",
     ("workflow", "model"): "epic-branch",
 }
@@ -158,8 +157,7 @@ WORKFLOWS = {
 REQUIRED_CHECKS = {"legacy": ("check", "regras", "seguranca"), "v3": ("gate",)}
 ENVIRONMENT = {"legacy": "producao", "v3": "production"}
 SECRETS = {"PROJETO_TOKEN": "PROJECT_TOKEN"}
-VARIABLES = {"PROJETO_OWNER": "PROJECT_OWNER", "PROJETO_PLANEJAMENTO": "PROJECT_NUMBER",
-             "PROJETO_EXECUCAO": "PROJECT_NUMBER", "PROJETO_BUGS": "PROJECT_NUMBER"}
+VARIABLES = {"PROJETO_OWNER": "PROJECT_OWNER", "PROJETO_QUADRO": "PROJECT_NUMBER"}
 
 # --- reverse lookups --------------------------------------------------------------------------------------------------
 

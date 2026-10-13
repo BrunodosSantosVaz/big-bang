@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # "Ver painéis" (spec 14.2): read only. Every board column by column (number, title, Sprint) and what waits for the
 # owner, in the log and in the run summary. In a public repository the summary is public too.
-# Environment: PROJETO_PLANEJAMENTO/EXECUCAO/BUGS, GITHUB_REPOSITORY, GH_TOKEN, GITHUB_STEP_SUMMARY (optional).
+# Environment: PROJETO_QUADRO, PROJECT_NUMBER, GITHUB_REPOSITORY, GH_TOKEN, GITHUB_STEP_SUMMARY (optional).
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
@@ -33,14 +33,28 @@ painel() { # <nome> <numero>
   done <<<"$colunas"$'\n-'
 }
 
+obter_quadro() {
+  local num="${PROJETO_QUADRO:-${PROJECT_NUMBER:-}}"
+  if [ -z "$num" ] || [ "$num" = "0" ]; then
+    num=$("${BB_CMD[@]}" config get paineis.quadro 2>/dev/null || true)
+  fi
+  if [ "$num" = "0" ]; then
+    num=""
+  fi
+  printf '%s' "$num"
+}
+
 espera() { # what waits for the owner
-  local p="${PROJETO_PLANEJAMENTO:-}" e="${PROJETO_EXECUCAO:-}" b="${PROJETO_BUGS:-}" itens=""
-  [ -z "$p" ] || itens+=$(projeto quadro "$p" | awk -F'\t' '$1 == "Backlog Refinement" { printf "- Aprovar o refinamento do #%s %s\n", $2, $3 }
-    $1 == "Validar protótipo" { printf "- Validar o protótipo do #%s %s\n", $2, $3 }
-    $1 == "Homologação" { printf "- Homologar o épico #%s %s\n", $2, $3 }')
-  [ -z "$e" ] || itens+=$(projeto quadro "$e" | awk -F'\t' '$1 == "Validar PR" { printf "\n- Revisar o PR da #%s %s", $2, $3 }')
-  [ -z "$b" ] || itens+=$(projeto quadro "$b" | awk -F'\t' '$1 == "Validar PR" { printf "\n- Revisar o PR do bug #%s %s", $2, $3 }
-    $1 == "Homologação" { printf "\n- Homologar o bug #%s %s", $2, $3 }')
+  local q; q=$(obter_quadro)
+  local itens=""
+  if [ -n "$q" ]; then
+    itens+=$(projeto quadro "$q" | awk -F'\t' '
+      $1 ~ /^(Refinement|Backlog Refinement)$/ { printf "- Aprovar o refinamento do #%s %s\n", $2, $3 }
+      $1 ~ /^(Prototyping|Validar protótipo)$/ { printf "- Validar o protótipo do #%s %s\n", $2, $3 }
+      $1 ~ /^(In Review|Validar PR)$/ { printf "- Revisar o PR da #%s %s\n", $2, $3 }
+      $1 ~ /^(QA|Homologação)$/ { printf "- Homologar o #%s %s\n", $2, $3 }
+    ')
+  fi
   echo "## O que espera pelo dono"; echo
   if [ -n "$itens" ]; then printf '%s\n' "$itens" | sed '/^$/d'; else echo "Nada."; fi
   echo
@@ -48,9 +62,10 @@ espera() { # what waits for the owner
 
 saida=$(
   espera
-  [ -z "${PROJETO_PLANEJAMENTO:-}" ] || painel "Planejamento" "$PROJETO_PLANEJAMENTO"
-  [ -z "${PROJETO_EXECUCAO:-}" ] || painel "Execução" "$PROJETO_EXECUCAO"
-  [ -z "${PROJETO_BUGS:-}" ] || painel "Bugs" "$PROJETO_BUGS"
+  num=$(obter_quadro)
+  if [ -n "$num" ]; then
+    painel "Quadro" "$num"
+  fi
   bb
 )
 printf '%s\n' "$saida"

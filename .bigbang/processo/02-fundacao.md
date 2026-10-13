@@ -92,11 +92,11 @@ Um item por vez, conferido pela IA com `gh` antes do próximo:
 6. No perfil deploy: credenciais do alvo, preferindo federação OIDC (nada de chave fixa). No perfil compilado:
    os segredos de assinatura `BB_ASSINATURA_ARQUIVO` (keystore ou certificado em base64), `BB_ASSINATURA_SENHA`,
    `BB_ASSINATURA_ALIAS` e, se diferente, `BB_ASSINATURA_SENHA_CHAVE`, gerados e guardados pelo dono.
-7. Variáveis do repositório (`PROJETO_OWNER`, números dos painéis) e opções de merge (permitir *merge commit*;
+7. Variáveis do repositório (`PROJETO_OWNER`, número do quadro único) e opções de merge (permitir *merge commit*;
    "apagar branch após merge" desligado, porque quem apaga é a esteira).
 
 Os itens 3, 4, 5 e 7 são aplicados por `.bigbang/scripts/configurar-repositorio.sh <dono/repo>` (rode antes com
-`--simular`); os itens 2 e 6 são segredos e só o dono os cria. Depois, a IA cria os três painéis com colunas, campos
+`--simular`); os itens 2 e 6 são segredos e só o dono os cria. Depois, a IA cria o quadro único com colunas, campos
 e visões (`criar-paineis.sh`), as labels completas (`criar-labels.sh`) e acrescenta as issues da Fundação já
 concluídas.
 
