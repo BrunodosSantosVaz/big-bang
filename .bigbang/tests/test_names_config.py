@@ -54,6 +54,9 @@ class Names(unittest.TestCase):
         self.assertEqual(len(aliases), len(set(aliases)))
         self.assertFalse(set(aliases) & set(names.COMMANDS))
 
+    def test_variables_mapping_only_quadro(self):
+        self.assertEqual(names.VARIABLES, {"PROJETO_OWNER": "PROJECT_OWNER", "PROJETO_QUADRO": "PROJECT_NUMBER"})
+
 
 class BilingualConfig(unittest.TestCase):
     def test_scenarios_translate_and_validate(self):
@@ -135,7 +138,8 @@ class BilingualConfig(unittest.TestCase):
         raw["workflow"]["model"] = "grouping"
         self.assertEqual(config.validate(raw), [])
         loaded = config.views(raw)
-        self.assertEqual(loaded["paineis"]["planejamento"], 42)
+        self.assertEqual(loaded["paineis"]["quadro"], 42)
+        self.assertNotIn("planejamento", loaded["paineis"])
         self.assertEqual(config.get(loaded, "board.number"), 42)
         raw["board"]["planning"] = 3
         self.assertIn("board.planning: só existe no modelo three-boards", config.validate(raw))

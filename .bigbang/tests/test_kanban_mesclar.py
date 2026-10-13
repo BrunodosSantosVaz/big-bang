@@ -42,6 +42,21 @@ class Kanban(ComBb):
         self.assertEqual(set(self.estado["issues"]["7"]["labels"]),
                          {"epic", "com-prototipo", "testes-revisao-ia", "revisao-humana"})
 
+    def test_kanban_com_quadro_unico_sem_tres_paineis(self):
+        self.issue(7, "Estoque", labels=["epic"], corpo=corpo_epico(prototipo="Sim", prs="Eu"))
+        r = self.kanban(EVENT="issues", ACTION="opened", ISSUE=7,
+                        PROJETO_QUADRO="1", PROJETO_PLANEJAMENTO="", PROJETO_EXECUCAO="", PROJETO_BUGS="")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.status(1, 7), "Brainstorm")
+
+    def test_kanban_recusa_quando_quadro_nao_informado_mesmo_com_variaveis_legadas(self):
+        self.issue(7, "Estoque", labels=["epic"], corpo=corpo_epico(prototipo="Sim", prs="Eu"))
+        r = self.kanban(EVENT="issues", ACTION="opened", ISSUE=7,
+                        PROJETO_QUADRO="", PROJECT_NUMBER="",
+                        PROJETO_PLANEJAMENTO="1", PROJETO_EXECUCAO="2", PROJETO_BUGS="3")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("informe PROJETO_QUADRO ou PROJECT_NUMBER", r.stderr)
+
     def test_edicao_so_muda_o_que_mudou(self):
         self.issue(7, "Estoque", labels=["epic", "sem-prototipo", "testes-revisao-ia", "revisao-humana"],
                    corpo=corpo_epico(prototipo="Sim"))

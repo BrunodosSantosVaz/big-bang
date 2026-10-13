@@ -373,16 +373,19 @@ class EncerrarEVerPaineis(ComGit):
     def test_ver_paineis(self):
         self.issue(7, "Estoque")
         self.issue(12, "Regra")
+        self.estado["boards"]["1"]["fields"]["Status"]["options"].append(
+            {"id": "OS1-pr", "name": "Validar PR"}
+        )
         self.cartao(1, 7, "Homologação")
-        self.cartao(2, 12, "Validar PR", Sprint="Sprint 1 · 2026-10-05")
+        self.cartao(1, 12, "Validar PR", Sprint="Sprint 1 · 2026-10-05")
         os.makedirs(os.path.join(self.pasta, ".bigbang"), exist_ok=True)
         shutil.copy(os.path.join(BIGBANG, "VERSION"), os.path.join(self.pasta, ".bigbang", "VERSION"))
         with open(os.path.join(self.pasta, "bigbang.toml"), "w", encoding="utf-8") as handle:
             handle.write(exemplo_toml().replace("BrunodosSantosVaz/meu-sistema", "dono/repo").replace(
-                'dono = "BrunodosSantosVaz"', 'dono = "dono"'))
+                'dono = "BrunodosSantosVaz"', 'dono = "dono"').replace("quadro = 0", "quadro = 1"))
         r = self.rodar("ver-paineis.sh", env={"BB": f"{sys.executable} {BB} --raiz {self.pasta}"})
         self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertIn("- Homologar o épico #7 Estoque", r.stdout)
+        self.assertIn("- Homologar o #7 Estoque", r.stdout)
         self.assertIn("- Revisar o PR da #12 Regra", r.stdout)
         self.assertIn("### Validar PR\n\n- #12 Regra (Sprint 1 · 2026-10-05)", r.stdout)
 

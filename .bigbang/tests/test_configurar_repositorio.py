@@ -16,8 +16,7 @@ class ConfigurarRepositorio(CasoDeScript):
         projeto = os.path.join(self.pasta, "projeto")
         os.makedirs(os.path.join(projeto, ".bigbang"))
         shutil.copy(os.path.join(BIGBANG, "VERSION"), os.path.join(projeto, ".bigbang", "VERSION"))
-        toml = (exemplo_toml().replace("planejamento = 0", "planejamento = 16").replace("execucao = 0", "execucao = 17")
-                .replace("bugs = 0", "bugs = 18"))
+        toml = exemplo_toml().replace("quadro = 0", "quadro = 17")
         with open(os.path.join(projeto, "bigbang.toml"), "w", encoding="utf-8") as arquivo:
             arquivo.write(toml)
         self.bb = f"{sys.executable} {BB} --raiz {projeto}"
@@ -48,7 +47,13 @@ class ConfigurarRepositorio(CasoDeScript):
         self.assertIn(["api", "-X", "PATCH", "repos/dono/repo", "-f",
                        "security_and_analysis[secret_scanning][status]=enabled", "-f",
                        "security_and_analysis[secret_scanning_push_protection][status]=enabled"], chamadas)
-        self.assertIn(["variable", "set", "PROJETO_EXECUCAO", "--repo", "dono/repo", "--body", "17"], chamadas)
+        self.assertIn(["variable", "set", "PROJECT_OWNER", "--repo", "dono/repo", "--body", "BrunodosSantosVaz"], chamadas)
+        self.assertIn(["variable", "set", "PROJECT_NUMBER", "--repo", "dono/repo", "--body", "17"], chamadas)
+        self.assertIn(["variable", "set", "PROJETO_OWNER", "--repo", "dono/repo", "--body", "BrunodosSantosVaz"], chamadas)
+        self.assertIn(["variable", "set", "PROJETO_QUADRO", "--repo", "dono/repo", "--body", "17"], chamadas)
+        self.assertNotIn(["variable", "set", "PROJETO_EXECUCAO", "--repo", "dono/repo", "--body", "17"], chamadas)
+        self.assertNotIn(["variable", "set", "PROJETO_PLANEJAMENTO", "--repo", "dono/repo", "--body", "17"], chamadas)
+        self.assertNotIn(["variable", "set", "PROJETO_BUGS", "--repo", "dono/repo", "--body", "17"], chamadas)
         self.assertTrue(any(c[:2] == ["repo", "edit"] and "--delete-branch-on-merge=false" in c for c in chamadas))
         self.assertIn("Pendente do dono (segredos): PROJETO_TOKEN", r.stdout)
         self.assertIn("staging", r.stdout)  # deploy profile

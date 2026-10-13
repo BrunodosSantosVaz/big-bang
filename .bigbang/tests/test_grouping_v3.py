@@ -366,9 +366,9 @@ class GeneratedV3(unittest.TestCase):
         with open(os.path.join(CENARIOS, "deploy-vps-docker.toml"), encoding="utf-8") as handle:
             text = init.set_value(handle.read(), "bigbang", "versao", framework_version(root))
         text = config.text_to_v3(text).replace('model = "epic-branch"', 'model = "grouping"').replace(
-            'model = "three-boards"                 # single depois da migração do quadro', 'model = "single"\nnumber = 7'
+            'model = "three-boards"                 # single depois da migração do quadro', 'model = "single"'
         ).replace('labels = "legacy"                      # v3 depois da migração das labels', 'labels = "v3"')
-        text = text.replace('planning = 0\n', '').replace('execution = 0\n', '').replace('bugs = 0\n', '')
+        text = text.replace('number = 0', 'number = 7').replace('planning = 0\n', '').replace('execution = 0\n', '').replace('bugs = 0\n', '')
         with open(os.path.join(root, "bigbang.toml"), "w", encoding="utf-8") as handle:
             handle.write(text)
         self.assertEqual(config.validate(config.parse(text)), [])

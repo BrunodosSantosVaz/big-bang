@@ -20,6 +20,12 @@ class IniciarSprint(ComBb):
     def iniciar(self, **env):
         return self.rodar("iniciar-sprint.sh", env={"BB": self.bb, "DATA": "2026-10-05", **env})
 
+    def test_iniciar_sprint_recusa_quando_quadro_nao_informado_mesmo_com_variaveis_legadas(self):
+        r = self.iniciar(PROJETO_QUADRO="", PROJECT_NUMBER="",
+                         PROJETO_PLANEJAMENTO="1", PROJETO_EXECUCAO="2")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("informe PROJETO_QUADRO ou PROJECT_NUMBER", r.stderr)
+
     def criadas(self):
         return {int(n): i for n, i in self.ler_estado()["issues"].items() if int(n) != 7}
 
@@ -47,6 +53,15 @@ class IniciarSprint(ComBb):
         self.assertEqual(sorted(issues[doc]["blocked_by"]), sorted([t1, t2]))
         self.assertIn("heads/epico/7-bloquear-pedido-sem-estoque", self.estado["refs"])
         self.assertTrue(any(ref.startswith(f"heads/teste/{teste}-") for ref in self.estado["refs"]))
+        self.assertEqual(self.status(1, 7), "Em desenvolvimento")
+
+    def test_iniciar_com_quadro_unico_sem_tres_paineis(self):
+        self.estado["boards"]["1"]["fields"]["Status"]["options"].append(
+            {"id": "OS1-afazer", "name": "A fazer"}
+        )
+        self.gravar_estado()
+        r = self.iniciar(PROJETO_QUADRO="1", PROJETO_PLANEJAMENTO="", PROJETO_EXECUCAO="")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(self.status(1, 7), "Em desenvolvimento")
 
     def test_rodar_de_novo_nao_duplica(self):

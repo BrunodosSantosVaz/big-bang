@@ -102,7 +102,7 @@ class Esquema(unittest.TestCase):
                  ("seguranca", "banco_no_navegador", "false"), ("ias", "tarefas_por_ia", 0),
                  ("projeto", "slug", "Meu Sistema"), ("deploy", "url_producao", "http://x.com"),
                  ("testes", "padrao_teste", "(it|test"), ("ias", "nomes", ["claude-1", "claude-1"]),
-                 ("paineis", "bugs", True)]
+                 ("paineis", "quadro", True)]
         for secao, chave, valor in casos:
             with self.subTest(chave=f"{secao}.{chave}", valor=valor):
                 cfg = copy.deepcopy(exemplo())
@@ -117,6 +117,29 @@ class Esquema(unittest.TestCase):
         cfg = exemplo()
         cfg["projeto"]["repositorio"] = "outra-pessoa/meu-sistema"
         self.assertIn("projeto.repositorio: deve pertencer ao projeto.dono", config.validate(cfg))
+
+    def test_legacy_three_boards_rejected_outside_migration(self):
+        cfg = exemplo()
+        cfg["paineis"]["planejamento"] = 1
+        cfg["paineis"]["execucao"] = 2
+        cfg["paineis"]["bugs"] = 3
+        errors = config.validate(cfg)
+        self.assertIn("chave desconhecida: paineis.planejamento", errors)
+        self.assertIn("chave desconhecida: paineis.execucao", errors)
+        self.assertIn("chave desconhecida: paineis.bugs", errors)
+        self.assertEqual(config.validate(cfg, allow_legacy_boards=True), [])
+
+    def test_v3_three_boards_rejected_outside_migration(self):
+        v3_cfg = config.parse(config.text_to_v3(exemplo_toml()))
+        v3_cfg["board"]["model"] = "three-boards"
+        v3_cfg["board"]["planning"] = 1
+        v3_cfg["board"]["execution"] = 2
+        v3_cfg["board"]["bugs"] = 3
+        v3_cfg["board"].pop("number", None)
+        v3_cfg["board"].pop("quadro", None)
+        errors = config.validate(v3_cfg)
+        self.assertTrue(any("three-boards" in err for err in errors), f"Esperava erro sobre three-boards, obteve: {errors}")
+        self.assertEqual(config.validate(v3_cfg, allow_legacy_boards=True), [])
 
 
 class ConfigGet(unittest.TestCase):
