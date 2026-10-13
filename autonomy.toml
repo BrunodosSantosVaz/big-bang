@@ -3,7 +3,7 @@
 version = 1
 targets = ["production"]          # ambiente reconhecido; a aprovação do environment `production` no GitHub continua só do dono
 risk = ["low", "medium"]          # alto e crítico (contrato, segurança, .bigbang/, release) continuam com o dono
-gates = ["backlog", "refinement", "prototype", "tests", "pr", "qa", "publish"]  # `publish` é o portão do bb; risco alto/crítico (todo release muda .bigbang/) segue bloqueado para o dono
+gates = ["refinement", "prototype", "tests", "pr", "qa", "publish"]  # `backlog` NÃO é delegado (a prioridade é do dono); `publish` é o portão do bb; risco alto/crítico (todo release muda .bigbang/) segue bloqueado para o dono
 flags = "owner"                   # quem liga feature flags
 wip = 3                           # tarefas/épicos em andamento ao mesmo tempo
 attempts = 3                      # reprovações antes de blocked
