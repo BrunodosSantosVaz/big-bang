@@ -2756,7 +2756,7 @@
         ".bigbang/pipeline/process/README.md": "sha256:563c93bb12e74264d620ffad936c2039cf3ed231f4e0a66090f27063e9bb6d03",
         ".bigbang/pipeline/process/board.md": "sha256:db8b4f489cbd4f8b08ced195f6da10719095cc85a6d394f2511ebd2b920ab349",
         ".bigbang/pipeline/process/bugs.md": "sha256:2f13beb591518a5039b46ed34720c7fc27302b30ccc19277990099f9395dbf78",
-        ".bigbang/pipeline/process/delivery.md": "sha256:36f9fe81499448a8d90c9bd89b780886b2b340b35c97d73072a72beebf1b946c",
+        ".bigbang/pipeline/process/delivery.md": "sha256:1abc62b7d45a020f9f7ca6f0def2f07c62ea8f8bc4414a6bf12a292d53693ba3",
         ".bigbang/pipeline/process/execution.md": "sha256:a53d9677df320fdbacc75e4c054a3c87e4c915effa3d8338cf57a9fa2c7f51b9",
         ".bigbang/pipeline/process/modes.md": "sha256:d1630b5c4aad2e0c36343f67c689669526a1f3299a7acf24f80fafea35cc3eef",
         ".bigbang/pipeline/process/planning.md": "sha256:14e761b28252ecdf754028721f193a6391d05e73e9079b21cd92219916ab6874",
