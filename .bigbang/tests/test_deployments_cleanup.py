@@ -109,16 +109,38 @@ class TestDeploymentsCleanup(unittest.TestCase):
         self.assertNotIn(("DELETE", "repos/dono/repo/deployments/302", None), calls)
         self.assertIn(("DELETE", "repos/dono/repo/deployments/303", None), calls)
 
+    def test_clean_deployments_cleans_deployments_with_waiting_status(self):
+        calls = []
+
+        def fake_api(method, path, payload=None):
+            calls.append((method, path, payload))
+            if method == "GET" and path.startswith("repos/dono/repo/deployments?"):
+                return 200, [
+                    {"id": 401, "environment": "production"},
+                ]
+            if method == "GET" and path.startswith("repos/dono/repo/deployments/401/statuses"):
+                return 200, [{"id": 1, "state": "waiting", "log_url": "https://github.com/dono/repo/actions/runs/888/job/1"}]
+            if method == "POST" and "statuses" in path:
+                return 201, {"id": 999, "state": "inactive"}
+            if method == "DELETE":
+                return 204, None
+            return 200, {}
+
+        client = gh.GitHub("dono/repo", api=fake_api)
+        cleaned = pipeline.clean_deployments(client, run_id="888", environment="production")
+
+        self.assertEqual(cleaned, [401])
+        self.assertIn(("POST", "repos/dono/repo/deployments/401/statuses", {"state": "inactive"}), calls)
+        self.assertIn(("DELETE", "repos/dono/repo/deployments/401", None), calls)
+
 
 class TestPublishWorkflowCleanDeploymentsStep(unittest.TestCase):
-    def test_publish_workflow_contains_clean_deployments_always_step_and_job(self):
+    def test_publish_workflow_contains_clean_deployments_always_step(self):
         import os
         from _raiz import RAIZ
         template_path = os.path.join(RAIZ, ".bigbang", "pipeline", "core", "files", ".github", "workflows", "bb-publish.yml.tmpl")
         with open(template_path, encoding="utf-8") as f:
             template_text = f.read()
         self.assertIn("name: Clean deployments", template_text)
-        self.assertIn("cleanup:", template_text)
-        self.assertIn("needs: [check, publish]", template_text)
-        self.assertIn("if: always() && needs.check.result == 'success' && !inputs.dry_run", template_text)
+        self.assertIn("if: always()", template_text)
         self.assertIn("python .bigbang/bin/bb.py pipeline clean-deployments --environment production", template_text)

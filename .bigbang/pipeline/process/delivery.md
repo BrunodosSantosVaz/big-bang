@@ -63,7 +63,7 @@ Depois da aprovação, a publicação:
 6. libera a trava da versão;
 7. remove os registros de deployment do próprio run (sucesso ou falha), mantendo a página do repositório limpa sem alterar o ambiente nem seus revisores.
 
-Como `environment: production` é uma proteção no nível de job (o job não inicia nem executa steps `if: always()` enquanto aguarda aprovação), a limpeza de deployments é acionada tanto ao término do job `publish` quanto em um job independente de `cleanup` executado sem ambiente protegido, garantindo que registros em espera de aprovação, cancelados ou concluídos sejam limpos pelo identificador exato do run.
+Como `environment: production` é uma regra de proteção no nível do job, o runner só é despachado após a aprovação manual do dono. Enquanto a execução aguarda aprovação na interface do GitHub, o registro em Deployments permanece visível como pendente/em espera; ao ser concluída (com sucesso ou falha), o passo de limpeza (`if: always()`) marca o registro como inativo e o exclui pelo ID exato do run. Caso uma execução seja cancelada ou abandonada antes de rodar o job, a faxina periódica (`bb cleanup`) ou o comando manual `bb pipeline clean-deployments` realizam a higienização dos registros remanescentes.
 
 Promoção que falha não conclui nenhum épico. Publicar de novo não duplica nada.
 
