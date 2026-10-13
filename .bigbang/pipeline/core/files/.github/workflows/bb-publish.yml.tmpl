@@ -88,3 +88,9 @@ jobs:
           VERSION: ${{ inputs.version }}
           # deploy profile: the production server (variables and secrets of the production environment)
 {{gerado.env_alvo}}
+      - name: Clean deployments
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: python .bigbang/bin/bb.py pipeline clean-deployments --environment production
+

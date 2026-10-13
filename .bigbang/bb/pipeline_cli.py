@@ -137,6 +137,11 @@ def register(commands, parser_class):
     p.add_argument("issue", type=int)
     p.set_defaults(handler=lambda args: ownership.touch(config_module.load(args.raiz), args.issue) or EXIT_OK)
 
+    p = sub.add_parser(**names.cli_name('esteira', "limpar-deployments"), help="limpa registros de deployment do run atual")
+    p.add_argument("--run-id", dest="run_id", default=os.environ.get("GITHUB_RUN_ID", ""), help="ID do workflow run")
+    p.add_argument("--environment", dest="environment", default="production", help="ambiente do deployment")
+    p.set_defaults(handler=_clean_deployments)
+
     from . import flow_cli
     flow_cli.register(commands, sub)
 
@@ -392,3 +397,17 @@ def _write_version(args):
         raise BbError(f"{relative}: {exc}", EXIT_USAGE) from exc
     print(f"{relative}: versão {args.versao}")
     return EXIT_OK
+
+
+def _clean_deployments(args):
+    from . import gh
+    config = config_module.load(args.raiz)
+    repo = config_module.get(config, "project.repository")
+    client = gh.GitHub(repo)
+    cleaned = pipeline.clean_deployments(client, run_id=args.run_id, environment=args.environment)
+    if cleaned:
+        print(f"Deployments limpos: {', '.join(str(d) for d in cleaned)}")
+    else:
+        print("Nenhum deployment a limpar.")
+    return EXIT_OK
+

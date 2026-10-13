@@ -570,3 +570,30 @@ def tables_without_rls(sql_texts):
         created += [name(m) for m in CREATE_TABLE.findall(text)]
         protected |= {name(m) for m in ENABLE_RLS.findall(text)}
     return sorted(set(created) - protected)
+
+
+def clean_deployments(client, run_id, environment=None):
+    """Clean GitHub deployment records for the given workflow run ID without touching environments or reviewers.
+
+    Deactivates matching deployments by setting status to inactive, then deletes them.
+    """
+    if not run_id:
+        return []
+    run_str = str(run_id)
+    deployments = client.paginate("deployments")
+    cleaned = []
+    for dep in deployments:
+        dep_id = dep.get("id")
+        dep_env = dep.get("environment")
+        if environment is not None and dep_env != environment:
+            continue
+        statuses = client.paginate(f"deployments/{dep_id}/statuses")
+        match = any(run_str in (status.get("log_url") or "") for status in statuses)
+        if match:
+            # Set to inactive first
+            client.call("POST", f"deployments/{dep_id}/statuses", {"state": "inactive"}, accept=(200, 201, 204))
+            # Delete deployment
+            client.call("DELETE", f"deployments/{dep_id}", accept=(200, 204, 404))
+            cleaned.append(dep_id)
+    return cleaned
+

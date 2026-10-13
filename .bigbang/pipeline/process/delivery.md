@@ -60,7 +60,8 @@ Depois da aprovação, a publicação:
 3. conclui os épicos entregues e mantém no escuro os demais;
 4. fecha o milestone;
 5. devolve a `main` à `develop` (PR de sync com `conflict` se houver conflito);
-6. libera a trava da versão.
+6. libera a trava da versão;
+7. remove os registros de deployment do próprio run (sucesso ou falha), mantendo a página do repositório limpa sem alterar o ambiente nem seus revisores.
 
 Promoção que falha não conclui nenhum épico. Publicar de novo não duplica nada.
 

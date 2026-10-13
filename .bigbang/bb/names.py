@@ -82,7 +82,7 @@ CLI = {
     ("esteira", "guarda-stack"): "stack-guard", ("esteira", "osv-avaliar"): "osv-check", ("esteira", "rls"): "rls",
     ("esteira", "gravar-versao"): "write-version", ("esteira", "resumo-posses"): "claims-summary",
     ("esteira", "marcar-paradas"): "mark-stale", ("esteira", "liberar-posse"): "release-claim",
-    ("esteira", "registrar-push"): "record-push",
+    ("esteira", "registrar-push"): "record-push", ("esteira", "limpar-deployments"): "clean-deployments",
 }
 OPTIONS = {
     "--raiz": "--root", "--simular": "--dry-run", "--esteira": "--pipeline", "--nome": "--name", "--dono": "--owner",
