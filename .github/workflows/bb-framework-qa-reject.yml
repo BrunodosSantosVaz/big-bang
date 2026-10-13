@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v3.0.1 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-qa-reject.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v3.1.0 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-qa-reject.yml. Não edite: personalize em bigbang.toml.
 # Button "QA reject" (v3): with the owner's decision qa:rejected recorded on the epic, the epic passes through
 # Rejected back to In Progress and one correction task is born from the release branch (fix/<n>).
 name: QA reject

@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v3.0.1 a partir de .bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v3.1.0 a partir de .bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml. Não edite: personalize em bigbang.toml.
 # CI do proprio Big Bang. Roda so no repositorio BrunodosSantosVaz/big-bang: em sistemas criados a partir do
 # template, todos os jobs sao pulados, e a Fundacao (F5) remove este arquivo. Decisoes: .bigbang/docs/decisoes/ADR-0006.
 name: Framework gate

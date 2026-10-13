@@ -4,6 +4,26 @@ O que muda em cada versão do framework e o que um projeto precisa fazer ao atua
 SemVer: versão **maior** = o projeto precisa agir, e a seção diz como. A camada do projeto nunca é tocada.
 Cada seção tem "O que muda" e "O que o projeto precisa fazer" ("Nada." quando não há passo manual).
 
+## [3.1.0] - 2026-10-12
+
+### O que muda
+
+Deploy multiplataforma (épico #174) e correções de operação:
+
+- **Alvo de deploy personalizado:** o projeto pode publicar com scripts próprios. Os scripts rodam com ambiente mínimo e
+  nunca recebem o token da publicação.
+- **Pacotes e arquivos estáticos:** novos formatos de artefato com **manifesto imutável** por hash SHA-256; a promoção
+  reutiliza o mesmo artefato e a validação recusa corrupção e caminhos fora do pacote.
+- **Adaptador AWS (S3 + CloudFront) em BETA:** autenticação por OIDC (sem chaves fixas) e política de menor privilégio.
+  **Não foi testado em conta AWS real:** use com atenção e envie o relato pelo template de issue gerado.
+- **Publicação e corte de release repetíveis:** o botão de publicar aceita PR já mesclado e lê as notas depois do merge; o
+  botão de corte configura a identidade do git antes de gravar a versão.
+- **Checagem de comunidade** aceita o quadro único (`paineis.quadro`), além do formato de três painéis.
+
+### O que o projeto precisa fazer
+
+Nada.
+
 ## [3.0.1] - 2026-10-11
 
 ### O que muda

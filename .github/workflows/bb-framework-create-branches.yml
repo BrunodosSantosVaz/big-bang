@@ -1,4 +1,4 @@
-# Gerado pelo Big Bang v3.0.1 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-create-branches.yml. Não edite: personalize em bigbang.toml.
+# Gerado pelo Big Bang v3.1.0 a partir de .bigbang/pipeline/core/files/.github/workflows/bb-create-branches.yml. Não edite: personalize em bigbang.toml.
 # Button "Create branches" (ADR-0022): branches from develop for every unblocked child of an epic in progress.
 # Also runs after every merge into develop.
 name: Create branches

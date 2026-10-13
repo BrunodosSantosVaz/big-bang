@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "b5e7754e989fe054a2c9798e50fc69457251436b",
-    "commit": "36e00596007a01e3323337448ef94d696cd004ba",
+    "commit": "972cb56dc4cb221344e70ef8b0fcb155a58cb940",
     "branch": "master",
-    "proposta": "bigbang/proposta-180-adaptador-aws-s3-cloudfront"
+    "proposta": "bigbang/proposta-310-release"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -263,8 +263,8 @@
     }
   },
   "codigo": {
-    "commit": "371a61ae5c993f6ba3fde76e77f91e64f0bf9c42",
-    "versao": "3.0.1",
+    "commit": "00ac9462d6b51b904656e3f5dbee29576b93a5da",
+    "versao": "3.1.0",
     "raizes": [
       ".bigbang/",
       ".github/workflows/",
@@ -504,7 +504,7 @@
       ],
       "hashes": {
         ".bigbang/bb/config.py": "sha256:6e1be8259367d86f80c18dcbe19bf78cae3bee9093dd48c8322e202ff5549d18",
-        ".bigbang/modelos/bigbang.toml.exemplo": "sha256:e7e60bcd9976ca35ec8d15181f5425b3d78d4cb008b6c421469dd1ffb4907501",
+        ".bigbang/modelos/bigbang.toml.exemplo": "sha256:77f15cea27877763b002867e4326d916067a7323103c1a6101d7cffe12ee38de",
         ".bigbang/modelos/flags.toml": "sha256:3f4bf065d88d1b4b344e2ec8d24e536ef7433333bacb2cf974fc4194703a47ba"
       },
       "descricao": "Ler bigbang.toml sem aceitar erros de digitação que silenciem controles do projeto."
@@ -622,7 +622,7 @@
         ".bigbang/esteira/perfis/deploy/arquivos/.github/workflows/bb-voltar-versao.yml.tmpl": "sha256:1708c585432d766cd02bdbb0f2ad30b4246ef92509b28345293b792525e4a8b7",
         ".bigbang/esteira/perfis/deploy/scripts/publicar-personalizado.sh": "sha256:47e3238064568be91b848e0f275e41c76ce372d6538d3ee8cccf3cf86591db40",
         ".bigbang/esteira/perfis/deploy/scripts/finalizar-publicacao.sh": "sha256:fd47cc1d94bc9a53ae50bd59b16a52b78d8609bb2f58a31d2fba2f253e7e35fa",
-        ".bigbang/MIGRACAO.md": "sha256:1e000be6a33005ae94682a9eed869f40f5b5a9143905a02cf9aaab8a289941a8",
+        ".bigbang/MIGRACAO.md": "sha256:0605d292a82b4d7a1ea5ba27c8d4386a337c26c46af2fa7eb07b478019312633",
         ".bigbang/processo/14-automacoes.md": "sha256:6e9e080532e3999529d7f427e2076c8033b17722fe5b2b0978b51aa1305752a8"
       },
       "descricao": "Resolver entregas por contratos instalados, distinguindo suporte implementado de integração reservada."
@@ -936,8 +936,8 @@
       ],
       "hashes": {
         ".bigbang/bb/package.py": "sha256:8e87231013938d732ebfe3123872e2231f3564030f3264960ba85c4259784197",
-        ".bigbang/MIGRACAO.md": "sha256:1e000be6a33005ae94682a9eed869f40f5b5a9143905a02cf9aaab8a289941a8",
-        ".bigbang/VERSION": "sha256:06e3fe4a7a1884d20d81cc7065ca8cfd4c394ec602c4d180ddc39bbd4f7da521"
+        ".bigbang/MIGRACAO.md": "sha256:0605d292a82b4d7a1ea5ba27c8d4386a337c26c46af2fa7eb07b478019312633",
+        ".bigbang/VERSION": "sha256:b2f44d3b6e29f8b1b73ea4735f006affc4d198e1fd9c7d50e736159b1ef636c6"
       },
       "descricao": "Empacotar .bigbang com integridade e notas de migração que permitem atualização oficial verificável."
     },
@@ -2191,7 +2191,7 @@
         ".bigbang/esteira/perfis/deploy/alvos/paas/README.md": "sha256:d8b52c4956fab996c303edcfbda6e162874b8311a23def757877de0aa272ad20",
         ".bigbang/esteira/perfis/deploy/alvos/vps-docker/README.md": "sha256:bb04007d9e8e6977492685e35299a7801fdbd87b5fbeb4d5f78132d2cfc57411",
         ".bigbang/esteira/nucleo/arquivos/.github/pull_request_template.md": "sha256:48c315e38f91ccd02d1cd2e4f4ac4e3433255bfe1cfa2dca00d6d8bbdb843872",
-        "AGENTS.md": "sha256:896ba86add5004df018382c4420cce234cbb43df08d8e14ed732e1cc2d571f77",
+        "AGENTS.md": "sha256:b69152d7eee951ed4919d712970e6c8dfd9dc5fef1e855063b39b098357fbd9b",
         "CLAUDE.md": "sha256:336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
         ".bigbang/skills/bb-migrate/SKILL.md": "sha256:700dc19417dbfde4ef4e59cb30f40251ecf3ec77f131d2eec7c5c2f442034401"
       },
@@ -2690,24 +2690,24 @@
       ],
       "hashes": {
         ".bigbang/bb/framework.py": "sha256:7cff1ea3c3d74119834ea524e06fd7fb18739a351c6e63fc6b0db86b74e1af98",
-        ".bigbang/pipeline/framework/config.toml": "sha256:a95b68be77686e6c30e1a56ed0e9efbaf0a26e02314df302c9667ca2d9372c59",
+        ".bigbang/pipeline/framework/config.toml": "sha256:00bc84444c90e705816d01da541ab334c20596f6725cd2bfc1d11421d2fccb3c",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-candidate.yml.tmpl": "sha256:49709060fa19fa6c0e86e624df856dac13ec41e02eb64d3e4f763d6654b0f810",
         ".bigbang/pipeline/framework/files/.github/workflows/bb-gate.yml": "sha256:0245df537e46101bd142701cd485913c8558ed61a262efdae7fd9a2e229dc8d4",
         ".bigbang/pipeline/framework/scripts/testes-candidata.sh": "sha256:b9cc01977794173b5dc2a2bec28b7ca53eb0f8fa91798f10148d25efae546a0e",
-        ".github/workflows/bb-framework-board-report.yml": "sha256:58bb408d63fe6d725d6511d173e1700cc7bf04be6dc5a418137a6052d687142d",
-        ".github/workflows/bb-framework-candidate.yml": "sha256:e2331becf5c2b49252e9afa7bc7449485e84f60aa1a4774ea4a8989f45d985d8",
-        ".github/workflows/bb-framework-cleanup.yml": "sha256:a0be815e7d47bb542f52b4bcccebe44a3910351a07ccb6ee825280e04aad8590",
-        ".github/workflows/bb-framework-codeql.yml": "sha256:bd7776366427a7b805baaf1227ea24dfe57a9f22d4d30b9efc4527b4ab2be4ee",
-        ".github/workflows/bb-framework-controller.yml": "sha256:3f4398c63394283d46c83e72bfd1830df6b36f936b57efba987f759a55f3e63f",
-        ".github/workflows/bb-framework-create-branches.yml": "sha256:5c1debff02a75a5a8146424f365109de1d26477dca28c56ef11dff42fb142013",
-        ".github/workflows/bb-framework-cut-release.yml": "sha256:22ac7ef5b19134d880a3596a7c6599741a21484499e7a6531888d09f1cf9cc46",
-        ".github/workflows/bb-framework-gate.yml": "sha256:7eb2aa9bc633133ce0ff633c7855bfaff5c1897bb591e3b7fe75516f8c27638c",
-        ".github/workflows/bb-framework-merge-pr.yml": "sha256:5f64fa8b18ee32c9a0a25eaf9b206c26acfe858667cbdda8f4f7541a521b23d5",
-        ".github/workflows/bb-framework-publish-maintenance.yml": "sha256:45c69c92b3bd2672d2dccd6deed82c5eddafcf5fca160fa079752bf554ee4bf9",
-        ".github/workflows/bb-framework-publish.yml": "sha256:2c4af9d475350a0e871b1f44497fec8a9d54a9cb025f69bf357b720fbb3bbe11",
-        ".github/workflows/bb-framework-qa-reject.yml": "sha256:0b77d47364aaafa0dbd729cad76d526b73546f488b81ba54f4903cfcb7d0dab0",
-        ".github/workflows/bb-framework-start-sprint.yml": "sha256:4b440ee6aec02a32b5c97485300871e33b9c99b457532a0370a0a4adc56d9a62",
-        ".bigbang-framework.toml": "sha256:a95b68be77686e6c30e1a56ed0e9efbaf0a26e02314df302c9667ca2d9372c59"
+        ".github/workflows/bb-framework-board-report.yml": "sha256:4d6d2b94ef92810f9ade5f1e11cbb6ec2b2d58fa05fc1eef97726e1ae81eb4de",
+        ".github/workflows/bb-framework-candidate.yml": "sha256:56f1f6ba23652b8fe4837002ff5f52d763949cb8d692fd0f50a5518036c03c47",
+        ".github/workflows/bb-framework-cleanup.yml": "sha256:266a9ab9b985c949a315b80b8052fae21dcff55bf22e95e706a67b3682e775c7",
+        ".github/workflows/bb-framework-codeql.yml": "sha256:5e50f8179cbfc23bcbbb6489efb794b354625b8fdbabc7b2c3e1132f61e55cab",
+        ".github/workflows/bb-framework-controller.yml": "sha256:4ae387e7cefa37ceafba3ad6a9be1eba1cf56e2529cd40fd3aeea36f75751450",
+        ".github/workflows/bb-framework-create-branches.yml": "sha256:1228c795026934573b4e2488601cbb53eeb4b8a3c95f637eca0addbb89d6c9c1",
+        ".github/workflows/bb-framework-cut-release.yml": "sha256:21d5730fe3afd6c0d835454a85adf7927efb4481ca050f8b174bc42f8a85300e",
+        ".github/workflows/bb-framework-gate.yml": "sha256:a43493281acac8e487f1e1625c45ab0d19866d95727f73bbb825cf8fc9dd03e4",
+        ".github/workflows/bb-framework-merge-pr.yml": "sha256:f2c75c07d5f5ee3402639edc5467c585ddc073ca461cdb45f01b5b9347d7d78c",
+        ".github/workflows/bb-framework-publish-maintenance.yml": "sha256:9a59b578b2dd28b8ff37f5c9df13ae6b04dba5fd309276a60beea957ed6c2c4f",
+        ".github/workflows/bb-framework-publish.yml": "sha256:c56e73efd1bfa50c139f9e1d8b517f29ebe1484c9e4233aa743b73124ff62ee9",
+        ".github/workflows/bb-framework-qa-reject.yml": "sha256:309bdf6c17a16ca810ce557b4e58b47d4a9f3fa85860f937add9cda15f76ba6d",
+        ".github/workflows/bb-framework-start-sprint.yml": "sha256:92ee31427920d00a1570e132f8140ccab9ae8c02198abef4955a72d7e95426d9",
+        ".bigbang-framework.toml": "sha256:00bc84444c90e705816d01da541ab334c20596f6725cd2bfc1d11421d2fccb3c"
       },
       "descricao": "Suporte à esteira exclusiva da origem, namespace próprio e preservação do template não fundado."
     },
@@ -3011,7 +3011,10 @@
     },
     "paineis": {
       "owner": "BrunodosSantosVaz",
-      "quadro": 31
+      "quadro": 31,
+      "planejamento": 31,
+      "execucao": 31,
+      "bugs": 31
     }
   },
   "revisao": {
