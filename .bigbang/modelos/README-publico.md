@@ -8,7 +8,7 @@ este README não declara entregas que ainda não ocorreram.
 [Issues](https://github.com/{{projeto.repositorio}}/issues) ·
 [Releases](https://github.com/{{projeto.repositorio}}/releases)
 
-Os três painéis públicos serão ligados aqui ao concluir F4. Guias, requisitos, arquitetura, design, operação,
+O quadro público será ligado aqui ao concluir F4. Guias, requisitos, arquitetura, design, operação,
 segurança, histórico e a matriz de cobertura ficam exclusivamente na Wiki. Atualize esta apresentação e os links
 no mesmo ciclo da entrega.
 

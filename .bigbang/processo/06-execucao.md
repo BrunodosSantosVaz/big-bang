@@ -4,7 +4,7 @@ Os caminhos de documentação do sistema citados aqui são identificadores lógi
 
 No [modo Flash](17-flash.md), a ordem teste → tarefas permanece. Escreva os testes antes, conclua o código e execute uma rodada dos testes afetados (`bb testes --base <base>`). Não repita a suíte completa por hábito; a CI do mesmo commit serve como evidência. Mudanças estruturais, major/minor e produção exigem tudo.
 
-Ordem fixa: **teste do épico → tarefas → documentação**. Painel: **Execução**.
+Ordem fixa: **teste do épico → tarefas → documentação**. Visão de tarefas no quadro único (veja [04-paineis.md](04-paineis.md)).
 
 ## 1. Teste do épico (issue `teste-aceite`)
 
