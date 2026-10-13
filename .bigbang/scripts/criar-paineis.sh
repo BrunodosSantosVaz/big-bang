@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Creates the three boards of the process (spec 11.1) for a repository, or completes them (idempotent):
-#   "<Produto> — Planejamento", "<Produto> — Execução", "<Produto> — Bugs"
-# with the Status columns, the fields Sprint (single select), Épico (text), Prioridade and Versão (text), and the
-# views Quadro, Tabela and Roadmap. Planejamento and Bugs lose the built-in "Auto-add sub-issues" workflow. Prints the numbers to put in bigbang.toml [paineis] and in the repository
-# variables PROJETO_PLANEJAMENTO, PROJETO_EXECUCAO and PROJETO_BUGS.
+# Creates the single board of the process (spec 11.1) for a repository, or completes it (idempotent):
+#   "<Produto> — Quadro"
+# with the Status columns (15 states), fields, and the views Quadro, Tabela and Roadmap.
+# Prints the number to put in bigbang.toml [paineis] and in the repository variables PROJECT_OWNER and PROJECT_NUMBER.
 #
 # Requires gh with the "project" scope (gh auth refresh -s project).
 # Usage: .bigbang/scripts/criar-paineis.sh OWNER/REPO "Nome do Produto" [--simular]
@@ -129,33 +128,24 @@ montar() { # <titulo> <array de colunas> -> numero
 }
 
 if [ "${3:-}" = --simular ]; then
-  for titulo in "$PRODUTO — Planejamento" "$PRODUTO — Execução" "$PRODUTO — Bugs"; do
-    numero=$(numero_do_painel "$titulo")
-    if [ -n "$numero" ]; then echo "[simulado] completar o painel existente #$numero $titulo"
-    else echo "[simulado] criar o painel \"$titulo\" e ligar a $REPO"; fi
-  done
-  echo "[simulado] colunas da seção 11.1, campos Sprint/Épico/Prioridade/Versão, visões Quadro/Tabela/Roadmap;"
-  echo "[simulado] sem o workflow 'Auto-add sub-issues' no Planejamento e em Bugs"
+  titulo="$PRODUTO — Quadro"
+  numero=$(numero_do_painel "$titulo")
+  if [ -n "$numero" ]; then echo "[simulado] completar o quadro existente #$numero $titulo"
+  else echo "[simulado] criar o quadro \"$titulo\" e ligar a $REPO"; fi
+  echo "[simulado] colunas da v3 (15 estados), campos Sprint/Épico/Prioridade/Versão, visões Quadro/Tabela/Roadmap"
   exit 0
 fi
 
-echo "== Planejamento ==" >&2
-P=$(montar "$PRODUTO — Planejamento" "${COLUNAS_PLANEJAMENTO[@]}")
-sem_auto_add_de_sub_issues "$P"
-echo "== Execução ==" >&2
-E=$(montar "$PRODUTO — Execução" "${COLUNAS_EXECUCAO[@]}")
-echo "== Bugs ==" >&2
-B=$(montar "$PRODUTO — Bugs" "${COLUNAS_BUGS[@]}")
-sem_auto_add_de_sub_issues "$B"
+echo "== Quadro ==" >&2
+Q=$(montar "$PRODUTO — Quadro" "${COLUNAS_QUADRO[@]}")
 
 cat <<FIM
 
-Painéis prontos para $REPO: Planejamento #$P, Execução #$E, Bugs #$B.
-No bigbang.toml, seção [paineis]: owner = "$OWNER", planejamento = $P, execucao = $E, bugs = $B
+Quadro único pronto para $REPO: Quadro #$Q.
+No bigbang.toml, seção [paineis]: owner = "$OWNER", quadro = $Q
 Variáveis do repositório:
-  gh variable set PROJETO_OWNER --repo $REPO --body $OWNER
-  gh variable set PROJETO_PLANEJAMENTO --repo $REPO --body $P
-  gh variable set PROJETO_EXECUCAO --repo $REPO --body $E
-  gh variable set PROJETO_BUGS --repo $REPO --body $B
+  gh variable set PROJECT_OWNER --repo $REPO --body $OWNER
+  gh variable set PROJECT_NUMBER --repo $REPO --body $Q
 Só pela interface do GitHub: agrupar a Tabela por Épico (opcional).
 FIM
+

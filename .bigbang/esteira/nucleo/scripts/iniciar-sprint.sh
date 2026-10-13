@@ -9,7 +9,7 @@
 # Refuses (reason in the log) epics without refinamento-aprovado, com-prototipo without prototipo-aprovado, or without
 # tasks. Running again duplicates nothing. Asks for no version (the version comes out of the PR titles).
 #
-# Environment: SIMULAR (true: only the plan), DATA (AAAA-MM-DD, default today), PROJETO_PLANEJAMENTO/EXECUCAO,
+# Environment: SIMULAR (true: only the plan), DATA (AAAA-MM-DD, default today), PROJETO_QUADRO (PROJECT_NUMBER),
 # GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN), BB, BRANCH_DEVELOP (develop).
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
@@ -19,7 +19,8 @@ if [ -z "${BB_CACHE_DIR:-}" ]; then  # board ids and options fetched once per ru
 fi
 
 AQUI="$(cd "$(dirname "$0")" && pwd)"
-PLAN="${PROJETO_PLANEJAMENTO:?}"; EXEC="${PROJETO_EXECUCAO:?}"
+QUADRO="${PROJETO_QUADRO:-${PROJECT_NUMBER:?informe PROJETO_QUADRO ou PROJECT_NUMBER}}"
+PLAN="$QUADRO"; EXEC="$QUADRO"
 R="${GITHUB_REPOSITORY:?}"; OWNER="${R%%/*}"; REPO="${R##*/}"
 DEVELOP="${BRANCH_DEVELOP:-develop}"; SIMULAR="${SIMULAR:-false}"; DATA="${DATA:-$(date -u +%F)}"
 read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"

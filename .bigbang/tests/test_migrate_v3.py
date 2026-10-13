@@ -50,7 +50,8 @@ class Base(unittest.TestCase):
         with open(os.path.join(RAIZ, ".bigbang", "VERSION"), encoding="utf-8") as handle:
             version = handle.read().strip()
         text = text.replace('versao = "0.9.0"', f'versao = "{version}"', 1)
-        text = text.replace("planejamento = 0", "planejamento = 28").replace("execucao = 0", "execucao = 29") \
+        text = text.replace("quadro = 0", "planejamento = 28\nexecucao = 29\nbugs = 30").replace(
+            "planejamento = 0", "planejamento = 28").replace("execucao = 0", "execucao = 29") \
             .replace("bugs = 0", "bugs = 30")
         self.write("bigbang.toml", text)
         self.write("AGENTS.md", "<!-- bigbang:inicio v2.0.1 -->\nbloco\n<!-- bigbang:fim -->\n" + FRAMEWORK_SECTION)
@@ -67,10 +68,10 @@ class Base(unittest.TestCase):
             return handle.read()
 
     def read_config_repository(self):
-        return config_module.get(config_module.load(self.root), "project.repository")
+        return config_module.get(config_module.load(self.root, migration=True), "project.repository")
 
     def config(self):
-        return config_module.load(self.root)
+        return config_module.load(self.root, migration=True)
 
 
 class Config(Base):
@@ -569,10 +570,14 @@ class CLI(Base):
         self.assertEqual(self.read("bigbang.toml"), before)
 
     def test_github_parts_default_to_the_plan_without_yes(self):
-        for part in ("board", "labels"):
-            with self.subTest(part=part), patch("bb.migrate." + part + "_part", return_value={}) as action:
-                self.assertEqual(cli.main(["--root", self.root, "migrate", part]), 0)
-                self.assertTrue(action.call_args.kwargs["dry_run"])
+        with patch("bb.migrate.board_part", return_value={}) as action:
+            self.assertEqual(cli.main(["--root", self.root, "migrate", "board"]), 0)
+            self.assertTrue(action.call_args.kwargs["dry_run"])
+        text = self.read("bigbang.toml").replace("planejamento = 28\nexecucao = 29\nbugs = 30", "quadro = 17")
+        self.write("bigbang.toml", text)
+        with patch("bb.migrate.labels_part", return_value={}) as action:
+            self.assertEqual(cli.main(["--root", self.root, "migrate", "labels"]), 0)
+            self.assertTrue(action.call_args.kwargs["dry_run"])
 
     def test_real_run_without_snapshot_refuses_before_mutation(self):
         with patch("bb.migrate.labels_part") as action:
@@ -587,6 +592,16 @@ class CLI(Base):
         self.assertIn("[project]", self.read("bigbang.toml"))
         self.assertEqual(cli.main(args + ["--rollback"]), 0)
         self.assertEqual(self.read("bigbang.toml"), before)
+
+    def test_migration_load_only_allows_legacy_boards_for_board_part(self):
+        with patch("bb.config.load") as mock_load, patch("bb.gh.GitHub"):
+            mock_load.return_value = {"_dialect": "v3", "project": {"repository": "dono/repo", "name": "Repo"}, "board": {"owner": "dono"}}
+            with patch("bb.migrate.labels_part", return_value={}):
+                cli.main(["--root", self.root, "migrate", "labels"])
+                self.assertFalse(mock_load.call_args.kwargs.get("migration", False))
+            with patch("bb.migrate.board_part", return_value={}):
+                cli.main(["--root", self.root, "migrate", "board"])
+                self.assertTrue(mock_load.call_args.kwargs.get("migration", False))
 
 
 class RollbackOrder(Workflow):

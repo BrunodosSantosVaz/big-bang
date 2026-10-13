@@ -206,13 +206,11 @@ def verify(root, config):
         found.append("falta o primeiro post da IA em Discussions")
     if config["projeto"].get("visibilidade") == "publico":
         boards = config["paineis"]
-        # v3: one board ("quadro"); the three v2 boards stay supported for systems that still have them.
-        for key in (("quadro",) if boards.get("quadro") else ("planejamento", "execucao", "bugs")):
-            try:
-                number = config["paineis"][key]
-                if not number:
-                    fail(f"painel obrigatório não configurado: {key}")
-                anonymous_project(config["paineis"]["owner"], number)
-            except BbError as exc:
-                found.append(exc.message)
+        try:
+            number = boards.get("quadro")
+            if not number:
+                fail("painel obrigatório não configurado: quadro")
+            anonymous_project(boards["owner"], number)
+        except BbError as exc:
+            found.append(exc.message)
     return found

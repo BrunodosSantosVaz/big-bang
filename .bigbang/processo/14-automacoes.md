@@ -81,9 +81,9 @@ antes de gerar arquivos. A composição passa pelo formato do artefato antes do 
 
 | Nome | Tipo | Para quê |
 | --- | --- | --- |
-| `PROJETO_TOKEN` | segredo | PAT clássico (`repo`, `project`; `workflow` só se necessário), com validade, um por projeto. Lê e move os painéis; dispara workflows |
-| `PROJETO_OWNER` | variável | dono dos painéis |
-| `PROJETO_PLANEJAMENTO`, `PROJETO_EXECUCAO`, `PROJETO_BUGS` | variáveis | números dos painéis |
+| `PROJETO_TOKEN` | segredo | PAT clássico (`repo`, `project`; `workflow` só se necessário), com validade, um por projeto. Lê e move os itens do quadro; dispara workflows |
+| `PROJETO_OWNER` | variável | dono do quadro |
+| `PROJETO_QUADRO` | variável | número do quadro único (aceita `PROJECT_NUMBER`) |
 | credenciais do alvo | segredos do ambiente | só no perfil deploy; preferir OIDC a chave fixa |
 
 ## Usar os botões pela IA
@@ -103,12 +103,12 @@ resultado.
   alternativa no momento, conferindo a documentação vigente.
 - Todas as IAs usam a conta do dono: o GitHub não distingue quem pôs uma label (veja [08-revisao.md](08-revisao.md)).
 - **Limites de requisições:** a API GraphQL (que os Projects usam) dá 5.000 pontos por hora por conta, divididos entre
-  todos os workflows que usam o `PROJETO_TOKEN` e a IA; os scripts guardam os ids dos painéis durante cada execução
+  todos os workflows que usam o `PROJETO_TOKEN` e a IA; os scripts guardam os ids do quadro durante cada execução
   para economizar. Há também um **limite secundário** para criar conteúdo em sequência (issues, PRs, comentários):
   um *Iniciar sprint* com muitos épicos pode esbarrar nele. Os botões são idempotentes, então a solução é esperar
   alguns minutos e rodar de novo.
-- O workflow embutido *Auto-add sub-issues to project* vem ligado em painel novo e puxaria as tarefas para o
-  Planejamento; a API não o desliga, só o apaga, e o `criar-paineis` apaga no Planejamento e em Bugs.
+- O workflow embutido *Auto-add sub-issues to project* vem ligado em painel novo; a API não o desliga, só o apaga, e o
+  `criar-paineis` remove automações conflitantes no quadro único.
 
 ## O que a automação faz sozinha
 

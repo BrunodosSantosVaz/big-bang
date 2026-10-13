@@ -108,12 +108,18 @@ ruleset bb-develop refs/heads/develop
 ruleset bb-epicos "refs/heads/epico/*"
 
 echo "7. Variáveis e opções de merge"
-for par in "PROJETO_OWNER:paineis.owner" "PROJETO_PLANEJAMENTO:paineis.planejamento" \
-           "PROJETO_EXECUCAO:paineis.execucao" "PROJETO_BUGS:paineis.bugs"; do
-  valor=$(config "${par#*:}")
-  if [ "$valor" = 0 ]; then aviso "${par#*:} = 0: rode criar-paineis.sh e registre os números no bigbang.toml"; continue; fi
-  fazer "variável ${par%%:*}=$valor" gh variable set "${par%%:*}" --repo "$REPO" --body "$valor"
-done
+quadro=$(config paineis.quadro 2>/dev/null || true)
+if [ -z "$quadro" ] || [ "$quadro" = 0 ]; then
+  quadro=$(config board.number 2>/dev/null || true)
+fi
+if [ -n "$quadro" ] && [ "$quadro" != 0 ]; then
+  fazer "variável PROJECT_OWNER=$dono" gh variable set PROJECT_OWNER --repo "$REPO" --body "$dono"
+  fazer "variável PROJECT_NUMBER=$quadro" gh variable set PROJECT_NUMBER --repo "$REPO" --body "$quadro"
+  fazer "variável PROJETO_OWNER=$dono" gh variable set PROJETO_OWNER --repo "$REPO" --body "$dono"
+  fazer "variável PROJETO_QUADRO=$quadro" gh variable set PROJETO_QUADRO --repo "$REPO" --body "$quadro"
+else
+  aviso "paineis.quadro = 0: rode criar-paineis.sh e registre o número no bigbang.toml"
+fi
 fazer "merge commit permitido; apagar branch no merge desligado" gh repo edit "$REPO" --enable-merge-commit \
   --delete-branch-on-merge=false
 

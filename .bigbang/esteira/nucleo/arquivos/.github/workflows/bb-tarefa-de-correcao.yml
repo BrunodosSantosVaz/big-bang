@@ -44,5 +44,5 @@ jobs:
           MOTIVO: ${{ inputs.motivo }}
           SIMULAR: ${{ inputs.simular }}
           PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
-          PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
-          PROJETO_EXECUCAO: ${{ vars.PROJETO_EXECUCAO }}
+          PROJETO_QUADRO: ${{ vars.PROJETO_QUADRO }}
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}

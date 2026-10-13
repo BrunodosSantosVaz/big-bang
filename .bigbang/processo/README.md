@@ -7,7 +7,7 @@ Um arquivo por assunto, cada um com "quem faz o quê" e "o que a automação faz
 | [01-visao.md](01-visao.md) | Papéis, vocabulário, ciclo de vida e onde vive cada coisa |
 | [02-fundacao.md](02-fundacao.md) | F0 a F5 e como retomar |
 | [03-planejamento.md](03-planejamento.md) | Da ideia à próxima sprint; *Definition of Ready*; protótipo |
-| [04-paineis.md](04-paineis.md) | Os três painéis, colunas, campos e quem move cada coluna |
+| [04-paineis.md](04-paineis.md) | O quadro único, visões, colunas, campos e quem move cada coluna |
 | [05-sprint.md](05-sprint.md) | Iniciar, rodar e encerrar a sprint |
 | [06-execucao.md](06-execucao.md) | Teste do épico, tarefas, documentação; *Definition of Done*; testes travados |
 | [07-branches-e-commits.md](07-branches-e-commits.md) | Branches, commits, PRs e tipo de merge |

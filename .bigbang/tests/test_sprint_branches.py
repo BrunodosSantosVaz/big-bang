@@ -20,6 +20,12 @@ class IniciarSprint(ComBb):
     def iniciar(self, **env):
         return self.rodar("iniciar-sprint.sh", env={"BB": self.bb, "DATA": "2026-10-05", **env})
 
+    def test_iniciar_sprint_recusa_quando_quadro_nao_informado_mesmo_com_variaveis_legadas(self):
+        r = self.iniciar(PROJETO_QUADRO="", PROJECT_NUMBER="",
+                         PROJETO_PLANEJAMENTO="1", PROJETO_EXECUCAO="2")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("informe PROJETO_QUADRO ou PROJECT_NUMBER", r.stderr)
+
     def criadas(self):
         return {int(n): i for n, i in self.ler_estado()["issues"].items() if int(n) != 7}
 
@@ -38,15 +44,24 @@ class IniciarSprint(ComBb):
                 self.assertIn("revisao-humana", issues[n]["labels"])
                 self.assertIn("testes-revisao-ia", issues[n]["labels"])
                 self.assertEqual(issues[n]["parent"], 7)
-                self.assertEqual(self.status(2, n), "A fazer")
-                self.assertEqual(self.estado["boards"]["2"]["items"][str(n)]["Sprint"], "Sprint 1 · 2026-10-05")
-                self.assertEqual(self.estado["boards"]["2"]["items"][str(n)]["Épico"], "#7")
+                self.assertEqual(self.status(1, n), "A fazer")
+                self.assertEqual(self.estado["boards"]["1"]["items"][str(n)]["Sprint"], "Sprint 1 · 2026-10-05")
+                self.assertEqual(self.estado["boards"]["1"]["items"][str(n)]["Épico"], "#7")
         self.assertIn("CA-1", issues[teste]["body"])
         self.assertEqual(issues[t1]["blocked_by"], [teste])
         self.assertEqual(sorted(issues[t2]["blocked_by"]), sorted([teste, t1]))
         self.assertEqual(sorted(issues[doc]["blocked_by"]), sorted([t1, t2]))
         self.assertIn("heads/epico/7-bloquear-pedido-sem-estoque", self.estado["refs"])
         self.assertTrue(any(ref.startswith(f"heads/teste/{teste}-") for ref in self.estado["refs"]))
+        self.assertEqual(self.status(1, 7), "Em desenvolvimento")
+
+    def test_iniciar_com_quadro_unico_sem_tres_paineis(self):
+        self.estado["boards"]["1"]["fields"]["Status"]["options"].append(
+            {"id": "OS1-afazer", "name": "A fazer"}
+        )
+        self.gravar_estado()
+        r = self.iniciar(PROJETO_QUADRO="1", PROJETO_PLANEJAMENTO="", PROJETO_EXECUCAO="")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(self.status(1, 7), "Em desenvolvimento")
 
     def test_rodar_de_novo_nao_duplica(self):
@@ -56,7 +71,7 @@ class IniciarSprint(ComBb):
         r = self.iniciar()
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(len(self.criadas()), antes)
-        self.assertEqual(self.rodar("projeto.sh", "sprints", "2").stdout.count("Sprint 1 · 2026-10-05"), 1)
+        self.assertEqual(self.rodar("projeto.sh", "sprints", "1").stdout.count("Sprint 1 · 2026-10-05"), 1)
 
     def test_proxima_sprint_numera(self):
         self.iniciar()
@@ -96,7 +111,7 @@ class CriarBranches(IniciarSprint.__bases__[0]):
         self.issue(13, "API", labels=["task"], parent=7, blocked_by=[11, 12])
         self.issue(14, "Documentação · Estoque", labels=["documentacao"], parent=7, blocked_by=[12, 13])
         for n in (11, 12, 13, 14):
-            self.cartao(2, n, "A fazer")
+            self.cartao(1, n, "A fazer")
 
     def criar(self):
         r = self.rodar("criar-branches.sh", env={"BB": self.bb, "EPICO": "7"})
@@ -118,8 +133,8 @@ class CriarBranches(IniciarSprint.__bases__[0]):
         self.mesclar("teste/11-testes-de-aceite-estoque")
         self.criar()
         self.assertEqual(self.branches(), ["feature/12-dominio", "teste/11-testes-de-aceite-estoque"])
-        self.assertEqual(self.status(2, 12), "Feature")
-        self.assertEqual(self.status(2, 13), "A fazer")  # depends on 12
+        self.assertEqual(self.status(1, 12), "Feature")
+        self.assertEqual(self.status(1, 13), "A fazer")  # depends on 12
         self.mesclar("feature/12-dominio")
         self.criar()
         self.assertIn("feature/13-api", self.branches())

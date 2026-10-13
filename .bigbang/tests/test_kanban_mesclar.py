@@ -42,6 +42,21 @@ class Kanban(ComBb):
         self.assertEqual(set(self.estado["issues"]["7"]["labels"]),
                          {"epic", "com-prototipo", "testes-revisao-ia", "revisao-humana"})
 
+    def test_kanban_com_quadro_unico_sem_tres_paineis(self):
+        self.issue(7, "Estoque", labels=["epic"], corpo=corpo_epico(prototipo="Sim", prs="Eu"))
+        r = self.kanban(EVENT="issues", ACTION="opened", ISSUE=7,
+                        PROJETO_QUADRO="1", PROJETO_PLANEJAMENTO="", PROJETO_EXECUCAO="", PROJETO_BUGS="")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(self.status(1, 7), "Brainstorm")
+
+    def test_kanban_recusa_quando_quadro_nao_informado_mesmo_com_variaveis_legadas(self):
+        self.issue(7, "Estoque", labels=["epic"], corpo=corpo_epico(prototipo="Sim", prs="Eu"))
+        r = self.kanban(EVENT="issues", ACTION="opened", ISSUE=7,
+                        PROJETO_QUADRO="", PROJECT_NUMBER="",
+                        PROJETO_PLANEJAMENTO="1", PROJETO_EXECUCAO="2", PROJETO_BUGS="3")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("informe PROJETO_QUADRO ou PROJECT_NUMBER", r.stderr)
+
     def test_edicao_so_muda_o_que_mudou(self):
         self.issue(7, "Estoque", labels=["epic", "sem-prototipo", "testes-revisao-ia", "revisao-humana"],
                    corpo=corpo_epico(prototipo="Sim"))
@@ -77,42 +92,42 @@ class Kanban(ComBb):
     def test_bug_com_severidade(self):
         self.issue(20, "Total errado", labels=["bug"], corpo="### Severidade\n\nalta")
         self.kanban(EVENT="issues", ACTION="opened", ISSUE=20)
-        self.assertEqual(self.status(3, 20), "Novo")
+        self.assertEqual(self.status(1, 20), "Novo")
         self.assertIn("severidade:alta", self.estado["issues"]["20"]["labels"])
 
     def test_ciclo_de_uma_tarefa(self):
         self.issue(12, "Tarefa", labels=["task"])
         self.kanban(EVENT="issues", ACTION="opened", ISSUE=12)
-        self.assertEqual(self.status(2, 12), "A fazer")
+        self.assertEqual(self.status(1, 12), "A fazer")
         self.kanban(EVENT="push", REF_NAME="feature/12-tarefa", CREATED="true")
-        self.assertEqual(self.status(2, 12), "Feature")
+        self.assertEqual(self.status(1, 12), "Feature")
         self.kanban(EVENT="push", REF_NAME="feature/12-tarefa", CREATED="false")
-        self.assertEqual(self.status(2, 12), "Code")
+        self.assertEqual(self.status(1, 12), "Code")
         self.kanban(EVENT="pull_request", ACTION="opened", HEAD_REF="feature/12-tarefa", BASE_REF="epico/7-x")
-        self.assertEqual(self.status(2, 12), "CI/PR")
+        self.assertEqual(self.status(1, 12), "CI/PR")
         self.kanban(EVENT="pull_request", ACTION="closed", MERGED="false", HEAD_REF="feature/12-tarefa",
                     BASE_REF="epico/7-x")
-        self.assertEqual(self.status(2, 12), "Code")
-        self.cartao(2, 12, "CI/PR")
+        self.assertEqual(self.status(1, 12), "Code")
+        self.cartao(1, 12, "CI/PR")
         self.kanban(EVENT="pull_request", ACTION="closed", MERGED="true", HEAD_REF="feature/12-tarefa",
                     BASE_REF="epico/7-x")
-        self.assertEqual(self.status(2, 12), "Pronto")
+        self.assertEqual(self.status(1, 12), "Pronto")
 
     def test_ci_verde_com_revisao_humana_vai_para_validar_pr(self):
         self.issue(12, "Tarefa", labels=["task"])
         self.issue(30, "PR", labels=["revisao-humana"])
-        self.cartao(2, 12, "CI/PR")
+        self.cartao(1, 12, "CI/PR")
         self.kanban(EVENT="workflow_run", CONCLUSION="failure", HEAD_REF="feature/12-tarefa", PR_NUMBER=30)
-        self.assertEqual(self.status(2, 12), "CI/PR")
+        self.assertEqual(self.status(1, 12), "CI/PR")
         self.kanban(EVENT="workflow_run", CONCLUSION="success", HEAD_REF="feature/12-tarefa", PR_NUMBER=30)
-        self.assertEqual(self.status(2, 12), "Validar PR")
+        self.assertEqual(self.status(1, 12), "Validar PR")
 
     def test_ci_verde_com_revisao_ia_fica(self):
         self.issue(12, "Tarefa", labels=["task"])
         self.issue(30, "PR", labels=["revisao-ia"])
-        self.cartao(2, 12, "CI/PR")
+        self.cartao(1, 12, "CI/PR")
         self.kanban(EVENT="workflow_run", CONCLUSION="success", HEAD_REF="feature/12-tarefa", PR_NUMBER=30)
-        self.assertEqual(self.status(2, 12), "CI/PR")
+        self.assertEqual(self.status(1, 12), "CI/PR")
 
 
 class Mesclar(ComBb):
@@ -145,7 +160,7 @@ class Mesclar(ComBb):
         with open(template, encoding="utf-8") as handle:
             step = handle.read().split("- name: Mesclar se aprovado e verde", 1)[1]
         bindings = dict(re.findall(r"^          (PROJETO_\w+): (.+)$", step, re.MULTILINE))
-        values = {"PROJETO_OWNER": "dono", "PROJETO_PLANEJAMENTO": "1", "PROJETO_EXECUCAO": "2"}
+        values = {"PROJETO_OWNER": "dono", "PROJETO_QUADRO": "1"}
         return {key: values[key] for key, expression in bindings.items()
                 if key in values and expression == "${{ vars." + key + " }}"}
 
@@ -163,7 +178,7 @@ class Mesclar(ComBb):
 
     def test_workflow_fornece_variaveis_publicas_dos_paineis(self):
         self.assertEqual(self.workflow_project_env(),
-                         {"PROJETO_OWNER": "dono", "PROJETO_PLANEJAMENTO": "1", "PROJETO_EXECUCAO": "2"})
+                         {"PROJETO_OWNER": "dono", "PROJETO_QUADRO": "1"})
 
     def test_merge_de_testes_cria_proxima_tarefa_com_env_real_do_workflow(self):
         self.epico()
@@ -174,7 +189,7 @@ class Mesclar(ComBb):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertTrue(self.mesclado())
         self.assertEqual(self.estado["refs"].get("heads/feature/12-tarefa"), "epic-sha")
-        self.assertEqual(self.status(2, 12), "Feature")
+        self.assertEqual(self.status(1, 12), "Feature")
         self.assertNotIn("heads/docs/13-documentacao", self.estado["refs"])
         self.assertFalse([call for call in self.chamadas() if call[:2] == ["workflow", "run"]])
 

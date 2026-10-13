@@ -14,7 +14,7 @@
 # The version comes from the merged PR titles (bb esteira versao); a VERSAO that disagrees needs
 # CONFIRMAR_VERSAO=true. Conflict: nothing is pushed and the epic gets the label `conflito`.
 #
-# Environment: EPICO | BUG | DEPENDENCIAS, VERSAO, CONFIRMAR_VERSAO, SIMULAR, PROJETO_PLANEJAMENTO,
+# Environment: EPICO | BUG | DEPENDENCIAS, VERSAO, CONFIRMAR_VERSAO, SIMULAR, PROJETO_QUADRO (PROJECT_NUMBER),
 # GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN; the checkout must push with it), BB.
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
@@ -24,6 +24,8 @@ if [ -z "${BB_CACHE_DIR:-}" ]; then  # board ids and options fetched once per ru
 fi
 
 AQUI="$(cd "$(dirname "$0")" && pwd)"
+QUADRO="${PROJETO_QUADRO:-${PROJECT_NUMBER:?informe PROJETO_QUADRO ou PROJECT_NUMBER}}"
+PLAN="$QUADRO"
 R="${GITHUB_REPOSITORY:?}"; OWNER="${R%%/*}"; REPO="${R##*/}"
 SIMULAR="${SIMULAR:-false}"
 read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
@@ -77,7 +79,7 @@ if [ -n "${EPICO:-}" ]; then
         [ -n "$n" ] || continue
         rot=$(gh api "repos/$R/issues/$n" --jq '[.labels[].name] | join(",")')
         if tem "$rot" epic && ! tem "$rot" sem-release; then epicos+=("$n"); fi
-      done < <(projeto cartoes "${PROJETO_PLANEJAMENTO:?}" "$col")
+      done < <(projeto cartoes "${PLAN:?}" "$col")
     done
     [ "${#epicos[@]}" -gt 0 ] || erro "nenhum épico da sprint em Em desenvolvimento ou Homologação (sem-release usa epico=<n>)"
   else
@@ -175,7 +177,7 @@ milestone=$(gh api "repos/$R/milestones?state=all&per_page=100" --jq ".[] | sele
 [ -n "$milestone" ] || milestone=$(gh api -X POST "repos/$R/milestones" -f title="$tag" \
   -f description="Release $tag: $unidade" --jq .number)
 for n in "${issues[@]}"; do gh issue edit "$n" --repo "$R" --milestone "$tag" >/dev/null; done
-for n in "${epicos[@]}"; do projeto texto "${PROJETO_PLANEJAMENTO:?}" "$n" "Versão" "$tag" >/dev/null || true; done
+for n in "${epicos[@]}"; do projeto texto "${PLAN:?}" "$n" "Versão" "$tag" >/dev/null || true; done
 echo "Enviada: $branch ($tag). A candidata é gerada a partir dela."
 if ! "${BB_CMD[@]}" documentacao destino docs/operacao/checklist-producao.md >/dev/null; then
   echo "::warning::docs/operacao/checklist-producao.md não existe: o Publicar em produção vai recusar; crie-o pela documentação do épico (modelo em .bigbang/modelos/checklist-producao.md)"

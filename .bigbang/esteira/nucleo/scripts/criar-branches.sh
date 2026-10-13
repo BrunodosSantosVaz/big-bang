@@ -6,7 +6,7 @@
 # Moves the card to "Feature" and comments the branch on the issue. Idempotent. Also runs after every merge into
 # an epic branch (mesclar-pr.sh).
 #
-# Environment: EPICO (optional), SIMULAR, PROJETO_PLANEJAMENTO/EXECUCAO, GITHUB_REPOSITORY, GH_TOKEN, BB.
+# Environment: EPICO (optional), SIMULAR, PROJETO_QUADRO (PROJECT_NUMBER), GITHUB_REPOSITORY, GH_TOKEN, BB.
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 
@@ -15,7 +15,8 @@ if [ -z "${BB_CACHE_DIR:-}" ]; then  # board ids and options fetched once per ru
 fi
 
 AQUI="$(cd "$(dirname "$0")" && pwd)"
-PLAN="${PROJETO_PLANEJAMENTO:?}"; EXEC="${PROJETO_EXECUCAO:?}"
+QUADRO="${PROJETO_QUADRO:-${PROJECT_NUMBER:?informe PROJETO_QUADRO ou PROJECT_NUMBER}}"
+PLAN="$QUADRO"; EXEC="$QUADRO"
 R="${GITHUB_REPOSITORY:?}"; OWNER="${R%%/*}"; REPO="${R##*/}"; SIMULAR="${SIMULAR:-false}"
 read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 [ "$SIMULAR" = true ] && export DRY_RUN=1

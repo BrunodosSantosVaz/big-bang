@@ -3,14 +3,15 @@
 # owner's reason. It inherits the epic's labels, enters the milestone, the Sprint and the "A fazer" column, gets its
 # feature/<n>-<slug> branch from the epic branch, and follows the normal flow. When its PR is merged, the epic is
 # complete again and "Integrar release" merges it into the same release/x.y.z: the next candidate is rc.N+1.
-# Environment: EPICO, MOTIVO, SIMULAR, PROJETO_PLANEJAMENTO/EXECUCAO, GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN), BB.
+# Environment: EPICO, MOTIVO, SIMULAR, PROJETO_QUADRO (PROJECT_NUMBER), GITHUB_REPOSITORY, GH_TOKEN (PROJETO_TOKEN), BB.
 set -euo pipefail
 trap 'echo "::error::$(basename "$0") falhou na linha $LINENO (código $?)" >&2' ERR
 if [ -z "${BB_CACHE_DIR:-}" ]; then
   BB_CACHE_DIR=$(mktemp -d); export BB_CACHE_DIR; trap 'rm -rf "$BB_CACHE_DIR"' EXIT
 fi
 AQUI="$(cd "$(dirname "$0")" && pwd)"
-PLAN="${PROJETO_PLANEJAMENTO:?}"; EXEC="${PROJETO_EXECUCAO:?}"; R="${GITHUB_REPOSITORY:?}"
+QUADRO="${PROJETO_QUADRO:-${PROJECT_NUMBER:?informe PROJETO_QUADRO ou PROJECT_NUMBER}}"
+PLAN="$QUADRO"; EXEC="$QUADRO"; R="${GITHUB_REPOSITORY:?}"
 epico="${EPICO:?}"; motivo="${MOTIVO:?informe o motivo da reprovação}"; SIMULAR="${SIMULAR:-false}"
 read -r -a BB_CMD <<<"${BB:-python3 .bigbang/bin/bb.py}"
 projeto() { bash "$AQUI/projeto.sh" "$@"; }

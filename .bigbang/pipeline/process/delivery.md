@@ -60,7 +60,10 @@ Depois da aprovação, a publicação:
 3. conclui os épicos entregues e mantém no escuro os demais;
 4. fecha o milestone;
 5. devolve a `main` à `develop` (PR de sync com `conflict` se houver conflito);
-6. libera a trava da versão.
+6. libera a trava da versão;
+7. remove os registros de deployment do próprio run (sucesso ou falha), mantendo a página do repositório limpa sem alterar o ambiente nem seus revisores.
+
+Como `environment: production` é uma regra de proteção no nível do job, o runner só é despachado após a aprovação manual do dono. Enquanto a execução aguarda aprovação na interface do GitHub, o registro em Deployments permanece visível como pendente/em espera; ao ser concluída (com sucesso ou falha), o passo de limpeza (`if: always()`) do job `publish` marca o registro como inativo e o exclui pelo ID exato do run. Adicionalmente, o job `check` inclui um passo prévio que limpa registros residuais de execuções anteriores (`bb pipeline clean-deployments --environment production --stale`, que preserva o run atual, consulta o estado dos runs e remove apenas deployments cujos runs associados estejam comprovadamente finalizados/falhos, preservando execuções ativas ou aguardando aprovação), e a remoção avulsa pode ser realizada pelo comando `bb pipeline clean-deployments --run-id <ID>`.
 
 Promoção que falha não conclui nenhum épico. Publicar de novo não duplica nada.
 

@@ -29,7 +29,7 @@ def register(commands, parser_class):
     p = sub.add_parser(**names.cli_name('documentacao', "validar"), help="bloqueia cobertura incompleta, links ruins e documentação desatualizada")
     p.add_argument(*names.cli_option("--wiki"), dest="wiki", help="snapshot local (padrão: SHA do manifesto)")
     p.add_argument(*names.cli_option("--publicada"), dest="publicada", action="store_true", help="exige publicação confirmada no HEAD oficial da Wiki")
-    p.add_argument(*names.cli_option("--comunidade"), dest="comunidade", action="store_true", help="confere Discussions e visibilidade dos três painéis")
+    p.add_argument(*names.cli_option("--comunidade"), dest="comunidade", action="store_true", help="confere Discussions e visibilidade do quadro único")
     p.set_defaults(handler=_validate)
     p = sub.add_parser(**names.cli_name('documentacao', "publicar"), help="publica a proposta revisada com proteção contra alterações concorrentes")
     p.add_argument(*names.cli_option("--simular"), dest="simular", action="store_true")
@@ -143,7 +143,7 @@ def _validate(args):
         if config is None or config.get('_framework'):
             config = documentation.load(args.raiz).get("configuracao_comunidade")
         if not config:
-            found.append("configuração dos painéis do framework ausente")
+            found.append("configuração do painel do framework ausente")
         else:
             found += community_public.verify(args.raiz, config)
     for problem in found:

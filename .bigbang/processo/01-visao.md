@@ -74,7 +74,7 @@ flowchart LR
 | Regras e padrões | `.bigbang/padroes/` |
 | Este processo | `.bigbang/processo/` |
 | Regras de negócio, decisões, arquitetura, API, operação | `docs/` do sistema |
-| Planejamento e andamento | Painéis *Planejamento*, *Execução* e *Bugs* (GitHub Projects) |
+| Planejamento e andamento | Quadro único (GitHub Projects) |
 | Decisões do dono | Labels nas issues e PRs, com o comentário que as justifica |
 | Código | Git, nas branches da [07](07-branches-e-commits.md) |
 | Artefatos publicados | GitHub Releases (compilado) ou registro de imagens com digest (deploy) |

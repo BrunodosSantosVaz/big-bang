@@ -9,6 +9,13 @@ COLUNAS_PLANEJAMENTO=(
 COLUNAS_EXECUCAO=(
   "A fazer:GRAY" "Feature:BLUE" "Code:BLUE" "CI/PR:YELLOW" "Validar PR:PINK" "Pronto:GREEN" "Concluído:GREEN"
 )
+COLUNAS_QUADRO=(
+  "Brainstorm:PURPLE" "Backlog:GRAY" "Refinement:YELLOW" "Prototyping:PINK"
+  "Ready:YELLOW" "Selected:BLUE" "In Progress:ORANGE" "Todo:GRAY"
+  "Coding:BLUE" "In Review:YELLOW" "QA:ORANGE" "Releasing:ORANGE"
+  "Done:GREEN" "Rejected:RED" "Cancelled:RED"
+)
 COLUNAS_BUGS=(
   "Novo:RED" "Em correção:BLUE" "CI/PR:YELLOW" "Validar PR:PINK" "Homologação:ORANGE" "Corrigido:GREEN"
 )
+
