@@ -1015,7 +1015,7 @@
         ".bigbang/tests/test_bb_esteira.py:test_tabelas_sem_rls"
       ],
       "hashes": {
-        ".bigbang/bb/pipeline.py": "sha256:69c4ebd2c6363755eac88bd0c516d3d616f915834752a1be7e8ea2a5e9a14244"
+        ".bigbang/bb/pipeline.py": "sha256:6330689320a316ded098dabe88b23c7733623069f03dcb9d68736487220e0f6b"
       },
       "descricao": "Calcular prontidão, branches, revisão, SemVer, changelog, matriz e nomes de artefatos sem executar deploy."
     },
@@ -2756,7 +2756,7 @@
         ".bigbang/pipeline/process/README.md": "sha256:563c93bb12e74264d620ffad936c2039cf3ed231f4e0a66090f27063e9bb6d03",
         ".bigbang/pipeline/process/board.md": "sha256:db8b4f489cbd4f8b08ced195f6da10719095cc85a6d394f2511ebd2b920ab349",
         ".bigbang/pipeline/process/bugs.md": "sha256:2f13beb591518a5039b46ed34720c7fc27302b30ccc19277990099f9395dbf78",
-        ".bigbang/pipeline/process/delivery.md": "sha256:fcbb71acf0535ec84e614c340c3066eacc001d5242ff223d76870d82851c9b88",
+        ".bigbang/pipeline/process/delivery.md": "sha256:89b8228f24339b7026114bb234055fe41b01e91774b743a1becd500ac136d914",
         ".bigbang/pipeline/process/execution.md": "sha256:a53d9677df320fdbacc75e4c054a3c87e4c915effa3d8338cf57a9fa2c7f51b9",
         ".bigbang/pipeline/process/modes.md": "sha256:d1630b5c4aad2e0c36343f67c689669526a1f3299a7acf24f80fafea35cc3eef",
         ".bigbang/pipeline/process/planning.md": "sha256:14e761b28252ecdf754028721f193a6391d05e73e9079b21cd92219916ab6874",

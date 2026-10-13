@@ -153,6 +153,8 @@ class TestDeploymentsCleanup(unittest.TestCase):
             if method == "GET" and path.startswith("repos/dono/repo/deployments/503/statuses"):
                 # stale run 666, but in staging
                 return 200, [{"id": 3, "log_url": "https://github.com/dono/repo/actions/runs/666/job/3"}]
+            if method == "GET" and path.startswith("repos/dono/repo/actions/runs/777"):
+                return 200, {"id": 777, "status": "completed", "conclusion": "failure"}
             if method == "POST" and "statuses" in path:
                 return 201, {"id": 999, "state": "inactive"}
             if method == "DELETE":
