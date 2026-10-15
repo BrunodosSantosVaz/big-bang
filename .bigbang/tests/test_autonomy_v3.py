@@ -359,6 +359,7 @@ class FrameworkContract(unittest.TestCase):
         loaded["_autonomy"] = contract
         self.assertEqual(autonomy.publish_problems(loaded, "production", NOW), [])
         self.assertIn("publish", contract["gates"])
+        self.assertNotIn("backlog", contract["gates"])  # priority is the owner's decision (#332)
         self.assertEqual(contract["flags"], "owner")
         self.assertNotIn("high", contract["risk"])
         self.assertNotIn("critical", contract["risk"])

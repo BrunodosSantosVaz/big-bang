@@ -3,10 +3,10 @@
   "repositorio": "BrunodosSantosVaz/big-bang",
   "visibilidade": "publico",
   "wiki": {
-    "base": "b5e7754e989fe054a2c9798e50fc69457251436b",
-    "commit": "ce2927010f4c7ac2eb7ff369980e16b3a60ba03c",
+    "base": "972cb56dc4cb221344e70ef8b0fcb155a58cb940",
+    "commit": "4ecc4e7bdf4f9757a91df864fcf7eecb0eecabcf",
     "branch": "master",
-    "proposta": "bigbang/proposta-323-claude-1-quadro-unico"
+    "proposta": "bigbang/proposta-332-sem-backlog-3"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -263,7 +263,7 @@
     }
   },
   "codigo": {
-    "commit": "aef2e4ffb36411a88250a269509584b47689aca7",
+    "commit": "5dacda6eab65dc6bd4f0798f01700319c8f67c50",
     "versao": "3.1.0",
     "raizes": [
       ".bigbang/",
