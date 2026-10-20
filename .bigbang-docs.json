@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "972cb56dc4cb221344e70ef8b0fcb155a58cb940",
-    "commit": "4ecc4e7bdf4f9757a91df864fcf7eecb0eecabcf",
+    "commit": "2c48acc76996eb572e639ba06c9fb05a3c870bbf",
     "branch": "master",
-    "proposta": "bigbang/proposta-332-sem-backlog-3"
+    "proposta": "bigbang/proposta-336-limite-readme"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -649,7 +649,7 @@
         ".bigbang/tests/test_readme_sistema.py:test_modelos_existem"
       ],
       "hashes": {
-        ".bigbang/bb/docs_check.py": "sha256:876271c62a5bf5bcd59474dc8fc7a5739f2e15b157286c5d346de66afc850905"
+        ".bigbang/bb/docs_check.py": "sha256:e5ddd6e54c338fc71192ec5dab3a53fef6de38eea4fe8b27455e415482a32af0"
       },
       "descricao": "Detectar cercas abertas, links locais inválidos e ausência da apresentação, comunidade ou ícone necessários ao sistema."
     },
