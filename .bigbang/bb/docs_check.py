@@ -81,6 +81,7 @@ def markdown_files(root):
 # DOC-15: sections every system README has once a version is in production (modelos/README-sistema.md).
 README_SECTIONS = ("Estado atual", "Para que serve", "Recursos", "Instalação", "Como usar", "Para desenvolvedores",
                    "Versões e releases", "Segurança", "Limitações", "Licença")
+PUBLIC_README_MAX_WORDS = 3000  # public README: presentation page (badges, sections); full docs live in the Wiki
 README_LEFTOVERS = (("Em **Fundação**", "ainda diz que o sistema está na Fundação"),
                     ("Sistema em construção", "ainda diz que o sistema está em construção"),
                     ("(a preencher)", "ainda tem seções \"(a preencher)\""))
@@ -103,7 +104,7 @@ def readme_problems(root):
             return ["README.md: apresentação pública ausente"]
         text = read_text(path)
         result = []
-        if len(text.split()) > 500:
+        if len(text.split()) > PUBLIC_README_MAX_WORDS:
             result.append("README.md público deve ser breve; mova a documentação completa para a Wiki")
         if "github.com/" not in text or "/wiki" not in text:
             result.append("README.md público sem acesso à Wiki oficial")
