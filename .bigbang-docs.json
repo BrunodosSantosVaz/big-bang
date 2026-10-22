@@ -4,9 +4,9 @@
   "visibilidade": "publico",
   "wiki": {
     "base": "b5e7754e989fe054a2c9798e50fc69457251436b",
-    "commit": "2c48acc76996eb572e639ba06c9fb05a3c870bbf",
+    "commit": "dff83614ae7cb77f576f7fbd609f828d9047f14b",
     "branch": "master",
-    "proposta": "bigbang/proposta-336-limite-readme"
+    "proposta": "bigbang/proposta-340-limpeza-copias"
   },
   "paginas": {
     ".bigbang/docs/README.md": "Historico-bigbang-docs-README",
@@ -2543,7 +2543,7 @@
         ".bigbang/tests/test_framework_pipeline.py:test_cut_release_sets_git_identity_before_documentation_commands"
       ],
       "hashes": {
-        ".bigbang/pipeline/AGENTS.base.md": "sha256:37182439f6c9f8b3801fab7916a6616e6fb42040e6524262505a92f9c07c24d0",
+        ".bigbang/pipeline/AGENTS.base.md": "sha256:606a082fc3f788f5b1be7130572de2f06660fb7881ac647a45959a83c6ad0757",
         ".bigbang/pipeline/core/files/.github/dependabot.yml.tmpl": "sha256:34ab41c900e502b5e964c35d01fb97ca64f29b11c4c3c29e2bff3a6d718f2470",
         ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-bug.yml": "sha256:a106896eef75aee654f73c09b2ec1d793d387ba0331c44c9982a90b5ac314840",
         ".bigbang/pipeline/core/files/.github/ISSUE_TEMPLATE/bb-docs.yml": "sha256:7330b1a0f1bd69d66711e66c1179a88327f6e38fea9940e5125e99f03fc96fd4",
@@ -2757,7 +2757,7 @@
         ".bigbang/pipeline/process/board.md": "sha256:db8b4f489cbd4f8b08ced195f6da10719095cc85a6d394f2511ebd2b920ab349",
         ".bigbang/pipeline/process/bugs.md": "sha256:2f13beb591518a5039b46ed34720c7fc27302b30ccc19277990099f9395dbf78",
         ".bigbang/pipeline/process/delivery.md": "sha256:f3b680f176b722843a8d9eafe8165e8c89cd90e5a99e222618a10bcc3fbd5715",
-        ".bigbang/pipeline/process/execution.md": "sha256:a53d9677df320fdbacc75e4c054a3c87e4c915effa3d8338cf57a9fa2c7f51b9",
+        ".bigbang/pipeline/process/execution.md": "sha256:8540bb1bdc5ed7a83f6fe09a8f3c73918dc7210561c1fdd83e3f147376d6fc32",
         ".bigbang/pipeline/process/modes.md": "sha256:d1630b5c4aad2e0c36343f67c689669526a1f3299a7acf24f80fafea35cc3eef",
         ".bigbang/pipeline/process/planning.md": "sha256:14e761b28252ecdf754028721f193a6391d05e73e9079b21cd92219916ab6874",
         ".bigbang/pipeline/process/sprint.md": "sha256:97901470697eb6d8311c4d127f145241c0ac70b7e6d142e68b0a59f29f6ac44a",
