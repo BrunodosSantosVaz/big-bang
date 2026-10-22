@@ -28,4 +28,6 @@
 8. **Merge:** `bb merge PR` (botão *Merge PR*) exige a aprovação (nos dois idiomas de label) e o `gate` verde no
    SHA exato, e nunca mescla na `main`. No merge, a tarefa vai para Done, a issue fecha e a trava é liberada.
 9. **Saída limpa:** posse liberada, pasta removida e nenhuma branch órfã. A faxina diária apaga as branches
-   mescladas de issues fechadas ([delivery.md](delivery.md)).
+   mescladas de issues fechadas ([delivery.md](delivery.md)). Quem trabalhou em cópias locais (`git worktree`,
+   clones extras) as remove ao terminar, depois de conferir que não há alteração pendente nem commit fora do remoto
+   (e de salvar o que houver); issues concluídas são fechadas.
