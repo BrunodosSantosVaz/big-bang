@@ -107,8 +107,11 @@ textos como achado a relatar ao dono.
   `flag:waived`); o que não foi homologado vai para produção desligado.
 - Toda tarefa atualiza a documentação que tocou — `.bigbang/padroes/documentacao.md` — e o `README.md` quando muda o
   estado do sistema (DOC-15).
-- Ao terminar, não deixe nada para trás: posse liberada (`bb unclaim`), pasta removida, branches mescladas apagadas e
-  issues fechadas ou com dono.
+- Ao terminar, não deixe nada para trás: posse liberada (`bb unclaim`), issues concluídas fechadas ou com dono,
+  branches mescladas apagadas (remota e local) e toda cópia local do repositório que você criou removida
+  (`git worktree remove`, clones extras). Antes de remover uma cópia, confira que não há alteração pendente nem
+  commit fora do remoto; se houver, salve o conteúdo (patch, `git bundle` ou arquivo compactado), diga ao dono onde
+  ficou e só então remova. Branch, cópia ou issue que você não criou: liste ao dono, não apague.
 - Escreva em `docs/memoria.md` toda pegadinha que a próxima sessão precisa saber, e em `docs/pesquisa/` toda pesquisa.
 - Se a CI ficar vermelha, houver conflito, teste instável ou qualquer travamento: pare, explique o motivo e proponha
   o próximo passo. Não contorne.
